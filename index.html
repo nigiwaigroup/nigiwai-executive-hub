@@ -30,7 +30,7 @@
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <p class="text-[10px] text-slate-500 font-bold px-3 py-2 uppercase">Human Resources</p>
             
-            <a href="#" onclick="loadContent('Salary 2026.html', this)" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all group">
+            <a href="#" onclick="loadContent('Salary_2026.html', this)" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-all group">
                 <i class="fas fa-chart-pie text-blue-400 group-hover:scale-110 transition-transform"></i>
                 <span>Salary Dashboard 2026</span>
             </a>
@@ -41,10 +41,10 @@
             </a>
 
             <div class="pt-6">
-                <p class="text-[10px] text-slate-500 font-bold px-3 py-2 uppercase">More Dashboards (Coming Soon)</p>
-                <div class="flex items-center gap-3 px-4 py-3 text-slate-500 cursor-not-allowed italic">
+                <p class="text-[10px] text-slate-500 font-bold px-3 py-2 uppercase">More Dashboards</p>
+                <div class="flex items-center gap-3 px-4 py-3 text-slate-500 italic">
                     <i class="fas fa-lock text-slate-600"></i>
-                    <span>Financial Overview</span>
+                    <span>Financial Overview (Soon)</span>
                 </div>
             </div>
         </nav>
@@ -64,27 +64,30 @@
         <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 z-10">
             <h2 id="pageTitle" class="font-bold text-gray-700">Salary Dashboard 2026</h2>
             <div class="flex items-center gap-4">
-                <span class="text-xs text-gray-400"><i class="far fa-clock mr-1"></i>ข้อมูลล่าสุด: มกราคม 2569</span>
+                <span class="text-xs text-gray-400" id="lastUpdate"><i class="far fa-clock mr-1"></i>อัปเดตล่าสุด: กุมภาพันธ์ 2569</span>
                 <button onclick="refreshFrame()" class="text-gray-400 hover:text-blue-600 p-2">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </header>
 
-        <div class="flex-1 overflow-hidden bg-gray-200">
-            <iframe id="contentFrame" src="Salary 2026.html"></iframe>
+        <div class="flex-1 overflow-hidden bg-gray-200 relative">
+            <iframe id="contentFrame" src="Salary_2026.html"></iframe>
         </div>
     </main>
 
     <script>
         function loadContent(url, element) {
-            // Change Iframe Source
-            document.getElementById('contentFrame').src = url;
+            const frame = document.getElementById('contentFrame');
+            const title = document.getElementById('pageTitle');
             
-            // Update Page Title
-            document.getElementById('pageTitle').innerText = element.innerText.trim();
+            // เปลี่ยนหน้า Content
+            frame.src = url;
             
-            // UI Update: Active Sidebar
+            // อัปเดตหัวข้อหน้าเว็บ
+            title.innerText = element.querySelector('span').innerText;
+            
+            // เปลี่ยนสถานะเมนูที่คลิก
             document.querySelectorAll('.sidebar-link').forEach(link => {
                 link.classList.remove('active');
             });
