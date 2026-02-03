@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nigiwai Group | Executive Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
+        body { font-family: 'Sarabun', sans-serif; overflow: hidden; }
+        
+        /* Sidebar Styling */
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #fbbf24; /* Amber-400 */
+        }
+        
+        /* Iframe Styling */
+        iframe { 
+            width: 100%; 
+            height: calc(100vh - 64px); 
+            border: none; 
+            background-color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen">
+
+    <aside class="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-20">
+        <div class="p-6 border-b border-slate-800 bg-slate-950">
+            <h1 class="text-xl font-bold tracking-wider flex items-center gap-3">
+                <i class="fas fa-shield-halved text-blue-500"></i>
+                NIGIWAO GROUP
+            </h1>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase font-semibold tracking-widest pl-8">Executive Data Hub</p>
+        </div>
+
+        <nav class="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+            <p class="text-[10px] text-slate-500 font-bold px-3 py-2 uppercase tracking-wider">Human Resources</p>
+            
+            <a href="#" onclick="loadContent('Salary_2026.html', 'Salary Dashboard 2026', this)" 
+               class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-r-lg group">
+                <div class="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                    <i class="fas fa-chart-pie text-blue-400"></i>
+                </div>
+                <span class="font-medium text-sm">Salary Dashboard 2026</span>
+            </a>
+
+            <a href="#" onclick="loadContent('as2.html', 'Executive JD Report', this)" 
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-r-lg group">
+                <div class="w-8 h-8 rounded bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                    <i class="fas fa-id-card-clip text-emerald-400"></i>
+                </div>
+                <span class="font-medium text-sm">Executive JD Report</span>
+            </a>
+
+            <div class="pt-6">
+                <p class="text-[10px] text-slate-500 font-bold px-3 py-2 uppercase tracking-wider">Coming Soon</p>
+                <div class="flex items-center gap-3 px-4 py-3 text-slate-600 opacity-60 cursor-not-allowed">
+                    <i class="fas fa-lock text-xs"></i>
+                    <span class="text-sm">Financial Overview</span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="p-4 bg-slate-950 border-t border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <span class="font-bold text-xs">EX</span>
+                </div>
+                <div>
+                    <p class="text-sm font-bold">Executive View</p>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <p class="text-[10px] text-slate-400">System Online</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10 shadow-sm">
+            <div class="flex items-center gap-4">
+                <h2 id="pageTitle" class="font-bold text-gray-800 text-lg">Salary Dashboard 2026</h2>
+                <span class="hidden md:inline-block px-2 py-1 bg-gray-100 rounded text-[10px] text-gray-500 font-mono border border-gray-200">
+                    SECURE CONNECTION
+                </span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-400 hidden sm:inline-block">
+                    <i class="far fa-clock mr-1"></i>Last Update: Feb 2026
+                </span>
+                <button onclick="refreshFrame()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-all" title="Refresh Data">
+                    <i class="fas fa-sync-alt text-sm"></i>
+                </button>
+                <a href="https://github.com/nigiwaigroup/nigiwai-executive-hub" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-black transition-all" title="View Source">
+                    <i class="fab fa-github text-lg"></i>
+                </a>
+            </div>
+        </header>
+
+        <div class="flex-1 relative bg-gray-50">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+                <i class="fas fa-circle-notch fa-spin text-gray-300 text-4xl"></i>
+            </div>
+            
+            <iframe id="contentFrame" src="Salary_2026.html" title="Dashboard Content"></iframe>
+        </div>
+    </main>
+
+    <script>
+        function loadContent(url, title, element) {
+            const frame = document.getElementById('contentFrame');
+            const pageTitle = document.getElementById('pageTitle');
+            
+            // 1. เปลี่ยนเนื้อหาใน iframe
+            frame.src = url;
+            
+            // 2. เปลี่ยนชื่อหัวข้อ
+            pageTitle.innerText = title;
+            
+            // 3. จัดการ Active State ของเมนู
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        function refreshFrame() {
+            const frame = document.getElementById('contentFrame');
+            // เทคนิคการรีโหลด iframe โดยไม่กระทบ parent
+            frame.contentWindow.location.reload();
+        }
+    </script>
+</body>
+</html>
