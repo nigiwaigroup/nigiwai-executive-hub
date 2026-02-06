@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login - Nigiwai Executive Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-box {
+            background: white;
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 420px;
+        }
+        .login-logo { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+        h1 { text-align: center; color: #1e3a8a; margin-bottom: 0.5rem; }
+        p { text-align: center; color: #6b7280; margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1.125rem;
+            letter-spacing: 0.5rem;
+            text-align: center;
+        }
+        input:focus { outline: none; border-color: #3b82f6; }
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .error-message {
+            background: #fee;
+            color: #ef4444;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .error-message.show { display: block; }
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .success-message.show { display: block; }
+        .debug-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .debug-info h3 { margin-bottom: 0.5rem; color: #374151; }
+        .debug-info p { margin: 0.25rem 0; color: #6b7280; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="login-logo">🔐</div>
+        <h1>Nigiwai Executive Hub</h1>
+        <p>ทดสอบระบบ Login</p>
+
+        <div class="error-message" id="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-text">รหัส PIN ไม่ถูกต้อง</span>
+        </div>
+
+        <div class="success-message" id="success-message">
+            <i class="fas fa-check-circle"></i>
+            Login สำเร็จ! กำลังเปลี่ยนหน้า...
+        </div>
+
+        <form id="login-form">
+            <div class="input-group">
+                <label for="pin-input">PIN Code (ทดสอบ: 8787)</label>
+                <input 
+                    type="text" 
+                    id="pin-input" 
+                    maxlength="4" 
+                    placeholder="8787"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                เข้าสู่ระบบ
+            </button>
+        </form>
+
+        <div class="debug-info">
+            <h3>ข้อมูล Debug:</h3>
+            <p id="debug-pin">PIN ที่ใส่: -</p>
+            <p id="debug-correct">PIN ที่ถูกต้อง: 8787</p>
+            <p id="debug-match">ตรงกันหรือไม่: -</p>
+            <p id="debug-localStorage">localStorage: -</p>
+        </div>
+    </div>
+
+    <script>
+        // ระบบ Authentication แบบง่าย
+        const CORRECT_PIN = '8787';
+        const STORAGE_KEY = 'nigiwai_auth_session';
+
+        // ดึง Elements
+        const loginForm = document.getElementById('login-form');
+        const pinInput = document.getElementById('pin-input');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const successMessage = document.getElementById('success-message');
+
+        // Debug Elements
+        const debugPin = document.getElementById('debug-pin');
+        const debugMatch = document.getElementById('debug-match');
+        const debugLocalStorage = document.getElementById('debug-localStorage');
+
+        // ตรวจสอบ localStorage support
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+
+        debugLocalStorage.textContent = 'localStorage: ' + (testLocalStorage() ? '✅ รองรับ' : '❌ ไม่รองรับ');
+
+        // Focus ที่ input
+        pinInput.focus();
+
+        // อนุญาตเฉพาะตัวเลข
+        pinInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+
+        // Handle Form Submit
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const pin = pinInput.value.trim();
+
+            // แสดง Debug Info
+            debugPin.textContent = 'PIN ที่ใส่: ' + pin;
+            debugMatch.textContent = 'ตรงกันหรือไม่: ' + (pin === CORRECT_PIN ? '✅ ตรงกัน' : '❌ ไม่ตรงกัน');
+
+            console.log('PIN ที่ใส่:', pin);
+            console.log('PIN ที่ถูกต้อง:', CORRECT_PIN);
+            console.log('ตรงกันหรือไม่:', pin === CORRECT_PIN);
+
+            if (pin === CORRECT_PIN) {
+                // Login สำเร็จ
+                successMessage.classList.add('show');
+                errorMessage.classList.remove('show');
+
+                // บันทึก Session
+                const session = {
+                    authenticated: true,
+                    loginTime: new Date().getTime(),
+                    lastActivity: new Date().getTime()
+                };
+
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+                    console.log('Session saved:', session);
+                    
+                    // เปลี่ยนหน้าหลัง 1 วินาที
+                    setTimeout(() => {
+                        // ถ้ามีไฟล์ dashboard.html ให้เปลี่ยนหน้า
+                        // window.location.href = 'dashboard.html';
+                        
+                        // สำหรับการทดสอบ แสดงข้อความแทน
+                        alert('Login สำเร็จ! ในระบบจริงจะเปลี่ยนไปหน้า Dashboard');
+                    }, 1000);
+                } catch(e) {
+                    console.error('ไม่สามารถบันทึก Session:', e);
+                    errorText.textContent = 'ไม่สามารถบันทึกข้อมูล (localStorage ไม่รองรับ)';
+                    errorMessage.classList.add('show');
+                }
+
+            } else {
+                // Login ไม่สำเร็จ
+                errorText.textContent = 'รหัส PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง';
+                errorMessage.classList.add('show');
+                successMessage.classList.remove('show');
+                pinInput.value = '';
+                pinInput.focus();
+
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
