@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Nigiwai Executive Hub</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">📊</div>
+                    <h1>Nigiwai Hub</h1>
+                </div>
+                <div class="sidebar-subtitle">Executive Dashboard</div>
+            </div>
+
+            <nav class="sidebar-menu" id="sidebar-menu">
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">Executive User</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
+                <button class="btn-logout" id="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    ออกจากระบบ
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="page-title" id="page-title">Dashboard</h2>
+                </div>
+                <div class="topbar-right">
+                    <div class="breadcrumb">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <iframe 
+                    id="content-frame" 
+                    class="content-frame"
+                    frameborder="0"
+                    sandbox="allow-same-origin allow-scripts allow-forms"
+                ></iframe>
+            </div>
+        </main>
+    </div>
+
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/menu.js"></script>
+    <script>
+        // รอให้ DOM และ Scripts โหลดเสร็จทั้งหมด
+        window.addEventListener('DOMContentLoaded', async () => {
+            // ตรวจสอบว่า authManager และ menuManager พร้อมใช้งาน
+            if (typeof authManager === 'undefined') {
+                console.error('authManager not loaded');
+                alert('ระบบขัดข้อง กรุณารีเฟรชหน้าใหม่');
+                return;
+            }
+
+            if (typeof menuManager === 'undefined') {
+                console.error('menuManager not loaded');
+                alert('ระบบขัดข้อง กรุณารีเฟรชหน้าใหม่');
+                return;
+            }
+
+            // โหลด Config และตรวจสอบ Authentication
+            await authManager.loadConfig();
+            authManager.requireAuth();
+
+            // Initialize Menu System
+            await menuManager.init();
+
+            // ตั้งค่า Activity Timer
+            let activityTimer;
+            const resetActivityTimer = () => {
+                clearTimeout(activityTimer);
+                authManager.updateSessionActivity();
+                
+                // ตั้ง Timer สำหรับ Auto-logout
+                activityTimer = setTimeout(() => {
+                    alert('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่');
+                    authManager.logout();
+                }, authManager.sessionTimeout * 60 * 1000);
+            };
+
+            // ตรวจจับกิจกรรมของผู้ใช้
+            ['mousedown', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                document.addEventListener(event, resetActivityTimer);
+            });
+
+            // เริ่ม Timer
+            resetActivityTimer();
+        });
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            }
+        });
+
+        // Prevent iframe clickjacking
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+    </script>
+</body>
+</html>
