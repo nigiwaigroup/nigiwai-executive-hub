@@ -7,26 +7,30 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --primary-color: #1a252f;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --bg-color: #f4f6f9;
-            --text-color: #2c3e50;
-            --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            /* Chinese New Year Theme */
+            --primary-color: #c0392b;   /* Deep Red */
+            --secondary-color: #f1c40f; /* Gold */
+            --accent-color: #e74c3c;    /* Bright Red */
+            --success-color: #27ae60;   /* Green (for money) */
+            --warning-color: #f39c12;   /* Orange */
+            --bg-color: #fff5f5;        /* Very light red background */
+            --text-color: #641e16;      /* Dark brownish red for text */
+            --card-shadow: 0 4px 15px rgba(192, 57, 43, 0.15);
+            --border-radius: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             background-color: var(--bg-color);
+            background-image: radial-gradient(#ffeaa7 1px, transparent 1px);
+            background-size: 20px 20px;
             color: var(--text-color);
             padding: 30px;
             min-height: 100vh;
@@ -39,37 +43,60 @@
 
         /* Header */
         .header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(192, 57, 43, 0.3);
             margin-bottom: 30px;
             text-align: center;
-            border-bottom: 4px solid var(--accent-color); /* Red accent for Angpao theme */
+            color: #fff;
+            border: 2px solid #f1c40f;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Decorative Elements */
+        .header::before {
+            content: '🧧';
+            position: absolute;
+            top: 10px; left: 20px;
+            font-size: 4rem;
+            opacity: 0.2;
+            transform: rotate(-20deg);
+        }
+        .header::after {
+            content: '🏮';
+            position: absolute;
+            bottom: 10px; right: 20px;
+            font-size: 4rem;
+            opacity: 0.2;
+            transform: rotate(20deg);
         }
 
         .header h1 {
-            font-size: 2em;
+            font-size: 2.2em;
             margin-bottom: 10px;
-            color: var(--primary-color);
             font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header .subtitle {
             font-size: 1.1em;
-            color: #7f8c8d;
+            color: #ffeaa7;
             margin-bottom: 15px;
+            font-weight: 500;
         }
 
         .header .condition-tag {
             display: inline-block;
-            background: #fdedec; /* Light red bg */
-            color: #c0392b;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
             padding: 6px 15px;
             border-radius: 20px;
             font-size: 0.9em;
             font-weight: 600;
-            border: 1px solid #fadbd8;
+            border: 1px solid #f1c40f;
+            backdrop-filter: blur(5px);
         }
 
         /* Criteria Section */
@@ -83,19 +110,28 @@
         .criteria-card {
             background: white;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            border-left: 5px solid var(--accent-color);
+            border-top: 5px solid var(--secondary-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: transform 0.2s;
         }
+        .criteria-card:hover { transform: translateY(-5px); }
 
         .criteria-info h3 { margin: 0 0 5px 0; font-size: 1.1em; color: var(--primary-color); }
         .criteria-info p { margin: 0; font-size: 0.9em; color: #7f8c8d; }
-        .criteria-amount { font-size: 1.4em; font-weight: 700; color: var(--accent-color); }
+        .criteria-amount { 
+            font-size: 1.4em; 
+            font-weight: 700; 
+            color: var(--primary-color);
+            background: #fadbd8;
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
 
-        /* Statistics Cards (Matches Main Dashboard) */
+        /* Statistics Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -106,32 +142,36 @@
         .stat-card {
             background: white;
             padding: 25px;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
+            border: 1px solid #f5b7b1;
         }
-        .stat-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-        .stat-card.blue::before { background: var(--secondary-color); }
-        .stat-card.green::before { background: var(--success-color); }
-        .stat-card.orange::before { background: var(--warning-color); }
-        .stat-card.red::before { background: var(--accent-color); }
+        
+        .stat-card .icon-bg {
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            font-size: 5rem;
+            opacity: 0.1;
+            color: var(--primary-color);
+        }
 
-        .stat-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 10px; }
-        .stat-value { font-size: 2rem; font-weight: 700; color: var(--text-color); }
-        .stat-unit { font-size: 0.8rem; color: #95a5a6; margin-left: 5px; }
-        .stat-icon { float: right; font-size: 2rem; opacity: 0.1; color: var(--primary-color); }
+        .stat-title { font-size: 0.9rem; color: #943126; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
+        .stat-value { font-size: 2.2rem; font-weight: 700; color: var(--primary-color); }
+        .stat-unit { font-size: 0.8rem; color: #b03a2e; margin-left: 5px; font-weight: 500; }
 
         /* Section Title */
         .section-header {
             display: flex;
             align-items: center;
             margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #d98880;
         }
         .section-header h2 { font-size: 1.5em; color: var(--primary-color); margin: 0; }
-        .section-header i { margin-right: 10px; color: var(--secondary-color); }
+        .section-header i { margin-right: 10px; color: var(--secondary-color); font-size: 1.5em; }
 
         /* Department Section Layout */
         .dept-wrapper {
@@ -142,16 +182,16 @@
 
         .dept-section {
             background: white;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            border-left: 5px solid var(--secondary-color); /* Default blue */
+            border-left: 6px solid var(--primary-color);
             overflow: hidden;
         }
 
         .dept-header {
-            padding: 20px 30px;
-            background: #fff;
-            border-bottom: 1px solid #f0f2f5;
+            padding: 15px 30px;
+            background: #fff9f9;
+            border-bottom: 1px solid #fceae9;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -163,15 +203,20 @@
             font-size: 1.3em;
             font-weight: 700;
             color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+        .dept-title::before { content: '🏮'; font-size: 0.8em; }
 
         .dept-summary-box {
             display: flex;
             gap: 25px;
-            background: #f8f9fa;
+            background: white;
             padding: 8px 20px;
             border-radius: 30px;
-            border: 1px solid #eee;
+            border: 1px solid #f5b7b1;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .ds-item {
@@ -180,9 +225,9 @@
             align-items: flex-end;
         }
         
-        .ds-label { font-size: 0.75em; color: #95a5a6; font-weight: 600; text-transform: uppercase; }
+        .ds-label { font-size: 0.75em; color: #943126; font-weight: 600; text-transform: uppercase; }
         .ds-value { font-size: 1.1em; font-weight: 700; color: var(--text-color); }
-        .ds-value.money { color: var(--success-color); }
+        .ds-value.money { color: #d35400; }
 
         /* Table */
         .table-responsive {
@@ -196,46 +241,55 @@
         }
 
         .dept-table th {
-            background: #fcfdfe;
+            background: #fdf2e9;
             padding: 15px 30px;
             text-align: left;
             font-size: 0.9em;
-            color: #7f8c8d;
+            color: #a04000;
             font-weight: 600;
             text-transform: uppercase;
-            border-bottom: 1px solid #f0f2f5;
+            border-bottom: 1px solid #fae5d3;
         }
 
         .dept-table td {
             padding: 15px 30px;
-            border-bottom: 1px solid #f5f5f5;
+            border-bottom: 1px solid #f9e79f; /* Yellowish lines */
             font-size: 0.95em;
             vertical-align: middle;
-            color: #34495e;
+            color: #5d4037;
         }
 
         .dept-table tr:last-child td { border-bottom: none; }
-        .dept-table tr:hover { background: #f8f9fa; }
+        .dept-table tr:hover { background: #fffcf5; }
 
-        .emp-name { font-weight: 600; color: var(--text-color); display: block; font-size: 1em; }
-        .emp-id { font-size: 0.85em; color: #95a5a6; margin-left: 10px; font-weight: 400; background: #f0f2f5; padding: 2px 8px; border-radius: 4px; }
+        .emp-name { font-weight: 600; color: var(--primary-color); display: block; font-size: 1em; }
+        /* Removed emp-id styles as requested */
         .emp-duration { font-size: 0.9em; color: #7f8c8d; }
         .emp-money { font-weight: 700; text-align: right; font-size: 1.1em; }
 
-        /* Money Badges */
-        .money-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.9em; display: inline-block; min-width: 80px; text-align: center; }
-        .money-500 { color: #27ae60; background: #e8f8f5; }
-        .money-300 { color: #f39c12; background: #fef9e7; }
-        .money-200 { color: #e74c3c; background: #fdedec; }
-        .money-0 { color: #bdc3c7; background: #f0f2f5; }
+        /* Money Badges - Gold Theme */
+        .money-badge { 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-size: 0.9em; 
+            display: inline-block; 
+            min-width: 90px; 
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        .money-500 { color: #b7950b; background: #fcf3cf; border-color: #f7dc6f; }
+        .money-300 { color: #d35400; background: #fdebd0; border-color: #f5b041; }
+        .money-200 { color: #c0392b; background: #fadbd8; border-color: #f1948a; }
+        .money-0 { color: #95a5a6; background: #f2f3f4; }
 
         .footer {
             text-align: center;
             padding: 40px 0;
-            color: #95a5a6;
-            font-size: 0.85em;
-            border-top: 1px solid #e0e0e0;
+            color: #c0392b;
+            font-size: 0.9em;
+            border-top: 1px solid #f5b7b1;
             margin-top: 40px;
+            font-weight: 500;
         }
 
         @media (max-width: 768px) {
@@ -245,7 +299,6 @@
             .dept-header { flex-direction: column; align-items: flex-start; }
             .dept-summary-box { width: 100%; justify-content: space-between; margin-top: 10px; }
             .dept-table th, .dept-table td { padding: 12px 15px; }
-            .emp-id { display: inline-block; margin-top: 4px; }
         }
     </style>
 </head>
@@ -253,44 +306,44 @@
     <div class="container">
         
         <div class="header">
-            <h1><i class="fas fa-envelope-open-text text-danger" style="color: #e74c3c;"></i> สรุปการแจกอั่งเปาตรุษจีน 2569</h1>
+            <h1><i class="fas fa-dragon" style="margin-right: 10px; color: #f1c40f;"></i> สรุปการแจกอั่งเปาตรุษจีน 2569</h1>
             <div class="subtitle">รายชื่อพนักงาน แยกรายแผนก เรียงตามอายุงาน</div>
-            <div class="condition-tag">✅ รวมพนักงานทุกแผนก (Executive, Consultant, etc.)</div>
+            <div class="condition-tag"><i class="fas fa-check-circle"></i> รวมพนักงานทุกแผนก (Executive, Consultant, etc.)</div>
         </div>
 
         <div class="criteria-grid">
             <div class="criteria-card">
-                <div class="criteria-info"><h3>ซองที่ 1</h3><p>อายุงาน 3 ปีขึ้นไป</p></div>
+                <div class="criteria-info"><h3><i class="fas fa-star" style="color:#f1c40f;"></i> เงื่อนไขที่ 1</h3><p>อายุงาน 3 ปีขึ้นไป</p></div>
                 <div class="criteria-amount">500 ฿</div>
             </div>
             <div class="criteria-card">
-                <div class="criteria-info"><h3>ซองที่ 2</h3><p>อายุงาน 1-2 ปี</p></div>
+                <div class="criteria-info"><h3><i class="fas fa-star-half-alt" style="color:#f1c40f;"></i> เงื่อนไขที่ 2</h3><p>อายุงาน 1-2 ปี</p></div>
                 <div class="criteria-amount">300 ฿</div>
             </div>
             <div class="criteria-card">
-                <div class="criteria-info"><h3>ซองที่ 3</h3><p>ต่ำกว่า 1 ปี</p></div>
+                <div class="criteria-info"><h3><i class="far fa-star" style="color:#f1c40f;"></i> เงื่อนไขที่ 3</h3><p>ต่ำกว่า 1 ปี</p></div>
                 <div class="criteria-amount">200 ฿</div>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card blue">
-                <i class="fas fa-money-bill-wave stat-icon"></i>
+            <div class="stat-card">
+                <i class="fas fa-coins icon-bg"></i>
                 <div class="stat-title">งบประมาณรวม</div>
                 <div class="stat-value" id="totalBudget">0<span class="stat-unit">บาท</span></div>
             </div>
-            <div class="stat-card green">
-                <i class="fas fa-users stat-icon"></i>
+            <div class="stat-card">
+                <i class="fas fa-users icon-bg"></i>
                 <div class="stat-title">พนักงานทั้งหมด</div>
                 <div class="stat-value" id="totalEmployees">0<span class="stat-unit">คน</span></div>
             </div>
-            <div class="stat-card orange">
-                <i class="fas fa-check-circle stat-icon"></i>
+            <div class="stat-card">
+                <i class="fas fa-envelope-open-text icon-bg"></i>
                 <div class="stat-title">ได้รับซอง</div>
                 <div class="stat-value" id="totalRecipients">0<span class="stat-unit">คน</span></div>
             </div>
-            <div class="stat-card red">
-                <i class="fas fa-chart-line stat-icon"></i>
+            <div class="stat-card">
+                <i class="fas fa-hand-holding-usd icon-bg"></i>
                 <div class="stat-title">เฉลี่ยต่อคน</div>
                 <div class="stat-value" id="avgPerPerson">0<span class="stat-unit">บาท</span></div>
             </div>
@@ -305,7 +358,7 @@
             </div>
 
         <div class="footer">
-            © 2569 Nigiwai Group | Dashboard สรุปการแจกซองอั่งเปา (Executive Theme) <br>
+            © 2569 Nigiwai Group | Dashboard สรุปการแจกซองอั่งเปา (Chinese New Year Edition) <br>
             ข้อมูล ณ วันที่ 12 กุมภาพันธ์ 2569
         </div>
     </div>
@@ -341,7 +394,8 @@
           {"รหัสพนักงาน":"660201","คำนำหน้า":"นางสาว","ชื่อ":"ธิติญา","นามสกุล":"ปัญญายิ่ง","ชื่อเล่น":"อุ้ม","แผนก":"Marketing","วันเข้าทำงาน":"2023-02-08","อายุงาน":"3 ปี, 4 วัน","จำนวนเงิน":500},
           {"รหัสพนักงาน":"VV660302","คำนำหน้า":"นางสาว","ชื่อ":"ศิริวรรณ","นามสกุล":"กำรัตน์","ชื่อเล่น":"นิว","แผนก":"Operation","วันเข้าทำงาน":"2023-03-01","อายุงาน":"2 ปี, 11 เดือน, 11 วัน","จำนวนเงิน":300},
           {"รหัสพนักงาน":"660401","คำนำหน้า":"นาย","ชื่อ":"พิชญา","นามสกุล":"บัวบรรจง","ชื่อเล่น":"พีพี","แผนก":"Information Technology","วันเข้าทำงาน":"2023-04-03","อายุงาน":"2 ปี, 10 เดือน, 9 วัน","จำนวนเงิน":300},
-          {"รหัสพนักงาน":"660409","คำนำหน้า":"นางสาว","ชื่อ":"พานทอง","นามสกุล":"รุ่งอนันต์กุลสิริ","ชื่อเล่น":"ปิงปิง","แผนก":"Human Resource","วันเข้าทำงาน":"2023-04-26","อายุงาน":"2 ปี, 9 เดือน, 16 วัน","จำนวนเงิน":300},
+          /* แก้ไข: ย้ายปิงปิงไป Executive */
+          {"รหัสพนักงาน":"660409","คำนำหน้า":"นางสาว","ชื่อ":"พานทอง","นามสกุล":"รุ่งอนันต์กุลสิริ","ชื่อเล่น":"ปิงปิง","แผนก":"Executive","วันเข้าทำงาน":"2023-04-26","อายุงาน":"2 ปี, 9 เดือน, 16 วัน","จำนวนเงิน":300},
           {"รหัสพนักงาน":"660504","คำนำหน้า":"นางสาว","ชื่อ":"ภัรตรา","นามสกุล":"เพ็ญภู่","ชื่อเล่น":"มะปราง","แผนก":"Sales","วันเข้าทำงาน":"2023-05-12","อายุงาน":"2 ปี, 9 เดือน,","จำนวนเงิน":300},
           {"รหัสพนักงาน":"660503","คำนำหน้า":"นาย","ชื่อ":"ภูรินทร์","นามสกุล":"บุญวรรณ","ชื่อเล่น":"ก้อนเมฆ","แผนก":"Financial And Account","วันเข้าทำงาน":"2023-05-15","อายุงาน":"2 ปี, 8 เดือน, 28 วัน","จำนวนเงิน":300},
           {"รหัสพนักงาน":"660801","คำนำหน้า":"นางสาว","ชื่อ":"ฐิติกานต์","นามสกุล":"รักเมือง","ชื่อเล่น":"หยก","แผนก":"Marketing","วันเข้าทำงาน":"2023-08-03","อายุงาน":"2 ปี, 6 เดือน, 9 วัน","จำนวนเงิน":300},
@@ -367,17 +421,17 @@
         let deptMap = {};
         const formatMoney = (num) => new Intl.NumberFormat('th-TH').format(num);
 
-        // Updated Colors to match Nigiwai Theme
+        // Updated Colors for CNY Theme
         const deptColors = {
-            'Executive': '#2c3e50', // Dark Blue
-            'Operation': '#27ae60', // Green
-            'Marketing': '#3498db', // Blue
+            'Executive': '#c0392b', // Deep Red
+            'Operation': '#d35400', // Pumpkin
+            'Marketing': '#e67e22', // Carrot
             'Sales': '#f39c12',     // Orange
-            'Financial And Account': '#8e44ad', // Purple
-            'Human Resource': '#e84393', // Pink
-            'Warehouse & Logistics': '#2980b9', // Darker Blue
+            'Financial And Account': '#b7950b', // Dark Gold
+            'Human Resource': '#cd6155', // Indian Red
+            'Warehouse & Logistics': '#a04000', // Brown
             'Construction': '#7f8c8d', // Grey
-            'Information Technology': '#16a085', // Teal
+            'Information Technology': '#16a085', // Green (Jade)
             'Consultant': '#34495e' // Navy
         };
 
@@ -401,21 +455,18 @@
         sortedDepts.forEach(dept => {
             const section = document.createElement('div');
             section.className = 'dept-section';
-            const color = deptColors[dept.name] || '#3498db';
+            const color = deptColors[dept.name] || '#c0392b';
             section.style.borderLeftColor = color;
 
             let empRowsHtml = '';
             dept.employees.forEach(emp => {
-                // Use class based badges for money
                 const moneyClass = emp.จำนวนเงิน >= 500 ? 'money-500' : (emp.จำนวนเงิน >= 300 ? 'money-300' : (emp.จำนวนเงิน >= 200 ? 'money-200' : 'money-0'));
                 const moneyText = emp.จำนวนเงิน > 0 ? `${formatMoney(emp.จำนวนเงิน)}` : '-';
                 
                 empRowsHtml += `
                     <tr>
                         <td>
-                            <span class="emp-name">${emp.คำนำหน้า}${emp.ชื่อ} ${emp.นามสกุล} (${emp.ชื่อเล่น})
-                                <span class="emp-id">#${emp.รหัสพนักงาน}</span>
-                            </span>
+                            <span class="emp-name" style="color:${color}">${emp.คำนำหน้า}${emp.ชื่อ} ${emp.นามสกุล} (${emp.ชื่อเล่น})</span>
                         </td>
                         <td><span class="emp-duration">${emp.อายุงาน}</span></td>
                         <td class="emp-money"><span class="money-badge ${moneyClass}">${moneyText}</span></td>
