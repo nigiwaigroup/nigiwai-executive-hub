@@ -7,126 +7,311 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Noto Sans Thai', sans-serif;
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            padding: 20px;
-            min-height: 100vh;
-            color: #333;
+        :root {
+            --primary-color: #1a252f;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-color: #f4f6f9;
+            --text-color: #2c3e50;
+            --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: #f8f9fa;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            min-height: 90vh;
-            padding-bottom: 40px;
         }
+
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
-            padding: 40px 20px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
             text-align: center;
+            border-bottom: 4px solid var(--accent-color); /* Red accent for Angpao theme */
         }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); font-weight: 700; }
-        .header .subtitle { font-size: 1.1em; opacity: 0.95; margin-bottom: 5px; font-weight: 300; }
-        .header .condition-tag { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.9em; margin-top: 10px; border: 1px solid rgba(255,255,255,0.4); }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .header .condition-tag {
+            display: inline-block;
+            background: #fdedec; /* Light red bg */
+            color: #c0392b;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 1px solid #fadbd8;
+        }
+
+        /* Criteria Section */
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .criteria-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .criteria-info h3 { margin: 0 0 5px 0; font-size: 1.1em; color: var(--primary-color); }
+        .criteria-info p { margin: 0; font-size: 0.9em; color: #7f8c8d; }
+        .criteria-amount { font-size: 1.4em; font-weight: 700; color: var(--accent-color); }
+
+        /* Statistics Cards (Matches Main Dashboard) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+        .stat-card.blue::before { background: var(--secondary-color); }
+        .stat-card.green::before { background: var(--success-color); }
+        .stat-card.orange::before { background: var(--warning-color); }
+        .stat-card.red::before { background: var(--accent-color); }
+
+        .stat-title { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 10px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--text-color); }
+        .stat-unit { font-size: 0.8rem; color: #95a5a6; margin-left: 5px; }
+        .stat-icon { float: right; font-size: 2rem; opacity: 0.1; color: var(--primary-color); }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .section-header h2 { font-size: 1.5em; color: var(--primary-color); margin: 0; }
+        .section-header i { margin-right: 10px; color: var(--secondary-color); }
+
+        /* Department Section Layout */
+        .dept-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .dept-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border-left: 5px solid var(--secondary-color); /* Default blue */
+            overflow: hidden;
+        }
+
+        .dept-header {
+            padding: 20px 30px;
+            background: #fff;
+            border-bottom: 1px solid #f0f2f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dept-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .dept-summary-box {
+            display: flex;
+            gap: 25px;
+            background: #f8f9fa;
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 1px solid #eee;
+        }
+
+        .ds-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
         
-        .criteria-section { background: white; padding: 30px 40px; border-bottom: 1px solid #eee; }
-        .criteria-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .criteria-card { background: #fff; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; border-left: 5px solid #ff6b6b; display: flex; justify-content: space-between; align-items: center; }
-        .criteria-info h3 { margin: 0 0 5px 0; font-size: 1.1em; color: #333; }
-        .criteria-info p { margin: 0; font-size: 0.9em; color: #666; }
-        .criteria-amount { font-size: 1.4em; font-weight: 700; color: #ff6b6b; }
+        .ds-label { font-size: 0.75em; color: #95a5a6; font-weight: 600; text-transform: uppercase; }
+        .ds-value { font-size: 1.1em; font-weight: 700; color: var(--text-color); }
+        .ds-value.money { color: var(--success-color); }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; padding: 30px 40px; background: white; margin-bottom: 20px; }
-        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: center; border: 1px solid #eee; }
-        .stat-card.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; }
-        .stat-card.primary .label, .stat-card.primary .value, .stat-card.primary .unit { color: white; }
-        .stat-card .icon { font-size: 2em; margin-bottom: 5px; }
-        .stat-card .label { font-size: 0.9em; color: #666; font-weight: 600; }
-        .stat-card .value { font-size: 1.8em; font-weight: 700; color: #333; }
-        .stat-card .unit { font-size: 0.5em; color: #999; margin-left: 5px; }
+        /* Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
 
-        .dept-wrapper { padding: 0 40px; display: flex; flex-direction: column; gap: 30px; }
-        .dept-section { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 6px solid #667eea; overflow: hidden; }
-        .dept-header { padding: 20px 30px; background: #fff; border-bottom: 2px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .dept-title { font-size: 1.5em; font-weight: 700; color: #2d3436; }
-        .dept-summary-box { display: flex; gap: 20px; background: #f9f9f9; padding: 10px 20px; border-radius: 30px; }
-        .ds-item { display: flex; flex-direction: column; align-items: flex-end; }
-        .ds-label { font-size: 0.75em; color: #888; font-weight: 600; text-transform: uppercase; }
-        .ds-value { font-size: 1.1em; font-weight: 700; color: #333; }
-        .ds-value.money { color: #00b894; }
+        .dept-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-        .table-responsive { width: 100%; overflow-x: auto; }
-        .dept-table { width: 100%; border-collapse: collapse; }
-        .dept-table th { background: #f8f9fa; padding: 15px 30px; text-align: left; font-size: 0.9em; color: #666; font-weight: 600; text-transform: uppercase; }
-        .dept-table td { padding: 15px 30px; border-bottom: 1px solid #f5f5f5; font-size: 1em; vertical-align: middle; }
+        .dept-table th {
+            background: #fcfdfe;
+            padding: 15px 30px;
+            text-align: left;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .dept-table td {
+            padding: 15px 30px;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 0.95em;
+            vertical-align: middle;
+            color: #34495e;
+        }
+
         .dept-table tr:last-child td { border-bottom: none; }
-        .dept-table tr:hover { background: #fafafa; }
+        .dept-table tr:hover { background: #f8f9fa; }
 
-        .emp-name { font-weight: 600; color: #333; display: block; font-size: 1.05em; }
-        .emp-id { font-size: 0.85em; color: #999; margin-left: 10px; font-weight: 400; background: #eee; padding: 2px 6px; border-radius: 4px; }
-        .emp-duration { font-size: 0.95em; color: #555; }
+        .emp-name { font-weight: 600; color: var(--text-color); display: block; font-size: 1em; }
+        .emp-id { font-size: 0.85em; color: #95a5a6; margin-left: 10px; font-weight: 400; background: #f0f2f5; padding: 2px 8px; border-radius: 4px; }
+        .emp-duration { font-size: 0.9em; color: #7f8c8d; }
         .emp-money { font-weight: 700; text-align: right; font-size: 1.1em; }
 
-        .money-500 { color: #00b894; background: rgba(0, 184, 148, 0.1); padding: 5px 10px; border-radius: 8px; display: inline-block; }
-        .money-300 { color: #f39c12; background: rgba(243, 156, 18, 0.1); padding: 5px 10px; border-radius: 8px; display: inline-block; }
-        .money-200 { color: #ff7675; background: rgba(255, 118, 117, 0.1); padding: 5px 10px; border-radius: 8px; display: inline-block; }
-        .money-0 { color: #b2bec3; }
+        /* Money Badges */
+        .money-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.9em; display: inline-block; min-width: 80px; text-align: center; }
+        .money-500 { color: #27ae60; background: #e8f8f5; }
+        .money-300 { color: #f39c12; background: #fef9e7; }
+        .money-200 { color: #e74c3c; background: #fdedec; }
+        .money-0 { color: #bdc3c7; background: #f0f2f5; }
 
-        .footer { text-align: center; padding: 30px; color: #888; font-size: 0.9em; margin-top: 20px; }
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #95a5a6;
+            font-size: 0.85em;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 40px;
+        }
 
         @media (max-width: 768px) {
-            .header h1 { font-size: 1.8em; }
-            .dept-wrapper { padding: 0 15px; }
+            body { padding: 15px; }
+            .header h1 { font-size: 1.6em; }
             .criteria-grid, .stats-grid { grid-template-columns: 1fr; }
             .dept-header { flex-direction: column; align-items: flex-start; }
-            .dept-summary-box { width: 100%; justify-content: space-between; }
+            .dept-summary-box { width: 100%; justify-content: space-between; margin-top: 10px; }
             .dept-table th, .dept-table td { padding: 12px 15px; }
-            .emp-id { display: block; margin: 2px 0 0 0; width: fit-content; }
+            .emp-id { display: inline-block; margin-top: 4px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        
         <div class="header">
-            <h1>🧧 Dashboard: สรุปการแจกอั่งเปาตรุษจีน 2569</h1>
+            <h1><i class="fas fa-envelope-open-text text-danger" style="color: #e74c3c;"></i> สรุปการแจกอั่งเปาตรุษจีน 2569</h1>
             <div class="subtitle">รายชื่อพนักงาน แยกรายแผนก เรียงตามอายุงาน</div>
             <div class="condition-tag">✅ รวมพนักงานทุกแผนก (Executive, Consultant, etc.)</div>
         </div>
 
-        <div class="criteria-section">
-            <div class="criteria-grid">
-                <div class="criteria-card"><div class="criteria-info"><h3>ซองที่ 1</h3><p>อายุงาน 3 ปีขึ้นไป</p></div><div class="criteria-amount">💰 500</div></div>
-                <div class="criteria-card"><div class="criteria-info"><h3>ซองที่ 2</h3><p>อายุงาน 1-2 ปี</p></div><div class="criteria-amount">💰 300</div></div>
-                <div class="criteria-card"><div class="criteria-info"><h3>ซองที่ 3</h3><p>ต่ำกว่า 1 ปี</p></div><div class="criteria-amount">💰 200</div></div>
+        <div class="criteria-grid">
+            <div class="criteria-card">
+                <div class="criteria-info"><h3>ซองที่ 1</h3><p>อายุงาน 3 ปีขึ้นไป</p></div>
+                <div class="criteria-amount">500 ฿</div>
+            </div>
+            <div class="criteria-card">
+                <div class="criteria-info"><h3>ซองที่ 2</h3><p>อายุงาน 1-2 ปี</p></div>
+                <div class="criteria-amount">300 ฿</div>
+            </div>
+            <div class="criteria-card">
+                <div class="criteria-info"><h3>ซองที่ 3</h3><p>ต่ำกว่า 1 ปี</p></div>
+                <div class="criteria-amount">200 ฿</div>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card primary"><div class="icon">💵</div><div class="label">งบประมาณรวม</div><div class="value" id="totalBudget">0<span class="unit">บาท</span></div></div>
-            <div class="stat-card"><div class="icon">👥</div><div class="label">พนักงานทั้งหมด</div><div class="value" id="totalEmployees">0<span class="unit">คน</span></div></div>
-            <div class="stat-card"><div class="icon">✅</div><div class="label">ได้รับซอง</div><div class="value" id="totalRecipients">0<span class="unit">คน</span></div></div>
-            <div class="stat-card"><div class="icon">📊</div><div class="label">เฉลี่ยต่อคน</div><div class="value" id="avgPerPerson">0<span class="unit">บาท</span></div></div>
+            <div class="stat-card blue">
+                <i class="fas fa-money-bill-wave stat-icon"></i>
+                <div class="stat-title">งบประมาณรวม</div>
+                <div class="stat-value" id="totalBudget">0<span class="stat-unit">บาท</span></div>
+            </div>
+            <div class="stat-card green">
+                <i class="fas fa-users stat-icon"></i>
+                <div class="stat-title">พนักงานทั้งหมด</div>
+                <div class="stat-value" id="totalEmployees">0<span class="stat-unit">คน</span></div>
+            </div>
+            <div class="stat-card orange">
+                <i class="fas fa-check-circle stat-icon"></i>
+                <div class="stat-title">ได้รับซอง</div>
+                <div class="stat-value" id="totalRecipients">0<span class="stat-unit">คน</span></div>
+            </div>
+            <div class="stat-card red">
+                <i class="fas fa-chart-line stat-icon"></i>
+                <div class="stat-title">เฉลี่ยต่อคน</div>
+                <div class="stat-value" id="avgPerPerson">0<span class="stat-unit">บาท</span></div>
+            </div>
         </div>
 
-        <div style="padding: 20px 40px 10px 40px;">
-            <h2 class="section-title" style="text-align: left; border-left: 5px solid #2d3436; padding-left: 15px; font-size:1.6em; font-weight:700;">🏢 รายชื่อพนักงานแยกตามแผนก</h2>
+        <div class="section-header">
+            <i class="fas fa-building fa-lg"></i>
+            <h2>รายชื่อพนักงานแยกตามแผนก</h2>
         </div>
         
-        <div class="dept-wrapper" id="deptContainer"></div>
+        <div class="dept-wrapper" id="deptContainer">
+            </div>
 
-        <div class="footer">© 2569 | Dashboard สรุปการแจกซองอั่งเปา (GitHub Version) <br> ข้อมูล ณ วันที่ 12 กุมภาพันธ์ 2569</div>
+        <div class="footer">
+            © 2569 Nigiwai Group | Dashboard สรุปการแจกซองอั่งเปา (Executive Theme) <br>
+            ข้อมูล ณ วันที่ 12 กุมภาพันธ์ 2569
+        </div>
     </div>
 
     <script>
+        // ข้อมูลดิบ
         const rawData = [
           {"รหัสพนักงาน":"610601","คำนำหน้า":"นาย","ชื่อ":"สุทธิพร","นามสกุล":"ตั้งสกุลสันติ","ชื่อเล่น":"คุณใหม่","แผนก":"Executive","วันเข้าทำงาน":"2018-06-12","อายุงาน":"7 ปี, 8 เดือน,","จำนวนเงิน":0},
           {"รหัสพนักงาน":"610602","คำนำหน้า":"นาย","ชื่อ":"วรันธร","นามสกุล":"แดงใหญ่","ชื่อเล่น":"คุณเก้ง","แผนก":"Executive","วันเข้าทำงาน":"2018-06-12","อายุงาน":"7 ปี, 8 เดือน,","จำนวนเงิน":0},
@@ -182,11 +367,18 @@
         let deptMap = {};
         const formatMoney = (num) => new Intl.NumberFormat('th-TH').format(num);
 
+        // Updated Colors to match Nigiwai Theme
         const deptColors = {
-            'Executive': '#FF6B6B', 'Operation': '#4ECDC4', 'Marketing': '#45B7D1',
-            'Sales': '#F7B731', 'Financial And Account': '#5f27cd', 'Human Resource': '#ff9ff3',
-            'Warehouse & Logistics': '#54a0ff', 'Construction': '#576574',
-            'Information Technology': '#2e86de', 'Consultant': '#34495e'
+            'Executive': '#2c3e50', // Dark Blue
+            'Operation': '#27ae60', // Green
+            'Marketing': '#3498db', // Blue
+            'Sales': '#f39c12',     // Orange
+            'Financial And Account': '#8e44ad', // Purple
+            'Human Resource': '#e84393', // Pink
+            'Warehouse & Logistics': '#2980b9', // Darker Blue
+            'Construction': '#7f8c8d', // Grey
+            'Information Technology': '#16a085', // Teal
+            'Consultant': '#34495e' // Navy
         };
 
         employeeData.forEach(emp => {
@@ -198,10 +390,10 @@
             deptMap[emp.แผนก].employees.push(emp);
         });
 
-        document.getElementById('totalBudget').innerHTML = `${formatMoney(totalBudget)}<span class="unit">บาท</span>`;
-        document.getElementById('totalEmployees').innerHTML = `${employeeData.length}<span class="unit">คน</span>`;
-        document.getElementById('totalRecipients').innerHTML = `${recipients}<span class="unit">คน</span>`;
-        document.getElementById('avgPerPerson').innerHTML = `${formatMoney((totalBudget / employeeData.length).toFixed(0))}<span class="unit">บาท</span>`;
+        document.getElementById('totalBudget').innerHTML = `${formatMoney(totalBudget)}<span class="stat-unit">บาท</span>`;
+        document.getElementById('totalEmployees').innerHTML = `${employeeData.length}<span class="stat-unit">คน</span>`;
+        document.getElementById('totalRecipients').innerHTML = `${recipients}<span class="stat-unit">คน</span>`;
+        document.getElementById('avgPerPerson').innerHTML = `${formatMoney((totalBudget / employeeData.length).toFixed(0))}<span class="stat-unit">บาท</span>`;
 
         const deptContainer = document.getElementById('deptContainer');
         const sortedDepts = Object.values(deptMap).sort((a, b) => b.money - a.money);
@@ -209,13 +401,14 @@
         sortedDepts.forEach(dept => {
             const section = document.createElement('div');
             section.className = 'dept-section';
-            const color = deptColors[dept.name] || '#667eea';
+            const color = deptColors[dept.name] || '#3498db';
             section.style.borderLeftColor = color;
 
             let empRowsHtml = '';
             dept.employees.forEach(emp => {
+                // Use class based badges for money
                 const moneyClass = emp.จำนวนเงิน >= 500 ? 'money-500' : (emp.จำนวนเงิน >= 300 ? 'money-300' : (emp.จำนวนเงิน >= 200 ? 'money-200' : 'money-0'));
-                const moneyText = emp.จำนวนเงิน > 0 ? `${formatMoney(emp.จำนวนเงิน)} ฿` : '-';
+                const moneyText = emp.จำนวนเงิน > 0 ? `${formatMoney(emp.จำนวนเงิน)}` : '-';
                 
                 empRowsHtml += `
                     <tr>
@@ -225,14 +418,14 @@
                             </span>
                         </td>
                         <td><span class="emp-duration">${emp.อายุงาน}</span></td>
-                        <td class="emp-money"><span class="${moneyClass}">${moneyText}</span></td>
+                        <td class="emp-money"><span class="money-badge ${moneyClass}">${moneyText}</span></td>
                     </tr>
                 `;
             });
 
             section.innerHTML = `
                 <div class="dept-header">
-                    <div class="dept-title">${dept.name}</div>
+                    <div class="dept-title" style="color:${color}">${dept.name}</div>
                     <div class="dept-summary-box">
                         <div class="ds-item"><span class="ds-label">พนักงาน</span><span class="ds-value">${dept.count} <span style="font-size:0.7em">คน</span></span></div>
                         <div class="ds-item"><span class="ds-label">รวมเงิน</span><span class="ds-value money" style="color:${color}">${formatMoney(dept.money)} <span style="font-size:0.7em">฿</span></span></div>
