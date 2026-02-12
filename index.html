@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nigiwai Group Executive Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -77,6 +79,16 @@
             transform: translateX(5px);
         }
         .menu-link i { margin-right: 12px; width: 20px; text-align: center; }
+
+        /* Styles for Section Header in Sidebar */
+        .menu-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #5d6d7e;
+            margin: 20px 0 10px 15px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
 
         .last-update { font-size: 0.8rem; color: #7f8c8d; margin-top: auto; text-align: center; }
 
@@ -244,7 +256,22 @@
                     <i class="fas fa-list"></i> ข้อมูลรายบริษัท
                 </a>
             </li>
+
+            <div class="menu-header">Other Dashboards</div>
+            
             <li class="menu-item">
+                <a class="menu-link" href="job-description.html" target="_blank">
+                    <i class="fas fa-briefcase"></i> Job Descriptions
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="angpao.html" target="_blank">
+                    <i class="fas fa-envelope"></i> สรุปอั่งเปา (Angpao)
+                </a>
+            </li>
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+            
+            <li class="menu-item" style="margin-top: 15px;">
                 <a class="menu-link" onclick="window.print()">
                     <i class="fas fa-print"></i> พิมพ์รายงาน
                 </a>
@@ -311,7 +338,7 @@
     </div>
 
 <script>
-    // --- 1. ข้อมูล (Data Set) แก้ไขยอดหนี้สินของทุเรียนนิสซึ่มแล้ว ---
+    // --- 1. ข้อมูล (Data Set) ---
     const rawData = [
         {
             id: 1, name: "บจก. นิกิวาอิ กรุ๊ป", 
@@ -506,8 +533,11 @@
             return;
         }
 
+        // Register the datalabels plugin
+        Chart.register(ChartDataLabels);
+
         try {
-            // Chart 1: Capital
+            // Chart 1: Capital (Bar Chart) - No labels needed
             const ctxCap = document.getElementById('capitalChart').getContext('2d');
             new Chart(ctxCap, {
                 type: 'bar',
@@ -522,12 +552,15 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        datalabels: { display: false } // Hide labels for this chart
+                    },
                     scales: { x: { ticks: { callback: v => v/1000000 + 'M' } } }
                 }
             });
 
-            // Chart 2: Debt (Top 10)
+            // Chart 2: Debt (Top 10) - With Data Labels
             const debtData = rawData.slice().sort((a,b) => b.debt - a.debt);
             const ctxDebt = document.getElementById('debtChart').getContext('2d');
             new Chart(ctxDebt, {
@@ -545,7 +578,19 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    layout: {
+                        padding: { right: 100 } // Add padding to prevent label cutoff
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#c0392b',
+                            font: { weight: 'bold', size: 11 },
+                            formatter: (value) => formatCurrency(value) // Format as currency
+                        }
+                    },
                     scales: { x: { ticks: { callback: v => v/1000000 + 'M' } } }
                 }
             });
