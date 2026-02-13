@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nigiwai Group Executive Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -34,6 +33,18 @@
             min-height: 100vh;
         }
 
+        /* Animation สำหรับตัวหนังสือกระพริบ */
+        .blink-red {
+            color: #e74c3c;
+            animation: blinker 1.5s linear infinite;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
         /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
@@ -58,6 +69,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
         }
 
         .menu-list { list-style: none; flex-grow: 1; }
@@ -192,7 +204,14 @@
             justify-content: space-between;
             align-items: center;
         }
-        .company-name { font-weight: 700; color: var(--primary-color); font-size: 1.1rem; }
+        .company-name { 
+            font-weight: 700; 
+            color: var(--primary-color); 
+            font-size: 1.1rem; 
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
         .company-body {
             padding: 20px 25px;
@@ -237,13 +256,20 @@
 <body>
 
     <nav class="sidebar">
-        <div class="brand">
+        <div class="brand" onclick="window.location.href='index.html'">
             <i class="fas fa-chart-line"></i> Nigiwai Group
         </div>
         <ul class="menu-list">
+            
+            <li class="menu-item">
+                <a class="menu-link" href="index.html">
+                    <i class="fas fa-home"></i> กลับหน้าหลัก (Home)
+                </a>
+            </li>
+
             <li class="menu-item">
                 <a class="menu-link active" onclick="scrollToSection('dashboard-top', this)">
-                    <i class="fas fa-home"></i> ภาพรวม (Overview)
+                    <i class="fas fa-tachometer-alt"></i> ภาพรวม (Overview)
                 </a>
             </li>
             <li class="menu-item">
@@ -260,13 +286,14 @@
             <div class="menu-header">Other Dashboards</div>
             
             <li class="menu-item">
-                <a class="menu-link" href="job-description.html" target="_blank">
-                    <i class="fas fa-briefcase"></i> Job Descriptions
+                <a class="menu-link" href="angpao.html" target="_blank">
+                    <i class="fas fa-envelope-open-text"></i> สรุปอั่งเปา (Angpao 69)
                 </a>
             </li>
+            
             <li class="menu-item">
-                <a class="menu-link" href="angpao.html" target="_blank">
-                    <i class="fas fa-envelope"></i> สรุปอั่งเปา (Angpao)
+                <a class="menu-link" href="as2.html" target="_blank">
+                    <i class="fas fa-user-tie"></i> Executive Assistant JD
                 </a>
             </li>
             <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
@@ -345,7 +372,8 @@
             reg: 5000000, paid: 3500000, debt: 1349691.13, 
             dir_old: "นาย สุทธิพร ตั้งสกุลสันติ", dir_new: "-", signatory: "นาย สุทธิพร ตั้งสกุลสันติ", 
             shareholders: "นาย สุทธิพร ตั้งสกุลสันติ (70.0%), นาย วรันธร แดงใหญ่ (30.0%)",
-            issue: "ปกติ"
+            issue: "ปกติ",
+            note: "( ตัวเลขหนี้คือบริษัทติดหนี้กรรมการ )" 
         },
         {
             id: 2, name: "บจก. ทุเรียนนิสซึ่ม", 
@@ -377,7 +405,7 @@
         },
         {
             id: 6, name: "บจก. ยู คูซีน", 
-            reg: 1000000, paid: 200000, debt: 0, 
+            reg: 1000000, paid: 200000, debt: 2152143.18, 
             dir_old: "นาย สุทธิพร ตั้งสกุลสันติ", dir_new: "นาย นิรันดร์ ดวงสุวรรณ", signatory: "นาย นิรันดร์ ดวงสุวรรณ", 
             shareholders: "บจก. นิกิวาอิ กรุ๊ป (80.0%), ตระกูลนาคมณฑนาคุ้ม (20.0%)",
             issue: "ผู้ถือหุ้นเดิมไม่อยากขายหุ้น / ไม่ส่งสอบ"
@@ -466,12 +494,19 @@
                     iconIssue = '<i class="fas fa-clock"></i>';
                 }
 
+                // *** Logic แสดงหมายเหตุตัวแดงกระพริบ ***
+                const noteHtml = item.note ? `<span class="blink-red">${item.note}</span>` : '';
+
                 // Create Card
                 const card = document.createElement('div');
                 card.className = 'company-row-card';
                 card.innerHTML = `
                     <div class="company-header">
-                        <div class="company-name"><i class="fas fa-building" style="color:#bdc3c7; margin-right:8px;"></i>${item.id}. ${item.name}</div>
+                        <div class="company-name">
+                            <i class="fas fa-building" style="color:#bdc3c7; margin-right:8px;"></i>
+                            ${item.id}. ${item.name} 
+                            ${noteHtml}
+                        </div>
                         <span class="badge ${badgeClass}">${iconIssue} ${issueText}</span>
                     </div>
                     <div class="company-body">
@@ -533,34 +568,33 @@
             return;
         }
 
-        // Register the datalabels plugin
-        Chart.register(ChartDataLabels);
-
         try {
-            // Chart 1: Capital (Bar Chart) - No labels needed
+            // Register DataLabels Plugin
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
+            // Chart 1: Capital
             const ctxCap = document.getElementById('capitalChart').getContext('2d');
             new Chart(ctxCap, {
                 type: 'bar',
                 data: {
                     labels: rawData.map(d => d.name.replace("บจก. ", "")),
                     datasets: [
-                        { label: 'ทุนจดทะเบียน', data: rawData.map(d => d.reg), backgroundColor: '#34495e', borderRadius: 4 },
-                        { label: 'ทุนชำระแล้ว', data: rawData.map(d => d.paid), backgroundColor: '#27ae60', borderRadius: 4 }
+                        { label: 'ทุนจดทะเบียน', data: rawData.map(d => d.reg), backgroundColor: '#34495e', borderRadius: 4, datalabels: { display: false } },
+                        { label: 'ทุนชำระแล้ว', data: rawData.map(d => d.paid), backgroundColor: '#27ae60', borderRadius: 4, datalabels: { display: false } }
                     ]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { position: 'bottom' },
-                        datalabels: { display: false } // Hide labels for this chart
-                    },
+                    plugins: { legend: { position: 'bottom' } },
                     scales: { x: { ticks: { callback: v => v/1000000 + 'M' } } }
                 }
             });
 
-            // Chart 2: Debt (Top 10) - With Data Labels
+            // Chart 2: Debt (แสดงตัวเลขท้ายกราฟ)
             const debtData = rawData.slice().sort((a,b) => b.debt - a.debt);
             const ctxDebt = document.getElementById('debtChart').getContext('2d');
             new Chart(ctxDebt, {
@@ -578,20 +612,33 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: {
-                        padding: { right: 100 } // Add padding to prevent label cutoff
-                    },
                     plugins: { 
                         legend: { display: false },
+                        // ตั้งค่า Data Labels ตรงนี้
                         datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            color: '#c0392b',
-                            font: { weight: 'bold', size: 11 },
-                            formatter: (value) => formatCurrency(value) // Format as currency
+                            anchor: 'end', // ยึดที่ปลายแท่ง
+                            align: 'end',  // ดันออกไปข้างนอกแท่ง
+                            color: '#444', // สีตัวอักษรเทาเข้ม
+                            font: {
+                                weight: 'bold',
+                                size: 10
+                            },
+                            formatter: function(value) {
+                                // จัดรูปแบบตัวเลข (เช่น 1,234,567)
+                                return value > 0 ? value.toLocaleString('th-TH', {maximumFractionDigits: 0}) : '';
+                            }
                         }
                     },
-                    scales: { x: { ticks: { callback: v => v/1000000 + 'M' } } }
+                    layout: {
+                        padding: {
+                            right: 60 // เพิ่มพื้นที่ด้านขวาเผื่อตัวเลขยาวๆ จะได้ไม่ตกขอบ
+                        }
+                    },
+                    scales: { 
+                        x: { 
+                            ticks: { callback: v => v/1000000 + 'M' } 
+                        } 
+                    }
                 }
             });
         } catch(e) {
