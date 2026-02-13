@@ -1,0 +1,11 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Data files (Optional - เพื่อป้องกันข้อมูลส่วนตัวหลุด)
+*.xlsx
+*.xls
+*.csv
