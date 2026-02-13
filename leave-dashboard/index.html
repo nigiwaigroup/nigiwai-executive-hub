@@ -308,6 +308,13 @@
         </div>
 
         <div class="card">
+            <h2><i class="fas fa-calendar-alt"></i> สถิติการลาแยกตามเดือน (Monthly Trend)</h2>
+            <div class="chart-container-large">
+                <canvas id="monthChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
             <h2><i class="fas fa-chart-bar"></i> สัดส่วนการลาแยกตามแผนก</h2>
             <div class="chart-container-large">
                 <canvas id="deptChart"></canvas>
@@ -565,7 +572,8 @@
             const stats = {
                 totalLeaves: data.length,
                 totalDays: data.reduce((s, i) => s + (i['ลา_วัน']||0), 0),
-                depts: {}, types: {}, employees: {}, empDetails: {}
+                depts: {}, types: {}, employees: {}, empDetails: {},
+                months: {} // New: Monthly Stats
             };
 
             data.forEach(row => {
@@ -591,6 +599,12 @@
                 if (!detail.types[type]) detail.types[type] = { days: 0 };
                 detail.types[type].days += row['ลา_วัน'];
                 detail.totalDays += row['ลา_วัน'];
+
+                // Monthly Stats
+                const mKey = row.monthKey || 'Unknown';
+                if(!stats.months[mKey]) stats.months[mKey] = { count: 0, days: 0 };
+                stats.months[mKey].count++;
+                stats.months[mKey].days += row['ลา_วัน'];
             });
 
             processedState = stats;
@@ -645,17 +659,35 @@
         function updateCharts() {
             const deptData = Object.entries(processedState.depts).map(([k,v]) => ({ label: k, val: v.count })).sort((a,b) => b.val - a.val);
             const typeData = Object.entries(processedState.types).map(([k,v]) => ({ label: k, val: v.count })).sort((a,b) => b.val - a.val);
+            
+            // Monthly Data Sorting & Formatting
+            const monthKeys = Object.keys(processedState.months).sort();
+            const monthLabels = monthKeys.map(k => {
+                if(k === 'Unknown') return 'ไม่ระบุ';
+                const [y, m] = k.split('-');
+                return `${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
+            });
+            const monthCounts = monthKeys.map(k => processedState.months[k].count);
 
+            // 1. Month Chart (NEW)
+            if (charts.month) charts.month.destroy();
+            charts.month = new Chart(document.getElementById('monthChart'), 
+                createBarChartConfig(monthLabels, monthCounts, 'จำนวนครั้ง', '#1abc9c')
+            );
+
+            // 2. Dept Chart
             if (charts.dept) charts.dept.destroy();
             charts.dept = new Chart(document.getElementById('deptChart'), 
                 createBarChartConfig(deptData.map(d=>d.label), deptData.map(d=>d.val), 'จำนวนครั้ง', '#3498db')
             );
 
+            // 3. Type Chart
             if (charts.type) charts.type.destroy();
             charts.type = new Chart(document.getElementById('leaveTypeChart'), 
                 createBarChartConfig(typeData.map(d=>d.label), typeData.map(d=>d.val), 'จำนวนครั้ง', '#9b59b6')
             );
 
+            // 4. Dept Summary Chart (Horizontal)
             if (charts.bar) charts.bar.destroy();
             charts.bar = new Chart(document.getElementById('deptBarChart'), {
                 type: 'bar',
@@ -687,18 +719,15 @@
         }
 
         function updateTables() {
-            // *** UPDATED: Top Employees with Red Blinking & Icon ***
+            // Top Employees
             const topEmps = Object.entries(processedState.employees)
                 .map(([k,v]) => ({ name: k, ...v }))
                 .sort((a,b) => b.count - a.count)
                 .slice(0, 10);
             
             document.querySelector('#topEmployeesTable tbody').innerHTML = topEmps.map((emp, i) => {
-                // Check if rank 1-3
                 const isTop3 = i < 3;
                 const badgeClass = isTop3 ? 'badge-danger' : 'badge-primary';
-                
-                // Add Blinking Class & Icon for Top 3
                 const nameContent = isTop3 
                     ? `<span class="blink-alert"><i class="fas fa-exclamation-triangle"></i> ${emp.name}</span>` 
                     : `<span style="font-weight:600">${emp.name}</span>`;
