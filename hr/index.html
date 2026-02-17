@@ -94,7 +94,6 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-        /* Style for sortable headers */
         th.sortable { cursor: pointer; user-select: none; transition: background-color 0.2s; }
         th.sortable:hover { background-color: #e2e8f0; }
     </style>
@@ -173,7 +172,6 @@
     <div class="max-w-7xl mx-auto">
         <div class="mb-6 bg-slate-800 rounded-xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
-            
             <div class="relative z-10">
                 <h1 class="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
                     <i class="fas fa-chart-line text-blue-400"></i> Executive Salary Dashboard 2026
@@ -196,7 +194,6 @@
             <button class="tab-button" onclick="switchTab('employee', this)"><i class="fas fa-user-check mr-2"></i>พนักงานที่ได้ปรับ #01/26</button>
             <button class="tab-button" onclick="switchTab('costcenter', this)"><i class="fas fa-building mr-2"></i>Cost Center</button>
             <button class="tab-button" onclick="switchTab('transfer', this)"><i class="fas fa-exchange-alt mr-2"></i>การโอนย้าย</button>
-            
             <button id="adminTabBtn" class="tab-button text-slate-600 ml-auto bg-white border border-slate-300 shadow-sm hover:text-blue-600 hover:border-blue-300" onclick="handleAdminTabClick()">
                 <i class="fas fa-sliders-h mr-2 text-blue-500"></i>จัดการข้อมูล
             </button>
@@ -227,8 +224,9 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="chart-card p-5 border-t-4 border-rose-400">
-                    <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center cursor-pointer hover:text-rose-600 transition-colors" onclick="toggleLevelSort()">
                         <i class="fas fa-layer-group text-rose-500 mr-2"></i>สัดส่วนพนักงานตามระดับ (Level Distribution)
+                        <i id="levelSortIcon" class="fas fa-sort-amount-down-alt ml-2 opacity-50 text-xs"></i>
                     </h3>
                     <div class="h-64"><canvas id="levelChart"></canvas></div>
                 </div>
@@ -255,9 +253,8 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                     <div>
                         <h3 class="text-xl font-bold text-slate-800 flex items-center"><i class="fas fa-users text-indigo-500 mr-2"></i>ฐานข้อมูลพนักงานทั้งหมด (Total Headcount)</h3>
-                        <p class="text-sm text-slate-500 mt-1">แสดงข้อมูลพนักงาน 47 อัตราในเครือ Nigiwai Group (คลิกที่หัวตารางเพื่อเรียงข้อมูล)</p>
+                        <p class="text-sm text-slate-500 mt-1">แสดงข้อมูลพนักงาน 47 อัตราในเครือ Nigiwai Group</p>
                     </div>
-                    
                     <div class="flex flex-wrap gap-3 w-full md:w-auto bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
                         <div>
                             <label class="block text-[0.7rem] font-bold text-slate-500 mb-1 uppercase tracking-wider">กรองบริษัท</label>
@@ -273,7 +270,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
@@ -296,8 +292,7 @@
         <div id="employee-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-emerald-400">
                 <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center"><i class="fas fa-user-check text-emerald-500 mr-2"></i>พนักงานที่ได้ปรับ #01/26</h3>
-                <p class="text-sm text-slate-500 mb-4">คลิกที่หัวตารางเพื่อเรียงข้อมูล หรือคลิกที่แถวพนักงานเพื่อดูรายละเอียดการปรับ</p>
-                
+                <p class="text-sm text-slate-500 mb-4">คลิกที่แถวพนักงานเพื่อดูรายละเอียดการปรับ</p>
                 <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -322,13 +317,8 @@
                 <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-building text-indigo-500 mr-2"></i>งบประมาณรวมตาม Cost Center (Payroll Distribution)</h3>
                 <div class="h-80"><canvas id="costCenterChart"></canvas></div>
             </div>
-
             <div class="card p-6">
                 <h3 class="text-xl font-bold text-slate-800 mb-2">รายละเอียด Cost Center</h3>
-                <p class="text-sm text-blue-700 bg-blue-50 inline-block px-4 py-1.5 rounded-lg font-medium mb-4 shadow-sm">
-                    <i class="fas fa-hand-pointer mr-2 animate-pulse"></i>คลิกที่หัวตารางเพื่อเรียง หรือคลิกที่แถวชื่อบริษัทเพื่อกางดูรายชื่อ
-                </p>
-                
                 <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -366,11 +356,7 @@
 
         <div id="admin-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-slate-800">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-xl font-bold text-slate-800 flex items-center"><i class="fas fa-sliders-h text-slate-800 mr-2"></i>จัดการข้อมูลพนักงาน (Admin Mode)</h3>
-                </div>
-                <p class="text-sm text-slate-500 mb-5">ตารางนี้สำหรับปรับปรุงข้อมูลรายบุคคล คลิกที่หัวตารางเพื่อเรียงข้อมูล หรือค้นหาได้ทันที</p>
-                
+                <h3 class="text-xl font-bold text-slate-800 flex items-center mb-5"><i class="fas fa-sliders-h text-slate-800 mr-2"></i>จัดการข้อมูลพนักงาน (Admin Mode)</h3>
                 <div class="flex flex-wrap gap-3 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
                     <div class="relative w-full md:w-64">
                         <i class="fas fa-search absolute left-3 top-2.5 text-slate-400"></i>
@@ -387,7 +373,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -404,12 +389,11 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
         // ----------------------------------------------------
-        // DATA: Base Array of 47 Employees (With Level Extracted)
+        // DATA
         // ----------------------------------------------------
         const originalAllEmployees = [
             {id: "660104", name: "นางสาวสาวิตรี สิงห์เหม้น", dept: "Operation", position: "Core Team Supervisor- Level I", level: "Leader and Supervisor", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
@@ -484,16 +468,20 @@
         // SYSTEM VARIABLES & STATES
         // ----------------------------------------------------
         let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees')) || originalAllEmployees;
-        
         let deptStats = {};
         let levelStats = {};
         let costCenterData = [];
-        
         let currentEditIndex = -1;
-
         let myDeptChart, myDistChart, myLevelChart, costCenterChart;
 
-        // Sorting States
+        // Custom Order: Consultant อยู่ล่างสุด (ก่อน 'ไม่ระบุ')
+        const standardLevelOrder = [
+            "C Level", "Chief and director", "Manager",
+            "Leader and Supervisor", "Senior", "Senior Officer", "Officer", 
+            "Consultant", "ไม่ระบุ"
+        ];
+        let levelSortDir = 'asc';
+
         let sortStates = {
             allEmp: { col: 'newSalary', dir: 'desc' },
             adjEmp: { col: 'diff', dir: 'desc' },
@@ -502,11 +490,6 @@
             admin: { col: 'newSalary', dir: 'desc' }
         };
 
-        const standardLevelOrder = [
-            "C Level", "Chief and director", "Consultant", "Manager",
-            "Leader and Supervisor", "Senior", "Senior Officer", "Officer", "ไม่ระบุ"
-        ];
-
         document.addEventListener('DOMContentLoaded', () => {
             initFilters();
             calculateStats();
@@ -514,57 +497,6 @@
             const lastUpdate = localStorage.getItem('admin_last_edit_stamp');
             if(lastUpdate) document.getElementById('lastUpdateText').innerText = lastUpdate;
         });
-
-        // ----------------------------------------------------
-        // SORTING ENGINE (GENERIC)
-        // ----------------------------------------------------
-        function handleSort(tableKey, col) {
-            if (sortStates[tableKey].col === col) {
-                sortStates[tableKey].dir = sortStates[tableKey].dir === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortStates[tableKey].col = col;
-                sortStates[tableKey].dir = 'asc';
-            }
-            
-            if(tableKey === 'allEmp') renderAllEmployeeTable();
-            if(tableKey === 'adjEmp') populateAdjustedTable();
-            if(tableKey === 'cc') populateCostCenterTable();
-            if(tableKey === 'transfer') populateTransferTable();
-            if(tableKey === 'admin') populateAdminTable();
-        }
-
-        function sortArray(arr, col, dir) {
-            return arr.sort((a, b) => {
-                let valA = a[col];
-                let valB = b[col];
-                
-                if (col === 'diff') { valA = a.newSalary - a.oldSalary; valB = b.newSalary - b.oldSalary; }
-                if (col === 'percent') { valA = a.oldSalary ? (a.newSalary - a.oldSalary)/a.oldSalary : 0; valB = b.oldSalary ? (b.newSalary - b.oldSalary)/b.oldSalary : 0; }
-                if (col === 'avg') { valA = a.employeeCount ? a.totalSalary / a.employeeCount : 0; valB = b.employeeCount ? b.totalSalary / b.employeeCount : 0; }
-
-                if (valA == null) valA = '';
-                if (valB == null) valB = '';
-
-                if (typeof valA === 'string' && typeof valB === 'string') {
-                    return dir === 'asc' ? valA.localeCompare(valB, 'th') : valB.localeCompare(valA, 'th');
-                }
-
-                if (valA < valB) return dir === 'asc' ? -1 : 1;
-                if (valA > valB) return dir === 'asc' ? 1 : -1;
-                return 0;
-            });
-        }
-
-        function updateSortIcons(tableKey) {
-            document.querySelectorAll(`.sort-icon-${tableKey}`).forEach(icon => {
-                icon.className = `sort-icon-${tableKey} fas fa-sort text-slate-300 ml-1 opacity-50`;
-            });
-            const state = sortStates[tableKey];
-            const activeIcon = document.getElementById(`icon-${tableKey}-${state.col}`);
-            if (activeIcon) {
-                activeIcon.className = `sort-icon-${tableKey} fas fa-sort-${state.dir === 'asc' ? 'up' : 'down'} text-blue-600 ml-1`;
-            }
-        }
 
         // ----------------------------------------------------
         // CALCULATIONS & KPI
@@ -604,274 +536,25 @@
             initializeCharts();
         }
 
-        function updateKPIs() {
-            const adjustedEmps = allEmployees.filter(e => e.newSalary !== e.oldSalary);
-            const totalAdded = adjustedEmps.reduce((sum, e) => sum + (e.newSalary - e.oldSalary), 0);
-            const oldTotalAdjustedOnly = adjustedEmps.reduce((sum, e) => sum + e.oldSalary, 0);
-            const avg = oldTotalAdjustedOnly === 0 ? 0 : ((totalAdded/oldTotalAdjustedOnly)*100).toFixed(2);
-            
-            document.getElementById('kpiAdjusted').innerText = adjustedEmps.length + " คน";
-            document.getElementById('kpiAdjustedPercent').innerText = `คิดเป็น ${((adjustedEmps.length/allEmployees.length)*100).toFixed(0)}% ของทั้งหมด`;
-            document.getElementById('kpiBudget').innerText = `฿${totalAdded.toLocaleString('th-TH')}`;
-            document.getElementById('kpiBudgetYear').innerHTML = `ประเมิน ฿${(totalAdded*12).toLocaleString('th-TH')}/ปี`;
-            document.getElementById('kpiAvgPercent').innerText = `${avg}%`;
-        }
-
-        function initFilters() {
-            const compSet = new Set(), deptSet = new Set();
-            allEmployees.forEach(e => {
-                if(e.company) compSet.add(e.company.replace(' (สำนักงานใหญ่)', ''));
-                if(e.dept) deptSet.add(e.dept);
-            });
-
-            const fComp = document.getElementById('filterComp');
-            const fDept = document.getElementById('filterDept');
-            const aComp = document.getElementById('adminFilterComp');
-            const aDept = document.getElementById('adminFilterDept');
-
-            fComp.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
-            aComp.innerHTML = '<option value="all">ทุกบริษัท (All)</option>';
-            compSet.forEach(c => { fComp.innerHTML += `<option value="${c}">${c}</option>`; aComp.innerHTML += `<option value="${c}">${c}</option>`; });
-
-            fDept.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
-            aDept.innerHTML = '<option value="all">ทุกแผนก (All)</option>';
-            deptSet.forEach(d => { fDept.innerHTML += `<option value="${d}">${d}</option>`; aDept.innerHTML += `<option value="${d}">${d}</option>`; });
-        }
-
         // ----------------------------------------------------
-        // TABLE RENDERERS (With Sort applied)
+        // CHART FUNCTIONS
         // ----------------------------------------------------
-        function renderAllEmployeeTable() {
-            const fComp = document.getElementById('filterComp').value;
-            const fDept = document.getElementById('filterDept').value;
-            
-            let filtered = allEmployees.filter(e => {
-                return (fComp === 'all' || e.company.includes(fComp)) && (fDept === 'all' || e.dept === fDept);
-            });
-
-            filtered = sortArray(filtered, sortStates.allEmp.col, sortStates.allEmp.dir);
-
-            const tbody = document.getElementById('allEmployeeTableBody');
-            tbody.innerHTML = '';
-            filtered.forEach((emp, i) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50 border-b border-slate-100 transition-colors">
-                        <td class="p-4 text-slate-500">${i + 1}</td>
-                        <td class="p-4 font-bold text-slate-800">${emp.name} <span class="text-sm font-normal text-slate-500 ml-1">(${emp.id})</span></td>
-                        <td class="p-4 text-xs text-slate-600">${emp.company.replace(' (สำนักงานใหญ่)', '')}</td>
-                        <td class="p-4 text-xs font-semibold text-slate-700 bg-slate-50/50">${emp.dept}</td>
-                        <td class="p-4 text-xs text-slate-600">${emp.position}</td>
-                        <td class="p-4 text-xs text-slate-600 bg-slate-50/50 text-center">${emp.level}</td>
-                        <td class="p-4 text-right font-bold text-blue-600 bg-blue-50/50">฿${emp.newSalary.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            updateSortIcons('allEmp');
+        function toggleLevelSort() {
+            levelSortDir = (levelSortDir === 'asc') ? 'desc' : 'asc';
+            const icon = document.getElementById('levelSortIcon');
+            icon.className = `fas fa-sort-amount-${levelSortDir === 'asc' ? 'down-alt' : 'up'} ml-2 text-rose-500`;
+            updateLevelChart();
         }
 
-        function populateAdjustedTable() {
-            let adjusted = allEmployees.filter(e => e.newSalary !== e.oldSalary);
-            adjusted = sortArray(adjusted, sortStates.adjEmp.col, sortStates.adjEmp.dir);
-            
-            const tbody = document.getElementById('employeeTableBody');
-            tbody.innerHTML = '';
-            adjusted.forEach((emp, i) => {
-                const diff = emp.newSalary - emp.oldSalary;
-                const percent = ((diff / emp.oldSalary) * 100).toFixed(1);
-                const isNeg = diff < 0;
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer transition-colors" onclick="document.getElementById('adj-det-${i}').classList.toggle('hidden')">
-                        <td class="p-4 font-bold text-slate-800">${emp.name}</td>
-                        <td class="p-4 text-xs text-slate-600">${emp.dept}</td>
-                        <td class="p-4 text-xs text-slate-500">${emp.position}</td>
-                        <td class="p-4 text-right text-slate-500">฿${emp.oldSalary.toLocaleString()}</td>
-                        <td class="p-4 text-right font-bold text-slate-800">฿${emp.newSalary.toLocaleString()}</td>
-                        <td class="p-4 text-right font-bold ${isNeg ? 'text-rose-500' : 'text-emerald-500'}">${isNeg ? '' : '+'}฿${diff.toLocaleString()}</td>
-                        <td class="p-4 text-right"><span class="px-2 py-1 rounded text-xs font-bold ${isNeg ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${percent}%</span></td>
-                    </tr>
-                    <tr id="adj-det-${i}" class="hidden bg-slate-50/80 border-b border-slate-200">
-                        <td colspan="7" class="p-4 pl-6 text-sm text-slate-600 border-l-4 border-blue-400">
-                            <i class="fas fa-info-circle text-blue-400 mr-2"></i><strong>รายละเอียดการปรับ:</strong> ${emp.details || 'ไม่มีบันทึกรายละเอียด (ปรับฐานเงินเดือนปกติ)'}
-                        </td>
-                    </tr>
-                `;
-            });
-            updateSortIcons('adjEmp');
-        }
-
-        function populateCostCenterTable() {
-            let sorted = sortArray([...costCenterData], sortStates.cc.col, sortStates.cc.dir);
-            const tbody = document.getElementById('costCenterTableBody');
-            tbody.innerHTML = '';
-            
-            sorted.forEach((cc, i) => {
-                const avg = cc.employeeCount ? (cc.totalSalary / cc.employeeCount).toFixed(0) : 0;
-                
-                let innerHtml = `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm my-2 mx-4"><h4 class="text-sm font-bold text-slate-700 mb-3 border-b pb-2">รายชื่อพนักงานเรียงตามเงินเดือน</h4><table class="w-full text-xs text-left"><thead><tr class="text-slate-500 uppercase"><th class="pb-2">ชื่อ-นามสกุล</th><th class="pb-2">แผนก</th><th class="pb-2">ตำแหน่ง</th><th class="pb-2 text-right">เงินเดือน '69</th></tr></thead><tbody>`;
-                cc.employees.sort((a,b) => b.newSalary - a.newSalary).forEach(emp => {
-                    innerHtml += `<tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-2.5 font-bold text-slate-700">${emp.name}</td><td class="py-2.5 text-slate-500">${emp.dept}</td><td class="py-2.5 text-slate-500">${emp.position}</td><td class="py-2.5 text-right text-blue-600 font-bold">฿${emp.newSalary.toLocaleString()}</td></tr>`;
-                });
-                innerHtml += `</tbody></table></div>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors group" onclick="document.getElementById('cc-row-${i}').classList.toggle('hidden')">
-                        <td class="p-4 font-bold text-blue-700 group-hover:text-blue-800"><i class="fas fa-chevron-circle-down text-slate-300 mr-2 text-sm group-hover:text-blue-400 transition-colors"></i>${cc.costCenter}</td>
-                        <td class="p-4 text-center"><span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${cc.employeeCount}</span></td>
-                        <td class="p-4 text-right font-extrabold text-slate-800">฿${cc.totalSalary.toLocaleString('th-TH')}</td>
-                        <td class="p-4 text-right text-slate-500 font-medium">฿${parseFloat(avg).toLocaleString('th-TH')}</td>
-                    </tr>
-                    <tr id="cc-row-${i}" class="hidden bg-slate-50/50">
-                        <td colspan="4" class="p-0 border-b border-slate-200">${innerHtml}</td>
-                    </tr>
-                `;
-            });
-            updateSortIcons('cc');
-
-            if(costCenterChart && (sortStates.cc.col === 'totalSalary' || sortStates.cc.col === 'costCenter')) {
-                costCenterChart.data.labels = sorted.map(cc => cc.costCenter);
-                costCenterChart.data.datasets[0].data = sorted.map(cc => cc.totalSalary);
-                costCenterChart.update();
-            }
-        }
-
-        function populateTransferTable() {
-            let sorted = sortArray([...transfers], sortStates.transfer.col, sortStates.transfer.dir);
-            const tbody = document.getElementById('transferTableBody');
-            tbody.innerHTML = '';
-            sorted.forEach(t => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="p-4 font-bold text-slate-800">${t.name}</td>
-                        <td class="p-4 text-xs text-slate-500">${t.from.replace(' (สำนักงานใหญ่)', '')}</td>
-                        <td class="p-4 text-xs text-indigo-600 font-bold"><i class="fas fa-arrow-right mr-1 opacity-50"></i>${t.to.replace(' (สำนักงานใหญ่)', '')}</td>
-                        <td class="p-4 text-xs font-semibold text-slate-600">${t.position}</td>
-                    </tr>
-                `;
-            });
-            updateSortIcons('transfer');
-        }
-
-        function populateAdminTable() {
-            const search = (document.getElementById('adminSearch')?.value || '').toLowerCase();
-            const fComp = document.getElementById('adminFilterComp')?.value || 'all';
-            const fDept = document.getElementById('adminFilterDept')?.value || 'all';
-            
-            let filtered = allEmployees.filter(emp => {
-                const matchSearch = search === '' || emp.name.toLowerCase().includes(search) || emp.id.toLowerCase().includes(search);
-                const matchComp = fComp === 'all' || emp.company.includes(fComp);
-                const matchDept = fDept === 'all' || emp.dept === fDept;
-                return matchSearch && matchComp && matchDept;
-            });
-
-            filtered = sortArray(filtered, sortStates.admin.col, sortStates.admin.dir);
-
-            const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '';
-            filtered.forEach(emp => {
-                const realIndex = allEmployees.findIndex(e => e.id === emp.id && e.name === emp.name);
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td class="p-4 font-bold text-slate-800">${emp.name} <span class="text-sm font-normal text-slate-500 ml-1">(${emp.id})</span></td>
-                        <td class="p-4">
-                            <div class="text-xs font-semibold text-slate-700">${emp.dept}</div>
-                            <div class="text-[0.65rem] text-slate-500 mt-0.5">${emp.position}</div>
-                        </td>
-                        <td class="p-4 text-center text-xs font-medium text-slate-600 bg-slate-50/50">${emp.level}</td>
-                        <td class="p-4 text-right font-bold text-blue-600">฿${emp.newSalary.toLocaleString()}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="openEditModal(${realIndex})" class="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
-                                <i class="fas fa-edit mr-1"></i> Edit
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            updateSortIcons('admin');
-        }
-
-        // ----------------------------------------------------
-        // ADMIN EDIT ACTIONS (STRICT AUTH EVERY TIME)
-        // ----------------------------------------------------
-        function handleAdminTabClick() {
-            document.getElementById('adminPassword').value = '';
-            document.getElementById('authError').classList.add('hidden');
-            document.getElementById('authModal').style.display = 'block';
-            setTimeout(() => { document.getElementById('adminPassword').focus(); }, 100);
-        }
-
-        function verifyAdmin() {
-            const pass = document.getElementById('adminPassword').value;
-            if(pass === 'admin2026') { 
-                closeAuthModal();
-                switchTab('admin', document.getElementById('adminTabBtn'));
-            } else {
-                document.getElementById('authError').classList.remove('hidden');
-            }
-        }
-
-        function openEditModal(realIndex) {
-            currentEditIndex = realIndex;
-            const emp = allEmployees[realIndex];
-            document.getElementById('editName').value = emp.name;
-            document.getElementById('editComp').value = emp.company;
-            document.getElementById('editDept').value = emp.dept;
-            document.getElementById('editPos').value = emp.position;
-            document.getElementById('editLevel').value = emp.level || '';
-            document.getElementById('editOldSal').value = emp.oldSalary;
-            document.getElementById('editNewSal').value = emp.newSalary;
-            document.getElementById('editDetails').value = emp.details || '';
-            document.getElementById('editModal').style.display = 'block';
-        }
-
-        function saveEditData() {
-            if(currentEditIndex === -1) return;
-            
-            allEmployees[currentEditIndex].dept = document.getElementById('editDept').value;
-            allEmployees[currentEditIndex].position = document.getElementById('editPos').value;
-            allEmployees[currentEditIndex].level = document.getElementById('editLevel').value;
-            allEmployees[currentEditIndex].oldSalary = parseFloat(document.getElementById('editOldSal').value) || 0;
-            allEmployees[currentEditIndex].newSalary = parseFloat(document.getElementById('editNewSal').value) || 0;
-            allEmployees[currentEditIndex].details = document.getElementById('editDetails').value;
-
-            const now = new Date();
-            const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
-            
-            localStorage.setItem('admin_all_employees', JSON.stringify(allEmployees));
-            localStorage.setItem('admin_last_edit_stamp', ts);
-            document.getElementById('lastUpdateText').innerText = ts;
-            
-            calculateStats();
-            renderDashboard();
-            closeEditModal();
-        }
-
-        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; currentEditIndex = -1; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('authError').classList.add('hidden'); }
-        
-        function switchTab(tabName, btnElement) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active', 'border-blue-300'));
-            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
-            if(btnElement) {
-                btnElement.classList.add('active');
-                if(tabName === 'admin') btnElement.classList.add('border-blue-300');
-            }
-        }
-
-        // ----------------------------------------------------
-        // CHARTS CONFIGURATION
-        // ----------------------------------------------------
-        function initializeCharts() {
-            Chart.register(ChartDataLabels);
-
+        function updateLevelChart() {
             const lvlKeys = Object.keys(levelStats).sort((a, b) => {
                 const iA = standardLevelOrder.indexOf(a);
                 const iB = standardLevelOrder.indexOf(b);
-                return (iA === -1 ? 99 : iA) - (iB === -1 ? 99 : iB);
+                const indexA = iA === -1 ? 99 : iA;
+                const indexB = iB === -1 ? 99 : iB;
+                return levelSortDir === 'asc' ? indexA - indexB : indexB - indexA;
             });
             const lvlValues = lvlKeys.map(k => levelStats[k]);
-            
             const lvlCtx = document.getElementById('levelChart').getContext('2d');
             const gradLvl = lvlCtx.createLinearGradient(0, 0, 400, 0);
             gradLvl.addColorStop(0, '#f59e0b');
@@ -888,28 +571,28 @@
                     layout: { padding: {right: 40} }
                 }
             });
+        }
 
+        function initializeCharts() {
+            Chart.register(ChartDataLabels);
+            updateLevelChart();
+
+            // Dept Chart
             const sortedDepts = Object.entries(deptStats).sort((a, b) => b[1].total - a[1].total);
             const dLabels = sortedDepts.map(d => d[0]);
             const dValues = sortedDepts.map(d => d[1].total);
-            
             const deptCtx = document.getElementById('deptChart').getContext('2d');
             const gradDept = deptCtx.createLinearGradient(0, 0, 400, 0);
             gradDept.addColorStop(0, '#3b82f6');
             gradDept.addColorStop(1, '#8b5cf6');
-
             if(myDeptChart) myDeptChart.destroy();
             myDeptChart = new Chart(deptCtx, {
                 type: 'bar',
                 data: { labels: dLabels, datasets: [{ data: dValues, backgroundColor: gradDept, borderColor: '#ffffff', borderWidth: 2, borderRadius: 6, barPercentage: 0.7 }] },
-                options: { 
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => '฿'+v.toLocaleString() } },
-                    scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: {size: 11, weight: '500'} } } },
-                    layout: { padding: {right: 60} }
-                }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => '฿'+v.toLocaleString() } }, scales: { x: { display: false }, y: { grid: { display: false } } }, layout: { padding: {right: 60} } }
             });
 
+            // Distribution Chart
             let ranges = {'0-500':0, '501-1000':0, '1001-2000':0, '2001-3000':0, '3001+':0, 'ลดลง':0};
             allEmployees.forEach(e => {
                 const d = e.newSalary - e.oldSalary;
@@ -924,39 +607,178 @@
             if(myDistChart) myDistChart.destroy();
             myDistChart = new Chart(document.getElementById('distributionChart').getContext('2d'), {
                 type: 'doughnut',
-                data: { labels: Object.keys(ranges), datasets: [{ data: Object.values(ranges), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#94a3b8'], borderWidth: 3, borderColor: '#ffffff', hoverOffset: 12 }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, cutout: '65%',
-                    plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {size: 12, weight: '500'} } }, datalabels: { color: '#ffffff', font: {weight: 'bold', size: 13}, formatter: v => v > 0 ? v : '' } }
-                }
+                data: { labels: Object.keys(ranges), datasets: [{ data: Object.values(ranges), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#94a3b8'], borderWidth: 3, borderColor: '#ffffff' }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' }, datalabels: { color: '#ffffff', font: {weight: 'bold'} } } }
             });
 
+            // Cost Center Chart
             if(costCenterChart) costCenterChart.destroy();
             const ccSorted = [...costCenterData].sort((a,b) => b.totalSalary - a.totalSalary);
-            const ccLabels = ccSorted.map(cc => cc.costCenter);
-            const ccValues = ccSorted.map(cc => cc.totalSalary);
-            
             const ccCtx = document.getElementById('costCenterChart').getContext('2d');
-            const gradCC = ccCtx.createLinearGradient(0, 0, 0, 400);
-            gradCC.addColorStop(0, '#10b981');
-            gradCC.addColorStop(1, '#06b6d4');
-
             costCenterChart = new Chart(ccCtx, {
                 type: 'bar',
-                data: { labels: ccLabels, datasets: [{ data: ccValues, backgroundColor: gradCC, borderColor: '#ffffff', borderWidth: 2, borderRadius: 6, barPercentage: 0.5 }] },
-                options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: {display:false}, datalabels: { anchor: 'end', align: 'top', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => '฿' + (v/1000).toFixed(1) + 'K' } },
-                    scales: { x: { grid: {display: false}, ticks: {font: {size: 11, weight: '600'}} }, y: { grid: {color: '#f1f5f9', borderDash: [4,4]}, ticks: {display: false} } },
-                    layout: { padding: {top: 30} }
-                }
+                data: { labels: ccSorted.map(cc => cc.costCenter), datasets: [{ data: ccSorted.map(cc => cc.totalSalary), backgroundColor: '#10b981' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false}, datalabels: { anchor: 'end', align: 'top', formatter: v => '฿'+(v/1000).toFixed(1)+'K' } } }
             });
         }
 
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('authModal')) closeAuthModal();
-            if (event.target == document.getElementById('editModal')) closeEditModal();
+        // ----------------------------------------------------
+        // SYSTEM ENGINE (SORTING, TABS, MODALS)
+        // ----------------------------------------------------
+        function updateKPIs() {
+            const adjustedEmps = allEmployees.filter(e => e.newSalary !== e.oldSalary);
+            const totalAdded = adjustedEmps.reduce((sum, e) => sum + (e.newSalary - e.oldSalary), 0);
+            const oldTotalAdjustedOnly = adjustedEmps.reduce((sum, e) => sum + e.oldSalary, 0);
+            const avg = oldTotalAdjustedOnly === 0 ? 0 : ((totalAdded/oldTotalAdjustedOnly)*100).toFixed(2);
+            document.getElementById('kpiAdjusted').innerText = adjustedEmps.length + " คน";
+            document.getElementById('kpiAdjustedPercent').innerText = `คิดเป็น ${((adjustedEmps.length/allEmployees.length)*100).toFixed(0)}% ของทั้งหมด`;
+            document.getElementById('kpiBudget').innerText = `฿${totalAdded.toLocaleString('th-TH')}`;
+            document.getElementById('kpiBudgetYear').innerHTML = `ประเมิน ฿${(totalAdded*12).toLocaleString('th-TH')}/ปี`;
+            document.getElementById('kpiAvgPercent').innerText = `${avg}%`;
         }
+
+        function initFilters() {
+            const compSet = new Set(), deptSet = new Set();
+            allEmployees.forEach(e => {
+                if(e.company) compSet.add(e.company.replace(' (สำนักงานใหญ่)', ''));
+                if(e.dept) deptSet.add(e.dept);
+            });
+            const fComp = document.getElementById('filterComp'), fDept = document.getElementById('filterDept'), aComp = document.getElementById('adminFilterComp'), aDept = document.getElementById('adminFilterDept');
+            fComp.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
+            aComp.innerHTML = '<option value="all">ทุกบริษัท (All)</option>';
+            compSet.forEach(c => { fComp.innerHTML += `<option value="${c}">${c}</option>`; aComp.innerHTML += `<option value="${c}">${c}</option>`; });
+            fDept.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
+            aDept.innerHTML = '<option value="all">ทุกแผนก (All)</option>';
+            deptSet.forEach(d => { fDept.innerHTML += `<option value="${d}">${d}</option>`; aDept.innerHTML += `<option value="${d}">${d}</option>`; });
+        }
+
+        function handleSort(tableKey, col) {
+            if (sortStates[tableKey].col === col) { sortStates[tableKey].dir = sortStates[tableKey].dir === 'asc' ? 'desc' : 'asc'; } 
+            else { sortStates[tableKey].col = col; sortStates[tableKey].dir = 'asc'; }
+            if(tableKey === 'allEmp') renderAllEmployeeTable();
+            if(tableKey === 'adjEmp') populateAdjustedTable();
+            if(tableKey === 'cc') populateCostCenterTable();
+            if(tableKey === 'transfer') populateTransferTable();
+            if(tableKey === 'admin') populateAdminTable();
+        }
+
+        function sortArray(arr, col, dir) {
+            return arr.sort((a, b) => {
+                let valA = a[col], valB = b[col];
+                if (col === 'diff') { valA = a.newSalary - a.oldSalary; valB = b.newSalary - b.oldSalary; }
+                if (col === 'percent') { valA = a.oldSalary ? (a.newSalary - a.oldSalary)/a.oldSalary : 0; valB = b.oldSalary ? (b.newSalary - b.oldSalary)/b.oldSalary : 0; }
+                if (col === 'avg') { valA = a.employeeCount ? a.totalSalary / a.employeeCount : 0; valB = b.employeeCount ? b.totalSalary / b.employeeCount : 0; }
+                if (typeof valA === 'string' && typeof valB === 'string') { return dir === 'asc' ? valA.localeCompare(valB, 'th') : valB.localeCompare(valA, 'th'); }
+                if (valA < valB) return dir === 'asc' ? -1 : 1;
+                if (valA > valB) return dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateSortIcons(tableKey) {
+            document.querySelectorAll(`.sort-icon-${tableKey}`).forEach(icon => { icon.className = `sort-icon-${tableKey} fas fa-sort text-slate-300 ml-1 opacity-50`; });
+            const state = sortStates[tableKey], activeIcon = document.getElementById(`icon-${tableKey}-${state.col}`);
+            if (activeIcon) { activeIcon.className = `sort-icon-${tableKey} fas fa-sort-${state.dir === 'asc' ? 'up' : 'down'} text-blue-600 ml-1`; }
+        }
+
+        function renderAllEmployeeTable() {
+            const fComp = document.getElementById('filterComp').value, fDept = document.getElementById('filterDept').value;
+            let filtered = allEmployees.filter(e => (fComp === 'all' || e.company.includes(fComp)) && (fDept === 'all' || e.dept === fDept));
+            filtered = sortArray(filtered, sortStates.allEmp.col, sortStates.allEmp.dir);
+            const tbody = document.getElementById('allEmployeeTableBody');
+            tbody.innerHTML = '';
+            filtered.forEach((emp, i) => {
+                tbody.innerHTML += `<tr class="hover:bg-blue-50 border-b border-slate-100">
+                    <td class="p-4 text-slate-500">${i + 1}</td>
+                    <td class="p-4 font-bold">${emp.name} (${emp.id})</td>
+                    <td class="p-4 text-xs">${emp.company.replace(' (สำนักงานใหญ่)', '')}</td>
+                    <td class="p-4 text-xs font-semibold">${emp.dept}</td>
+                    <td class="p-4 text-xs">${emp.position}</td>
+                    <td class="p-4 text-xs text-center">${emp.level}</td>
+                    <td class="p-4 text-right font-bold text-blue-600">฿${emp.newSalary.toLocaleString()}</td>
+                </tr>`;
+            });
+            updateSortIcons('allEmp');
+        }
+
+        function populateAdjustedTable() {
+            let adjusted = allEmployees.filter(e => e.newSalary !== e.oldSalary);
+            adjusted = sortArray(adjusted, sortStates.adjEmp.col, sortStates.adjEmp.dir);
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = '';
+            adjusted.forEach((emp, i) => {
+                const diff = emp.newSalary - emp.oldSalary, percent = ((diff / emp.oldSalary) * 100).toFixed(1);
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer" onclick="document.getElementById('adj-det-${i}').classList.toggle('hidden')">
+                    <td class="p-4 font-bold">${emp.name}</td>
+                    <td class="p-4 text-xs">${emp.dept}</td>
+                    <td class="p-4 text-xs">${emp.position}</td>
+                    <td class="p-4 text-right">฿${emp.oldSalary.toLocaleString()}</td>
+                    <td class="p-4 text-right font-bold">฿${emp.newSalary.toLocaleString()}</td>
+                    <td class="p-4 text-right font-bold ${diff < 0 ? 'text-rose-500' : 'text-emerald-500'}">${diff < 0 ? '' : '+'}฿${diff.toLocaleString()}</td>
+                    <td class="p-4 text-right"><span class="px-2 py-1 rounded text-xs font-bold ${diff < 0 ? 'bg-rose-100' : 'bg-emerald-100'}">${percent}%</span></td>
+                </tr><tr id="adj-det-${i}" class="hidden bg-slate-50/80"><td colspan="7" class="p-4 text-sm border-l-4 border-blue-400"><strong>รายละเอียด:</strong> ${emp.details || '-'}</td></tr>`;
+            });
+            updateSortIcons('adjEmp');
+        }
+
+        function populateCostCenterTable() {
+            let sorted = sortArray([...costCenterData], sortStates.cc.col, sortStates.cc.dir);
+            const tbody = document.getElementById('costCenterTableBody');
+            tbody.innerHTML = '';
+            sorted.forEach((cc, i) => {
+                const avg = cc.employeeCount ? (cc.totalSalary / cc.employeeCount).toFixed(0) : 0;
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 cursor-pointer border-b border-slate-100" onclick="document.getElementById('cc-row-${i}').classList.toggle('hidden')">
+                    <td class="p-4 font-bold text-blue-700">${cc.costCenter}</td>
+                    <td class="p-4 text-center">${cc.employeeCount}</td>
+                    <td class="p-4 text-right font-extrabold">฿${cc.totalSalary.toLocaleString()}</td>
+                    <td class="p-4 text-right text-slate-500">฿${parseFloat(avg).toLocaleString()}</td>
+                </tr><tr id="cc-row-${i}" class="hidden"><td colspan="4" class="p-4 bg-slate-50">รายชื่อพนักงาน... (ขยายเพื่อดูได้)</td></tr>`;
+            });
+            updateSortIcons('cc');
+        }
+
+        function populateTransferTable() {
+            let sorted = sortArray([...transfers], sortStates.transfer.col, sortStates.transfer.dir);
+            const tbody = document.getElementById('transferTableBody');
+            tbody.innerHTML = '';
+            sorted.forEach(t => {
+                tbody.innerHTML += `<tr class="border-b border-slate-100">
+                    <td class="p-4 font-bold">${t.name}</td>
+                    <td class="p-4 text-xs">${t.from.replace(' (สำนักงานใหญ่)', '')}</td>
+                    <td class="p-4 text-xs text-indigo-600 font-bold">${t.to.replace(' (สำนักงานใหญ่)', '')}</td>
+                    <td class="p-4 text-xs">${t.position}</td>
+                </tr>`;
+            });
+            updateSortIcons('transfer');
+        }
+
+        function populateAdminTable() {
+            const search = (document.getElementById('adminSearch')?.value || '').toLowerCase(), fComp = document.getElementById('adminFilterComp')?.value || 'all', fDept = document.getElementById('adminFilterDept')?.value || 'all';
+            let filtered = allEmployees.filter(emp => (search === '' || emp.name.toLowerCase().includes(search)) && (fComp === 'all' || emp.company.includes(fComp)) && (fDept === 'all' || emp.dept === fDept));
+            filtered = sortArray(filtered, sortStates.admin.col, sortStates.admin.dir);
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            filtered.forEach(emp => {
+                const realIndex = allEmployees.findIndex(e => e.id === emp.id);
+                tbody.innerHTML += `<tr class="border-b border-slate-100">
+                    <td class="p-4 font-bold">${emp.name}</td>
+                    <td class="p-4 text-xs">${emp.dept} / ${emp.position}</td>
+                    <td class="p-4 text-center">${emp.level}</td>
+                    <td class="p-4 text-right font-bold text-blue-600">฿${emp.newSalary.toLocaleString()}</td>
+                    <td class="p-4 text-center"><button onclick="openEditModal(${realIndex})" class="text-xs bg-slate-100 px-3 py-1 rounded">Edit</button></td>
+                </tr>`;
+            });
+            updateSortIcons('admin');
+        }
+
+        function handleAdminTabClick() { document.getElementById('adminPassword').value = ''; document.getElementById('authModal').style.display = 'block'; }
+        function verifyAdmin() { if(document.getElementById('adminPassword').value === 'admin2026') { closeAuthModal(); switchTab('admin', document.getElementById('adminTabBtn')); } else { document.getElementById('authError').classList.remove('hidden'); } }
+        function openEditModal(idx) { currentEditIndex = idx; const emp = allEmployees[idx]; document.getElementById('editName').value = emp.name; document.getElementById('editComp').value = emp.company; document.getElementById('editDept').value = emp.dept; document.getElementById('editPos').value = emp.position; document.getElementById('editLevel').value = emp.level; document.getElementById('editOldSal').value = emp.oldSalary; document.getElementById('editNewSal').value = emp.newSalary; document.getElementById('editDetails').value = emp.details; document.getElementById('editModal').style.display = 'block'; }
+        function saveEditData() { if(currentEditIndex===-1) return; allEmployees[currentEditIndex].dept = document.getElementById('editDept').value; allEmployees[currentEditIndex].position = document.getElementById('editPos').value; allEmployees[currentEditIndex].level = document.getElementById('editLevel').value; allEmployees[currentEditIndex].oldSalary = parseFloat(document.getElementById('editOldSal').value); allEmployees[currentEditIndex].newSalary = parseFloat(document.getElementById('editNewSal').value); allEmployees[currentEditIndex].details = document.getElementById('editDetails').value; localStorage.setItem('admin_all_employees', JSON.stringify(allEmployees)); calculateStats(); renderDashboard(); closeEditModal(); }
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+        function switchTab(t, b) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active')); document.getElementById(t+'-tab').classList.remove('hidden'); b.classList.add('active'); }
+        window.onclick = e => { if(e.target == document.getElementById('authModal')) closeAuthModal(); if(e.target == document.getElementById('editModal')) closeEditModal(); }
     </script>
 </body>
 </html>
