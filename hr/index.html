@@ -1,1 +1,962 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Dashboard 2026 - Executive View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f1f5f9; 
+            color: #334155;
+        }
+        .card { 
+            background: white; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .hidden { display: none; }
+        .tab-button {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .tab-button:hover {
+            color: #0f172a;
+            background-color: #f8fafc;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-control {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-size: 0.9rem;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        /* Style for sortable headers */
+        th.sortable { cursor: pointer; user-select: none; transition: background-color 0.2s; }
+        th.sortable:hover { background-color: #e2e8f0; }
+    </style>
+</head>
+<body class="p-4 md:p-6">
 
+    <div id="authModal" class="modal">
+        <div class="modal-content max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-slate-800"><i class="fas fa-lock text-slate-400 mr-2"></i>Admin Access</h2>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-slate-600 mb-2">กรุณาใส่รหัสผ่านเพื่อจัดการข้อมูล</label>
+                <input type="password" id="adminPassword" class="form-control w-full" placeholder="Password" onkeypress="if(event.key === 'Enter') verifyAdmin()">
+                <p class="text-xs text-red-500 mt-2 hidden" id="authError">รหัสผ่านไม่ถูกต้อง!</p>
+            </div>
+            <button onclick="verifyAdmin()" class="w-full bg-slate-800 text-white font-medium py-2.5 rounded-lg hover:bg-slate-700 transition-colors shadow-lg">
+                เข้าสู่ระบบ
+            </button>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-bold text-slate-800"><i class="fas fa-user-edit text-blue-500 mr-2"></i>แก้ไขข้อมูลพนักงาน</h2>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">ชื่อ-นามสกุล</label>
+                    <input type="text" id="editName" class="form-control w-full bg-slate-50 text-slate-500" readonly>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">บริษัท</label>
+                        <input type="text" id="editComp" class="form-control w-full bg-slate-50 text-slate-500" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">แผนก</label>
+                        <input type="text" id="editDept" class="form-control w-full font-semibold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">ตำแหน่ง</label>
+                        <input type="text" id="editPos" class="form-control w-full font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">ระดับ (Level)</label>
+                        <input type="text" id="editLevel" class="form-control w-full font-semibold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">เงินเดือนปี 68 (เดิม)</label>
+                        <input type="number" id="editOldSal" class="form-control w-full">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-blue-600 mb-1">เงินเดือนปี 69 (ใหม่)</label>
+                        <input type="number" id="editNewSal" class="form-control w-full border-blue-300 shadow-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">หมายเหตุ / รายละเอียดการปรับ</label>
+                    <input type="text" id="editDetails" class="form-control w-full">
+                </div>
+                <button onclick="saveEditData()" class="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-colors shadow-lg">
+                    <i class="fas fa-save mr-2"></i>บันทึกการแก้ไข
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6 bg-slate-800 rounded-xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
+                    <i class="fas fa-chart-line text-blue-400"></i> Executive Salary Dashboard 2026
+                </h1>
+                <p class="text-slate-300 mt-1 text-sm">Nigiwai Group | Overview & Analytics</p>
+            </div>
+            <div class="relative z-10 flex flex-col items-end">
+                <div class="bg-slate-900/60 border border-slate-700 px-4 py-2 rounded-xl text-right shadow-inner">
+                    <p class="text-[0.65rem] text-slate-400 uppercase tracking-wider font-bold mb-0.5">แก้ไขข้อมูลล่าสุดโดย Admin</p>
+                    <p class="font-semibold text-sm text-emerald-400 flex items-center">
+                        <i class="fas fa-history mr-1.5 text-xs"></i><span id="lastUpdateText">ไม่มีประวัติการแก้ไข</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+            <button class="tab-button active" onclick="switchTab('overview', this)"><i class="fas fa-chart-pie mr-2"></i>ภาพรวม (Overview)</button>
+            <button class="tab-button" onclick="switchTab('allemployee', this)"><i class="fas fa-users mr-2"></i>ฐานข้อมูลพนักงานทั้งหมด</button>
+            <button class="tab-button" onclick="switchTab('employee', this)"><i class="fas fa-user-check mr-2"></i>พนักงานที่ได้ปรับ #01/26</button>
+            <button class="tab-button" onclick="switchTab('costcenter', this)"><i class="fas fa-building mr-2"></i>Cost Center</button>
+            <button class="tab-button" onclick="switchTab('transfer', this)"><i class="fas fa-exchange-alt mr-2"></i>การโอนย้าย</button>
+            
+            <button id="adminTabBtn" class="tab-button text-slate-600 ml-auto bg-white border border-slate-300 shadow-sm hover:text-blue-600 hover:border-blue-300" onclick="handleAdminTabClick()">
+                <i class="fas fa-sliders-h mr-2 text-blue-500"></i>จัดการข้อมูล
+            </button>
+        </div>
+
+        <div id="overview-tab" class="tab-content animate-fade-in">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <div class="card p-5 border-l-4 border-slate-700 flex flex-col justify-center">
+                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">พนักงานทั้งหมด (Headcount)</p>
+                    <h2 class="text-3xl font-extrabold text-slate-800">47 <span class="text-sm font-normal text-slate-500">คน</span></h2>
+                </div>
+                <div class="card p-5 border-l-4 border-emerald-500 flex flex-col justify-center">
+                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">พนักงานที่ได้รับการปรับ</p>
+                    <h2 class="text-3xl font-extrabold text-emerald-600" id="kpiAdjusted">16 <span class="text-sm font-normal text-emerald-600/70">คน</span></h2>
+                    <p class="text-xs font-semibold text-emerald-600/70 mt-1" id="kpiAdjustedPercent">คิดเป็น 34% ของทั้งหมด</p>
+                </div>
+                <div class="card p-5 border-l-4 border-blue-500 flex flex-col justify-center">
+                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">งบประมาณที่เพิ่มขึ้น (ต่อเดือน)</p>
+                    <h2 class="text-3xl font-extrabold text-blue-600" id="kpiBudget">฿7,734</h2>
+                    <p class="text-xs font-semibold text-blue-600/70 mt-1" id="kpiBudgetYear">ประเมิน ฿92,808/ปี</p>
+                </div>
+                <div class="card p-5 border-l-4 border-amber-500 flex flex-col justify-center">
+                    <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">อัตราการปรับเฉลี่ย</p>
+                    <h2 class="text-3xl font-extrabold text-amber-500" id="kpiAvgPercent">5.89%</h2>
+                    <p class="text-xs font-semibold text-amber-500/70 mt-1">เฉพาะกลุ่มที่ได้รับการปรับ</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="chart-card p-5 border-t-4 border-rose-400">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center">
+                        <i class="fas fa-layer-group text-rose-500 mr-2"></i>สัดส่วนพนักงานตามระดับ (Level Distribution)
+                    </h3>
+                    <div class="h-64"><canvas id="levelChart"></canvas></div>
+                </div>
+                <div class="chart-card p-5 border-t-4 border-blue-400">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center">
+                        <i class="fas fa-chart-bar text-blue-500 mr-2"></i>งบประมาณที่ปรับเพิ่มแยกตามแผนก
+                    </h3>
+                    <div class="h-64"><canvas id="deptChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="chart-card p-5 border-t-4 border-purple-400">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center">
+                        <i class="fas fa-chart-pie text-purple-500 mr-2"></i>สัดส่วนการปรับเงินเดือน
+                    </h3>
+                    <div class="h-64"><canvas id="distributionChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="allemployee-tab" class="tab-content hidden animate-fade-in">
+            <div class="card p-6 border-t-4 border-indigo-400">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center"><i class="fas fa-users text-indigo-500 mr-2"></i>ฐานข้อมูลพนักงานทั้งหมด (Total Headcount)</h3>
+                        <p class="text-sm text-slate-500 mt-1">แสดงข้อมูลพนักงาน 47 อัตราในเครือ Nigiwai Group (คลิกที่หัวตารางเพื่อเรียงข้อมูล)</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
+                        <div>
+                            <label class="block text-[0.7rem] font-bold text-slate-500 mb-1 uppercase tracking-wider">กรองบริษัท</label>
+                            <select id="filterComp" class="form-control font-semibold text-sm w-48 shadow-sm" onchange="renderAllEmployeeTable()">
+                                <option value="all">ทั้งหมด (All)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[0.7rem] font-bold text-slate-500 mb-1 uppercase tracking-wider">กรองแผนก</label>
+                            <select id="filterDept" class="form-control font-semibold text-sm w-40 shadow-sm" onchange="renderAllEmployeeTable()">
+                                <option value="all">ทั้งหมด (All)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="p-4 text-slate-600 rounded-tl-xl">ลำดับ</th>
+                                <th class="p-4 text-slate-600 sortable" onclick="handleSort('allEmp', 'name')">ชื่อ-นามสกุล (รหัส) <i id="icon-allEmp-name" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-slate-600 sortable" onclick="handleSort('allEmp', 'company')">บริษัท <i id="icon-allEmp-company" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-slate-600 sortable" onclick="handleSort('allEmp', 'dept')">แผนก <i id="icon-allEmp-dept" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-slate-600 sortable" onclick="handleSort('allEmp', 'position')">ตำแหน่ง <i id="icon-allEmp-position" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-slate-600 text-center sortable" onclick="handleSort('allEmp', 'level')">ระดับ (Level) <i id="icon-allEmp-level" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right text-blue-700 bg-blue-50/50 rounded-tr-xl sortable" onclick="handleSort('allEmp', 'newSalary')">เงินเดือนปัจจุบัน <i id="icon-allEmp-newSalary" class="sort-icon-allEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allEmployeeTableBody" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="employee-tab" class="tab-content hidden animate-fade-in">
+            <div class="card p-6 border-t-4 border-emerald-400">
+                <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center"><i class="fas fa-user-check text-emerald-500 mr-2"></i>พนักงานที่ได้ปรับ #01/26</h3>
+                <p class="text-sm text-slate-500 mb-4">คลิกที่หัวตารางเพื่อเรียงข้อมูล หรือคลิกที่แถวพนักงานเพื่อดูรายละเอียดการปรับ</p>
+                
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="p-4 rounded-tl-xl sortable" onclick="handleSort('adjEmp', 'name')">ชื่อ-นามสกุล <i id="icon-adjEmp-name" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 sortable" onclick="handleSort('adjEmp', 'dept')">แผนก <i id="icon-adjEmp-dept" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 sortable" onclick="handleSort('adjEmp', 'position')">ตำแหน่ง <i id="icon-adjEmp-position" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right sortable" onclick="handleSort('adjEmp', 'oldSalary')">เงินเดือนเดิม <i id="icon-adjEmp-oldSalary" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right sortable" onclick="handleSort('adjEmp', 'newSalary')">เงินเดือนใหม่ <i id="icon-adjEmp-newSalary" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right sortable" onclick="handleSort('adjEmp', 'diff')">ปรับเพิ่ม <i id="icon-adjEmp-diff" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right rounded-tr-xl sortable" onclick="handleSort('adjEmp', 'percent')">% ปรับ <i id="icon-adjEmp-percent" class="sort-icon-adjEmp fas fa-sort text-slate-300 ml-1"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="costcenter-tab" class="tab-content hidden animate-fade-in">
+            <div class="chart-card p-6 mb-6 border-t-4 border-indigo-500">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-building text-indigo-500 mr-2"></i>งบประมาณรวมตาม Cost Center (Payroll Distribution)</h3>
+                <div class="h-80"><canvas id="costCenterChart"></canvas></div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-xl font-bold text-slate-800 mb-2">รายละเอียด Cost Center</h3>
+                <p class="text-sm text-blue-700 bg-blue-50 inline-block px-4 py-1.5 rounded-lg font-medium mb-4 shadow-sm">
+                    <i class="fas fa-hand-pointer mr-2 animate-pulse"></i>คลิกที่หัวตารางเพื่อเรียง หรือคลิกที่แถวชื่อบริษัทเพื่อกางดูรายชื่อ
+                </p>
+                
+                <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="p-4 rounded-tl-xl sortable" onclick="handleSort('cc', 'costCenter')">บริษัท (Cost Center) <i id="icon-cc-costCenter" class="sort-icon-cc fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-center sortable" onclick="handleSort('cc', 'employeeCount')">พนักงาน (คน) <i id="icon-cc-employeeCount" class="sort-icon-cc fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right sortable" onclick="handleSort('cc', 'totalSalary')">เงินเดือนรวม/เดือน <i id="icon-cc-totalSalary" class="sort-icon-cc fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right rounded-tr-xl sortable" onclick="handleSort('cc', 'avg')">เฉลี่ยต่อคน <i id="icon-cc-avg" class="sort-icon-cc fas fa-sort text-slate-300 ml-1"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="costCenterTableBody" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="transfer-tab" class="tab-content hidden animate-fade-in">
+            <div class="card p-6 border-t-4 border-amber-400">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-exchange-alt text-amber-500 mr-2"></i>การโอนย้ายพนักงาน (Internal Mobility)</h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="p-4 rounded-tl-xl sortable" onclick="handleSort('transfer', 'name')">ชื่อ-นามสกุล <i id="icon-transfer-name" class="sort-icon-transfer fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 sortable" onclick="handleSort('transfer', 'from')">จากบริษัทเดิม <i id="icon-transfer-from" class="sort-icon-transfer fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-blue-700 bg-blue-50/50 sortable" onclick="handleSort('transfer', 'to')">ไปบริษัทใหม่ <i id="icon-transfer-to" class="sort-icon-transfer fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 rounded-tr-xl sortable" onclick="handleSort('transfer', 'position')">ตำแหน่งปัจจุบัน <i id="icon-transfer-position" class="sort-icon-transfer fas fa-sort text-slate-300 ml-1"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="transferTableBody" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-tab" class="tab-content hidden animate-fade-in">
+            <div class="card p-6 border-t-4 border-slate-800">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center"><i class="fas fa-sliders-h text-slate-800 mr-2"></i>จัดการข้อมูลพนักงาน (Admin Mode)</h3>
+                </div>
+                <p class="text-sm text-slate-500 mb-5">ตารางนี้สำหรับปรับปรุงข้อมูลรายบุคคล คลิกที่หัวตารางเพื่อเรียงข้อมูล หรือค้นหาได้ทันที</p>
+                
+                <div class="flex flex-wrap gap-3 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
+                    <div class="relative w-full md:w-64">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-slate-400"></i>
+                        <input type="text" id="adminSearch" placeholder="ค้นหาชื่อ หรือ รหัสพนักงาน..." class="form-control w-full pl-9 text-sm shadow-sm" oninput="populateAdminTable()">
+                    </div>
+                    <div>
+                        <select id="adminFilterComp" class="form-control text-sm w-44 shadow-sm" onchange="populateAdminTable()">
+                            <option value="all">ทุกบริษัท (All)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="adminFilterDept" class="form-control text-sm w-36 shadow-sm" onchange="populateAdminTable()">
+                            <option value="all">ทุกแผนก (All)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="p-4 rounded-tl-xl sortable" onclick="handleSort('admin', 'name')">ชื่อ-นามสกุล (รหัส) <i id="icon-admin-name" class="sort-icon-admin fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 sortable" onclick="handleSort('admin', 'dept')">แผนก / ตำแหน่ง <i id="icon-admin-dept" class="sort-icon-admin fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-center sortable" onclick="handleSort('admin', 'level')">ระดับ (Level) <i id="icon-admin-level" class="sort-icon-admin fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-right text-blue-700 sortable" onclick="handleSort('admin', 'newSalary')">เงินเดือนปัจจุบัน <i id="icon-admin-newSalary" class="sort-icon-admin fas fa-sort text-slate-300 ml-1"></i></th>
+                                <th class="p-4 text-center rounded-tr-xl">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="text-sm text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // DATA: Base Array of 47 Employees (With Level Extracted)
+        // ----------------------------------------------------
+        const originalAllEmployees = [
+            {id: "660104", name: "นางสาวสาวิตรี สิงห์เหม้น", dept: "Operation", position: "Core Team Supervisor- Level I", level: "Leader and Supervisor", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
+            {id: "670601", name: "นางสาวรัตติกาล สกุลอินทร์", dept: "Sales", position: "Sales Executive", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 19000.0, newSalary: 19000.0, details: ""},
+            {id: "681001", name: "นางสาวพรวิไล มีชัย", dept: "Warehouse & Logistics", position: "Admin Purchasing", level: "ไม่ระบุ", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "ผ่านโปรปรับเงินเดือน"},
+            {id: "651003", name: "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", dept: "Financial And Account", position: "Acc Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 29300.0, newSalary: 30500.0, details: "ค่าตำแหน่ง: +500, ค่าชำนาญการ: +700"},
+            {id: "650206", name: "นาย กฤษฎา จันทร์ฝา", dept: "Human Resource", position: "Human Resources Supervisor", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20064.0, newSalary: 22000.0, details: "ฐานเงินเดือน: +436, ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +500"},
+            {id: "650104", name: "นางสาวช้องนาง หินขาว", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20900.0, newSalary: 22000.0, details: "ฐานเงินเดือน: +100, ค่าชำนาญการ: +1,000"},
+            {id: "660409", name: "นางสาว พานทอง รุ่งอนันต์กุลสิริ", dept: "Executive", position: "Executive Assistant - Level I", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 24472.8, newSalary: 26000.0, details: "ฐานเงินเดือน: +340, ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +187"},
+            {id: "651101", name: "นางสาวณัฐชานันท์ ธนังชูศิลป์", dept: "Sales", position: "Sales Manager (Acting)", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 28000.0, newSalary: 28000.0, details: ""},
+            {id: "631202", name: "นางสาวสาริศา กมลอรรฆ", dept: "Executive", position: "Executive Assistant - Level III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 30500.0, newSalary: 30500.0, details: ""},
+            {id: "651201", name: "นางสาวกนกพิชญ์ พิบูลย์", dept: "Financial And Account", position: "Financial & Account Manager", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 42000.0, newSalary: 42000.0, details: ""},
+            {id: "640502", name: "นายณรุจ พลับศิริ", dept: "Marketing", position: "Senior Creative & Content Marketing", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 24979.5, newSalary: 24979.5, details: ""},
+            {id: "650106", name: "นางสาวนัชชา ธนเกริกกวิน", dept: "Sales", position: "After Sales - Level III", level: "Senior", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25640.0, newSalary: 25640.0, details: ""},
+            {id: "640601", name: "นายไกรเจต สมพงษ์", dept: "Executive", position: "CTO & COO", level: "Chief and director", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 75000.0, newSalary: 75000.0, details: "ย้ายจากนิกิวาอิ คอนสครัคชั่น มีผล 1 กย.2568"},
+            {id: "641103", name: "นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์", dept: "Operation", position: "Project Leader", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 12000.0, newSalary: 12000.0, details: "ให้ค่า Project ตามเนื้องาน"},
+            {id: "681101", name: "นายภัทรพล เดือนฉาย", dept: "Human Resource", position: "Senior Recruite", level: "ไม่ระบุ", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 27000.0, newSalary: 27000.0, details: ""},
+            {id: "681002", name: "นางสาววิภาวี  เรืองจรูญ", dept: "Human Resource", position: "Recruite Officer", level: "ไม่ระบุ", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 16500.0, details: "ผ่านโปรปรับเงินเดือน"},
+            {id: "610701", name: "นางสาวอรอริยา สุดสุข", dept: "Operation", position: "ART Operation- Lv.III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 35172.15, newSalary: 35500.0, details: "ฐานเงินเดือน: +217, ค่าตำแหน่ง: +111"},
+            {id: "660504", name: "นางสาวภัรตรา เพ็ญภู่", dept: "Sales", position: "After Sales - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15750.0, newSalary: 18750.0, details: "ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +2,000"},
+            {id: "680901", name: "นายณัฐกิจ ต้นโต", dept: "Warehouse & Logistics", position: "พนักงานขนส่ง", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 15000.0, details: "ฐานเงินเดือน: +1,000, ค่าชำนาญการ: +1,000"},
+            {id: "AS670308", name: "นางสาวมณีรัตน์ ธงทอง", dept: "Operation", position: "Production Staff", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 14000.0, details: "ค่าชำนาญการ: +1,000"},
+            {id: "VV660302", name: "นางสาวศิริวรรณ กำรัตน์", dept: "Operation", position: "Chef - Lv.II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ค่าชำนาญการ: +1,000"},
+            {id: "660201", name: "นางสาวธิติญา ปัญญายิ่ง", dept: "Marketing", position: "Graphic Designer - Lv III", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 23690.0, newSalary: 23690.0, details: ""},
+            {id: "610601", name: "นายสุทธิพร ตั้งสกุลสันติ", dept: "Executive", position: "President & Group CEO", level: "Chief and director", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 180000.0, newSalary: 180000.0, details: ""},
+            {id: "670401", name: "นายพงศธร โชติยะศิลป์", dept: "Executive", position: "Chief Financial Officer", level: "C Level", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 65000.0, newSalary: 50000.0, details: "ฐานเงินเดือน: -15,000"},
+            {id: "650208", name: "นายขวัญวิชัย ไกรงาม", dept: "Operation", position: "Head Chef - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 28037.5, newSalary: 28037.5, details: ""},
+            {id: "640202", name: "นางสาวคณิตตา จำเริญพงษ์", dept: "Warehouse & Logistics", position: "ART Supply Chain - Level III", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 33000.0, newSalary: 33000.0, details: ""},
+            {id: "670202", name: "นางสาวกัลยรักษ์ ตระกูลอินทร์", dept: "Financial And Account", position: "Senior Accounting Officer", level: "Senior Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 24000.0, newSalary: 24000.0, details: ""},
+            {id: "660801", name: "นางสาวฐิติกานต์ รักเมือง", dept: "Marketing", position: "Graphic Designer - Lv I", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16500.0, details: "ค่าชำนาญการ: +500"},
+            {id: "660804", name: "นายจิติวัฒน์ อุปวรรณะ", dept: "Construction", position: "Senior Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26000.0, newSalary: 30000.0, details: "ฐานเงินเดือน: +1,000, ค่าตำแหน่ง: +2,000, ค่าชำนาญการ: +1,000"},
+            {id: "670201", name: "นายศักดิ์จรินทร์ ดวงฤทัย", dept: "Information Technology", position: "IT Support", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ฐานเงินเดือน: +1,000"},
+            {id: "660401", name: "นายพิชญา บัวบรรจง", dept: "Information Technology", position: "IT Specialist", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 33705.0, newSalary: 33705.0, details: ""},
+            {id: "610602", name: "นายวรันธร แดงใหญ่", dept: "Executive", position: "CEO", level: "Chief and director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 120000.0, newSalary: 120000.0, details: ""},
+            {id: "641105", name: "นาย อรรถสิทธิ์ สุปัดคำ", dept: "Construction", position: "Project Coordinator - Level I", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
+            {id: "671002", name: "นายนิรันดร์ ดวงสุวรรณ", dept: "Executive", position: "Construction Director", level: "Chief and director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 100000.0, newSalary: 100000.0, details: ""},
+            {id: "671101", name: "นางสาวนุชนารถ แตงอ่อน", dept: "Construction", position: "Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
+            {id: "650702", name: "นางสาว อรนิดา แพสถิตถาวร", dept: "Human Resource", position: "House Keeper", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 12860.0, newSalary: 12860.0, details: ""},
+            {id: "631204", name: "นายพงศธร อภัยนุกูล", dept: "Marketing", position: "Video Production Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26150.0, newSalary: 26150.0, details: ""},
+            {id: "999901", name: "นายสุวคนธ์ อินทร์ประคอง", dept: "Marketing", position: "Degital Marketing Consultant", level: "Consultant", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "เพิ่ม Function งาน Event และงาน Audit"},
+            {id: "641001", name: "นายวีระพจน์ สังเกตุ", dept: "Warehouse & Logistics", position: "Driver &Technician", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16222.5, newSalary: 16222.5, details: ""},
+            {id: "680801", name: "นางสาววัชรวีร์ ศุภเลิศธนศักดิ์", dept: "Human Resource", position: "Human Resources Manager", level: "Manager", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 43000.0, newSalary: 43000.0, details: ""},
+            {id: "660702", name: "นายกรกช บรรพจน์พิทักษ์", dept: "Marketing", position: "Video Creator", level: "Officer", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 20500.0, newSalary: 20500.0, details: ""},
+            {id: "630601", name: "นางสาวธนภรณ์ ผ่องประทุม", dept: "Marketing", position: "Art Supervisor", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 29674.2, newSalary: 30000.0, details: "ฐานเงินเดือน: +117, ค่าตำแหน่ง: +209"},
+            {id: "650102", name: "นายวินัย หนองแพ", dept: "Operation", position: "Executive Chef - Lv.II", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 33940.63, newSalary: 35500.0, details: "ฐานเงินเดือน: +438, ค่าตำแหน่ง: +622, ค่าชำนาญการ: +500"},
+            {id: "650207", name: "นางสาวเสาวณี พันสุวรรณ์", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 19742.5, newSalary: 22000.0, details: "ฐานเงินเดือน: +1,150, ค่าชำนาญการ: +1,108"},
+            {id: "650903", name: "นายกันต์ศักย์ ปานมงคล", dept: "Operation", position: "Quality Control & Audit Manager", level: "Manager", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36050.0, newSalary: 36050.0, details: ""},
+            {id: "660101", name: "นางสาวกรวรรณ สุวรรณพรรค", dept: "Financial And Account", position: "Accounts Payable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 22050.0, newSalary: 22050.0, details: ""},
+            {id: "660503", name: "นายภูรินทร์ บุญวรรณ", dept: "Financial And Account", position: "Accounts Receivable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 18900.0, newSalary: 18900.0, details: "รอดูผลงานและปรับเงินอีกครั้ง "}
+        ];
+
+        const transfers = [
+            {name: "นางสาวธิติญา ปัญญายิ่ง", from: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", position: "Graphic Designer - Lv III"},
+            {name: "นางสาวฐิติกานต์ รักเมือง", from: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", position: "Graphic Designer - Lv I"},
+            {name: "นางสาวธนภรณ์ ผ่องประทุม", from: "บริษัท ทุเรียนนิสซึ่ม จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Art Supervisor"},
+            {name: "นายวินัย หนองแพ", from: "บริษัท ทุเรียนนิสซึ่ม จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Executive Chef - Lv.I"},
+            {name: "นางสาวเสาวณี พันสุวรรณ์", from: "บริษัท ทุเรียนนิสซึ่ม จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Core Team - Level II"},
+            {name: "นางสาวณัฐชานันท์ ธนังชูศิลป์", from: "บริษัท ทุเรียนนิสซึ่ม จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", position: "Sales Manager (Acting)"},
+            {name: "นายกันต์ศักย์ ปานมงคล", from: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Quality Control & Audit Manager"},
+            {name: "นางสาววัชรวีร์ ศุภเลิศธนศักดิ์", from: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", to: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", position: "Human Resources Manager"},
+            {name: "นางสาวกรวรรณ สุวรรณพรรค", from: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Accounts Payable"},
+            {name: "นายพิชญา บัวบรรจง", from: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", position: "IT Specialist"},
+            {name: "นายกรกช บรรพจน์พิทักษ์", from: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", to: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", position: "Video Creator"},
+            {name: "นางสาวพรวิไล มีชัย", from: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", to: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", position: "Admin Purchasing"},
+            {name: "นางสาวกัลยรักษ์ ตระกูลอินทร์", from: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", position: "Senior Accounting Officer"},
+            {name: "นายภูรินทร์ บุญวรรณ", from: "บริษัท ยู คูซีน จำกัด (สำนักงานใหญ่)", to: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", position: "Accounts Receivable"},
+            {name: "นางสาวมณีรัตน์ ธงทอง", from: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", position: "Production Staff"},
+            {name: "นางสาวศิริวรรณ กำรัตน์", from: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", to: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", position: "Chef"}
+        ];
+
+        // ----------------------------------------------------
+        // SYSTEM VARIABLES & STATES
+        // ----------------------------------------------------
+        let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees')) || originalAllEmployees;
+        
+        let deptStats = {};
+        let levelStats = {};
+        let costCenterData = [];
+        
+        let currentEditIndex = -1;
+
+        let myDeptChart, myDistChart, myLevelChart, costCenterChart;
+
+        // Sorting States
+        let sortStates = {
+            allEmp: { col: 'newSalary', dir: 'desc' },
+            adjEmp: { col: 'diff', dir: 'desc' },
+            cc: { col: 'totalSalary', dir: 'desc' },
+            transfer: { col: 'name', dir: 'asc' },
+            admin: { col: 'newSalary', dir: 'desc' }
+        };
+
+        const standardLevelOrder = [
+            "C Level", "Chief and director", "Consultant", "Manager",
+            "Leader and Supervisor", "Senior", "Senior Officer", "Officer", "ไม่ระบุ"
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFilters();
+            calculateStats();
+            renderDashboard();
+            const lastUpdate = localStorage.getItem('admin_last_edit_stamp');
+            if(lastUpdate) document.getElementById('lastUpdateText').innerText = lastUpdate;
+        });
+
+        // ----------------------------------------------------
+        // SORTING ENGINE (GENERIC)
+        // ----------------------------------------------------
+        function handleSort(tableKey, col) {
+            if (sortStates[tableKey].col === col) {
+                sortStates[tableKey].dir = sortStates[tableKey].dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortStates[tableKey].col = col;
+                sortStates[tableKey].dir = 'asc';
+            }
+            
+            if(tableKey === 'allEmp') renderAllEmployeeTable();
+            if(tableKey === 'adjEmp') populateAdjustedTable();
+            if(tableKey === 'cc') populateCostCenterTable();
+            if(tableKey === 'transfer') populateTransferTable();
+            if(tableKey === 'admin') populateAdminTable();
+        }
+
+        function sortArray(arr, col, dir) {
+            return arr.sort((a, b) => {
+                let valA = a[col];
+                let valB = b[col];
+                
+                if (col === 'diff') { valA = a.newSalary - a.oldSalary; valB = b.newSalary - b.oldSalary; }
+                if (col === 'percent') { valA = a.oldSalary ? (a.newSalary - a.oldSalary)/a.oldSalary : 0; valB = b.oldSalary ? (b.newSalary - b.oldSalary)/b.oldSalary : 0; }
+                if (col === 'avg') { valA = a.employeeCount ? a.totalSalary / a.employeeCount : 0; valB = b.employeeCount ? b.totalSalary / b.employeeCount : 0; }
+
+                if (valA == null) valA = '';
+                if (valB == null) valB = '';
+
+                if (typeof valA === 'string' && typeof valB === 'string') {
+                    return dir === 'asc' ? valA.localeCompare(valB, 'th') : valB.localeCompare(valA, 'th');
+                }
+
+                if (valA < valB) return dir === 'asc' ? -1 : 1;
+                if (valA > valB) return dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function updateSortIcons(tableKey) {
+            document.querySelectorAll(`.sort-icon-${tableKey}`).forEach(icon => {
+                icon.className = `sort-icon-${tableKey} fas fa-sort text-slate-300 ml-1 opacity-50`;
+            });
+            const state = sortStates[tableKey];
+            const activeIcon = document.getElementById(`icon-${tableKey}-${state.col}`);
+            if (activeIcon) {
+                activeIcon.className = `sort-icon-${tableKey} fas fa-sort-${state.dir === 'asc' ? 'up' : 'down'} text-blue-600 ml-1`;
+            }
+        }
+
+        // ----------------------------------------------------
+        // CALCULATIONS & KPI
+        // ----------------------------------------------------
+        function calculateStats() {
+            deptStats = {};
+            levelStats = {};
+            const ccMap = {};
+            
+            allEmployees.forEach(emp => {
+                const diff = emp.newSalary - emp.oldSalary;
+                if(diff !== 0) {
+                    if (!deptStats[emp.dept]) deptStats[emp.dept] = { count: 0, total: 0 };
+                    deptStats[emp.dept].count++;
+                    deptStats[emp.dept].total += diff;
+                }
+                let lvl = emp.level || 'ไม่ระบุ';
+                if(!levelStats[lvl]) levelStats[lvl] = 0;
+                levelStats[lvl]++;
+
+                const cleanCCName = emp.company.replace(' (สำนักงานใหญ่)', '');
+                if (!ccMap[cleanCCName]) ccMap[cleanCCName] = { costCenter: cleanCCName, employeeCount: 0, totalSalary: 0, employees: [] };
+                ccMap[cleanCCName].employeeCount++;
+                ccMap[cleanCCName].totalSalary += emp.newSalary;
+                ccMap[cleanCCName].employees.push(emp);
+            });
+            costCenterData = Object.values(ccMap);
+        }
+
+        function renderDashboard() {
+            updateKPIs();
+            renderAllEmployeeTable();
+            populateAdjustedTable();
+            populateAdminTable();
+            populateCostCenterTable();
+            populateTransferTable();
+            initializeCharts();
+        }
+
+        function updateKPIs() {
+            const adjustedEmps = allEmployees.filter(e => e.newSalary !== e.oldSalary);
+            const totalAdded = adjustedEmps.reduce((sum, e) => sum + (e.newSalary - e.oldSalary), 0);
+            const oldTotalAdjustedOnly = adjustedEmps.reduce((sum, e) => sum + e.oldSalary, 0);
+            const avg = oldTotalAdjustedOnly === 0 ? 0 : ((totalAdded/oldTotalAdjustedOnly)*100).toFixed(2);
+            
+            document.getElementById('kpiAdjusted').innerText = adjustedEmps.length + " คน";
+            document.getElementById('kpiAdjustedPercent').innerText = `คิดเป็น ${((adjustedEmps.length/allEmployees.length)*100).toFixed(0)}% ของทั้งหมด`;
+            document.getElementById('kpiBudget').innerText = `฿${totalAdded.toLocaleString('th-TH')}`;
+            document.getElementById('kpiBudgetYear').innerHTML = `ประเมิน ฿${(totalAdded*12).toLocaleString('th-TH')}/ปี`;
+            document.getElementById('kpiAvgPercent').innerText = `${avg}%`;
+        }
+
+        function initFilters() {
+            const compSet = new Set(), deptSet = new Set();
+            allEmployees.forEach(e => {
+                if(e.company) compSet.add(e.company.replace(' (สำนักงานใหญ่)', ''));
+                if(e.dept) deptSet.add(e.dept);
+            });
+
+            const fComp = document.getElementById('filterComp');
+            const fDept = document.getElementById('filterDept');
+            const aComp = document.getElementById('adminFilterComp');
+            const aDept = document.getElementById('adminFilterDept');
+
+            fComp.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
+            aComp.innerHTML = '<option value="all">ทุกบริษัท (All)</option>';
+            compSet.forEach(c => { fComp.innerHTML += `<option value="${c}">${c}</option>`; aComp.innerHTML += `<option value="${c}">${c}</option>`; });
+
+            fDept.innerHTML = '<option value="all">ทั้งหมด (All)</option>';
+            aDept.innerHTML = '<option value="all">ทุกแผนก (All)</option>';
+            deptSet.forEach(d => { fDept.innerHTML += `<option value="${d}">${d}</option>`; aDept.innerHTML += `<option value="${d}">${d}</option>`; });
+        }
+
+        // ----------------------------------------------------
+        // TABLE RENDERERS (With Sort applied)
+        // ----------------------------------------------------
+        function renderAllEmployeeTable() {
+            const fComp = document.getElementById('filterComp').value;
+            const fDept = document.getElementById('filterDept').value;
+            
+            let filtered = allEmployees.filter(e => {
+                return (fComp === 'all' || e.company.includes(fComp)) && (fDept === 'all' || e.dept === fDept);
+            });
+
+            filtered = sortArray(filtered, sortStates.allEmp.col, sortStates.allEmp.dir);
+
+            const tbody = document.getElementById('allEmployeeTableBody');
+            tbody.innerHTML = '';
+            filtered.forEach((emp, i) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-blue-50 border-b border-slate-100 transition-colors">
+                        <td class="p-4 text-slate-500">${i + 1}</td>
+                        <td class="p-4 font-bold text-slate-800">${emp.name} <span class="text-sm font-normal text-slate-500 ml-1">(${emp.id})</span></td>
+                        <td class="p-4 text-xs text-slate-600">${emp.company.replace(' (สำนักงานใหญ่)', '')}</td>
+                        <td class="p-4 text-xs font-semibold text-slate-700 bg-slate-50/50">${emp.dept}</td>
+                        <td class="p-4 text-xs text-slate-600">${emp.position}</td>
+                        <td class="p-4 text-xs text-slate-600 bg-slate-50/50 text-center">${emp.level}</td>
+                        <td class="p-4 text-right font-bold text-blue-600 bg-blue-50/50">฿${emp.newSalary.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            updateSortIcons('allEmp');
+        }
+
+        function populateAdjustedTable() {
+            let adjusted = allEmployees.filter(e => e.newSalary !== e.oldSalary);
+            adjusted = sortArray(adjusted, sortStates.adjEmp.col, sortStates.adjEmp.dir);
+            
+            const tbody = document.getElementById('employeeTableBody');
+            tbody.innerHTML = '';
+            adjusted.forEach((emp, i) => {
+                const diff = emp.newSalary - emp.oldSalary;
+                const percent = ((diff / emp.oldSalary) * 100).toFixed(1);
+                const isNeg = diff < 0;
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100 cursor-pointer transition-colors" onclick="document.getElementById('adj-det-${i}').classList.toggle('hidden')">
+                        <td class="p-4 font-bold text-slate-800">${emp.name}</td>
+                        <td class="p-4 text-xs text-slate-600">${emp.dept}</td>
+                        <td class="p-4 text-xs text-slate-500">${emp.position}</td>
+                        <td class="p-4 text-right text-slate-500">฿${emp.oldSalary.toLocaleString()}</td>
+                        <td class="p-4 text-right font-bold text-slate-800">฿${emp.newSalary.toLocaleString()}</td>
+                        <td class="p-4 text-right font-bold ${isNeg ? 'text-rose-500' : 'text-emerald-500'}">${isNeg ? '' : '+'}฿${diff.toLocaleString()}</td>
+                        <td class="p-4 text-right"><span class="px-2 py-1 rounded text-xs font-bold ${isNeg ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${percent}%</span></td>
+                    </tr>
+                    <tr id="adj-det-${i}" class="hidden bg-slate-50/80 border-b border-slate-200">
+                        <td colspan="7" class="p-4 pl-6 text-sm text-slate-600 border-l-4 border-blue-400">
+                            <i class="fas fa-info-circle text-blue-400 mr-2"></i><strong>รายละเอียดการปรับ:</strong> ${emp.details || 'ไม่มีบันทึกรายละเอียด (ปรับฐานเงินเดือนปกติ)'}
+                        </td>
+                    </tr>
+                `;
+            });
+            updateSortIcons('adjEmp');
+        }
+
+        function populateCostCenterTable() {
+            let sorted = sortArray([...costCenterData], sortStates.cc.col, sortStates.cc.dir);
+            const tbody = document.getElementById('costCenterTableBody');
+            tbody.innerHTML = '';
+            
+            sorted.forEach((cc, i) => {
+                const avg = cc.employeeCount ? (cc.totalSalary / cc.employeeCount).toFixed(0) : 0;
+                
+                let innerHtml = `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm my-2 mx-4"><h4 class="text-sm font-bold text-slate-700 mb-3 border-b pb-2">รายชื่อพนักงานเรียงตามเงินเดือน</h4><table class="w-full text-xs text-left"><thead><tr class="text-slate-500 uppercase"><th class="pb-2">ชื่อ-นามสกุล</th><th class="pb-2">แผนก</th><th class="pb-2">ตำแหน่ง</th><th class="pb-2 text-right">เงินเดือน '69</th></tr></thead><tbody>`;
+                cc.employees.sort((a,b) => b.newSalary - a.newSalary).forEach(emp => {
+                    innerHtml += `<tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-2.5 font-bold text-slate-700">${emp.name}</td><td class="py-2.5 text-slate-500">${emp.dept}</td><td class="py-2.5 text-slate-500">${emp.position}</td><td class="py-2.5 text-right text-blue-600 font-bold">฿${emp.newSalary.toLocaleString()}</td></tr>`;
+                });
+                innerHtml += `</tbody></table></div>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors group" onclick="document.getElementById('cc-row-${i}').classList.toggle('hidden')">
+                        <td class="p-4 font-bold text-blue-700 group-hover:text-blue-800"><i class="fas fa-chevron-circle-down text-slate-300 mr-2 text-sm group-hover:text-blue-400 transition-colors"></i>${cc.costCenter}</td>
+                        <td class="p-4 text-center"><span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${cc.employeeCount}</span></td>
+                        <td class="p-4 text-right font-extrabold text-slate-800">฿${cc.totalSalary.toLocaleString('th-TH')}</td>
+                        <td class="p-4 text-right text-slate-500 font-medium">฿${parseFloat(avg).toLocaleString('th-TH')}</td>
+                    </tr>
+                    <tr id="cc-row-${i}" class="hidden bg-slate-50/50">
+                        <td colspan="4" class="p-0 border-b border-slate-200">${innerHtml}</td>
+                    </tr>
+                `;
+            });
+            updateSortIcons('cc');
+
+            if(costCenterChart && (sortStates.cc.col === 'totalSalary' || sortStates.cc.col === 'costCenter')) {
+                costCenterChart.data.labels = sorted.map(cc => cc.costCenter);
+                costCenterChart.data.datasets[0].data = sorted.map(cc => cc.totalSalary);
+                costCenterChart.update();
+            }
+        }
+
+        function populateTransferTable() {
+            let sorted = sortArray([...transfers], sortStates.transfer.col, sortStates.transfer.dir);
+            const tbody = document.getElementById('transferTableBody');
+            tbody.innerHTML = '';
+            sorted.forEach(t => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="p-4 font-bold text-slate-800">${t.name}</td>
+                        <td class="p-4 text-xs text-slate-500">${t.from.replace(' (สำนักงานใหญ่)', '')}</td>
+                        <td class="p-4 text-xs text-indigo-600 font-bold"><i class="fas fa-arrow-right mr-1 opacity-50"></i>${t.to.replace(' (สำนักงานใหญ่)', '')}</td>
+                        <td class="p-4 text-xs font-semibold text-slate-600">${t.position}</td>
+                    </tr>
+                `;
+            });
+            updateSortIcons('transfer');
+        }
+
+        function populateAdminTable() {
+            const search = (document.getElementById('adminSearch')?.value || '').toLowerCase();
+            const fComp = document.getElementById('adminFilterComp')?.value || 'all';
+            const fDept = document.getElementById('adminFilterDept')?.value || 'all';
+            
+            let filtered = allEmployees.filter(emp => {
+                const matchSearch = search === '' || emp.name.toLowerCase().includes(search) || emp.id.toLowerCase().includes(search);
+                const matchComp = fComp === 'all' || emp.company.includes(fComp);
+                const matchDept = fDept === 'all' || emp.dept === fDept;
+                return matchSearch && matchComp && matchDept;
+            });
+
+            filtered = sortArray(filtered, sortStates.admin.col, sortStates.admin.dir);
+
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            filtered.forEach(emp => {
+                const realIndex = allEmployees.findIndex(e => e.id === emp.id && e.name === emp.name);
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="p-4 font-bold text-slate-800">${emp.name} <span class="text-sm font-normal text-slate-500 ml-1">(${emp.id})</span></td>
+                        <td class="p-4">
+                            <div class="text-xs font-semibold text-slate-700">${emp.dept}</div>
+                            <div class="text-[0.65rem] text-slate-500 mt-0.5">${emp.position}</div>
+                        </td>
+                        <td class="p-4 text-center text-xs font-medium text-slate-600 bg-slate-50/50">${emp.level}</td>
+                        <td class="p-4 text-right font-bold text-blue-600">฿${emp.newSalary.toLocaleString()}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="openEditModal(${realIndex})" class="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-all shadow-sm">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            updateSortIcons('admin');
+        }
+
+        // ----------------------------------------------------
+        // ADMIN EDIT ACTIONS (STRICT AUTH EVERY TIME)
+        // ----------------------------------------------------
+        function handleAdminTabClick() {
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('authError').classList.add('hidden');
+            document.getElementById('authModal').style.display = 'block';
+            setTimeout(() => { document.getElementById('adminPassword').focus(); }, 100);
+        }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('adminPassword').value;
+            if(pass === 'admin2026') { 
+                closeAuthModal();
+                switchTab('admin', document.getElementById('adminTabBtn'));
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
+            }
+        }
+
+        function openEditModal(realIndex) {
+            currentEditIndex = realIndex;
+            const emp = allEmployees[realIndex];
+            document.getElementById('editName').value = emp.name;
+            document.getElementById('editComp').value = emp.company;
+            document.getElementById('editDept').value = emp.dept;
+            document.getElementById('editPos').value = emp.position;
+            document.getElementById('editLevel').value = emp.level || '';
+            document.getElementById('editOldSal').value = emp.oldSalary;
+            document.getElementById('editNewSal').value = emp.newSalary;
+            document.getElementById('editDetails').value = emp.details || '';
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function saveEditData() {
+            if(currentEditIndex === -1) return;
+            
+            allEmployees[currentEditIndex].dept = document.getElementById('editDept').value;
+            allEmployees[currentEditIndex].position = document.getElementById('editPos').value;
+            allEmployees[currentEditIndex].level = document.getElementById('editLevel').value;
+            allEmployees[currentEditIndex].oldSalary = parseFloat(document.getElementById('editOldSal').value) || 0;
+            allEmployees[currentEditIndex].newSalary = parseFloat(document.getElementById('editNewSal').value) || 0;
+            allEmployees[currentEditIndex].details = document.getElementById('editDetails').value;
+
+            const now = new Date();
+            const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
+            
+            localStorage.setItem('admin_all_employees', JSON.stringify(allEmployees));
+            localStorage.setItem('admin_last_edit_stamp', ts);
+            document.getElementById('lastUpdateText').innerText = ts;
+            
+            calculateStats();
+            renderDashboard();
+            closeEditModal();
+        }
+
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; currentEditIndex = -1; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; document.getElementById('authError').classList.add('hidden'); }
+        
+        function switchTab(tabName, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active', 'border-blue-300'));
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            if(btnElement) {
+                btnElement.classList.add('active');
+                if(tabName === 'admin') btnElement.classList.add('border-blue-300');
+            }
+        }
+
+        // ----------------------------------------------------
+        // CHARTS CONFIGURATION
+        // ----------------------------------------------------
+        function initializeCharts() {
+            Chart.register(ChartDataLabels);
+
+            const lvlKeys = Object.keys(levelStats).sort((a, b) => {
+                const iA = standardLevelOrder.indexOf(a);
+                const iB = standardLevelOrder.indexOf(b);
+                return (iA === -1 ? 99 : iA) - (iB === -1 ? 99 : iB);
+            });
+            const lvlValues = lvlKeys.map(k => levelStats[k]);
+            
+            const lvlCtx = document.getElementById('levelChart').getContext('2d');
+            const gradLvl = lvlCtx.createLinearGradient(0, 0, 400, 0);
+            gradLvl.addColorStop(0, '#f59e0b');
+            gradLvl.addColorStop(1, '#f43f5e');
+
+            if(myLevelChart) myLevelChart.destroy();
+            myLevelChart = new Chart(lvlCtx, {
+                type: 'bar',
+                data: { labels: lvlKeys, datasets: [{ data: lvlValues, backgroundColor: gradLvl, borderColor: '#ffffff', borderWidth: 2, borderRadius: 6, barPercentage: 0.7 }] },
+                options: { 
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => v + ' คน' } },
+                    scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: {size: 11, weight: '500'} } } },
+                    layout: { padding: {right: 40} }
+                }
+            });
+
+            const sortedDepts = Object.entries(deptStats).sort((a, b) => b[1].total - a[1].total);
+            const dLabels = sortedDepts.map(d => d[0]);
+            const dValues = sortedDepts.map(d => d[1].total);
+            
+            const deptCtx = document.getElementById('deptChart').getContext('2d');
+            const gradDept = deptCtx.createLinearGradient(0, 0, 400, 0);
+            gradDept.addColorStop(0, '#3b82f6');
+            gradDept.addColorStop(1, '#8b5cf6');
+
+            if(myDeptChart) myDeptChart.destroy();
+            myDeptChart = new Chart(deptCtx, {
+                type: 'bar',
+                data: { labels: dLabels, datasets: [{ data: dValues, backgroundColor: gradDept, borderColor: '#ffffff', borderWidth: 2, borderRadius: 6, barPercentage: 0.7 }] },
+                options: { 
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => '฿'+v.toLocaleString() } },
+                    scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: {size: 11, weight: '500'} } } },
+                    layout: { padding: {right: 60} }
+                }
+            });
+
+            let ranges = {'0-500':0, '501-1000':0, '1001-2000':0, '2001-3000':0, '3001+':0, 'ลดลง':0};
+            allEmployees.forEach(e => {
+                const d = e.newSalary - e.oldSalary;
+                if(d === 0) return;
+                if(d < 0) ranges['ลดลง']++;
+                else if(d<=500) ranges['0-500']++;
+                else if(d<=1000) ranges['501-1000']++;
+                else if(d<=2000) ranges['1001-2000']++;
+                else if(d<=3000) ranges['2001-3000']++;
+                else ranges['3001+']++;
+            });
+            if(myDistChart) myDistChart.destroy();
+            myDistChart = new Chart(document.getElementById('distributionChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(ranges), datasets: [{ data: Object.values(ranges), backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#ef4444', '#94a3b8'], borderWidth: 3, borderColor: '#ffffff', hoverOffset: 12 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
+                    plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {size: 12, weight: '500'} } }, datalabels: { color: '#ffffff', font: {weight: 'bold', size: 13}, formatter: v => v > 0 ? v : '' } }
+                }
+            });
+
+            if(costCenterChart) costCenterChart.destroy();
+            const ccSorted = [...costCenterData].sort((a,b) => b.totalSalary - a.totalSalary);
+            const ccLabels = ccSorted.map(cc => cc.costCenter);
+            const ccValues = ccSorted.map(cc => cc.totalSalary);
+            
+            const ccCtx = document.getElementById('costCenterChart').getContext('2d');
+            const gradCC = ccCtx.createLinearGradient(0, 0, 0, 400);
+            gradCC.addColorStop(0, '#10b981');
+            gradCC.addColorStop(1, '#06b6d4');
+
+            costCenterChart = new Chart(ccCtx, {
+                type: 'bar',
+                data: { labels: ccLabels, datasets: [{ data: ccValues, backgroundColor: gradCC, borderColor: '#ffffff', borderWidth: 2, borderRadius: 6, barPercentage: 0.5 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: {display:false}, datalabels: { anchor: 'end', align: 'top', color: '#475569', font: {weight: 'bold', size: 11}, formatter: v => '฿' + (v/1000).toFixed(1) + 'K' } },
+                    scales: { x: { grid: {display: false}, ticks: {font: {size: 11, weight: '600'}} }, y: { grid: {color: '#f1f5f9', borderDash: [4,4]}, ticks: {display: false} } },
+                    layout: { padding: {top: 30} }
+                }
+            });
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('authModal')) closeAuthModal();
+            if (event.target == document.getElementById('editModal')) closeEditModal();
+        }
+    </script>
+</body>
+</html>
