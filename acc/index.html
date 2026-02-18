@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Executive Dashboard - กุมภาพันธ์ 2569</title>
+    <title>Cash Flow Dashboard - กุมภาพันธ์ 2569</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,1685 +28,783 @@
         }
 
         body {
-            font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
-            padding: 15px;
-            color: #333;
-            font-size: 14px;
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Priority Color System */
-        .priority-critical {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
-            border-left: 8px solid #dc2626 !important;
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
-        }
-
-        .priority-high {
-            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%) !important;
-            border-left: 6px solid #ea580c !important;
-            box-shadow: 0 3px 12px rgba(234, 88, 12, 0.3) !important;
-        }
-
-        .priority-medium {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-            border-left: 6px solid #f59e0b !important;
-            box-shadow: 0 3px 12px rgba(245, 158, 11, 0.25) !important;
-        }
-
-        .priority-low {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
-            border-left: 6px solid #10b981 !important;
-            box-shadow: 0 3px 12px rgba(16, 185, 129, 0.25) !important;
-        }
-
-        .container {
-            max-width: 1800px;
+        .dashboard-container {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .header {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            padding: 20px;
+            background: var(--card-bg);
             border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             text-align: center;
-            border: 3px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--success-color));
         }
 
         .header h1 {
-            color: white;
-            font-size: 1.4em;
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 10px;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .header .date-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 500;
+            margin-top: 15px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        .kpi-card.income::before { background: var(--success-color); }
+        .kpi-card.expense::before { background: var(--danger-color); }
+        .kpi-card.net::before { background: var(--warning-color); }
+        .kpi-card.balance::before { background: var(--secondary-color); }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .kpi-card.income .kpi-value { color: var(--success-color); }
+        .kpi-card.expense .kpi-value { color: var(--danger-color); }
+        .kpi-card.net .kpi-value { color: var(--warning-color); }
+        .kpi-card.balance .kpi-value { color: var(--secondary-color); }
+
+        .kpi-change {
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            font-size: 1.5rem;
+            opacity: 0.2;
         }
 
-        .header p {
-            color: rgba(255,255,255,0.95);
-            font-size: 1em;
+        .kpi-card.income .kpi-icon { background: var(--success-color); }
+        .kpi-card.expense .kpi-icon { background: var(--danger-color); }
+        .kpi-card.net .kpi-icon { background: var(--warning-color); }
+        .kpi-card.balance .kpi-icon { background: var(--secondary-color); }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Tables Section */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .data-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+            font-weight: 600;
+            background: #f1f5f9;
+        }
+
+        .amount-positive { color: var(--success-color); font-weight: 600; }
+        .amount-negative { color: var(--danger-color); font-weight: 600; }
+        .amount-neutral { color: var(--text-primary); font-weight: 600; }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
-        /* Tab Navigation */
-        .tab-navigation {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+
+        /* Alert Section */
+        .alert-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 20px;
-            padding: 15px;
             display: flex;
+            align-items: center;
             gap: 10px;
-            overflow-x: auto;
-            flex-wrap: wrap;
         }
 
-        .tab-btn {
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .alert-item.danger {
+            background: #fee2e2;
+            border-left-color: var(--danger-color);
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .alert-content {
             flex: 1;
-            min-width: 180px;
-            padding: 12px 18px;
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-            font-weight: 700;
-            color: #475569;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            position: relative;
-            font-family: 'Sarabun', sans-serif;
         }
 
-        .tab-btn i {
-            font-size: 1.1em;
+        .alert-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
         }
 
-        .tab-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border-color: #3b82f6;
+        .alert-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        .tab-btn.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border-color: #1d4ed8;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8rem; }
+            .kpi-value { font-size: 1.8rem; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .tables-grid { grid-template-columns: 1fr; }
         }
 
-        .tab-btn.urgent-tab {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            border-color: #991b1b;
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        /* Print Styles */
+        @media print {
+            body { background: white; }
+            .kpi-card, .chart-card, .table-card, .alert-section, .header {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
         }
 
-        .tab-btn.urgent-tab.active {
-            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
-        }
-
-        .badge-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #dc2626;
-            color: white;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            font-weight: 800;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in;
-        }
-
+        /* Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        .kpi-card, .chart-card, .table-card, .alert-section {
+            animation: fadeIn 0.6s ease-out forwards;
         }
 
-        .card {
-            background: white;
-            padding: 28px;
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
-            border-left: 6px solid;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-        }
-
-        .card.green-card { border-left-color: #10b981; }
-        .card.red-card { border-left-color: #ef4444; }
-        .card.blue-card { border-left-color: #3b82f6; }
-        .card.yellow-card { border-left-color: #f59e0b; }
-        .card.purple-card { border-left-color: #8b5cf6; }
-
-        .card h3 {
-            font-size: 0.8em;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-bottom: 10px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card .amount {
-            font-size: 1.4em;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .card .subtitle {
-            font-size: 0.85em;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .positive { color: #10b981; }
-        .negative { color: #ef4444; }
-        .warning { color: #f59e0b; }
-        .info { color: #3b82f6; }
-
-        .urgent-section {
-            background: white;
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
-            margin-bottom: 30px;
-            border: 3px solid #fecaca;
-        }
-
-        .urgent-section h2 {
-            color: #dc2626;
-            font-size: 1.1em;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-        }
-
-        .urgent-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9em;
-        }
-
-        .urgent-table th {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 700;
-            border-bottom: 3px solid #991b1b;
-        }
-
-        .urgent-table td {
-            padding: 10px;
-            border-bottom: 2px solid #f3f4f6;
-            font-weight: 500;
-        }
-
-        .urgent-table tr:hover {
-            background: #fef2f2;
-        }
-
-        .urgent-table tbody tr.priority-critical td {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            font-weight: 700;
-            color: #991b1b;
-        }
-
-        .urgent-table tbody tr.priority-high td {
-            background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-            font-weight: 600;
-            color: #9a3412;
-        }
-
-        .urgent-table tbody tr.priority-medium td {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            font-weight: 600;
-            color: #92400e;
-        }
-
-        .status-badge {
-            padding: 6px 16px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .overdue {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            color: #991b1b;
-            border: 2px solid #fca5a5;
-        }
-
-        .due-soon {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            color: #92400e;
-            border: 2px solid #fcd34d;
-        }
-
-        .priority-item {
-            padding: 15px;
-            border-radius: 12px;
-            border-left: 6px solid;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border-left-color: #dc2626;
-            transition: all 0.3s ease;
-            margin-bottom: 12px;
-        }
-
-        .priority-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 20px rgba(220, 38, 38, 0.3);
-        }
-
-        .priority-item.extreme {
-            animation: blink-red 1.5s infinite;
-            border-left-width: 8px;
-        }
-
-        .priority-item strong {
-            color: #991b1b;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            font-size: 1em;
-            font-weight: 800;
-        }
-
-        .priority-item .amount {
-            font-size: 1.1em;
-            font-weight: 800;
-            color: #7f1d1d;
-            margin: 10px 0;
-        }
-
-        .cashflow-timeline {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 25px;
-        }
-
-        .timeline-item {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 6px solid;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .timeline-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .timeline-item.positive {
-            border-left-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        }
-
-        .timeline-item.negative {
-            border-left-color: #ef4444;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-        }
-
-        .timeline-item h4 {
-            font-size: 1.1em;
-            margin-bottom: 12px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .timeline-item .flow {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .timeline-item .balance {
-            font-size: 1.4em;
-            font-weight: 800;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 3px solid #e5e7eb;
-        }
-
-        .charts-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 30px;
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            border-top: 5px solid #3b82f6;
-        }
-
-        .chart-container h3 {
-            color: #1e40af;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .details-section {
-            background: white;
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            margin-bottom: 30px;
-        }
-
-        .details-section h2 {
-            color: #1e40af;
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .expense-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-        }
-
-        .expense-table th {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            color: #1e293b;
-            padding: 12px;
-            text-align: left;
-            font-weight: 700;
-            border-bottom: 3px solid #cbd5e1;
-        }
-
-        .expense-table td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: 500;
-        }
-
-        .expense-table tbody tr:hover {
-            background: #f8fafc;
-        }
-
-        .category-header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-            color: white !important;
-            font-weight: 800 !important;
-            font-size: 1.15em !important;
-        }
-
-        .bg-section {
-            background: white;
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            margin-bottom: 30px;
-            border-top: 5px solid #7c3aed;
-        }
-
-        .bg-section h2 {
-            color: #5b21b6;
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .bg-item {
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-            border-radius: 12px;
-            border-left: 6px solid #7c3aed;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .bg-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 20px rgba(124, 58, 237, 0.3);
-        }
-
-        .bg-item strong {
-            color: #5b21b6;
-            font-size: 1em;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .amount-large {
-            font-size: 1.4em;
-            font-weight: 800;
-            color: #4c1d95;
-            margin: 12px 0;
-        }
-
-        .footer {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            padding: 20px;
-            border-radius: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            text-align: center;
-            color: white;
-            margin-top: 30px;
-        }
-
-        .footer i {
-            color: #60a5fa;
-        }
-
-        @media (max-width: 768px) {
-            .header h1 { font-size: 1.4em; }
-            .tab-btn { min-width: 150px; font-size: 0.95em; }
-            .charts-section { grid-template-columns: 1fr; }
-        }
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.4s; }
     </style>
+<base target="_blank">
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
         <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-chart-line"></i> Executive Financial Dashboard</h1>
-            <p><i class="far fa-calendar-alt"></i> รายงานการเงินประจำเดือนกุมภาพันธ์ 2569 ( ตัวเลขรายรับและค่าใช้จ่ายถึงวันที่ 28/02/2569)</p>
+            <h1>Cash Flow Dashboard</h1>
+            <div class="subtitle">สรุปสภาพคล่องทางการเงินและการคาดการณ์รายรับ-รายจ่าย</div>
+            <div class="date-badge">เดือนกุมภาพันธ์ 2569 (As of 28/02/2569)</div>
         </div>
 
-        <!-- Tab Navigation -->
-        <div class="tab-navigation">
-            <button class="tab-btn urgent-tab active" onclick="openTab(event, 'urgent')">
-                <i class="fas fa-exclamation-triangle"></i>
-                รายการเร่งด่วน
-                <span class="badge-count">20</span>
-            </button>
-            <button class="tab-btn" onclick="openTab(event, 'overview')">
-                <i class="fas fa-chart-pie"></i>
-                ภาพรวมการเงิน
-            </button>
-            <button class="tab-btn" onclick="openTab(event, 'cashflow')">
-                <i class="fas fa-hand-holding-usd"></i>
-                กระแสเงินสด
-            </button>
-            <button class="tab-btn" onclick="openTab(event, 'projects')">
-                <i class="fas fa-project-diagram"></i>
-                โปรเจค Tier 1
-            </button>
-            <button class="tab-btn" onclick="openTab(event, 'details')">
-                <i class="fas fa-file-invoice-dollar"></i>
-                รายละเอียดทั้งหมด
-            </button>
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card income">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-label">ประมาณการเงินเข้า</div>
+                <div class="kpi-value">฿3,375,225.00</div>
+                <div class="kpi-change">
+                    <span>รวมทุกช่องทาง</span>
+                </div>
+            </div>
+
+            <div class="kpi-card expense">
+                <div class="kpi-icon">💸</div>
+                <div class="kpi-label">ประมาณการเงินออก</div>
+                <div class="kpi-value">฿5,522,888.32</div>
+                <div class="kpi-change">
+                    <span>รวม 47 รายการ</span>
+                </div>
+            </div>
+
+            <div class="kpi-card net">
+                <div class="kpi-icon">📊</div>
+                <div class="kpi-label">สภาพคล่องสุทธิ</div>
+                <div class="kpi-value">฿-2,147,663.32</div>
+                <div class="kpi-change">
+                    <span class="badge badge-danger">ขาดดุล</span>
+                </div>
+            </div>
+
+            <div class="kpi-card balance">
+                <div class="kpi-icon">🏦</div>
+                <div class="kpi-label">ยอดเงินที่ใช้ได้จริง</div>
+                <div class="kpi-value">฿3,375,225.00</div>
+                <div class="kpi-change">
+                    <span class="badge badge-info">รวมเงินในบัญชี</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Tab 1: รายการเร่งด่วน -->
-        <div id="urgent" class="tab-content active">
-            <div class="urgent-section">
-                <h2><i class="fas fa-fire-alt"></i> รายการเกินกำหนดและเร่งด่วนที่สุด</h2>
-                <p style="color: #dc2626; font-size: 1em; font-weight: 600; margin-bottom: 20px;">
-                    <i class="fas fa-info-circle"></i> รายการที่มีพื้นหลังกระพริบสีแดง = เร่งด่วนมาก ต้องจัดการทันที!
-                </p>
-                <table class="urgent-table">
+        <!-- Alerts Section -->
+        <div class="alert-section">
+            <div class="alert-title">
+                <span>⚠️</span>
+                <span>ประเด็นสำคัญที่ต้องติดตาม (Priority Alerts)</span>
+            </div>
+            <div class="alert-item danger">
+                <div class="alert-icon">🚨</div>
+                <div class="alert-content">
+                    <div class="alert-label">สภาพคล่องติดลบ 2.1 ล้านบาท</div>
+                    <div class="alert-desc">ยอดเงินที่ขาดอยู่สำหรับค่าใช้จ่ายรวมทั้งเดือน กุมภาพันธ์ 69 จำเป็นต้องหาแหล่งเงินทุนเพิ่มเติม</div>
+                </div>
+            </div>
+            <div class="alert-item">
+                <div class="alert-icon">📅</div>
+                <div class="alert-content">
+                    <div class="alert-label">วันที่ 28 ก.พ. ขาดสภาพคล่อง 1.35 ล้านบาท</div>
+                    <div class="alert-desc">เงินเข้า 300,000 บาท แต่ต้องจ่ายเงินเดือน 1.65 ล้านบาท ต้องวางแผนการเงินล่วงหน้า</div>
+                </div>
+            </div>
+            <div class="alert-item">
+                <div class="alert-icon">🏗️</div>
+                <div class="alert-content">
+                    <div class="alert-label">โครงการก่อสร้างรอการชำระเงิน</div>
+                    <div class="alert-desc">โอชินิค ภูเก็ต, นิกิเบนดอนเมือง และนิกิเบนภูเก็ต รวมมูลค่ากว่า 2 ล้านบาท</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">การกระจายรายจ่ายตามหมวดหมู่</div>
+                    <span class="badge badge-info">Expense Breakdown</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">รายจ่ายตามสาขา/โครงการ</div>
+                    <span class="badge badge-info">By Branch</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="branchChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Cash Flow -->
+        <div class="chart-card" style="margin-bottom: 25px;">
+            <div class="chart-header">
+                <div class="chart-title">สภาพคล่องรายวัน (Daily Cash Flow)</div>
+                <span class="badge badge-warning">Critical Timeline</span>
+            </div>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="tables-grid">
+            <div class="table-card">
+                <div class="chart-header">
+                    <div class="chart-title">รายการเงินเข้า (Cash Inflow)</div>
+                    <span class="badge badge-success">Income</span>
+                </div>
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag"></i> ลำดับ</th>
-                            <th><i class="fas fa-list-alt"></i> รายการ</th>
-                            <th><i class="fas fa-building"></i> สาขา/โปรเจค</th>
-                            <th><i class="fas fa-money-bill-wave"></i> จำนวนเงิน</th>
-                            <th><i class="fas fa-calendar-check"></i> กำหนดชำระ</th>
-                            <th><i class="fas fa-flag"></i> สถานะ</th>
+                            <th>วันที่</th>
+                            <th>รายการ</th>
+                            <th style="text-align: right;">จำนวนเงิน</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="priority-critical">
-                            <td>1</td>
-                            <td><strong>ตลาดอิ่มเอม สระบุรี งวด 3</strong></td>
-                            <td>NGYB</td>
-                            <td><strong>฿100,000</strong></td>
-                            <td>เลื่อนตั้งแต่ 15/12/67</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-fire"></i> เร่งด่วนมาก 67 วัน!</span></td>
+                        <tr>
+                            <td>17 ก.พ. 69</td>
+                            <td>ค่าออกแบบ งวด 2 โอชินิค ภูเก็ต</td>
+                            <td style="text-align: right;" class="amount-positive">146,640.00</td>
                         </tr>
-                        <tr class="priority-critical">
+                        <tr>
+                            <td>17 ก.พ. 69</td>
+                            <td>COCO - NGB-Airport หาดใหญ่</td>
+                            <td style="text-align: right;" class="amount-positive">928,001.00</td>
+                        </tr>
+                        <tr>
+                            <td>19 ก.พ. 69</td>
+                            <td>ค่าก่อสร้าง งวด 2 โอชินิค ภูเก็ต</td>
+                            <td style="text-align: right;" class="amount-positive">2,000,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>28 ก.พ. 69</td>
+                            <td>FOCO งวดที่ 5 สนามบิน ภูเก็ต</td>
+                            <td style="text-align: right;" class="amount-positive">300,000.00</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right;">รวมเงินเข้า</td>
+                            <td style="text-align: right;" class="amount-positive">3,374,641.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-card">
+                <div class="chart-header">
+                    <div class="chart-title">รายการเงินออกสำคัญ (Priority Outflows)</div>
+                    <span class="badge badge-danger">Tier 1 Critical</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ลำดับ</th>
+                            <th>รายการ</th>
+                            <th style="text-align: right;">จำนวนเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1.1</td>
+                            <td>เงินกู้ออฟฟิศ</td>
+                            <td style="text-align: right;" class="amount-negative">10,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>1.2</td>
+                            <td>เงินกู้นิติบุคคล</td>
+                            <td style="text-align: right;" class="amount-negative">108,600.00</td>
+                        </tr>
+                        <tr>
                             <td>2</td>
-                            <td><strong>NGS ภูเขียว - เครื่องครัว งวด 2</strong></td>
-                            <td>NGS ภูเขียว</td>
-                            <td><strong>฿135,783</strong></td>
-                            <td>เลื่อนตั้งแต่ 03/11/68</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-fire"></i> เร่งด่วนมาก 109 วัน!</span></td>
+                            <td>ค่าผ่อนรถ Volvo</td>
+                            <td style="text-align: right;" class="amount-negative">21,728.00</td>
                         </tr>
-                        <tr class="priority-critical">
+                        <tr>
                             <td>3</td>
-                            <td><strong>NGS ภูเขียว - ติดตั้ง งวด 2</strong></td>
-                            <td>NGS ภูเขียว</td>
-                            <td><strong>฿10,400</strong></td>
-                            <td>เลื่อนตั้งแต่ 03/11/68</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-fire"></i> เร่งด่วนมาก 109 วัน!</span></td>
+                            <td>ค่าไฟและเงินทดลองจ่าย ค่าโทรศัพท์และอินเตอร์เน็ต</td>
+                            <td style="text-align: right;" class="amount-negative">37,836.46</td>
                         </tr>
-                        <tr class="priority-critical">
+                        <tr>
                             <td>4</td>
-                            <td><strong>เงินกู้ Office (ปรับโครงสร้าง)</strong></td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿10,000</strong></td>
-                            <td>31/01/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-fire"></i> เกิน 28 วัน!</span></td>
+                            <td>ค่าประกันสังคม เดือนพฤศจิกายน 68</td>
+                            <td style="text-align: right;" class="amount-negative">75,000.00</td>
                         </tr>
-                        <tr class="priority-critical">
+                        <tr>
                             <td>5</td>
-                            <td><strong>ประกันสังคม (พ.ย.68)</strong></td>
-                            <td>ออฟฟิศ (ทุกบจก.)</td>
-                            <td><strong>฿75,000</strong></td>
-                            <td>ไม่เกิน 15/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-fire"></i> เกิน 5 วัน!</span></td>
+                            <td>โปรเจคนิกิเบน ในบจก.นิกิวาอิ กู๊ด เวลท์</td>
+                            <td style="text-align: right;" class="amount-negative">378,461.58</td>
                         </tr>
                         <tr>
                             <td>6</td>
-                            <td>อุปกรณ์นิกิเบน (ครัวกลาง)</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td><strong>฿253,616</strong></td>
-                            <td>16/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-clock"></i> เกิน 4 วัน</span></td>
+                            <td>โปรเจคนิกิเบนสาขาสนามบินดอนเมือง</td>
+                            <td style="text-align: right;" class="amount-negative">355,131.06</td>
                         </tr>
                         <tr>
                             <td>7</td>
-                            <td>ตู้แช่ 2-3 ประตู (นิกิเบน)</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td><strong>฿62,863</strong></td>
-                            <td>13/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-clock"></i> เกิน 7 วัน</span></td>
+                            <td>โปรเจคนิกิเบนสาขาสนามบินภูเก็ต</td>
+                            <td style="text-align: right;" class="amount-negative">546,440.00</td>
                         </tr>
                         <tr>
                             <td>8</td>
-                            <td>ตู้แช่ นิกิเบน ดอนเมือง งวด 2</td>
-                            <td>NGWC</td>
-                            <td><strong>฿143,380</strong></td>
-                            <td>16/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-clock"></i> เกิน 4 วัน</span></td>
+                            <td>งานเครื่องครัวสาขาโอชินิค</td>
+                            <td style="text-align: right;" class="amount-negative">511,930.10</td>
                         </tr>
                         <tr>
-                            <td>9</td>
-                            <td>ตู้แช่ นิกิเบน ภูเก็ต งวด 1</td>
-                            <td>NGWC</td>
-                            <td><strong>฿225,440</strong></td>
-                            <td>16/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-clock"></i> เกิน 4 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>10</td>
-                            <td>มัดจำ Exhaust & Gas โอชินิค</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td><strong>฿200,000</strong></td>
-                            <td>16/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-clock"></i> เกิน 4 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>11</td>
-                            <td>ค่าไฟออฟฟิศ (ม.ค.69)</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿10,872</strong></td>
-                            <td>18/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-bolt"></i> เกิน 2 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>12</td>
-                            <td>คืนเงิน CF แกลงระยอง</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿22,258</strong></td>
-                            <td>18/02/2569</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-undo"></i> เกิน 2 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>13</td>
-                            <td>มัดจำเครื่องครัว โอชินิค งวด 1</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td><strong>฿174,517</strong></td>
-                            <td>20/02/2569</td>
-                            <td><span class="status-badge due-soon"><i class="fas fa-hourglass-half"></i> วันนี้!</span></td>
-                        </tr>
-                        <tr>
-                            <td>14</td>
-                            <td>มัดจำติดตั้ง โอชินิค งวด 1</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td><strong>฿18,200</strong></td>
-                            <td>20/02/2569</td>
-                            <td><span class="status-badge due-soon"><i class="fas fa-hourglass-half"></i> วันนี้!</span></td>
-                        </tr>
-                        <tr>
-                            <td>15</td>
-                            <td>เงินกู้ ธ.ออมสิน งวด 33/60</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿20,000</strong></td>
-                            <td>30/10/2568</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-coins"></i> 28/2 ครบ 3 งวด</span></td>
-                        </tr>
-                        <tr>
-                            <td>16</td>
-                            <td>เงินกู้ Kbank + บัตร Corporate งวด 9</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿40,600</strong></td>
-                            <td>30/10/2568</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-coins"></i> 28/2 ครบ 3 งวด</span></td>
-                        </tr>
-                        <tr>
-                            <td>17</td>
-                            <td>ผ่อนรถ Volvo งวด 7</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿21,728</strong></td>
-                            <td>20/12/2568</td>
-                            <td><span class="status-badge overdue"><i class="fas fa-car"></i> 20/02 ครบ 3 งวด</span></td>
-                        </tr>
-                        <tr>
-                            <td>18</td>
-                            <td>ค่าก่อสร้าง นิกิเบน ภูเก็ต งวด 1</td>
-                            <td>NGWC</td>
-                            <td><strong>฿321,000</strong></td>
-                            <td>25/02/2569</td>
-                            <td><span class="status-badge due-soon"><i class="fas fa-hammer"></i> เหลือ 5 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>19</td>
-                            <td>ภงด.1 (ทุเรียนนิสซึม)</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿50,520</strong></td>
-                            <td>25/02/2569</td>
-                            <td><span class="status-badge due-soon"><i class="fas fa-file-invoice"></i> เหลือ 5 วัน</span></td>
-                        </tr>
-                        <tr>
-                            <td>20</td>
-                            <td>iPad A16 NGS ภูเขียว</td>
-                            <td>ออฟฟิศ</td>
-                            <td><strong>฿12,900</strong></td>
-                            <td>25/02/2569</td>
-                            <td><span class="status-badge due-soon"><i class="fas fa-tablet-alt"></i> เหลือ 5 วัน</span></td>
+                            <td colspan="2" style="text-align: right;">รวม Tier 1</td>
+                            <td style="text-align: right;" class="amount-negative">2,045,127.20</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Tab 2: ภาพรวมการเงิน -->
-        <div id="overview" class="tab-content">
-            <div class="summary-cards">
-                <div class="card red-card">
-                    <h3><i class="fas fa-wallet"></i> เงินคงเหลือในบัญชี</h3>
-                    <div class="amount negative">฿584.00</div>
-                    <div class="subtitle">KBANK (฿584) + SCB (฿0)</div>
-                </div>
-                <div class="card green-card">
-                    <h3><i class="fas fa-arrow-circle-down"></i> รายรับที่คาดว่าจะได้รับ</h3>
-                    <div class="amount positive">฿3,374,641</div>
-                    <div class="subtitle">16-28 กุมภาพันธ์ 2569</div>
-                </div>
-                <div class="card red-card">
-                    <h3><i class="fas fa-arrow-circle-up"></i> รายจ่ายทั้งหมด</h3>
-                    <div class="amount negative">฿5,522,888</div>
-                    <div class="subtitle">รวมเงินเดือน ฿1,655,000</div>
-                </div>
-                <div class="card red-card">
-                    <h3><i class="fas fa-exclamation-circle"></i> ยอดเงินที่ขาด</h3>
-                    <div class="amount negative">-฿2,147,663</div>
-                    <div class="subtitle">เงินที่ใช้ได้จริง ฿3,375,225</div>
-                </div>
-                <div class="card yellow-card">
-                    <h3><i class="fas fa-star"></i> Tier 1 (ไม่รวมเงินเดือน)</h3>
-                    <div class="amount warning">฿2,695,462</div>
-                    <div class="subtitle">รายการสำคัญเร่งด่วน</div>
-                </div>
-                <div class="card purple-card">
-                    <h3><i class="fas fa-shield-alt"></i> เงินประกัน (BG)</h3>
-                    <div class="amount warning">฿2,176,253</div>
-                    <div class="subtitle">สนามบินดอนเมือง (KPS)</div>
-                </div>
+        <!-- Detailed Expense Table -->
+        <div class="table-card">
+            <div class="chart-header">
+                <div class="chart-title">รายละเอียดรายจ่ายทั้งหมด (Detailed Expenses)</div>
+                <span class="badge badge-danger">All Expenses</span>
             </div>
-
-            <div class="charts-section">
-                <div class="chart-container">
-                    <h3><i class="fas fa-chart-pie"></i> สัดส่วนรายจ่ายตามหมวดหมู่</h3>
-                    <canvas id="expenseChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3><i class="fas fa-chart-bar"></i> กระแสเงินสดเปรียบเทียบ</h3>
-                    <canvas id="cashflowChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 3: กระแสเงินสด -->
-        <div id="cashflow" class="tab-content">
-            <div class="details-section">
-                <h2><i class="fas fa-exchange-alt"></i> กระแสเงินสดตามวันที่</h2>
-                <div class="cashflow-timeline">
-                    <div class="timeline-item positive">
-                        <h4><i class="far fa-calendar-check"></i> วันที่ 17 กุมภาพันธ์</h4>
-                        <div class="date">วันจันทร์</div>
-                        <div class="flow">
-                            <span><i class="fas fa-plus-circle"></i> รายรับ:</span>
-                            <strong class="positive">฿1,074,641</strong>
-                        </div>
-                        <div class="flow" style="font-size: 0.95em; color: #666; padding-left: 20px;">
-                            <span>→ ค่าออกแบบ โอชินิค งวด 2</span>
-                            <span>฿146,640</span>
-                        </div>
-                        <div class="flow" style="font-size: 0.95em; color: #666; padding-left: 20px;">
-                            <span>→ COCO NGB-Airport หาดใหญ่</span>
-                            <span>฿928,001</span>
-                        </div>
-                        <div class="flow" style="margin-top: 15px;">
-                            <span><i class="fas fa-minus-circle"></i> รายจ่าย:</span>
-                            <strong class="negative">฿1,042,884</strong>
-                        </div>
-                        <div class="balance positive">
-                            <i class="fas fa-check-circle"></i> เหลือ: ฿31,757
-                        </div>
-                    </div>
-                    <div class="timeline-item positive">
-                        <h4><i class="far fa-calendar-check"></i> วันที่ 19 กุมภาพันธ์</h4>
-                        <div class="date">วันพุธ</div>
-                        <div class="flow">
-                            <span><i class="fas fa-plus-circle"></i> รายรับ (คาดการณ์):</span>
-                            <strong class="positive">฿2,000,000</strong>
-                        </div>
-                        <div class="flow" style="font-size: 0.95em; color: #666; padding-left: 20px;">
-                            <span>→ ค่าก่อสร้าง โอชินิค งวด 2</span>
-                            <span>฿2,000,000</span>
-                        </div>
-                        <div class="flow" style="margin-top: 15px;">
-                            <span><i class="fas fa-minus-circle"></i> รายจ่าย:</span>
-                            <strong class="negative">฿1,683,832</strong>
-                        </div>
-                        <div class="balance positive">
-                            <i class="fas fa-check-circle"></i> เหลือ: ฿316,168
-                        </div>
-                    </div>
-                    <div class="timeline-item negative">
-                        <h4><i class="far fa-calendar-times"></i> วันที่ 28 กุมภาพันธ์</h4>
-                        <div class="date">วันศุกร์ - วันจ่ายเงินเดือน</div>
-                        <div class="flow">
-                            <span><i class="fas fa-plus-circle"></i> รายรับ:</span>
-                            <strong class="positive">฿300,000</strong>
-                        </div>
-                        <div class="flow" style="font-size: 0.95em; color: #666; padding-left: 20px;">
-                            <span>→ FOCO งวดที่ 5 สนามบิน ภูเก็ต</span>
-                            <span>฿300,000</span>
-                        </div>
-                        <div class="flow" style="margin-top: 15px;">
-                            <span><i class="fas fa-minus-circle"></i> รายจ่าย:</span>
-                            <strong class="negative">฿1,655,000</strong>
-                        </div>
-                        <div class="balance negative">
-                            <i class="fas fa-times-circle"></i> ขาด: -฿1,355,000
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-section">
-                <h2><i class="fas fa-university"></i> เงินประกัน (Bank Guarantee)</h2>
-                <p style="margin-bottom: 20px; color: #5b21b6; font-size: 1.1em; font-weight: 600;">
-                    <i class="fas fa-info-circle"></i> เงินที่ต้องใช้สำหรับการค้ำประกันโปรเจค - ไม่สามารถนำไปใช้จ่ายได้
-                </p>
-                <div class="bg-item">
-                    <strong><i class="fas fa-file-contract"></i> 1. BG สนามบินดอนเมือง (เงินสด) - KPS</strong>
-                    <div class="amount-large">฿1,110,533</div>
-                    <div style="color: #6b7280; font-size: 1em; margin-top: 5px;">
-                        <i class="far fa-clock"></i> ชำระวันทำสัญญา
-                    </div>
-                </div>
-                <div class="bg-item">
-                    <strong><i class="fas fa-file-contract"></i> 2. BG สนามบินดอนเมือง - KPS</strong>
-                    <div class="amount-large">฿1,065,720</div>
-                    <div style="color: #6b7280; font-size: 1em; margin-top: 5px;">
-                        <i class="far fa-clock"></i> ใช้ในการทำสัญญา
-                    </div>
-                </div>
-                <div style="margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border-left: 6px solid #f59e0b;">
-                    <strong style="color: #92400e; font-size: 1.2em; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-lock"></i> รวมเงินประกัน: ฿2,176,253
-                    </strong>
-                    <div style="color: #92400e; font-size: 1em; margin-top: 8px;">
-                        เงินส่วนนี้ต้องกันเอาไว้และไม่สามารถนำมาใช้จ่ายรายการอื่นได้
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 4: โปรเจค Tier 1 -->
-        <div id="projects" class="tab-content">
-            <div class="urgent-section">
-                <h2><i class="fas fa-trophy"></i> รายการ Tier 1 - ต้องจัดการก่อน 28 ก.พ.</h2>
-                <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 10px; border: 2px solid #e2e8f0;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 30px; height: 20px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; border-radius: 4px;"></div>
-                        <span style="font-weight: 700; color: #991b1b; font-size: 0.9em;"><i class="fas fa-fire"></i> วิกฤต (เกิน 60 วัน / ครบ 3 งวด)</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 30px; height: 20px; background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); border: 2px solid #ea580c; border-radius: 4px;"></div>
-                        <span style="font-weight: 600; color: #9a3412; font-size: 0.9em;"><i class="fas fa-exclamation-triangle"></i> เร่งด่วนมาก (เกิน 1-60 วัน)</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 30px; height: 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 4px;"></div>
-                        <span style="font-weight: 600; color: #92400e; font-size: 0.9em;"><i class="fas fa-clock"></i> เร่งด่วน (ครบภายใน 5 วัน)</span>
-                    </div>
-                </div>
-                
-                <table class="urgent-table" style="margin-bottom: 30px;">
+            <div style="max-height: 500px; overflow-y: auto;">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th style="width: 40px;"><i class="fas fa-hashtag"></i></th>
-                            <th style="width: 300px;"><i class="fas fa-list-alt"></i> รายการ</th>
-                            <th style="width: 150px;"><i class="fas fa-building"></i> สาขา/โปรเจค</th>
-                            <th style="width: 120px; text-align: right;"><i class="fas fa-money-bill-wave"></i> จำนวนเงิน</th>
-                            <th style="width: 150px;"><i class="fas fa-calendar-check"></i> กำหนดชำระ</th>
-                            <th><i class="fas fa-info-circle"></i> รายละเอียด</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- วิกฤต (แดง) -->
-                        <tr class="priority-critical">
-                            <td><strong>1</strong></td>
-                            <td><strong><i class="fas fa-coins"></i> เงินกู้ออฟฟิศ (รวม)</strong></td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿118,600</strong></td>
-                            <td>หลายกำหนด</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>1.1</strong> Office: ฿10K (เกิน 28 วัน)<br>
-                                    <strong>1.2</strong> ออมสิน: ฿20K (ครบ 3 งวดวันนี้)<br>
-                                    <strong>1.3</strong> Kbank: ฿40.6K (ครบ 3 งวดวันนี้)<br>
-                                    <strong>1.4</strong> ไทยเครดิต 2 รายการ: ฿24K<br>
-                                    <strong>1.5</strong> SCB: ฿24K (ตัดเงินพี่เก้ง)
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="priority-critical">
-                            <td><strong>2</strong></td>
-                            <td><strong><i class="fas fa-car"></i> ค่าผ่อนรถ Volvo</strong></td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿21,728</strong></td>
-                            <td>20/12/68</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>2.1</strong> งวดที่ 7 - <strong>20/02 ครบ 3 งวด</strong></div></td>
-                        </tr>
-                        <tr class="priority-critical">
-                            <td><strong>3</strong></td>
-                            <td><strong><i class="fas fa-users"></i> ประกันสังคม พ.ย.68</strong></td>
-                            <td>ทุกบจก.</td>
-                            <td style="text-align: right;"><strong>฿75,000</strong></td>
-                            <td>15/02/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>3.1</strong> <strong>เกินกำหนดแล้ว 5 วัน!</strong></div></td>
-                        </tr>
-                        <tr class="priority-critical">
-                            <td><strong>4</strong></td>
-                            <td><strong><i class="fas fa-store"></i> ตลาดอิ่มเอม สระบุรี</strong></td>
-                            <td>NGYB</td>
-                            <td style="text-align: right;"><strong>฿100,000</strong></td>
-                            <td>15/12/67</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>4.1</strong> งวด 3 แบ่ง 1/10 - <strong>เลื่อน 67 วัน!</strong></div></td>
-                        </tr>
-                        
-                        <!-- เร่งด่วนมาก (ส้ม) -->
-                        <tr class="priority-high">
-                            <td><strong>5</strong></td>
-                            <td><i class="fas fa-bolt"></i> ค่าไฟและค่าสื่อสาร</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿37,836</strong></td>
-                            <td>18-19/02/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>5.1</strong> ค่าไฟ + Internet + โทรศัพท์</div></td>
-                        </tr>
-                        <tr class="priority-high">
-                            <td><strong>6</strong></td>
-                            <td><i class="fas fa-utensils"></i> โปรเจคนิกิเบน (NGW)</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td style="text-align: right;"><strong>฿378,462</strong></td>
-                            <td>13-16/02/69</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>6.1</strong> อุปกรณ์: ฿253.6K (เกิน 4 วัน)<br>
-                                    <strong>6.2</strong> ตู้แช่: ฿62.9K (เกิน 7 วัน)<br>
-                                    <strong>6.3</strong> วัตถุดิบ: ฿62K
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="priority-high">
-                            <td><strong>7</strong></td>
-                            <td><i class="fas fa-plane-departure"></i> นิกิเบน ดอนเมือง</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;"><strong>฿355,131</strong></td>
-                            <td>16-27/02/69</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>7.1</strong> ซิ้งค์รถเข็น: ฿10.5K<br>
-                                    <strong>7.2</strong> ตู้แช่ งวด 2: ฿143.4K (เกิน 4 วัน)<br>
-                                    <strong>7.3</strong> ก่อสร้าง งวด 3: ฿184K (27/02)<br>
-                                    <strong>7.4</strong> ไมโครเวฟ: ฿27.8K
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="priority-high">
-                            <td><strong>8</strong></td>
-                            <td><i class="fas fa-island-tropical"></i> นิกิเบน ภูเก็ต</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;"><strong>฿546,440</strong></td>
-                            <td>16-25/02/69</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>8.1</strong> ตู้แช่ งวด 1: ฿225.4K (เกิน 4 วัน)<br>
-                                    <strong>8.2</strong> ก่อสร้าง งวด 1: ฿321K (25/02 - 5 วัน)
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="priority-high">
-                            <td><strong>9</strong></td>
-                            <td><i class="fas fa-wind"></i> Exhaust & Gas โอชินิค</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;"><strong>฿200,000</strong></td>
-                            <td>16/02/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>9.1</strong> มัดจำ - <strong>เกิน 4 วัน</strong></div></td>
-                        </tr>
-                        <tr class="priority-high">
-                            <td><strong>10</strong></td>
-                            <td><i class="fas fa-store-alt"></i> NGS ภูเขียว ชัยภูมิ</td>
-                            <td>NGS ภูเขียว</td>
-                            <td style="text-align: right;"><strong>฿146,183</strong></td>
-                            <td>03/11/68</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>10.1</strong> เครื่องครัว งวด 2: ฿135.8K<br>
-                                    <strong>10.2</strong> ติดตั้ง งวด 2: ฿10.4K<br>
-                                    <strong>เลื่อน 109 วัน!</strong>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <!-- เร่งด่วน (เหลือง) -->
-                        <tr class="priority-medium">
-                            <td><strong>11</strong></td>
-                            <td><i class="fas fa-fish"></i> โอชินิค - ครัว+ติดตั้ง</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;"><strong>฿192,717</strong></td>
-                            <td>20/02/69</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>11.1</strong> เครื่องครัว งวด 1: ฿174.5K<br>
-                                    <strong>11.2</strong> ติดตั้ง งวด 1: ฿18.2K<br>
-                                    <strong>ครบวันนี้!</strong>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="priority-medium">
-                            <td><strong>12</strong></td>
-                            <td><i class="fas fa-fish"></i> โอชินิค - ตู้แช่</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;">฿319,213</td>
-                            <td>04/03/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>12.1</strong> ชำระยอดเต็ม - เหลือ 12 วัน</div></td>
-                        </tr>
-                        <tr class="priority-medium">
-                            <td><strong>13</strong></td>
-                            <td><i class="fas fa-laptop"></i> Microsoft 365 + API</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿88,714</td>
-                            <td>06/03/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>13.1</strong> nigiwaigroup.com 1 ปี + Peakaccount</div></td>
-                        </tr>
-                        <tr class="priority-medium">
-                            <td><strong>14</strong></td>
-                            <td><i class="fas fa-file-invoice"></i> ภงด.1 (ทุเรียนนิสซึม)</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿50,520</td>
-                            <td>25/02/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>14.1</strong> เฉพาะของชามุก - เหลือ 5 วัน</div></td>
-                        </tr>
-                        <tr class="priority-medium">
-                            <td><strong>15</strong></td>
-                            <td><i class="fas fa-tablet-alt"></i> iPad A16</td>
-                            <td>NGS ภูเขียว</td>
-                            <td style="text-align: right;">฿12,900</td>
-                            <td>25/02/69</td>
-                            <td><div style="font-size: 0.9em; line-height: 1.6;"><strong>15.1</strong> สำหรับ NGS ภูเขียว ชัยภูมิ - เหลือ 5 วัน</div></td>
-                        </tr>
-                        <tr class="priority-medium">
-                            <td><strong>16</strong></td>
-                            <td><i class="fas fa-tasks"></i> ค่าใช้จ่ายออฟฟิศอื่นๆ</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿211,100</td>
-                            <td>หลายรายการ</td>
-                            <td>
-                                <div style="font-size: 0.9em; line-height: 1.6;">
-                                    <strong>16.1</strong> เงินประกัน AOT: ฿785.6K<br>
-                                    <strong>16.2</strong> Facebook Ads: ฿82K<br>
-                                    <strong>16.3</strong> สวัสดิการ, คืนเงินกู้ ฯลฯ
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <!-- แถวสรุป -->
-                        <tr style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); font-weight: 800;">
-                            <td colspan="3" style="text-align: right; padding: 15px; font-size: 1.1em;">
-                                <i class="fas fa-calculator"></i> <strong>รวม Tier 1 (ไม่รวมเงินเดือน)</strong>
-                            </td>
-                            <td style="text-align: right; color: #dc2626; font-size: 1.3em; padding: 15px;">
-                                <strong>฿2,695,462</strong>
-                            </td>
-                            <td colspan="2"></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- สรุปตามระดับความเร่งด่วน -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
-                    <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; border-left: 6px solid #dc2626;">
-                        <h4 style="color: #991b1b; font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-fire"></i> วิกฤต (4 รายการ)
-                        </h4>
-                        <div style="font-size: 2em; font-weight: 800; color: #7f1d1d; margin-bottom: 8px;">฿315,328</div>
-                        <div style="font-size: 0.95em; color: #991b1b;">ต้องจัดการทันที - เกิน 28 วัน หรือครบ 3 งวด</div>
-                    </div>
-                    
-                    <div style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); padding: 20px; border-radius: 12px; border-left: 6px solid #ea580c;">
-                        <h4 style="color: #9a3412; font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-exclamation-triangle"></i> เร่งด่วนมาก (6 รายการ)
-                        </h4>
-                        <div style="font-size: 2em; font-weight: 800; color: #9a3412; margin-bottom: 8px;">฿1,663,052</div>
-                        <div style="font-size: 0.95em; color: #9a3412;">เกินกำหนด 1-109 วัน - จัดการภายในสัปดาห์นี้</div>
-                    </div>
-                    
-                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 12px; border-left: 6px solid #f59e0b;">
-                        <h4 style="color: #92400e; font-size: 1.2em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-clock"></i> เร่งด่วน (6 รายการ)
-                        </h4>
-                        <div style="font-size: 2em; font-weight: 800; color: #92400e; margin-bottom: 8px;">฿717,082</div>
-                        <div style="font-size: 0.95em; color: #92400e;">ครบภายใน 5-12 วัน - เตรียมการชำระ</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 5: รายละเอียดทั้งหมด -->
-        <div id="details" class="tab-content">
-            <div class="details-section">
-                <h2><i class="fas fa-list-ul"></i> รายละเอียดค่าใช้จ่ายทั้งหมด</h2>
-                <table class="expense-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;">#</th>
+                            <th>ลำดับ</th>
                             <th>รายการ</th>
-                            <th>สาขา/โปรเจค</th>
+                            <th>สาขา</th>
                             <th style="text-align: right;">จำนวนเงิน</th>
-                            <th>กำหนดชำระ</th>
                             <th>หมายเหตุ</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-credit-card"></i> เงินกู้และหนี้สิน (฿140,328)</td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>เงินกู้ซื้อ Office ปรับโครงสร้างหนี้ งวด 2</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿10,000</strong></td>
-                            <td>31/01/2569</td>
-                            <td><span class="status-badge overdue">เกินกำหนด</span></td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>เงินกู้ ธ.ออมสิน นามบริษัท งวด 33/60</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿20,000</strong></td>
-                            <td>30/10/2568</td>
-                            <td>28/2 ครบ 3 งวด</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>เงินกู้ Kbank + บัตร Corporate งวด 9</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿40,600</strong></td>
-                            <td>30/10/2568</td>
-                            <td>28/2 ครบ 3 งวด</td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>เงินกู้ ธ.ไทยเครดิต งวด 1 วงใหญ่</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿12,000</td>
-                            <td>28/02/2569</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td>เงินกู้ ธ.ไทยเครดิต งวด 1 วงใหม่</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿12,000</td>
-                            <td>28/02/2569</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>6</td>
-                            <td>เงินกู้ SCB กู้ร่วมนามบุคคล งวด 8</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿24,000</td>
-                            <td>-</td>
-                            <td>ตัดเงินพี่เก้ง 2 เดือน</td>
-                        </tr>
-                        <tr>
-                            <td>7</td>
-                            <td>ผ่อนรถ Volvo งวด 7</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿21,728</td>
-                            <td>20/12/2568</td>
-                            <td>20/02 ครบ 3 งวด</td>
-                        </tr>
-                        
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-utensils"></i> โปรเจคนิกิเบน - Nigiwai Good Wealth (฿378,462)</td>
-                        </tr>
-                        <tr>
-                            <td>8</td>
-                            <td>อุปกรณ์นิกิเบน (วัสดุ-อุปกรณ์เครื่องครัว)</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td style="text-align: right;"><strong>฿253,616</strong></td>
-                            <td>16/02/2569</td>
-                            <td><span class="status-badge overdue">เกินกำหนด</span></td>
-                        </tr>
-                        <tr>
-                            <td>9</td>
-                            <td>ตู้แช่ 2 ประตู + 3 ประตู</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td style="text-align: right;"><strong>฿62,863</strong></td>
-                            <td>13/02/2569</td>
-                            <td><span class="status-badge overdue">เกินกำหนด</span></td>
-                        </tr>
-                        <tr>
-                            <td>10</td>
-                            <td>วัตถุดิบสำหรับผลิต นิกิเบน</td>
-                            <td>นิกิวาอิ กู๊ดเวลท์</td>
-                            <td style="text-align: right;">฿61,983</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-plane-departure"></i> โปรเจคนิกิเบน - สนามบินดอนเมือง (฿355,131)</td>
-                        </tr>
-                        <tr>
-                            <td>11</td>
-                            <td>ซิ้งค์รถเข็นล้างจาน มีระบบปั้มน้ำ งวด 2</td>
-                            <td>KIN Matcha</td>
-                            <td style="text-align: right;">฿10,486</td>
-                            <td>20/02/2569</td>
-                            <td>รับของมาแล้ว 16/02</td>
-                        </tr>
-                        <tr>
-                            <td>12</td>
-                            <td>ตู้แช่ นิกิเบน 3 ตู้ งวด 2</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;"><strong>฿143,380</strong></td>
-                            <td>16/02/2569</td>
-                            <td>เดอะฟรีซเซอร์</td>
-                        </tr>
-                        <tr>
-                            <td>13</td>
-                            <td>ค่าก่อสร้างร้าน นิกิเบน งวด 3</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;">฿183,951</td>
-                            <td>27/02/2569</td>
-                            <td>57 เฟอร์นิเจอร์</td>
-                        </tr>
-                        <tr>
-                            <td>14</td>
-                            <td>เงิน Advanced ซื้อไมโครเวฟ 2 ตัว</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;">฿27,800</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-island-tropical"></i> โปรเจคนิกิเบน - สนามบินภูเก็ต (฿546,440)</td>
-                        </tr>
-                        <tr>
-                            <td>15</td>
-                            <td>ตู้แช่ นิกิเบน 4 ตู้ งวด 1</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;"><strong>฿225,440</strong></td>
-                            <td>16/02/2569</td>
-                            <td>เดอะฟรีซเซอร์</td>
-                        </tr>
-                        <tr>
-                            <td>16</td>
-                            <td>ค่าก่อสร้างร้าน นิกิเบน ภูเก็ต งวด 1</td>
-                            <td>NGWC</td>
-                            <td style="text-align: right;"><strong>฿321,000</strong></td>
-                            <td>25/02/2569</td>
-                            <td>มัดจำก่อนเริ่มงาน (57 เฟอร์นิเจอร์)</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-fish"></i> โปรเจคโอชินิค - ภูเก็ต (฿711,930)</td>
-                        </tr>
-                        <tr>
-                            <td>17</td>
-                            <td>มัดจำเครื่องครัวสแตนเลส งวด 1 (50%)</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;"><strong>฿174,517</strong></td>
-                            <td>20/02/2569</td>
-                            <td>คิท แอนด์ ฟู้ดส์</td>
-                        </tr>
-                        <tr>
-                            <td>18</td>
-                            <td>มัดจำค่าดำเนินการติดตั้ง งวด 1 (50%)</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;"><strong>฿18,200</strong></td>
-                            <td>20/02/2569</td>
-                            <td>คิท แอนด์ ฟู้ดส์</td>
-                        </tr>
-                        <tr>
-                            <td>19</td>
-                            <td>มัดจำระบบ Exhaust & Fresh Air และแก๊ส</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;"><strong>฿200,000</strong></td>
-                            <td>16/02/2569</td>
-                            <td>ประมาณการ</td>
-                        </tr>
-                        <tr>
-                            <td>20</td>
-                            <td>ตู้แช่โอชินิค ชำระยอดเต็ม</td>
-                            <td>โอเชียนิค ภูเก็ต</td>
-                            <td style="text-align: right;">฿319,213</td>
-                            <td>04/03/2569</td>
-                            <td>-</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-store-alt"></i> โปรเจคอื่นๆ (฿306,905)</td>
-                        </tr>
-                        <tr>
-                            <td>21</td>
-                            <td>ระบบ Exhaust NGSB หาดใหญ่ งวด 3</td>
-                            <td>NGSB หาดใหญ่</td>
-                            <td style="text-align: right;">฿48,112</td>
-                            <td>-</td>
-                            <td>ช่างเป้า (20%)</td>
-                        </tr>
-                        <tr>
-                            <td>22</td>
-                            <td>ระบบแก๊ส NGSB หาดใหญ่ งวด 3</td>
-                            <td>NGSB หาดใหญ่</td>
-                            <td style="text-align: right;">฿12,610</td>
-                            <td>-</td>
-                            <td>ช่างเป้า (20%)</td>
-                        </tr>
-                        <tr>
-                            <td>23</td>
-                            <td>งานตกแต่งภายใน ตลาดอิ่มเอม งวด 3</td>
-                            <td>NGYB</td>
-                            <td style="text-align: right;"><strong>฿100,000</strong></td>
-                            <td>เลื่อนตั้งแต่ 15/12/67</td>
-                            <td><span class="status-badge overdue">เร่งด่วนมาก 67 วัน!</span></td>
-                        </tr>
-                        <tr>
-                            <td>24</td>
-                            <td>เครื่องครัว NGS ภูเขียว งวด 2 (50%)</td>
-                            <td>NGS ภูเขียว</td>
-                            <td style="text-align: right;"><strong>฿135,783</strong></td>
-                            <td>เลื่อนตั้งแต่ 03/11/68</td>
-                            <td><span class="status-badge overdue">เร่งด่วนมาก 109 วัน!</span></td>
-                        </tr>
-                        <tr>
-                            <td>25</td>
-                            <td>ติดตั้ง NGS ภูเขียว งวด 2</td>
-                            <td>NGS ภูเขียว</td>
-                            <td style="text-align: right;"><strong>฿10,400</strong></td>
-                            <td>เลื่อนตั้งแต่ 03/11/68</td>
-                            <td><span class="status-badge overdue">เร่งด่วนมาก 109 วัน!</span></td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-building"></i> ค่าใช้จ่ายออฟฟิศและบริหาร (฿1,240,535)</td>
-                        </tr>
-                        <tr>
-                            <td>26</td>
-                            <td>เงินประกันพื้นที่ AOT - ทางเชื่อมดอนเมือง</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿401,397</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>27</td>
-                            <td>เงินประกันพื้นที่ AOT - หาดใหญ่</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿384,238</td>
-                            <td>-</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>28</td>
-                            <td>Facebook Ads รวม 2 งวด</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿82,000</td>
-                            <td>-</td>
-                            <td>ประมาณการ</td>
-                        </tr>
-                        <tr>
-                            <td>29</td>
-                            <td>ประกันสังคม (พฤศจิกายน 2568)</td>
-                            <td>ทุกบจก.</td>
-                            <td style="text-align: right;"><strong>฿75,000</strong></td>
-                            <td>15/02/2569</td>
-                            <td><span class="status-badge overdue">เกินกำหนด</span></td>
-                        </tr>
-                        <tr>
-                            <td>30</td>
-                            <td>Microsoft 365 + API (1 ปี)</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿88,714</td>
-                            <td>06/03/2569</td>
-                            <td>บจก.เอ็นดิท โซลูชั่น</td>
-                        </tr>
-                        <tr>
-                            <td>31</td>
-                            <td>ภงด.1 (ทุเรียนนิสซึม)</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿50,520</td>
-                            <td>25/02/2569</td>
-                            <td>เฉพาะของชามุก</td>
-                        </tr>
-                        <tr>
-                            <td>32</td>
-                            <td>ค่าใช้จ่ายอื่นๆ รวม</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿158,666</td>
-                            <td>-</td>
-                            <td>ค่าไฟ, โทรศัพท์, iPad, สวัสดิการ ฯลฯ</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-file-invoice"></i> ภาษีค้างชำระ (฿150,000)</td>
-                        </tr>
-                        <tr>
-                            <td>33</td>
-                            <td>ภาษี ภงด.3, ภงด.53, ภพ.30 ปี 2565-2568</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;">฿150,000</td>
-                            <td>-</td>
-                            <td>ทยอยชำระเป็นเดือนๆ</td>
-                        </tr>
-
-                        <tr class="category-header">
-                            <td colspan="6"><i class="fas fa-users-cog"></i> เงินเดือนพนักงาน (฿1,655,000)</td>
-                        </tr>
-                        <tr>
-                            <td>34</td>
-                            <td>เงินเดือนพนักงาน เดือนกุมภาพันธ์ 2569</td>
-                            <td>ออฟฟิศ</td>
-                            <td style="text-align: right;"><strong>฿1,655,000</strong></td>
-                            <td>28/02/2569</td>
-                            <td><span class="status-badge due-soon">กำหนดจ่าย</span></td>
-                        </tr>
-
-                        <tr style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); font-weight: 800;">
-                            <td colspan="3" style="text-align: right; padding: 18px; font-size: 1.2em;">
-                                <i class="fas fa-calculator"></i> รวมทั้งสิ้น
-                            </td>
-                            <td style="text-align: right; color: #dc2626; font-size: 1.4em;">฿5,522,888</td>
-                            <td colspan="2"></td>
-                        </tr>
+                    <tbody id="expenseTableBody">
                     </tbody>
                 </table>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="footer">
-            <p>
-                <i class="fas fa-chart-line"></i> 
-                รายงานนี้สร้างโดยระบบ Executive Dashboard 
-                <i class="fas fa-circle" style="font-size: 0.3em; vertical-align: middle;"></i> 
-                ข้อมูล ณ วันที่ 28 กุมภาพันธ์ 2569
-            </p>
-            <p style="margin-top: 10px; font-size: 0.95em; opacity: 0.9;">
-                <i class="fas fa-lock"></i> สำหรับการใช้งานภายในองค์กรเท่านั้น
-            </p>
+        <div style="text-align: center; padding: 20px; color: white; opacity: 0.8; font-size: 0.9rem;">
+            <p>Cash Flow Dashboard - Generated on 18/02/2026</p>
+            <p> confidential - For Executive Use Only</p>
         </div>
     </div>
 
     <script>
-        // Tab Navigation
-        function openTab(evt, tabName) {
-            var i, tabcontent, tabbtns;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tabbtns = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tabbtns.length; i++) {
-                tabbtns[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
+        // Data from Python
+        const expenseData = [{"no": 1, "name": "ค่างวดเงินกู้ซื้อ Office ปรับโครงสร้างหนี้ปรับใหม่ งวด 2", "branch": "ออฟฟิศ", "amount": 10000.0, "note": "กำหนดชำระ 31/01/2569"}, {"no": 2, "name": "ค่างวดเงินกู้ ธ.ออมสิน นามบริษัท งวดที่ 33/60 ปรับโครงสร้างหนี้", "branch": "ออฟฟิศ", "amount": 20000.0, "note": "กำหนดชำระ 30/10/2568"}, {"no": 3, "name": "ค่าเงินกู้ Kbank , บัตร Corporate, ดอกเบี้ยพักชำระบัตรหลังทำการปรัปโครงสร้างหนี้ งวดที่ 9", "branch": "ออฟฟิศ", "amount": 40600.0, "note": "กำหนดชำระ 30/10/2568"}, {"no": 4, "name": "ค่างวดเงินกู้ ธ.ไทยเครดิต งวดที่ 1 วงใหญ่ (หมายเลข 0901023059100) ปรับโครงสร้างหนี้", "branch": "ออฟฟิศ", "amount": 12000.0, "note": "กำหนดชำระ 28/02/2569"}, {"no": 5, "name": "ค่างวดเงินกู้ ธ.ไทยเครดิต งวดที่ 1 วงใหม่ (หมายเลข 901024052670) ปรับโครงสร้างหนี้", "branch": "ออฟฟิศ", "amount": 12000.0, "note": "กำหนดชำระ 28/02/2569"}, {"no": 6, "name": "ค่างวดเงินกู้ SCB กู้ร่วมนามบุคคล งวดที่ 8 ปรับโครงสร้างหนี้", "branch": "ออฟฟิศ", "amount": 24000.0, "note": "ตัดเงินเดือนพี่เก้ง ไป 2 เดือน"}, {"no": 7, "name": "ค่าผ่อนรถ Volvo งวดที่ 7 (ปรับโครงสร้างหนี้)", "branch": "ออฟฟิศ", "amount": 21728.0, "note": "กำหนดชำระ 20/12/2568"}, {"no": 8, "name": "อุปกรณ์นิกิเบน (วัสดุ - อุปกรณ์เครื่องครัว) ใช้ที่ครัวกลางนิกิเบน", "branch": "นิกิวาอิ กู๊ดเวลท์", "amount": 253616.08, "note": "กำหนดชำระ 16/02/2569"}, {"no": 9, "name": "ตู้แช่ 2 ประตู ,ตู้แช่ 3 ประตู  (นิกิเบน ครัวกลาง)", "branch": "นิกิวาอิ กู๊ดเวลท์", "amount": 62862.5, "note": "กำหนดชำระไม่เกิน 13/02/2569"}, {"no": 10, "name": "วัตถุดิบสำหรับผลิต นิกิเบน", "branch": "นิกิวาอิ กู๊ดเวลท์", "amount": 61983.0, "note": ""}, {"no": 11, "name": "ซิ้งค์รถเข็นล้างจาน มีระบบปั้มน้ำมีล้อ - งวดที่ 2 KIN Matcha สนามบินดอนเมือง", "branch": "KIN Matcha", "amount": 10486.0, "note": "กำหนดชำระ 20/02/2569"}, {"no": 12, "name": "ค่าตู้แช่ สำหรับโปรเจค นิกิเบน 3 ตู้   นิกิเบน-ดอนเมิอง งวดที่ 2", "branch": "NGWC", "amount": 143380.0, "note": "กำหนดชำระ 16/02/2569"}, {"no": 13, "name": "ค่าก่อสร้างร้าน นิกิเบน สาขาดอนเมือง    นิกิเบน-ดอนเมิอง งวดที่ 3", "branch": "NGWC", "amount": 183951.06, "note": "งวดที่ 3 ชำระ 27/02/2569"}, {"no": 14, "name": "ค่าตู้แช่ สำหรับโปรเจค นิกิเบน 4 ตู้   นิกิเบน-ภูเก็ต งวดที่ 1", "branch": "NGWC", "amount": 225440.0, "note": "กำหนดชำระ 16/02/2569"}, {"no": 15, "name": "ค่าก่อสร้างร้าน นิกิเบน สาขา นิกิเบน-ภูเก็ต งวดที่ 1", "branch": "NGWC", "amount": 321000.0, "note": "มัดจำก่อนเริ่มงาน กำหนดชำระ 25/02/2569"}, {"no": 16, "name": "เงิน Advanced สำหรับซื้อเตาไมโครเวฟ 2 ตัว ร้าน Nigiben ดอนเมือง", "branch": "NGWC", "amount": 27800.0, "note": ""}, {"no": 17, "name": "มัดจำงานเครื่องครัวสแตนเลส งวดที่ 1 มัดจำ 50% ( สาขาโอชินิค ภูเก็ต )", "branch": "โอเชียนิค  ภูเก็ต", "amount": 174517.0, "note": "กำหนดชำระ 20/02/2569"}, {"no": 18, "name": "มัดจำงานค่าดำเนินการติดตั้ง งวดที่ 1 มัดจำ 50% (สาขาโอชินิค ภูเก็ต )", "branch": "โอเชียนิค  ภูเก็ต", "amount": 18200.0, "note": "กำหนดชำระ 20/02/2569"}, {"no": 19, "name": "ประมาณการ มัดจำงานระบบ Exhaust & Fresh Air และงานระบบ แก๊ส", "branch": "โอเชียนิค  ภูเก็ต", "amount": 200000.0, "note": "กำหนดชำระ 16/02/2569"}, {"no": 20, "name": "ตู้แช่โอชินิค ชำระยอดเต็ม", "branch": "โอเชียนิค  ภูเก็ต", "amount": 319213.1, "note": "กำหนดชำระ 04/03/2569"}, {"no": 21, "name": "ค่างานระบบ Exhaust & Fresh Air  ร้าน NGSB หาดใหญ่วิลเลจ  งวดที่ 3 ชำระ 20%", "branch": " NGSB หาดใหญ่วิลเลจ", "amount": 48112.0, "note": ""}, {"no": 22, "name": "ค่างานระบบ แก๊ส ร้าน NGSB หาดใหญ่วิลเลจ งวดที่ 3 ชำระ 20%", "branch": " NGSB หาดใหญ่วิลเลจ", "amount": 12610.0, "note": ""}, {"no": 23, "name": "ค่าบริการรับจ้างเหมา-งานตกแต่งภายในร้าน NGYB สาขา ตลาดอิ่มเอม สระบุรี งวดที่ 3 ชำระ 30%  แบ่งชำระ 1/10", "branch": "ตลาดอิ่มเอม สระบุรี", "amount": 100000.0, "note": " 57 เฟอร์นิเจอร์ เร่งด่วน เลื่อนชำระตั้งแต่   15/12/2567"}, {"no": 24, "name": "เงินประกันพื้นที่ AOT - ทางเชื่อมดอนเมือง", "branch": "ออฟฟิศ", "amount": 401397.3, "note": ""}, {"no": 25, "name": "เงินประกันพื้นที่ AOT - หาดใหญ่", "branch": "ออฟฟิศ", "amount": 384238.41, "note": ""}, {"no": 26, "name": "ค่ารับรอง, Internet AIS Router,โทรศัพท์หมายเลข 0617789169,Google WorkSpace ,ค่าเบ็ตเตล็ด", "branch": "ออฟฟิศ", "amount": 15000.0, "note": ""}, {"no": 27, "name": "ค่าไฟออฟฟิศ 555/44 เดือน มกราคม 2569", "branch": "ออฟฟิศ", "amount": 10871.72, "note": "กำหนดชำระ 18/02/2569"}, {"no": 28, "name": "เบิกเงินทดลองจ่าย ออฟฟิศ (ค่าโทรศัพท์ + อินเตอร์เน็ต) เดือน ธันวาคม  2568", "branch": "ออฟฟิศ", "amount": 11964.74, "note": "2569-02-19 00:00:00"}, {"no": 29, "name": "ค่าตรวจสอบงบการเงินสำหรับปี 2568 งวดที่ 2/6", "branch": "ออฟฟิศ", "amount": 19400.0, "note": ""}, {"no": 30, "name": "ชำระประกันสังคม ประจำเดือน พฤศจิกายน 2568", "branch": "ออฟฟิศ", "amount": 75000.0, "note": "ทุกบจก. ไม่เกินวันที่ 15 ก.พ.69"}, {"no": 31, "name": "คืนเงิน CF แกลงระยอง ", "branch": "ออฟฟิศ", "amount": 22258.1, "note": "กำนนดชำระ 18/02/2569"}, {"no": 32, "name": "ค่าโฆษณา Facebook Ads (ประมาณการ)  17 - 23 กพ.69", "branch": "ออฟฟิศ", "amount": 30000.0, "note": ""}, {"no": 33, "name": "ค่าโฆษณา Facebook Ads (ประมาณการ)  24 กพ. - 02 มี.ค.69", "branch": "ออฟฟิศ", "amount": 52000.0, "note": ""}, {"no": 34, "name": "Microsoft 365 Business Standard - nigiwaigroup.com (15/3/2026-14/3/2027)", "branch": "ออฟฟิศ", "amount": 88714.08, "note": "บจก.เอ็นดิท โซลูชั่น"}, {"no": 35, "name": "ซื้ออุปกรณ์ IPad A16 ใช้สำหรับสาขาNGS ภูเขียว ชัยภูมิ", "branch": "ออฟฟิศ", "amount": 12900.0, "note": "กำหนดชำระ 25/02/2569"}, {"no": 36, "name": "ค่าดำเนินคดีความสู้คดี พ.243/2568 ศาลจังหวัดเชียงใหม่ งวดที่ 3/4 ", "branch": "ออฟฟิศ", "amount": 19400.0, "note": ""}, {"no": 37, "name": "ค่าภาษีภงด.1 ปี 2568 บจก.ทุเรียนนิสซึ่ม", "branch": "ออฟฟิศ", "amount": 50520.0, "note": "กำหนดชำระ 25/02/2569"}, {"no": 38, "name": "ซื้อสวัสดิการพนักงาน (makro) และของใช้สำนักงาน", "branch": "ออฟฟิศ", "amount": 11500.0, "note": "เร่งด่วน"}, {"no": 39, "name": "จ่ายคืนเงินกู้ยืม ทีมผู้บริหาร (พี่แบงค์) งวดที่ 11", "branch": "ออฟฟิศ", "amount": 34183.05, "note": "กำหนดชำระ 31/01/2569"}, {"no": 40, "name": "จ่ายคืนเงินกู้ยืม ทีมผู้บริหาร (พี่อาร์ท) งวดที่ 11", "branch": "ออฟฟิศ", "amount": 20859.18, "note": "กำหนดชำระ 31/01/2569"}, {"no": 41, "name": "คืนเงินกู้ส่วนตัวพี่เก้ง วง 8,000 บาท", "branch": "ออฟฟิศ", "amount": 8000.0, "note": "กำหนดชำระ 31/01/2569"}, {"no": 42, "name": "งานเครื่องครัวสแตนเลส งวดที่ 2 ที่เหลือ 50% (NGS ภูเขียว ชัยภูมิ)", "branch": "NGS ภูเขียว ชัยภูมิ", "amount": 135783.0, "note": "คิท แอนด์ ฟู้ดส์  เร่งด่วน เลื่อนชำระตั้งแต่ 03/11/2568"}, {"no": 43, "name": "งานค่าดำเนินการติดตั้ง งวดที่ 2 ที่เหลือ 50% (NGS ภูเขียว ชัยภูมิ)", "branch": "NGS ภูเขียว ชัยภูมิ", "amount": 10400.0, "note": "คิท แอนด์ ฟู้ดส์  เร่งด่วน เลื่อนชำระตั้งแต่ 03/11/2568"}, {"no": 44, "name": "ค่าภาษีภงด.3 ปี 2565-2568", "branch": "ออฟฟิศ", "amount": 50000.0, "note": "ทยอยชำระเป็นเดือนๆ"}, {"no": 45, "name": "ค่าภาษีภงด.53 ปี 2565-2568", "branch": "ออฟฟิศ", "amount": 50000.0, "note": "ทยอยชำระเป็นเดือนๆ"}, {"no": 46, "name": "ค่าภาษีซื้อ-ขาย (ภพ.30)  ปี 2566-2568", "branch": "ออฟฟิศ", "amount": 50000.0, "note": "ทยอยชำระเป็นเดือนๆ"}, {"no": 47, "name": "ประมาณการเงินเดือนพนักงาน เดือนกุมภาพันธ์ 2569", "branch": "ออฟฟิศ", "amount": 1655000.0, "note": "กำหนดชำระ 28/02/2569"}];
+        const incomeData = [{"date": "KBANK", "amount": 584.0, "description": "ยอดคงเหลือในบัญชี บริษัท"}, {"date": "SCB", "amount": 0.0, "description": "ยอดคงเหลือในบัญชี วัตถุดิบ"}, {"date": "2569-02-17 00:00:00", "amount": 146640.0, "description": "ค่าออกแบบ งวด 2 โอชินิค ภูเก็ต"}, {"date": "2569-02-17 00:00:00", "amount": 928001.0, "description": "COCO - NGB-Airport หาดใหญ่"}, {"date": "2569-02-19 00:00:00", "amount": 2000000.0, "description": "ค่าก่อสร้าง งวด 2 โอชินิค ภูเก็ต"}, {"date": "2569-02-28 00:00:00", "amount": 300000.0, "description": "FOCO งวดที่ 5 สนามบิน ภูเก็ต"}];
+        const branchData = [{"name": "ออฟฟิศ", "value": 3213534.58}, {"name": "นิกิวาอิ กู๊ดเวลท์", "value": 378461.57999999996}, {"name": "KIN Matcha", "value": 10486.0}, {"name": "NGWC", "value": 901571.06}, {"name": "โอเชียนิค  ภูเก็ต", "value": 711930.1}, {"name": " NGSB หาดใหญ่วิลเลจ", "value": 60722.0}, {"name": "ตลาดอิ่มเอม สระบุรี", "value": 100000.0}, {"name": "NGS ภูเขียว ชัยภูมิ", "value": 146183.0}];
+        const categoryData = [{"name": "เงินกู้และการเงิน", "value": 203370.22999999998}, {"name": "โครงการก่อสร้าง", "value": 2190970.7399999998}, {"name": "ค่าใช้จ่ายดำเนินงาน", "value": 355991.64}, {"name": "ภาษีและประกัน", "value": 986155.71}, {"name": "เงินเดือนและบุคลากร", "value": 1730000.0}, {"name": "อื่นๆ", "value": 56400.0}];
+        const dailyData = [{"day": "17", "expense": 1042884.1399999999, "income": 1074641.0, "balance": 31756.860000000102}, {"day": "19", "expense": 1683832.0, "income": 2000000.0, "balance": 316168.0}, {"day": "28", "expense": 1655000.0, "income": 300000.0, "balance": -1355000.0}];
 
-        // Chart 1: Expense by Category
-        const ctx1 = document.getElementById('expenseChart').getContext('2d');
-        new Chart(ctx1, {
+        // Populate expense table
+        const tableBody = document.getElementById('expenseTableBody');
+        expenseData.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.no}</td>
+                <td>${item.name}</td>
+                <td><span class="badge badge-info">${item.branch}</span></td>
+                <td style="text-align: right;" class="amount-negative">${item.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</td>
+                <td>${item.note || '-'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Add total row
+        const totalRow = document.createElement('tr');
+        const totalAmount = expenseData.reduce((sum, item) => sum + item.amount, 0);
+        totalRow.innerHTML = `
+            <td colspan="3" style="text-align: right;"><strong>รวมทั้งสิ้น</strong></td>
+            <td style="text-align: right;" class="amount-negative"><strong>${totalAmount.toLocaleString('th-TH', {minimumFractionDigits: 2})}</strong></td>
+            <td></td>
+        `;
+        tableBody.appendChild(totalRow);
+
+        // Category Chart (Doughnut)
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
             type: 'doughnut',
             data: {
-                labels: [
-                    'เงินเดือนพนักงาน',
-                    'โปรเจคนิกิเบน',
-                    'โปรเจคโอชินิค',
-                    'เงินประกัน AOT',
-                    'เงินกู้+หนี้สิน',
-                    'ภาษีค้างชำระ',
-                    'ค่าใช้จ่ายอื่นๆ'
-                ],
+                labels: categoryData.map(d => d.name),
                 datasets: [{
-                    data: [1655000, 1280033, 711930, 785635, 140328, 150000, 799962],
+                    data: categoryData.map(d => d.value),
                     backgroundColor: [
-                        '#ef4444',
-                        '#f59e0b',
-                        '#10b981',
+                        '#1e3a8a',
                         '#3b82f6',
-                        '#8b5cf6',
-                        '#ec4899',
-                        '#6366f1'
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#8b5cf6'
                     ],
-                    borderWidth: 3,
-                    borderColor: '#fff'
+                    borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            padding: 20,
-                            font: {
-                                size: 14,
-                                family: "'Sarabun', sans-serif",
-                                weight: '600'
-                            }
+                            font: { family: 'Kanit', size: 12 },
+                            padding: 15
                         }
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += '฿' + context.parsed.toLocaleString();
-                                let percent = ((context.parsed / 5522888) * 100).toFixed(1);
-                                label += ' (' + percent + '%)';
-                                return label;
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ฿${value.toLocaleString('th-TH')} (${percentage}%)`;
                             }
-                        },
-                        titleFont: {
-                            size: 16,
-                            family: "'Sarabun', sans-serif",
-                            weight: 'bold'
-                        },
-                        bodyFont: {
-                            size: 14,
-                            family: "'Sarabun', sans-serif"
                         }
                     }
                 }
             }
         });
 
-        // Chart 2: Cash Flow Timeline
-        const ctx2 = document.getElementById('cashflowChart').getContext('2d');
-        new Chart(ctx2, {
+        // Branch Chart (Bar)
+        const branchCtx = document.getElementById('branchChart').getContext('2d');
+        new Chart(branchCtx, {
             type: 'bar',
             data: {
-                labels: ['วันที่ 17 ก.พ.', 'วันที่ 19 ก.พ.', 'วันที่ 28 ก.พ.'],
+                labels: branchData.map(d => d.name),
+                datasets: [{
+                    label: 'ยอดเงิน (บาท)',
+                    data: branchData.map(d => d.value),
+                    backgroundColor: [
+                        '#1e3a8a',
+                        '#3b82f6',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#8b5cf6',
+                        '#ec4899',
+                        '#14b8a6'
+                    ],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `฿${context.raw.toLocaleString('th-TH')}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: 'Kanit' },
+                            callback: function(value) {
+                                return '฿' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Kanit', size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // Daily Cash Flow Chart (Line + Bar Combo)
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: dailyData.map(d => `วันที่ ${d.day}`),
                 datasets: [
                     {
-                        label: 'รายรับ',
-                        data: [1074641, 2000000, 300000],
+                        label: 'เงินเข้า',
+                        data: dailyData.map(d => d.income),
                         backgroundColor: '#10b981',
-                        borderWidth: 2,
-                        borderColor: '#059669'
+                        borderRadius: 8,
+                        order: 2
                     },
                     {
-                        label: 'รายจ่าย',
-                        data: [1042884, 1683832, 1655000],
+                        label: 'เงินออก',
+                        data: dailyData.map(d => d.expense),
                         backgroundColor: '#ef4444',
-                        borderWidth: 2,
-                        borderColor: '#dc2626'
+                        borderRadius: 8,
+                        order: 3
                     },
                     {
-                        label: 'คงเหลือ',
-                        data: [31757, 316168, -1355000],
-                        backgroundColor: '#6366f1',
-                        borderColor: '#4f46e5',
-                        borderWidth: 3,
+                        label: 'ยอดคงเหลือ',
+                        data: dailyData.map(d => d.balance),
                         type: 'line',
-                        tension: 0.4
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.4,
+                        order: 1
                     }
                 ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '฿' + (value / 1000).toFixed(0) + 'K';
-                            },
-                            font: {
-                                size: 13,
-                                family: "'Sarabun', sans-serif",
-                                weight: '600'
-                            }
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                size: 13,
-                                family: "'Sarabun', sans-serif",
-                                weight: '600'
-                            }
-                        }
-                    }
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
                 },
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: {
-                                size: 14,
-                                family: "'Sarabun', sans-serif",
-                                weight: '600'
-                            }
-                        }
+                        position: 'top',
+                        labels: { font: { family: 'Kanit' } }
                     },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += '฿' + context.parsed.y.toLocaleString();
-                                return label;
+                                return `${context.dataset.label}: ฿${context.raw.toLocaleString('th-TH')}`;
                             }
-                        },
-                        titleFont: {
-                            size: 16,
-                            family: "'Sarabun', sans-serif",
-                            weight: 'bold'
-                        },
-                        bodyFont: {
-                            size: 14,
-                            family: "'Sarabun', sans-serif"
                         }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: { family: 'Kanit' },
+                            callback: function(value) {
+                                return '฿' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: { font: { family: 'Kanit' } }
                     }
                 }
             }
