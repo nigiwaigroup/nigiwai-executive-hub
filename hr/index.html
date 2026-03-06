@@ -97,10 +97,31 @@
         /* Style for sortable headers */
         th.sortable { cursor: pointer; user-select: none; transition: background-color 0.2s; }
         th.sortable:hover { background-color: #e2e8f0; }
+
+        /* Styles for Drag and Drop */
+        .draggable-row {
+            cursor: grab;
+            transition: background-color 0.2s;
+        }
+        .draggable-row:active {
+            cursor: grabbing;
+        }
+        .draggable-row.dragging {
+            opacity: 0.5;
+            background-color: #e2e8f0;
+        }
+        .droppable-area {
+            transition: background-color 0.2s, border 0.2s;
+        }
+        .droppable-area.drag-over {
+            background-color: #eff6ff !important;
+            border: 2px dashed #3b82f6 !important;
+        }
     </style>
 </head>
 <body class="p-4 md:p-6">
 
+    <!-- Auth Modal -->
     <div id="authModal" class="modal">
         <div class="modal-content max-w-sm">
             <div class="flex justify-between items-center mb-4">
@@ -109,6 +130,7 @@
             </div>
             <div class="mb-5">
                 <label class="block text-sm font-medium text-slate-600 mb-2">กรุณาใส่รหัสผ่านเพื่อจัดการข้อมูล</label>
+                <!-- ไม่มี Placeholder Suggest และรองรับการกด Enter -->
                 <input type="password" id="adminPassword" class="form-control w-full" placeholder="Password" onkeypress="if(event.key === 'Enter') verifyAdmin()" autocomplete="new-password">
                 <p class="text-xs text-red-500 mt-2 hidden" id="authError">รหัสผ่านไม่ถูกต้อง!</p>
             </div>
@@ -118,6 +140,7 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-5">
@@ -170,7 +193,9 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD CONTENT -->
     <div class="max-w-7xl mx-auto">
+        <!-- Header -->
         <div class="mb-6 bg-slate-800 rounded-xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-lg relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl"></div>
             
@@ -190,6 +215,7 @@
             </div>
         </div>
 
+        <!-- Tab Navigation -->
         <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
             <button class="tab-button active" onclick="switchTab('overview', this)"><i class="fas fa-chart-pie mr-2"></i>ภาพรวม (Overview)</button>
             <button class="tab-button" onclick="switchTab('allemployee', this)"><i class="fas fa-users mr-2"></i>ฐานข้อมูลพนักงานทั้งหมด</button>
@@ -197,12 +223,15 @@
             <button class="tab-button" onclick="switchTab('costcenter', this)"><i class="fas fa-building mr-2"></i>Cost Center</button>
             <button class="tab-button" onclick="switchTab('transfer', this)"><i class="fas fa-exchange-alt mr-2"></i>การโอนย้าย</button>
             
+            <!-- Admin Tab Button -->
             <button id="adminTabBtn" class="tab-button text-slate-600 ml-auto bg-white border border-slate-300 shadow-sm hover:text-blue-600 hover:border-blue-300" onclick="handleAdminTabClick()">
                 <i class="fas fa-sliders-h mr-2 text-blue-500"></i>จัดการข้อมูล
             </button>
         </div>
 
+        <!-- 1. Overview Tab -->
         <div id="overview-tab" class="tab-content animate-fade-in">
+            <!-- KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                 <div class="card p-5 border-l-4 border-slate-700 flex flex-col justify-center">
                     <p class="text-[0.7rem] font-bold text-slate-400 uppercase tracking-wider mb-1">พนักงานทั้งหมด (Headcount)</p>
@@ -225,6 +254,7 @@
                 </div>
             </div>
 
+            <!-- Charts Row 1: Level and Dept -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="chart-card p-5 border-t-4 border-rose-400">
                     <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center cursor-pointer hover:text-rose-600 transition-colors" onclick="toggleLevelSort()">
@@ -241,6 +271,7 @@
                 </div>
             </div>
 
+            <!-- Charts Row 2: Doughnut Distribution -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="chart-card p-5 border-t-4 border-purple-400">
                     <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wide flex items-center">
@@ -251,6 +282,7 @@
             </div>
         </div>
 
+        <!-- 2. All Employees Tab -->
         <div id="allemployee-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-indigo-400">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
@@ -259,6 +291,7 @@
                         <p class="text-sm text-slate-500 mt-1">แสดงข้อมูลพนักงาน 47 อัตราในเครือ Nigiwai Group (คลิกที่หัวตารางเพื่อเรียงข้อมูล)</p>
                     </div>
                     
+                    <!-- Filters -->
                     <div class="flex flex-wrap gap-3 w-full md:w-auto bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
                         <div>
                             <label class="block text-[0.7rem] font-bold text-slate-500 mb-1 uppercase tracking-wider">กรองบริษัท</label>
@@ -300,6 +333,7 @@
             </div>
         </div>
 
+        <!-- 3. Adjusted Employee Tab -->
         <div id="employee-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-emerald-400">
                 <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center"><i class="fas fa-user-check text-emerald-500 mr-2"></i>พนักงานที่ได้ปรับ #01/26</h3>
@@ -324,6 +358,7 @@
             </div>
         </div>
 
+        <!-- 4. Cost Center Tab -->
         <div id="costcenter-tab" class="tab-content hidden animate-fade-in">
             <div class="chart-card p-6 mb-6 border-t-4 border-indigo-500">
                 <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-building text-indigo-500 mr-2"></i>งบประมาณรวมตาม Cost Center (Payroll Distribution)</h3>
@@ -331,9 +366,9 @@
             </div>
 
             <div class="card p-6">
-                <h3 class="text-xl font-bold text-slate-800 mb-2">รายละเอียด Cost Center</h3>
-                <p class="text-sm text-blue-700 bg-blue-50 inline-block px-4 py-1.5 rounded-lg font-medium mb-4 shadow-sm">
-                    <i class="fas fa-hand-pointer mr-2 animate-pulse"></i>คลิกที่หัวตารางเพื่อเรียง หรือคลิกที่แถวชื่อบริษัทเพื่อกางดูรายชื่อ
+                <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center"><i class="fas fa-hand-holding-usd text-indigo-500 mr-2"></i>รายละเอียด Cost Center</h3>
+                <p class="text-sm text-blue-700 bg-blue-50 inline-block px-4 py-2 rounded-lg font-medium mb-4 shadow-sm border border-blue-100">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i><strong>Drag & Drop:</strong> คุณสามารถคลิกค้างที่ชื่อพนักงาน แล้วลากไปวางในบริษัทอื่นเพื่อจำลองการย้าย Cost Center ได้
                 </p>
                 
                 <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
@@ -352,6 +387,7 @@
             </div>
         </div>
 
+        <!-- 5. Transfer Tab -->
         <div id="transfer-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-amber-400">
                 <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center"><i class="fas fa-exchange-alt text-amber-500 mr-2"></i>การโอนย้ายพนักงาน (Internal Mobility)</h3>
@@ -371,6 +407,7 @@
             </div>
         </div>
 
+        <!-- 6. Admin Editing Tab -->
         <div id="admin-tab" class="tab-content hidden animate-fade-in">
             <div class="card p-6 border-t-4 border-slate-800">
                 <div class="flex justify-between items-center mb-2">
@@ -378,6 +415,7 @@
                 </div>
                 <p class="text-sm text-slate-500 mb-5">ตารางนี้สำหรับปรับปรุงข้อมูลรายบุคคล คลิกที่หัวตารางเพื่อเรียงข้อมูล หรือค้นหาได้ทันที</p>
                 
+                <!-- Filters for Admin Table -->
                 <div class="flex flex-wrap gap-3 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
                     <div class="relative w-full md:w-64">
                         <i class="fas fa-search absolute left-3 top-2.5 text-slate-400"></i>
@@ -421,56 +459,56 @@
 
     <script>
         // ----------------------------------------------------
-        // DATA: Base Array of 47 Employees (With Level Extracted)
+        // DATA: Base Array of 47 Employees (UPDATED FROM LATEST FILE)
         // ----------------------------------------------------
         const originalAllEmployees = [
             {id: "660104", name: "นางสาวสาวิตรี สิงห์เหม้น", dept: "Operation", position: "Core Team Supervisor- Level I", level: "Leader and Supervisor", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
             {id: "670601", name: "นางสาวรัตติกาล สกุลอินทร์", dept: "Sales", position: "Sales Executive", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 19000.0, newSalary: 19000.0, details: ""},
-            {id: "681001", name: "นางสาวพรวิไล มีชัย", dept: "Warehouse & Logistics", position: "Admin Purchasing", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "ผ่านโปรปรับเงินเดือน"},
-            {id: "651003", name: "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", dept: "Financial And Account", position: "Acc Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 29300.0, newSalary: 30500.0, details: "ค่าตำแหน่ง: +500, ค่าชำนาญการ: +700"},
-            {id: "650206", name: "นาย กฤษฎา จันทร์ฝา", dept: "Human Resource", position: "Human Resources Supervisor", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20064.0, newSalary: 22000.0, details: "ฐานเงินเดือน: +436, ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +500"},
-            {id: "650104", name: "นางสาวช้องนาง หินขาว", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20900.0, newSalary: 22000.0, details: "ฐานเงินเดือน: +100, ค่าชำนาญการ: +1,000"},
-            {id: "660409", name: "นางสาว พานทอง รุ่งอนันต์กุลสิริ", dept: "Executive", position: "Executive Assistant - Level I", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 24472.8, newSalary: 26000.0, details: "ฐานเงินเดือน: +340, ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +187"},
+            {id: "681001", name: "นางสาวพรวิไล มีชัย", dept: "Warehouse & Logistics", position: "Admin Purchasing", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "ผ่านโปรปรับเงินเดือนตามตกลง"},
+            {id: "651003", name: "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", dept: "Financial And Account", position: "Acc Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 29300.0, newSalary: 30500.0, details: ""},
+            {id: "650206", name: "นายกฤษฎา จันทร์ฝา", dept: "Human Resource", position: "Human Resources Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20064.0, newSalary: 22000.0, details: ""},
+            {id: "650104", name: "นางสาวช้องนาง หินขาว", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20900.0, newSalary: 22000.0, details: ""},
+            {id: "660409", name: "นางสาวพานทอง รุ่งอนันต์กุลสิริ", dept: "Executive", position: "Executive Assistant - Level I", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 26812.8, newSalary: 28400.0, details: ""},
             {id: "651101", name: "นางสาวณัฐชานันท์ ธนังชูศิลป์", dept: "Sales", position: "Sales Manager (Acting)", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 28000.0, newSalary: 28000.0, details: ""},
             {id: "631202", name: "นางสาวสาริศา กมลอรรฆ", dept: "Executive", position: "Executive Assistant - Level III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 30500.0, newSalary: 30500.0, details: ""},
             {id: "651201", name: "นางสาวกนกพิชญ์ พิบูลย์", dept: "Financial And Account", position: "Financial & Account Manager", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 42000.0, newSalary: 42000.0, details: ""},
             {id: "640502", name: "นายณรุจ พลับศิริ", dept: "Marketing", position: "Senior Creative & Content Marketing", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 24979.5, newSalary: 24979.5, details: ""},
             {id: "650106", name: "นางสาวนัชชา ธนเกริกกวิน", dept: "Sales", position: "After Sales - Level III", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25640.0, newSalary: 25640.0, details: ""},
             {id: "640601", name: "นายไกรเจต สมพงษ์", dept: "Executive", position: "CTO & COO", level: "Chief and Director", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 75000.0, newSalary: 75000.0, details: "ย้ายจากนิกิวาอิ คอนสครัคชั่น มีผล 1 กย.2568"},
-            {id: "641103", name: "นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์", dept: "Operation", position: "Project Leader", level: "Consultant", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 12000.0, newSalary: 12000.0, details: "ให้ค่า Project ตามเนื้องาน"},
+            {id: "641103", name: "นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์", dept: "Operation", position: "Project Leader", level: "Consultant", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 12000.0, newSalary: 12000.0, details: ".ให้ค่า Project ตามเนื้องาน 5,000 - 10,000 บาท"},
             {id: "681101", name: "นายภัทรพล เดือนฉาย", dept: "Human Resource", position: "Senior Recruite", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 27000.0, newSalary: 27000.0, details: ""},
-            {id: "681002", name: "นางสาววิภาวี  เรืองจรูญ", dept: "Human Resource", position: "Recruite Officer", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 16500.0, details: "ผ่านโปรปรับเงินเดือน"},
-            {id: "610701", name: "นางสาวอรอริยา สุดสุข", dept: "Operation", position: "ART Operation- Lv.III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 35172.15, newSalary: 35500.0, details: "ฐานเงินเดือน: +217, ค่าตำแหน่ง: +111"},
-            {id: "660504", name: "นางสาวภัรตรา เพ็ญภู่", dept: "Sales", position: "After Sales - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15750.0, newSalary: 18750.0, details: "ค่าตำแหน่ง: +1,000, ค่าชำนาญการ: +2,000"},
-            {id: "680901", name: "นายณัฐกิจ ต้นโต", dept: "Warehouse & Logistics", position: "พนักงานขนส่ง", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 15000.0, details: "ฐานเงินเดือน: +1,000, ค่าชำนาญการ: +1,000"},
-            {id: "AS670308", name: "นางสาวมณีรัตน์ ธงทอง", dept: "Operation", position: "Production Staff", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 14000.0, details: "ค่าชำนาญการ: +1,000"},
-            {id: "VV660302", name: "นางสาวศิริวรรณ กำรัตน์", dept: "Operation", position: "Chef - Lv.II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ค่าชำนาญการ: +1,000"},
+            {id: "681002", name: "นางสาววิภาวี  เรืองจรูญ", dept: "Human Resource", position: "Recruite Officer", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 16500.0, details: "ผ่านโปรปรับเงินเดือนตามตกลง"},
+            {id: "610701", name: "นางสาวอรอริยา สุดสุข", dept: "Operation", position: "ART Operation- Lv.III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 35889.15, newSalary: 36000.0, details: ""},
+            {id: "660504", name: "นางสาวภัรตรา เพ็ญภู่", dept: "Sales", position: "After Sales - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 19500.0, details: ""},
+            {id: "680901", name: "นายณัฐกิจ ต้นโต", dept: "Warehouse & Logistics", position: "พนักงานขนส่ง", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 15000.0, details: ""},
+            {id: "AS670308", name: "นางสาวมณีรัตน์ ธงทอง", dept: "Operation", position: "Production Staff", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 14000.0, details: ""},
+            {id: "VV660302", name: "นางสาวศิริวรรณ กำรัตน์", dept: "Operation", position: "Chef - Lv.II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: ""},
             {id: "660201", name: "นางสาวธิติญา ปัญญายิ่ง", dept: "Marketing", position: "Graphic Designer - Lv III", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 23690.0, newSalary: 23690.0, details: ""},
             {id: "610601", name: "นายสุทธิพร ตั้งสกุลสันติ", dept: "Executive", position: "President & Group CEO", level: "Chief and Director", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 180000.0, newSalary: 180000.0, details: ""},
-            {id: "670401", name: "นายพงศธร โชติยะศิลป์", dept: "Executive", position: "Chief Financial Officer", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 65000.0, newSalary: 50000.0, details: "ฐานเงินเดือน: -15,000"},
+            {id: "670401", name: "นายพงศธร โชติยะศิลป์", dept: "Executive", position: "Chief Financial Officer", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 65000.0, newSalary: 50000.0, details: "จะมีการพิจารณาปรับขึ้นเมื่อสามารถ Funding ได้"},
             {id: "650208", name: "นายขวัญวิชัย ไกรงาม", dept: "Operation", position: "Head Chef - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 28037.5, newSalary: 28037.5, details: ""},
             {id: "640202", name: "นางสาวคณิตตา จำเริญพงษ์", dept: "Warehouse & Logistics", position: "ART Supply Chain - Level III", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 33000.0, newSalary: 33000.0, details: ""},
             {id: "670202", name: "นางสาวกัลยรักษ์ ตระกูลอินทร์", dept: "Financial And Account", position: "Senior Accounting Officer", level: "Senior Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 24000.0, newSalary: 24000.0, details: ""},
-            {id: "660801", name: "นางสาวฐิติกานต์ รักเมือง", dept: "Marketing", position: "Graphic Designer - Lv I", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16500.0, details: "ค่าชำนาญการ: +500"},
-            {id: "660804", name: "นายจิติวัฒน์ อุปวรรณะ", dept: "Construction", position: "Senior Interior Designer", level: "Senior Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26000.0, newSalary: 30000.0, details: "ฐานเงินเดือน: +1,000, ค่าตำแหน่ง: +2,000, ค่าชำนาญการ: +1,000"},
-            {id: "670201", name: "นายศักดิ์จรินทร์ ดวงฤทัย", dept: "Information Technology", position: "IT Support", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ฐานเงินเดือน: +1,000"},
+            {id: "660801", name: "นางสาวฐิติกานต์ รักเมือง", dept: "Marketing", position: "Graphic Designer - Lv I", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16500.0, details: ""},
+            {id: "660804", name: "นายจิติวัฒน์ อุปวรรณะ", dept: "Construction", position: "Senior Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26000.0, newSalary: 30000.0, details: ""},
+            {id: "670201", name: "นายศักดิ์จรินทร์ ดวงฤทัย", dept: "Information Technology", position: "IT Support", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: ""},
             {id: "660401", name: "นายพิชญา บัวบรรจง", dept: "Information Technology", position: "IT Specialist", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 33705.0, newSalary: 33705.0, details: ""},
-            {id: "610602", name: "นายวรันธร แดงใหญ่", dept: "Executive", position: "CEO", level: "Chief and Director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 120000.0, newSalary: 120000.0, details: ""},
-            {id: "641105", name: "นาย อรรถสิทธิ์ สุปัดคำ", dept: "Construction", position: "Project Coordinator - Level I", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
+            {id: "610602", name: "นายวรันธร แดงใหญ่", dept: "Executive", position: "CEO", level: "Chief and Director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 120000.0, newSalary: 120000.0, details: "ย้ายมาจาก นิกิวาอิ กรุ๊ป มีผล 1 กย.2568"},
+            {id: "641105", name: "นายอรรถสิทธิ์ สุปัดคำ", dept: "Construction", position: "Project Coordinator - Level I", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
             {id: "671002", name: "นายนิรันดร์ ดวงสุวรรณ", dept: "Executive", position: "Construction Director", level: "Chief and Director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 100000.0, newSalary: 100000.0, details: ""},
             {id: "671101", name: "นางสาวนุชนารถ แตงอ่อน", dept: "Construction", position: "Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
-            {id: "650702", name: "นางสาวอรนิดา แพสถิตถาวร", dept: "Human Resource", position: "House Keeper", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 12860.0, newSalary: 12860.0, details: ""},
+            {id: "650702", name: "นางสาว อรนิดา แพสถิตถาวร", dept: "Human Resource", position: "House Keeper", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 12860.0, newSalary: 12860.0, details: ""},
             {id: "631204", name: "นายพงศธร อภัยนุกูล", dept: "Marketing", position: "Video Production Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26150.0, newSalary: 26150.0, details: ""},
             {id: "999901", name: "นายสุวคนธ์ อินทร์ประคอง", dept: "Marketing", position: "Degital Marketing Consultant", level: "Consultant", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "เพิ่ม Function งาน Event และงาน Audit"},
             {id: "641001", name: "นายวีระพจน์ สังเกตุ", dept: "Warehouse & Logistics", position: "Driver &Technician", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16222.5, newSalary: 16222.5, details: ""},
             {id: "680801", name: "นางสาววัชรวีร์ ศุภเลิศธนศักดิ์", dept: "Human Resource", position: "Human Resources Manager", level: "Manager", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 43000.0, newSalary: 43000.0, details: ""},
             {id: "660702", name: "นายกรกช บรรพจน์พิทักษ์", dept: "Marketing", position: "Video Creator", level: "Officer", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 20500.0, newSalary: 20500.0, details: ""},
-            {id: "630601", name: "นางสาวธนภรณ์ ผ่องประทุม", dept: "Marketing", position: "Art Supervisor", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 29674.2, newSalary: 30000.0, details: "ฐานเงินเดือน: +117, ค่าตำแหน่ง: +209"},
-            {id: "650102", name: "นายวินัย หนองแพ", dept: "Operation", position: "Executive Chef - Lv.II", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 33940.63, newSalary: 35500.0, details: "ฐานเงินเดือน: +438, ค่าตำแหน่ง: +622, ค่าชำนาญการ: +500"},
-            {id: "650207", name: "นางสาวเสาวณี พันสุวรรณ์", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 19742.5, newSalary: 22000.0, details: "ฐานเงินเดือน: +1,150, ค่าชำนาญการ: +1,108"},
-            {id: "650903", name: "นายกันต์ศักย์ ปานมงคล", dept: "Operation", position: "Quality Control & Audit Manager", level: "Manager", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 36050.0, newSalary: 36050.0, details: ""},
-            {id: "660101", name: "นางสาวกรวรรณ สุวรรณพรรค", dept: "Financial And Account", position: "Accounts Payable", level: "Officer", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 22050.0, newSalary: 22050.0, details: ""},
-            {id: "660503", name: "นายภูรินทร์ บุญวรรณ", dept: "Financial And Account", position: "Accounts Receivable", level: "Officer", company: "บริษัท เอ็นจีดับบลิว คอร์ปอเรชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 18900.0, newSalary: 18900.0, details: "รอดูผลงานและปรับเงินอีกครั้ง "}
+            {id: "630601", name: "นางสาวธนภรณ์ ผ่องประทุม", dept: "Marketing", position: "Art Supervisor", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 29674.2, newSalary: 30000.0, details: ""},
+            {id: "650102", name: "นายวินัย หนองแพ", dept: "Operation", position: "Executive Chef - Lv.II", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36378.13, newSalary: 37500.0, details: ""},
+            {id: "650207", name: "นางสาวเสาวณี พันสุวรรณ์", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 19742.5, newSalary: 22000.0, details: ""},
+            {id: "650903", name: "นายกันต์ศักย์ ปานมงคล", dept: "Operation", position: "Quality Control & Audit Manager", level: "Manager", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36050.0, newSalary: 36050.0, details: ""},
+            {id: "660101", name: "นางสาวกรวรรณ สุวรรณพรรค", dept: "Financial And Account", position: "Accounts Payable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 22050.0, newSalary: 22050.0, details: ""},
+            {id: "660503", name: "นายภูรินทร์ บุญวรรณ", dept: "Financial And Account", position: "Accounts Receivable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 18900.0, newSalary: 18900.0, details: "รอดูผลงานและปรับเงินอีกครั้ง"}
         ];
 
         const transfers = [
@@ -495,8 +533,8 @@
         // ----------------------------------------------------
         // SYSTEM VARIABLES & STATES
         // ----------------------------------------------------
-        // รีเซ็ต Key ใหม่รอบสุดท้าย เพื่อล้างค่าแคชผิดพลาดทั้งหมด
-        let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees_v4')) || originalAllEmployees;
+        // ล้างแคชรับข้อมูลใหม่
+        let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees_v7')) || originalAllEmployees;
         
         let deptStats = {};
         let levelStats = {};
@@ -521,11 +559,14 @@
         ];
         let levelSortDir = 'asc';
 
+        // Drag and Drop Variables
+        let draggedEmployeeId = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             initFilters();
             calculateStats();
             renderDashboard();
-            const lastUpdate = localStorage.getItem('admin_last_edit_stamp_v4');
+            const lastUpdate = localStorage.getItem('admin_last_edit_stamp_v7');
             if(lastUpdate) document.getElementById('lastUpdateText').innerText = lastUpdate;
         });
 
@@ -663,7 +704,62 @@
         }
 
         // ----------------------------------------------------
-        // TABLE RENDERERS (With Sort applied)
+        // DRAG AND DROP FUNCTIONS
+        // ----------------------------------------------------
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function leaveDrop(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function dragStart(ev, empId) {
+            draggedEmployeeId = empId;
+            ev.currentTarget.classList.add('dragging');
+            ev.dataTransfer.effectAllowed = 'move';
+            // Set data for Firefox compatibility
+            ev.dataTransfer.setData('text/plain', empId);
+        }
+
+        function dragEnd(ev) {
+            ev.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.droppable-area').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function drop(ev, newCompanyName) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            
+            if (!draggedEmployeeId) return;
+
+            // Find employee and update company
+            const empIndex = allEmployees.findIndex(e => e.id === draggedEmployeeId);
+            if (empIndex !== -1) {
+                const oldCompanyName = allEmployees[empIndex].company.replace(' (สำนักงานใหญ่)', '');
+                
+                // Only update if dragged to a different company
+                if (oldCompanyName !== newCompanyName) {
+                    allEmployees[empIndex].company = newCompanyName + " (สำนักงานใหญ่)";
+                    
+                    // Save to localStorage
+                    const now = new Date();
+                    const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
+                    localStorage.setItem('admin_all_employees_v7', JSON.stringify(allEmployees));
+                    localStorage.setItem('admin_last_edit_stamp_v7', ts);
+                    document.getElementById('lastUpdateText').innerText = ts;
+                    
+                    // Recalculate and Render
+                    calculateStats();
+                    renderDashboard();
+                }
+            }
+            draggedEmployeeId = null;
+        }
+
+        // ----------------------------------------------------
+        // TABLE RENDERERS
         // ----------------------------------------------------
         function renderAllEmployeeTable() {
             const fComp = document.getElementById('filterComp').value;
@@ -735,16 +831,36 @@
             sorted.forEach((cc, i) => {
                 const avg = cc.employeeCount ? (cc.totalSalary / cc.employeeCount).toFixed(0) : 0;
                 
-                let innerHtml = `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm my-2 mx-4"><h4 class="text-sm font-bold text-slate-700 mb-3 border-b pb-2">รายชื่อพนักงานเรียงตามเงินเดือน</h4><table class="w-full text-xs text-left"><thead><tr class="text-slate-500 uppercase"><th class="pb-2">ชื่อ-นามสกุล</th><th class="pb-2">แผนก</th><th class="pb-2">ตำแหน่ง</th><th class="pb-2 text-right">เงินเดือน '69</th></tr></thead><tbody>`;
+                // สร้างตารางย่อยพร้อมระบบ Drag and Drop
+                let innerHtml = `<div class="bg-white border border-slate-200 rounded-lg p-4 shadow-sm my-2 mx-4 droppable-area" 
+                                      ondrop="drop(event, '${cc.costCenter}')" 
+                                      ondragover="allowDrop(event)"
+                                      ondragleave="leaveDrop(event)">
+                                    <h4 class="text-sm font-bold text-slate-700 mb-3 border-b pb-2 flex justify-between">
+                                        <span><i class="fas fa-users mr-2 text-indigo-400"></i>รายชื่อพนักงาน ${cc.costCenter}</span>
+                                        <span class="text-xs text-slate-400 font-normal"><i class="fas fa-download mr-1"></i>ลากพนักงานมาวางที่นี่เพื่อย้ายแผนก</span>
+                                    </h4>
+                                    <table class="w-full text-xs text-left">
+                                        <thead><tr class="text-slate-500 uppercase"><th class="pb-2">ชื่อ-นามสกุล</th><th class="pb-2">แผนก</th><th class="pb-2">ตำแหน่ง</th><th class="pb-2 text-right">เงินเดือน '69</th></tr></thead>
+                                        <tbody>`;
+                
                 cc.employees.sort((a,b) => b.newSalary - a.newSalary).forEach(emp => {
-                    innerHtml += `<tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-2.5 font-bold text-slate-700">${emp.name}</td><td class="py-2.5 text-slate-500">${emp.dept}</td><td class="py-2.5 text-slate-500">${emp.position}</td><td class="py-2.5 text-right text-blue-600 font-bold">฿${emp.newSalary.toLocaleString()}</td></tr>`;
+                    innerHtml += `<tr class="border-b border-slate-50 hover:bg-slate-100 draggable-row" 
+                                      draggable="true" 
+                                      ondragstart="dragStart(event, '${emp.id}')"
+                                      ondragend="dragEnd(event)">
+                                    <td class="py-2.5 font-bold text-slate-700 flex items-center"><i class="fas fa-grip-vertical text-slate-300 mr-2 cursor-grab"></i>${emp.name}</td>
+                                    <td class="py-2.5 text-slate-500">${emp.dept}</td>
+                                    <td class="py-2.5 text-slate-500">${emp.position}</td>
+                                    <td class="py-2.5 text-right text-blue-600 font-bold">฿${emp.newSalary.toLocaleString()}</td>
+                                  </tr>`;
                 });
                 innerHtml += `</tbody></table></div>`;
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors group" onclick="document.getElementById('cc-row-${i}').classList.toggle('hidden')">
+                    <tr class="hover:bg-slate-50 cursor-pointer border-b border-slate-100 transition-colors group" onclick="if(event.target.closest('.droppable-area') || event.target.closest('.draggable-row')) return; document.getElementById('cc-row-${i}').classList.toggle('hidden')">
                         <td class="p-4 font-bold text-blue-700 group-hover:text-blue-800"><i class="fas fa-chevron-circle-down text-slate-300 mr-2 text-sm group-hover:text-blue-400 transition-colors"></i>${cc.costCenter}</td>
-                        <td class="p-4 text-center"><span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${cc.employeeCount}</span></td>
+                        <td class="p-4 text-center"><span class="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm">${cc.employeeCount}</span></td>
                         <td class="p-4 text-right font-extrabold text-slate-800">฿${cc.totalSalary.toLocaleString('th-TH')}</td>
                         <td class="p-4 text-right text-slate-500 font-medium">฿${parseFloat(avg).toLocaleString('th-TH')}</td>
                     </tr>
@@ -823,7 +939,6 @@
         // ADMIN EDIT ACTIONS (STRICT AUTH EVERY TIME)
         // ----------------------------------------------------
         function handleAdminTabClick() {
-            // เคลียร์ Password และเด้งให้ล็อกอินใหม่ทุกครั้ง
             document.getElementById('adminPassword').value = '';
             document.getElementById('authError').classList.add('hidden');
             document.getElementById('authModal').style.display = 'block';
@@ -834,7 +949,7 @@
             const pass = document.getElementById('adminPassword').value;
             if(pass === 'admin2026') { 
                 closeAuthModal();
-                switchTab('admin'); 
+                switchTab('admin', document.getElementById('adminTabBtn'));
             } else {
                 document.getElementById('authError').classList.remove('hidden');
             }
@@ -867,8 +982,8 @@
             const now = new Date();
             const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
             
-            localStorage.setItem('admin_all_employees_v4', JSON.stringify(allEmployees));
-            localStorage.setItem('admin_last_edit_stamp_v4', ts);
+            localStorage.setItem('admin_all_employees_v7', JSON.stringify(allEmployees));
+            localStorage.setItem('admin_last_edit_stamp_v7', ts);
             document.getElementById('lastUpdateText').innerText = ts;
             
             calculateStats();
