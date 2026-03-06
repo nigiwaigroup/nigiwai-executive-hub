@@ -459,16 +459,16 @@
 
     <script>
         // ----------------------------------------------------
-        // DATA: Base Array of 47 Employees (UPDATED FROM LATEST FILE)
+        // DATA: Base Array of Employees 
         // ----------------------------------------------------
         const originalAllEmployees = [
             {id: "660104", name: "นางสาวสาวิตรี สิงห์เหม้น", dept: "Operation", position: "Core Team Supervisor- Level I", level: "Leader and Supervisor", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
             {id: "670601", name: "นางสาวรัตติกาล สกุลอินทร์", dept: "Sales", position: "Sales Executive", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 19000.0, newSalary: 19000.0, details: ""},
             {id: "681001", name: "นางสาวพรวิไล มีชัย", dept: "Warehouse & Logistics", position: "Admin Purchasing", level: "Officer", company: "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16000.0, details: "ผ่านโปรปรับเงินเดือนตามตกลง"},
-            {id: "651003", name: "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", dept: "Financial And Account", position: "Acc Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 29300.0, newSalary: 30500.0, details: ""},
-            {id: "650206", name: "นายกฤษฎา จันทร์ฝา", dept: "Human Resource", position: "Human Resources Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20064.0, newSalary: 22000.0, details: ""},
-            {id: "650104", name: "นางสาวช้องนาง หินขาว", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20900.0, newSalary: 22000.0, details: ""},
-            {id: "660409", name: "นางสาวพานทอง รุ่งอนันต์กุลสิริ", dept: "Executive", position: "Executive Assistant - Level I", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 26812.8, newSalary: 28400.0, details: ""},
+            {id: "651003", name: "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", dept: "Financial And Account", position: "Acc Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 29300.0, newSalary: 30500.0, details: "ค่าชำนาญการ: +700, ค่าตำแหน่ง: +500"},
+            {id: "650206", name: "นายกฤษฎา จันทร์ฝา", dept: "Human Resource", position: "Human Resources Supervisor", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20064.0, newSalary: 22000.0, details: "ค่าชำนาญการ: +500, ค่าตำแหน่ง: +1,000, ฐานเงินเดือน: +436"},
+            {id: "650104", name: "นางสาวช้องนาง หินขาว", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 20900.0, newSalary: 22000.0, details: "ค่าชำนาญการ: +1,000, ฐานเงินเดือน: +100"},
+            {id: "660409", name: "นางสาวพานทอง รุ่งอนันต์กุลสิริ", dept: "Executive", position: "Executive Assistant - Level I", level: "Senior Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 26812.8, newSalary: 28400.0, details: "ค่าชำนาญการ: +387, ค่าตำแหน่ง: +1,200"},
             {id: "651101", name: "นางสาวณัฐชานันท์ ธนังชูศิลป์", dept: "Sales", position: "Sales Manager (Acting)", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 28000.0, newSalary: 28000.0, details: ""},
             {id: "631202", name: "นางสาวสาริศา กมลอรรฆ", dept: "Executive", position: "Executive Assistant - Level III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 30500.0, newSalary: 30500.0, details: ""},
             {id: "651201", name: "นางสาวกนกพิชญ์ พิบูลย์", dept: "Financial And Account", position: "Financial & Account Manager", level: "Manager", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 42000.0, newSalary: 42000.0, details: ""},
@@ -478,20 +478,20 @@
             {id: "641103", name: "นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์", dept: "Operation", position: "Project Leader", level: "Consultant", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 12000.0, newSalary: 12000.0, details: ".ให้ค่า Project ตามเนื้องาน 5,000 - 10,000 บาท"},
             {id: "681101", name: "นายภัทรพล เดือนฉาย", dept: "Human Resource", position: "Senior Recruite", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 27000.0, newSalary: 27000.0, details: ""},
             {id: "681002", name: "นางสาววิภาวี  เรืองจรูญ", dept: "Human Resource", position: "Recruite Officer", level: "Officer", company: "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 16500.0, details: "ผ่านโปรปรับเงินเดือนตามตกลง"},
-            {id: "610701", name: "นางสาวอรอริยา สุดสุข", dept: "Operation", position: "ART Operation- Lv.III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 35889.15, newSalary: 36000.0, details: ""},
-            {id: "660504", name: "นางสาวภัรตรา เพ็ญภู่", dept: "Sales", position: "After Sales - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 19500.0, details: ""},
-            {id: "680901", name: "นายณัฐกิจ ต้นโต", dept: "Warehouse & Logistics", position: "พนักงานขนส่ง", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 15000.0, details: ""},
-            {id: "AS670308", name: "นางสาวมณีรัตน์ ธงทอง", dept: "Operation", position: "Production Staff", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 14000.0, details: ""},
-            {id: "VV660302", name: "นางสาวศิริวรรณ กำรัตน์", dept: "Operation", position: "Chef - Lv.II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: ""},
+            {id: "610701", name: "นางสาวอรอริยา สุดสุข", dept: "Operation", position: "ART Operation- Lv.III", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 35889.15, newSalary: 36000.0, details: "ค่าตำแหน่ง: +111"},
+            {id: "660504", name: "นางสาวภัรตรา เพ็ญภู่", dept: "Sales", position: "After Sales - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 16500.0, newSalary: 19500.0, details: "ค่าชำนาญการ: +2,000, ค่าตำแหน่ง: +1,000"},
+            {id: "680901", name: "นายณัฐกิจ ต้นโต", dept: "Warehouse & Logistics", position: "พนักงานขนส่ง", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 15000.0, details: "ค่าชำนาญการ: +1,000, ฐานเงินเดือน: +1,000"},
+            {id: "AS670308", name: "นางสาวมณีรัตน์ ธงทอง", dept: "Operation", position: "Production Staff", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 13000.0, newSalary: 14000.0, details: "ค่าชำนาญการ: +1,000"},
+            {id: "VV660302", name: "นางสาวศิริวรรณ กำรัตน์", dept: "Operation", position: "Chef - Lv.II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ค่าชำนาญการ: +1,000"},
             {id: "660201", name: "นางสาวธิติญา ปัญญายิ่ง", dept: "Marketing", position: "Graphic Designer - Lv III", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 23690.0, newSalary: 23690.0, details: ""},
             {id: "610601", name: "นายสุทธิพร ตั้งสกุลสันติ", dept: "Executive", position: "President & Group CEO", level: "Chief and Director", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 180000.0, newSalary: 180000.0, details: ""},
             {id: "670401", name: "นายพงศธร โชติยะศิลป์", dept: "Executive", position: "Chief Financial Officer", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 65000.0, newSalary: 50000.0, details: "จะมีการพิจารณาปรับขึ้นเมื่อสามารถ Funding ได้"},
             {id: "650208", name: "นายขวัญวิชัย ไกรงาม", dept: "Operation", position: "Head Chef - Level II", level: "Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 28037.5, newSalary: 28037.5, details: ""},
             {id: "640202", name: "นางสาวคณิตตา จำเริญพงษ์", dept: "Warehouse & Logistics", position: "ART Supply Chain - Level III", level: "Manager", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 33000.0, newSalary: 33000.0, details: ""},
             {id: "670202", name: "นางสาวกัลยรักษ์ ตระกูลอินทร์", dept: "Financial And Account", position: "Senior Accounting Officer", level: "Senior Officer", company: "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", oldSalary: 24000.0, newSalary: 24000.0, details: ""},
-            {id: "660801", name: "นางสาวฐิติกานต์ รักเมือง", dept: "Marketing", position: "Graphic Designer - Lv I", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16500.0, details: ""},
-            {id: "660804", name: "นายจิติวัฒน์ อุปวรรณะ", dept: "Construction", position: "Senior Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26000.0, newSalary: 30000.0, details: ""},
-            {id: "670201", name: "นายศักดิ์จรินทร์ ดวงฤทัย", dept: "Information Technology", position: "IT Support", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: ""},
+            {id: "660801", name: "นางสาวฐิติกานต์ รักเมือง", dept: "Marketing", position: "Graphic Designer - Lv I", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16000.0, newSalary: 16500.0, details: "ค่าชำนาญการ: +500"},
+            {id: "660804", name: "นายจิติวัฒน์ อุปวรรณะ", dept: "Construction", position: "Senior Interior Designer", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 26000.0, newSalary: 30000.0, details: "ค่าชำนาญการ: +1,000, ค่าตำแหน่ง: +2,000, ฐานเงินเดือน: +1,000"},
+            {id: "670201", name: "นายศักดิ์จรินทร์ ดวงฤทัย", dept: "Information Technology", position: "IT Support", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 15000.0, newSalary: 16000.0, details: "ฐานเงินเดือน: +1,000"},
             {id: "660401", name: "นายพิชญา บัวบรรจง", dept: "Information Technology", position: "IT Specialist", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 33705.0, newSalary: 33705.0, details: ""},
             {id: "610602", name: "นายวรันธร แดงใหญ่", dept: "Executive", position: "CEO", level: "Chief and Director", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 120000.0, newSalary: 120000.0, details: "ย้ายมาจาก นิกิวาอิ กรุ๊ป มีผล 1 กย.2568"},
             {id: "641105", name: "นายอรรถสิทธิ์ สุปัดคำ", dept: "Construction", position: "Project Coordinator - Level I", level: "Leader and Supervisor", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 25000.0, newSalary: 25000.0, details: ""},
@@ -503,9 +503,9 @@
             {id: "641001", name: "นายวีระพจน์ สังเกตุ", dept: "Warehouse & Logistics", position: "Driver &Technician", level: "Officer", company: "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", oldSalary: 16222.5, newSalary: 16222.5, details: ""},
             {id: "680801", name: "นางสาววัชรวีร์ ศุภเลิศธนศักดิ์", dept: "Human Resource", position: "Human Resources Manager", level: "Manager", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 43000.0, newSalary: 43000.0, details: ""},
             {id: "660702", name: "นายกรกช บรรพจน์พิทักษ์", dept: "Marketing", position: "Video Creator", level: "Officer", company: "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", oldSalary: 20500.0, newSalary: 20500.0, details: ""},
-            {id: "630601", name: "นางสาวธนภรณ์ ผ่องประทุม", dept: "Marketing", position: "Art Supervisor", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 29674.2, newSalary: 30000.0, details: ""},
-            {id: "650102", name: "นายวินัย หนองแพ", dept: "Operation", position: "Executive Chef - Lv.II", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36378.13, newSalary: 37500.0, details: ""},
-            {id: "650207", name: "นางสาวเสาวณี พันสุวรรณ์", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 19742.5, newSalary: 22000.0, details: ""},
+            {id: "630601", name: "นางสาวธนภรณ์ ผ่องประทุม", dept: "Marketing", position: "Art Supervisor", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 29674.2, newSalary: 30000.0, details: "ค่าตำแหน่ง: +209, ฐานเงินเดือน: +117"},
+            {id: "650102", name: "นายวินัย หนองแพ", dept: "Operation", position: "Executive Chef - Lv.II", level: "Leader and Supervisor", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36378.13, newSalary: 37500.0, details: "ค่าชำนาญการ: +500, ค่าตำแหน่ง: +622"},
+            {id: "650207", name: "นางสาวเสาวณี พันสุวรรณ์", dept: "Operation", position: "Core Team - Level II", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 19742.5, newSalary: 22000.0, details: "ค่าชำนาญการ: +1,108, ฐานเงินเดือน: +1,150"},
             {id: "650903", name: "นายกันต์ศักย์ ปานมงคล", dept: "Operation", position: "Quality Control & Audit Manager", level: "Manager", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 36050.0, newSalary: 36050.0, details: ""},
             {id: "660101", name: "นางสาวกรวรรณ สุวรรณพรรค", dept: "Financial And Account", position: "Accounts Payable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 22050.0, newSalary: 22050.0, details: ""},
             {id: "660503", name: "นายภูรินทร์ บุญวรรณ", dept: "Financial And Account", position: "Accounts Receivable", level: "Officer", company: "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", oldSalary: 18900.0, newSalary: 18900.0, details: "รอดูผลงานและปรับเงินอีกครั้ง"}
@@ -533,8 +533,8 @@
         // ----------------------------------------------------
         // SYSTEM VARIABLES & STATES
         // ----------------------------------------------------
-        // ล้างแคชรับข้อมูลใหม่
-        let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees_v7')) || originalAllEmployees;
+        // เปลี่ยน Key เพื่ออัปเดตข้อมูลใหม่ล่าสุดจากที่ปรับปรุง
+        let allEmployees = JSON.parse(localStorage.getItem('admin_all_employees_v8')) || originalAllEmployees;
         
         let deptStats = {};
         let levelStats = {};
@@ -566,7 +566,7 @@
             initFilters();
             calculateStats();
             renderDashboard();
-            const lastUpdate = localStorage.getItem('admin_last_edit_stamp_v7');
+            const lastUpdate = localStorage.getItem('admin_last_edit_stamp_v8');
             if(lastUpdate) document.getElementById('lastUpdateText').innerText = lastUpdate;
         });
 
@@ -746,8 +746,8 @@
                     // Save to localStorage
                     const now = new Date();
                     const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
-                    localStorage.setItem('admin_all_employees_v7', JSON.stringify(allEmployees));
-                    localStorage.setItem('admin_last_edit_stamp_v7', ts);
+                    localStorage.setItem('admin_all_employees_v8', JSON.stringify(allEmployees));
+                    localStorage.setItem('admin_last_edit_stamp_v8', ts);
                     document.getElementById('lastUpdateText').innerText = ts;
                     
                     // Recalculate and Render
@@ -815,7 +815,7 @@
                     </tr>
                     <tr id="adj-det-${i}" class="hidden bg-slate-50/80 border-b border-slate-200">
                         <td colspan="7" class="p-4 pl-6 text-sm text-slate-600 border-l-4 border-blue-400">
-                            <i class="fas fa-info-circle text-blue-400 mr-2"></i><strong>รายละเอียดการปรับ:</strong> ${emp.details || 'ไม่มีบันทึกรายละเอียด (ปรับฐานเงินเดือนปกติ)'}
+                            <i class="fas fa-info-circle text-blue-400 mr-2"></i><strong>รายละเอียดการปรับ:</strong> <span class="font-medium text-slate-700">${emp.details || 'ปรับฐานเงินเดือนปกติ (ไม่มีรายละเอียดเพิ่มเติม)'}</span>
                         </td>
                     </tr>
                 `;
@@ -982,8 +982,8 @@
             const now = new Date();
             const ts = `${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})} น.`;
             
-            localStorage.setItem('admin_all_employees_v7', JSON.stringify(allEmployees));
-            localStorage.setItem('admin_last_edit_stamp_v7', ts);
+            localStorage.setItem('admin_all_employees_v8', JSON.stringify(allEmployees));
+            localStorage.setItem('admin_last_edit_stamp_v8', ts);
             document.getElementById('lastUpdateText').innerText = ts;
             
             calculateStats();
