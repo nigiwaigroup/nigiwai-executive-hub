@@ -186,16 +186,23 @@ body {
 .b-ne { background: rgba(100, 116, 139, 0.1); color: var(--muted); border: 1px solid rgba(100, 116, 139, 0.2); }
 
 /* Bar Charts (CSS) */
-.barchart { display: flex; flex-direction: column; gap: 14px; }
-.brow { display: flex; align-items: center; gap: 12px; }
-.blabel { font-size: 12px; color: var(--text-dark); width: 320px; min-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
-.bwrap { flex: 1; background: var(--bg); border-radius: 6px; height: 16px; overflow: hidden; }
+.barchart { 
+  display: grid; 
+  grid-template-columns: max-content 1fr max-content; 
+  gap: 14px 12px; 
+  align-items: center; 
+  width: 100%;
+  overflow-x: auto; 
+  padding-bottom: 4px;
+}
+.blabel { font-size: 12px; color: var(--text-dark); white-space: nowrap; }
+.bwrap { width: 100%; min-width: 60px; background: var(--bg); border-radius: 6px; height: 16px; overflow: hidden; }
 .bfill { height: 100%; border-radius: 6px; background: var(--accent); transition: width .8s cubic-bezier(.4,0,.2,1); }
 .bfill.indigo { background: var(--accent2); }
 .bfill.emerald { background: var(--accent3); }
 .bfill.amber { background: var(--accent4); }
 .bfill.red { background: var(--accent5); }
-.bval { font-size: 12px; font-family: "IBM Plex Mono", monospace; color: var(--muted); width: 80px; text-align: right; flex-shrink: 0; }
+.bval { font-size: 12px; font-family: "IBM Plex Mono", monospace; color: var(--muted); text-align: right; white-space: nowrap; }
 
 /* Tables */
 .twrap { overflow-x: auto; margin: 0 -24px; padding: 0 24px; }
@@ -332,7 +339,6 @@ tbody tr:last-child td { border-bottom: none; }
   .mob-flow { width: 100%; flex-direction: column; align-items: stretch; gap: 8px;}
   .mob-arrow { transform: rotate(90deg); }
   .mob-meta { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px;}
-  .blabel { width: 180px; min-width: 180px; }
 }
 </style>
 </head>
@@ -417,7 +423,7 @@ tbody tr:last-child td { border-bottom: none; }
       <div class="kpi-sub" style="margin-top:8px;">บาท/เดือน <span id="k-base-diff" class="badge" style="margin-left:8px;"></span></div>
     </div>
   </div>
-  <div class="g1" style="margin-bottom:24px;">
+  <div class="g2" style="margin-bottom:24px;">
     <div class="card">
       <div class="ctitle"><i data-lucide="building" width="16" height="16"></i> พนักงานตาม Cost Center (ปัจจุบัน)</div>
       <div class="barchart" id="ov-cc"></div>
@@ -742,11 +748,9 @@ function renderBars(id,data,cls=""){
   const el=document.getElementById(id);if(!el)return;
   const max=Math.max(...data.map(d=>d.val),1);
   el.innerHTML=data.map(d=>`
-    <div class="brow">
-      <div class="blabel" title="${d.label}">${d.label}</div>
-      <div class="bwrap"><div class="bfill ${cls}" style="width:${(d.val/max*100).toFixed(1)}%"></div></div>
-      <div class="bval">${typeof d.val==="number"&&d.val>999?fmt(d.val):d.val}${d.sfx||""}</div>
-    </div>`).join("");
+    <div class="blabel" title="${d.label}">${d.label}</div>
+    <div class="bwrap"><div class="bfill ${cls}" style="width:${(d.val/max*100).toFixed(1)}%"></div></div>
+    <div class="bval">${typeof d.val==="number"&&d.val>999?fmt(d.val):d.val}${d.sfx||""}</div>`).join("");
 }
 function drawDonut(canvasId,legendId,data){
   const cv=document.getElementById(canvasId);if(!cv)return;
