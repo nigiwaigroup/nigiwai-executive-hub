@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Work Flow Stock Adjust — Nigiben ดอนเมือง</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #f4f6fb;
+  font-family: 'Noto Sans Thai', sans-serif;
+  padding: 32px 24px 80px;
+  color: #1a1a2e;
+}
+.page { max-width: 1280px; margin: 0 auto; }
+
+.header {
+  background: linear-gradient(135deg, #1a237e 0%, #1565c0 60%, #0288d1 100%);
+  border-radius: 12px; padding: 28px 36px; margin-bottom: 24px;
+  color: #fff; display: flex; justify-content: space-between; align-items: flex-start;
+}
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.header .sub { font-size: 13px; opacity: 0.8; }
+.header-meta { text-align: right; font-size: 12px; opacity: 0.85; line-height: 1.9; }
+.ver-badge {
+  display: inline-block; background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 4px;
+  padding: 2px 10px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; margin-bottom: 8px;
+}
+
+.legend {
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 18px; padding: 10px 18px;
+  background: #fff; border-radius: 8px; border: 1px solid #e0e4ef;
+}
+.legend-lbl { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #444; }
+.ldot { width: 13px; height: 13px; border-radius: 3px; flex-shrink:0; }
+
+/* ── Diagram wrapper — exact 1240px wide so SVG coordinates match ── */
+.diagram-wrap {
+  position: relative;
+  width: 1240px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #d0d5e8;
+  overflow: visible;
+}
+
+/* SVG sits absolutely on top, same size as diagram-wrap */
+.arrows-svg {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 20;
+  overflow: visible;
+}
+
+.col-heads {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 2px solid #d0d5e8;
+  border-radius: 12px 12px 0 0; overflow: hidden;
+}
+.col-head {
+  padding: 14px 16px; text-align: center;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+  border-right: 1px solid #d0d5e8;
+}
+.col-head:last-child { border-right: none; }
+.ch-b { background: #e3f2fd; color: #1565c0; }
+.ch-k { background: #e8f5e9; color: #2e7d32; }
+.ch-w { background: #fff8e1; color: #e65100; }
+
+.lanes { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.lane {
+  padding: 18px 14px 24px; border-right: 1px solid #e4e8f4;
+  display: flex; flex-direction: column; align-items: center;
+  position: relative;
+}
+.lane:last-child { border-right: none; }
+.lane-b { background: #f8fbff; }
+.lane-k { background: #f7fbf7; }
+.lane-w { background: #fffcf2; }
+
+/* Nodes */
+.node {
+  width: 228px; padding: 10px 13px; border-radius: 8px;
+  font-size: 13px; line-height: 1.5; text-align: center; position: relative; z-index: 5;
+}
+.ntag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  padding: 2px 7px; border-radius: 3px; display: inline-block; margin-bottom: 4px;
+}
+.ntitle { font-weight: 600; font-size: 13px; }
+.nsub { font-size: 11px; color: #666; margin-top: 3px; line-height: 1.4; }
+
+.pill {
+  border-radius: 24px; padding: 9px 28px; font-weight: 700; font-size: 13px;
+  color: #fff; text-align: center; position: relative; z-index: 5;
+}
+.pill-s { background: #5c35c5; box-shadow: 0 2px 8px rgba(92,53,197,0.3); }
+.pill-e { background: #1b8f47; box-shadow: 0 2px 8px rgba(27,143,71,0.3); }
+
+.nb { background:#e3f2fd; border:1.5px solid #90caf9; color:#0d47a1; }
+.nk { background:#e8f5e9; border:1.5px solid #a5d6a7; color:#1b5e20; }
+.nw { background:#fff8e1; border:1.5px solid #ffcc80; color:#bf360c; }
+.nc { background:#f3e5f5; border:1.5px dashed #ce93d8; color:#6a1b9a; }
+.nn { background:#fce4ec; border:1.5px solid #f48fb1; color:#880e4f; }
+.nkpi { background:#e8eaf6; border:1.5px solid #9fa8da; color:#1a237e; }
+
+.tb { background:#bbdefb; color:#1565c0; }
+.tk { background:#c8e6c9; color:#2e7d32; }
+.tw { background:#ffe082; color:#e65100; }
+.tc { background:#e1bee7; color:#6a1b9a; }
+.tn { background:#f8bbd9; color:#880e4f; }
+
+/* Vertical arrows */
+.va {
+  width: 2px; height: 20px; position: relative; margin: 3px auto; z-index: 5;
+}
+.va::after {
+  content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
+  border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid currentColor;
+}
+.vab { background:#1565c0; color:#1565c0; }
+.vak { background:#2e7d32; color:#2e7d32; }
+.vaw { background:#e65100; color:#e65100; }
+.var { background:#c62828; color:#c62828; }
+
+.yn {
+  display:inline-block; font-size:10px; font-weight:700;
+  padding:2px 8px; border-radius:10px; margin:2px auto; z-index:5; position:relative;
+}
+.yy { background:#c8e6c9; color:#1b5e20; }
+.yn2 { background:#ffcdd2; color:#b71c1c; }
+
+.sp  { height:10px; flex-shrink:0; }
+.sp2 { height:20px; flex-shrink:0; }
+.sp4 { height:40px; flex-shrink:0; }
+
+/* Notes */
+.notes { margin-top:24px; background:#fff; border:1px solid #d0d5e8; border-radius:12px; overflow:hidden; }
+.notes-head { background:#1a237e; color:#fff; padding:12px 20px; font-size:13px; font-weight:700; }
+.notes-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+.nc2 { padding:15px 18px; border-right:1px solid #e8ebf4; border-bottom:1px solid #e8ebf4; }
+.nc2:nth-child(3n) { border-right:none; }
+.nc-num { font-family:'IBM Plex Mono',monospace; font-size:10px; color:#aaa; margin-bottom:4px; }
+.nc-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+.nc-body { font-size:12px; color:#555; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div>
+    <div class="ver-badge">WF-STOCK-ADJUST v2.0 · 10/03/2026</div>
+    <h1>Work Flow: Stock Adjust (สินค้าเบิกใช้ภายในองค์กร)</h1>
+    <div class="sub">คลัง Nigiben ดอนเมือง → สาขา Nigiben ดอนเมือง · Revised &amp; Improved</div>
+  </div>
+  <div class="header-meta">
+    <div>Drawing: Pichaya</div><div>Approved: Kraijate</div><div>10/03/2026</div>
+  </div>
+</div>
+
+<div class="legend">
+  <span class="legend-lbl">Legend</span>
+  <div class="legend-item"><div class="ldot" style="background:#e3f2fd;border:1.5px solid #90caf9;"></div> Branch</div>
+  <div class="legend-item"><div class="ldot" style="background:#e8f5e9;border:1.5px solid #a5d6a7;"></div> Kitchen</div>
+  <div class="legend-item"><div class="ldot" style="background:#fff8e1;border:1.5px solid #ffcc80;"></div> Warehouse</div>
+  <div class="legend-item"><div class="ldot" style="background:#f3e5f5;border:1.5px dashed #ce93d8;"></div> Checkpoint</div>
+  <div class="legend-item"><div class="ldot" style="background:#fce4ec;border:1.5px solid #f48fb1;"></div> เพิ่มใหม่</div>
+  <div class="legend-item" style="margin-left:8px;">
+    <svg width="34" height="14" style="overflow:visible">
+      <defs><marker id="lgb" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#1565c0"/></marker></defs>
+      <line x1="0" y1="7" x2="26" y2="7" stroke="#1565c0" stroke-width="2" marker-end="url(#lgb)"/>
+    </svg> เส้นเชื่อมปกติ
+  </div>
+  <div class="legend-item">
+    <svg width="34" height="14" style="overflow:visible">
+      <defs><marker id="lgr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#c62828"/></marker></defs>
+      <line x1="0" y1="7" x2="26" y2="7" stroke="#c62828" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#lgr)"/>
+    </svg> เส้น Reject/เคลม
+  </div>
+</div>
+
+<!-- ─── DIAGRAM BOX ─── -->
+<div class="diagram-wrap" id="wrap">
+
+  <!-- ══ SVG ARROWS — coordinates hardcoded from measured layout ══ -->
+  <svg class="arrows-svg" id="svg" width="1240" height="1002" style="position:absolute;top:0;left:0;">
+    <defs>
+      <marker id="aB" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#1565c0"/></marker>
+      <marker id="aG" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#2e7d32"/></marker>
+      <marker id="aO" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#e65100"/></marker>
+      <marker id="aR" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#c62828"/></marker>
+    </defs>
+
+    <!-- ① Branch(n-b2) → Warehouse(n-w1): ส่ง PO
+         right of n-b2(321,292) → x=430 → UP to y=113 (empty space above n-k1)
+         → across to left of n-w1(919,113) -->
+    <path d="M321 292 L430 292 L430 113 L919 113"
+          fill="none" stroke="#1565c0" stroke-width="2.2" marker-end="url(#aB)"/>
+    <rect x="636" y="100" width="78" height="17" rx="3" fill="white" stroke="#1565c0" stroke-width="1"/>
+    <text x="675" y="113" text-anchor="middle" fill="#1565c0" font-size="10" font-family="IBM Plex Mono,monospace" font-weight="600">ส่ง PO</text>
+
+    <!-- ② Warehouse(n-w2) → Kitchen(n-k1): ส่งวัตถุดิบ
+         left of n-w2(912,251) → x=800 → y=291 → right of n-k1(730,291) -->
+    <path d="M912 251 L800 251 L800 291 L730 291"
+          fill="none" stroke="#e65100" stroke-width="2.2" marker-end="url(#aO)"/>
+    <rect x="762" y="258" width="90" height="17" rx="3" fill="white" stroke="#e65100" stroke-width="1"/>
+    <text x="807" y="271" text-anchor="middle" fill="#e65100" font-size="10" font-family="IBM Plex Mono,monospace" font-weight="600">ส่งวัตถุดิบ</text>
+
+    <!-- ③ Kitchen(n-k4) → Branch(n-cp2): ส่งสินค้า
+         left of n-k4(502,739) → x=400 → y=448 → right of n-cp2(320,448) -->
+    <path d="M502 739 L400 739 L400 448 L320 448"
+          fill="none" stroke="#2e7d32" stroke-width="2.2" marker-end="url(#aG)"/>
+    <rect x="344" y="576" width="78" height="17" rx="3" fill="white" stroke="#2e7d32" stroke-width="1"/>
+    <text x="383" y="589" text-anchor="middle" fill="#2e7d32" font-size="10" font-family="IBM Plex Mono,monospace" font-weight="600">ส่งสินค้า</text>
+
+    <!-- ④ Branch(n-b5) → Warehouse(n-w5): ส่งของเคลม (dashed red)
+         bottom of n-b5(206,957) → y=990 → across → bottom of n-w5(1026,822) -->
+    <path d="M206 957 L206 990 L1026 990 L1026 822"
+          fill="none" stroke="#c62828" stroke-width="2.2" stroke-dasharray="6 3" marker-end="url(#aR)"/>
+    <rect x="553" y="978" width="106" height="17" rx="3" fill="white" stroke="#c62828" stroke-width="1"/>
+    <text x="606" y="991" text-anchor="middle" fill="#c62828" font-size="10" font-family="IBM Plex Mono,monospace" font-weight="600">ส่งของเคลมกลับ</text>
+
+    <!-- ⑤ Warehouse loop n-w4 → n-w1: สั่งซ้ำ (dashed orange)
+         right of n-w4(1140,480) → x=1195 → y=113 → right of n-w1(1140,113) -->
+    <path d="M1140 480 L1195 480 L1195 113 L1140 113"
+          fill="none" stroke="#e65100" stroke-width="2.2" stroke-dasharray="6 3" marker-end="url(#aO)"/>
+    <rect x="1157" y="280" width="52" height="17" rx="3" fill="white" stroke="#e65100" stroke-width="1"/>
+    <text x="1183" y="293" text-anchor="middle" fill="#e65100" font-size="10" font-family="IBM Plex Mono,monospace" font-weight="600">loop</text>
+  </svg>
+
+  <!-- Column headers -->
+  <div class="col-heads">
+    <div class="col-head ch-b">🏪 Branch (สาขา)</div>
+    <div class="col-head ch-k">🍳 Delivery Kitchen (ครัวกลาง)</div>
+    <div class="col-head ch-w">🏭 Warehouse (คลังสินค้า)</div>
+  </div>
+
+  <!-- Swim lanes -->
+  <div class="lanes">
+
+    <!-- BRANCH -->
+    <div class="lane lane-b">
+      <div class="sp"></div>
+      <div class="pill pill-s" id="n-start">▶ START</div>
+      <div class="va vab"></div>
+      <div class="node nb" id="n-b1">
+        <span class="ntag tb">FMH</span>
+        <div class="ntitle">สั่งสินค้า (PO)</div>
+        <div class="nsub">สร้าง Purchase Order ในระบบ FMH</div>
+      </div>
+      <div class="va vab"></div>
+      <div class="node nb" id="n-b2">
+        <span class="ntag tb">FMH</span>
+        <div class="ntitle">รับ Order (SO)</div>
+        <div class="nsub">รับ Sales Order จากระบบ</div>
+      </div>
+
+      <!-- spacer = Kitchen top spacer height (200px) minus Branch nodes so far so CP2 aligns ~same zone -->
+      <div style="flex:1; min-height:16px;"></div>
+
+      <div class="node nc" id="n-cp2">
+        <span class="ntag tc">Checkpoint 2</span>
+        <div class="ntitle">ตรวจรับสินค้าที่สาขา</div>
+        <div class="nsub">✓ จำนวน ✓ อุณหภูมิ<br>✓ สภาพ ✓ ฉลาก</div>
+      </div>
+      <div class="va vab"></div>
+      <div class="yn yy">✓ ผ่าน</div>
+      <div class="va vab"></div>
+      <div class="node nn" id="n-b3">
+        <span class="ntag tn">⭐ เพิ่มใหม่</span>
+        <div class="ntitle">บันทึก Stock Adjust ในระบบ FMH</div>
+        <div class="nsub">ผู้รับผิดชอบ: หัวหน้าสาขา</div>
+      </div>
+      <div class="va vab"></div>
+      <div class="node nb" id="n-b4">
+        <div class="ntitle">จัดเรียงสินค้า → ดำเนินงานขาย</div>
+      </div>
+      <div class="va vab"></div>
+      <div class="pill pill-e" id="n-end">✔ DONE</div>
+      <div class="sp4"></div>
+      <div class="yn yn2">✗ ไม่ผ่าน (ของเคลม)</div>
+      <div class="va var"></div>
+      <div class="node nn" id="n-b5">
+        <span class="ntag tn">เพิ่มใหม่</span>
+        <div class="ntitle">แจ้ง Warehouse</div>
+        <div class="nsub">+ ส่งของเคลมกลับคลัง</div>
+      </div>
+      <div class="sp2"></div>
+    </div>
+
+    <!-- KITCHEN -->
+    <div class="lane lane-k">
+      <div style="height:200px; flex-shrink:0;"></div>
+      <div class="node nk" id="n-k1">
+        <div class="ntitle">ครัวกลางรับ Order จากคลัง</div>
+      </div>
+      <div class="va vak"></div>
+      <div class="node nk" id="n-k2">
+        <div class="ntitle">รับวัตถุดิบ → ผลิตสินค้า</div>
+        <div class="nsub">เตรียมวัตถุดิบ → ผลิต</div>
+      </div>
+      <div class="va vak"></div>
+      <div class="node nk" id="n-k3">
+        <span class="ntag tk">ปรับปรุง</span>
+        <div class="ntitle">บรรจุสินค้าลงบรรจุภัณฑ์</div>
+        <div class="nsub">ชื่อสินค้า / วันผลิต / วันหมดอายุ</div>
+      </div>
+      <div class="va vak"></div>
+      <div class="node nc" id="n-cp1">
+        <span class="ntag tc">Checkpoint 1</span>
+        <div class="ntitle">ตรวจสอบก่อนขนส่ง</div>
+        <div class="nsub">✓ จำนวน ✓ น้ำหนัก<br>✓ วันหมดอายุ ✓ ฉลาก</div>
+      </div>
+      <div class="va vak"></div>
+      <div class="yn yy">✓ ผ่าน</div>
+      <div class="va vak"></div>
+      <div class="node nk" id="n-k4">
+        <div class="ntitle">ขนสินค้าขึ้นรถขนส่ง</div>
+        <div class="nsub">→ ส่งไปยังสาขาปลายทาง</div>
+      </div>
+      <div class="sp4"></div>
+      <div class="yn yn2">✗ ไม่ผ่าน</div>
+      <div class="va var"></div>
+      <div class="node nn" id="n-k5">
+        <span class="ntag tn">เพิ่มใหม่</span>
+        <div class="ntitle">บันทึก NCR</div>
+        <div class="nsub">Non-Conformance Report<br>แจ้งผลิตใหม่ / ทำ Credit Note</div>
+      </div>
+      <div class="sp2"></div>
+    </div>
+
+    <!-- WAREHOUSE -->
+    <div class="lane lane-w">
+      <div class="sp"></div>
+      <div class="node nw" id="n-w1">
+        <span class="ntag tw">ปรับปรุง</span>
+        <div class="ntitle">เช็คสต็อควัตถุดิบ + บรรจุภัณฑ์</div>
+      </div>
+      <div class="va vaw"></div>
+      <div class="yn yy">✓ มีเพียงพอ</div>
+      <div class="va vaw"></div>
+      <div class="node nw" id="n-w2">
+        <div class="ntitle">เตรียมวัตถุดิบ + บรรจุภัณฑ์</div>
+        <div class="nsub">พับกล่อง / ติด Label</div>
+      </div>
+      <div class="sp4"></div>
+      <div class="yn yn2">✗ ไม่เพียงพอ</div>
+      <div class="va var"></div>
+      <div class="node nw" id="n-w3">
+        <div class="ntitle">สั่งซื้อวัตถุดิบเข้าคลัง</div>
+      </div>
+      <div class="va vaw"></div>
+      <div class="node nn" id="n-w4">
+        <span class="ntag tn">เพิ่มใหม่</span>
+        <div class="ntitle">กำหนด Lead Time</div>
+        <div class="nsub">Escalation path หากเกิน SLA</div>
+      </div>
+      <div style="flex:1; min-height:16px;"></div>
+      <div class="node nn" id="n-w5">
+        <span class="ntag tn">เพิ่มใหม่</span>
+        <div class="ntitle">รับสินค้าเคลมกลับ</div>
+        <div class="nsub">บันทึกสต็อคลด + Claim Document</div>
+      </div>
+      <div class="sp2"></div>
+      <div class="node nkpi" id="n-kpi">
+        <span class="ntag" style="background:#c5cae9;color:#1a237e;">KPI ใหม่</span>
+        <div class="ntitle">ตัวชี้วัดประสิทธิภาพ</div>
+        <div class="nsub">ส่งตรงเวลา ≥ 95%<br>Stock Accuracy ≥ 99%<br>Defect Rate &lt; 2%</div>
+      </div>
+      <div class="sp2"></div>
+    </div>
+
+  </div><!-- /lanes -->
+</div><!-- /wrap -->
+
+<!-- Notes -->
+<div class="notes">
+  <div class="notes-head">📋 สรุปการปรับปรุง 6 จุดหลัก เทียบกับต้นฉบับ</div>
+  <div class="notes-grid">
+    <div class="nc2"><div class="nc-num">01 · เพิ่มใหม่ ⭐</div><div class="nc-title" style="color:#880e4f;">บันทึก Stock Adjust ในระบบ FMH</div><div class="nc-body">Step ที่ขาดหายในต้นฉบับ ต้องบันทึกทันทีหลัง CP2 โดยหัวหน้าสาขา</div></div>
+    <div class="nc2"><div class="nc-num">02 · ปรับปรุง</div><div class="nc-title" style="color:#6a1b9a;">Checkpoint มี Criteria ชัดเจน</div><div class="nc-body">CP1 และ CP2 ระบุรายการ: จำนวน น้ำหนัก วันหมดอายุ อุณหภูมิ สภาพ ฉลาก</div></div>
+    <div class="nc2"><div class="nc-num">03 · เพิ่มใหม่</div><div class="nc-title" style="color:#880e4f;">Sub-flow กรณี Reject/เคลม</div><div class="nc-body">NCR เมื่อไม่ผ่าน CP1, Claim Document เมื่อไม่ผ่าน CP2</div></div>
+    <div class="nc2"><div class="nc-num">04 · เพิ่มใหม่</div><div class="nc-title" style="color:#880e4f;">Lead Time &amp; Escalation Path</div><div class="nc-body">วัตถุดิบไม่เพียงพอต้องกำหนด Lead Time และ Escalation ป้องกัน Loop ไม่มีทางออก</div></div>
+    <div class="nc2"><div class="nc-num">05 · เพิ่มใหม่</div><div class="nc-title" style="color:#880e4f;">KPI &amp; Metrics</div><div class="nc-body">ส่งตรงเวลา ≥95%, Stock Accuracy ≥99%, Defect Rate &lt;2%, Claim Rate &lt;1%</div></div>
+    <div class="nc2"><div class="nc-num">06 · ปรับปรุง</div><div class="nc-title" style="color:#6a1b9a;">ระบุ Owner แต่ละ Step</div><div class="nc-body">ผู้รับผิดชอบชัดเจน: หัวหน้าสาขา, หัวหน้าครัว, เจ้าหน้าที่คลัง</div></div>
+  </div>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
