@@ -175,9 +175,17 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 .str-hero{text-align:center;padding:24px 20px 20px;margin-bottom:24px;background:linear-gradient(135deg,rgba(200,164,86,0.06),rgba(91,141,239,0.04));border:1px solid rgba(200,164,86,0.1);border-radius:14px;}
 .str-hero h2{font-size:24px;font-weight:900;color:var(--wh);margin-bottom:4px;}
 .str-hero p{font-size:13px;color:var(--td);}
-.str-hero .str-kpi-row{display:flex;justify-content:center;gap:32px;margin-top:14px;}
-.str-hero .str-kpi-val{font-size:30px;font-weight:800;color:var(--gold);}
-.str-hero .str-kpi-lbl{font-size:11px;color:var(--td);}
+.str-kpi-row{display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap;}
+.str-kpi-box{
+  padding:14px 20px;border-radius:12px;min-width:120px;cursor:pointer;
+  border:1px solid rgba(200,164,86,0.1);transition:all .25s;position:relative;
+  background:rgba(19,32,64,0.6);
+}
+.str-kpi-box:hover{transform:translateY(-2px);border-color:rgba(200,164,86,0.3);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.str-kpi-box.skb-active{border-color:var(--gold);background:rgba(200,164,86,0.08);box-shadow:0 0 20px rgba(200,164,86,0.15);}
+.str-kpi-box .skb-val{font-size:30px;font-weight:800;}
+.str-kpi-box .skb-lbl{font-size:11px;color:var(--td);margin-top:2px;}
+.str-kpi-box .skb-icon{font-size:14px;margin-bottom:4px;}
 
 </style>
 </head>
@@ -564,12 +572,19 @@ function rStrat(){
   var allS=gM(allMs);
   var nSubgroups=0;S.forEach(function(g){if(g.subgroups)nSubgroups+=g.subgroups.length;});
 
+  var closedCount=0;var constructCount=0;var followCount=0;
+  R.forEach(function(b){if(allMs.indexOf(b.model)>=0){if(b.status==='ปิดแล้ว')closedCount++;if(b.status==='กำลังก่อสร้าง')constructCount++;if(b.status==='ติดตาม')followCount++;}});
   var h='<div class="str-hero"><h2>NIGIWAI GROUP — Model Strategy 2026</h2>';
-  h+='<p>โครงสร้าง Brand Hierarchy · คลิกที่ Brand เพื่อดูรายชื่อสาขาด้านล่าง</p>';
-  h+='<div class="str-kpi-row"><div><div class="str-kpi-val">'+S.length+'</div><div class="str-kpi-lbl">กลุ่มธุรกิจ</div></div>';
-  h+='<div><div class="str-kpi-val">'+totalSubs+'</div><div class="str-kpi-lbl">Brands</div></div>';
-  h+='<div><div class="str-kpi-val">'+allS.t+'</div><div class="str-kpi-lbl">สาขาทั้งหมด</div></div>';
-  h+='<div><div class="str-kpi-val" style="color:var(--gr)">'+allS.o+'</div><div class="str-kpi-lbl">เปิดอยู่</div></div></div></div>';
+  h+='<p>โครงสร้าง Brand Hierarchy · คลิกที่ Brand เพื่อดูสาขา · คลิกตัวเลขด้านล่างเพื่อกรองสถานะ</p>';
+  h+='<div class="str-kpi-row">';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27all\x27)" id="skb-all"><div class="skb-icon" style="color:var(--gold)"><i class="fa-solid fa-layer-group"></i></div><div class="skb-val" style="color:var(--gold)">'+S.length+'</div><div class="skb-lbl">กลุ่มธุรกิจ</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27brands\x27)" id="skb-brands"><div class="skb-icon" style="color:var(--gold)"><i class="fa-solid fa-tags"></i></div><div class="skb-val" style="color:var(--gold)">'+totalSubs+'</div><div class="skb-lbl">Brands</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27total\x27)" id="skb-total"><div class="skb-icon" style="color:var(--bl)"><i class="fa-solid fa-store"></i></div><div class="skb-val" style="color:var(--bl)">'+allS.t+'</div><div class="skb-lbl">เคยเปิดทั้งหมด</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27open\x27)" id="skb-open"><div class="skb-icon" style="color:var(--gr)"><i class="fa-solid fa-circle-check"></i></div><div class="skb-val" style="color:var(--gr)">'+allS.o+'</div><div class="skb-lbl">เปิดอยู่</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27closed\x27)" id="skb-closed"><div class="skb-icon" style="color:var(--rd)"><i class="fa-solid fa-circle-xmark"></i></div><div class="skb-val" style="color:var(--rd)">'+closedCount+'</div><div class="skb-lbl">ปิดแล้ว</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27construct\x27)" id="skb-construct"><div class="skb-icon" style="color:var(--or)"><i class="fa-solid fa-helmet-safety"></i></div><div class="skb-val" style="color:var(--or)">'+constructCount+'</div><div class="skb-lbl">กำลังก่อสร้าง</div></div>';
+  h+='<div class="str-kpi-box" onclick="filterStratStatus(\x27follow\x27)" id="skb-follow"><div class="skb-icon" style="color:var(--pu)"><i class="fa-solid fa-binoculars"></i></div><div class="skb-val" style="color:var(--pu)">'+followCount+'</div><div class="skb-lbl">ติดตาม</div></div>';
+  h+='</div></div>';
 
   // Build tree
   h+='<div class="tree-wrap"><div class="tree">';
@@ -678,6 +693,53 @@ function showBranches2(cid){
     h+='<td data-sv="'+(b.openDate||'zzz')+'">'+(b.openDate||'<span style="color:var(--td)">ไม่ทราบ</span>')+'</td>';
     h+='<td data-sv="'+av+'">'+fS(a)+'</td>';
     h+='<td data-sv="'+(b.locationType||'zzz')+'">'+(b.locationType||'—')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div></div>';
+  document.getElementById('stratDetail').innerHTML=h;
+  document.getElementById('stratDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function filterStratStatus(type){
+  // Highlight active box
+  document.querySelectorAll('.str-kpi-box').forEach(function(b){b.classList.remove('skb-active');});
+  var box=document.getElementById('skb-'+type);if(box)box.classList.add('skb-active');
+  // Get all models from strategy
+  var S=_stratData;if(!S)return;
+  var allMs=[];
+  S.forEach(function(g){
+    if(g.children) g.children.forEach(function(c){c.models.forEach(function(m){allMs.push(m);});});
+    if(g.subgroups) g.subgroups.forEach(function(sg){sg.children.forEach(function(c){c.models.forEach(function(m){allMs.push(m);});});});
+  });
+  var statusMap={'open':'เปิดอยู่','closed':'ปิดแล้ว','construct':'กำลังก่อสร้าง','follow':'ติดตาม'};
+  var statusFilter=statusMap[type]||null;
+  var bs;
+  if(type==='all'||type==='brands'){closeBranches();return;}
+  if(type==='total'){bs=R.filter(function(b){return allMs.indexOf(b.model)>=0;});}
+  else{bs=R.filter(function(b){return allMs.indexOf(b.model)>=0 && b.status===statusFilter;});}
+  var titleMap={'total':'สาขาที่เคยเปิดทั้งหมด','open':'สาขาที่เปิดอยู่','closed':'สาขาที่ปิดแล้ว','construct':'สาขากำลังก่อสร้าง','follow':'สาขาที่อยู่ระหว่างติดตาม'};
+  var colorMap={'total':'var(--bl)','open':'var(--gr)','closed':'var(--rd)','construct':'var(--or)','follow':'var(--pu)'};
+  var clr=colorMap[type]||'var(--gold)';
+  var title=titleMap[type]||type;
+  document.querySelectorAll('.t-node.sc-open').forEach(function(n){n.classList.remove('sc-open');});
+  var h='<div class="strat-detail"><div class="tc" style="border-color:'+clr+'">';
+  h+='<div class="sd-header"><i class="fa-solid fa-filter" style="font-size:20px;color:'+clr+'"></i>';
+  h+='<div class="sd-title" style="color:'+clr+'">'+title+' <span style="font-weight:400;color:var(--td);font-size:13px">('+bs.length+' สาขา)</span></div>';
+  h+='<div class="sd-close" onclick="closeBranches()"><i class="fa-solid fa-xmark"></i></div></div>';
+  h+='<div class="ts"><table><thead><tr>';
+  h+='<th onclick="doSort(\'sdTB\',0)" style="font-size:12px"># <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',1)" style="font-size:12px">ชื่อสาขา <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',2)" style="font-size:12px">Model <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',3)" style="font-size:12px">สถานะ <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',4)" style="font-size:12px">วันเปิด <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',5)" style="font-size:12px">อายุ <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='</tr></thead><tbody id="sdTB">';
+  bs.forEach(function(b,i){
+    var a=cA(b.openDate);var av=a!==null?a.toFixed(2):'9999';
+    h+='<tr><td data-sv="'+i+'">'+(i+1)+'</td>';
+    h+='<td data-sv="'+b.name+'" style="font-weight:600;color:var(--wh)">'+b.name+'</td>';
+    h+='<td data-sv="'+b.model+'"><span style="color:'+( mC(b.model))+'">'+b.model+'</span></td>';
+    h+='<td data-sv="'+b.status+'"><span class="bd '+sB(b.status)+'" style="font-size:11px;padding:3px 10px">'+b.status+'</span></td>';
+    h+='<td data-sv="'+(b.openDate||'zzz')+'">'+(b.openDate||'<span style="color:var(--td)">ไม่ทราบ</span>')+'</td>';
+    h+='<td data-sv="'+av+'">'+fS(a)+'</td></tr>';
   });
   h+='</tbody></table></div></div></div>';
   document.getElementById('stratDetail').innerHTML=h;
