@@ -124,6 +124,85 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 @media(max-width:768px){.sb{transform:translateX(-100%);}.sb.op{transform:translateX(0);}.mn{margin-left:0;}.hd{left:0;}.hb{display:block;}.kg{grid-template-columns:1fr 1fr;}}
 @media(max-width:480px){.kg{grid-template-columns:1fr;}.fg{flex-direction:column;}}
 ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(200,164,86,0.2);border-radius:3px;}
+
+/* ═══ Org Chart Tree ═══ */
+.tree-wrap{overflow-x:auto;padding:20px 0 40px;}
+.tree{display:flex;flex-direction:column;align-items:center;}
+.tree ul{display:flex;justify-content:center;padding-top:28px;position:relative;list-style:none;gap:12px;flex-wrap:wrap;}
+.tree li{display:flex;flex-direction:column;align-items:center;position:relative;padding-top:28px;}
+/* Vertical line down from parent */
+.tree li::before{content:'';position:absolute;top:0;width:2px;height:28px;background:rgba(200,164,86,0.2);}
+/* Horizontal line connecting siblings */
+.tree ul::before{content:'';position:absolute;top:0;left:calc(50% - 50% + 24px);right:calc(50% - 50% + 24px);height:2px;background:rgba(200,164,86,0.2);}
+/* Hide horizontal for single child */
+.tree ul:has(> li:only-child)::before{display:none;}
+/* Root has no top line */
+.tree > .t-root::before{display:none;}
+
+.t-root{padding-top:0;}
+.t-node{
+  text-align:center;padding:14px 20px;min-width:160px;max-width:240px;
+  border-radius:12px;position:relative;cursor:default;
+  transition:transform .2s,box-shadow .2s;
+}
+.t-node:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+
+/* Root node */
+.t-root .t-node{
+  background:linear-gradient(135deg,#1a2d5a,#0f1b33);
+  border:2px solid var(--gold);padding:20px 32px;min-width:280px;
+}
+.t-root .t-node .tn-title{font-size:20px;font-weight:800;color:var(--gold);}
+.t-root .t-node .tn-sub{font-size:12px;color:var(--td);margin-top:4px;}
+
+/* Level 1: Category */
+.t-l1 .t-node{
+  background:linear-gradient(135deg,var(--nl),rgba(26,45,90,0.8));
+  border:1px solid rgba(200,164,86,0.15);
+}
+.t-l1 .t-node .tn-icon{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:8px;}
+.t-l1 .t-node .tn-title{font-size:13px;font-weight:700;color:var(--wh);line-height:1.3;}
+.t-l1 .t-node .tn-stats{margin-top:8px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.t-l1 .t-node .tn-desc{font-size:10px;color:var(--td);margin-top:4px;line-height:1.3;max-width:200px;}
+
+/* Level 2: Sub-brand */
+.t-l2 .t-node{
+  background:rgba(19,32,64,0.9);
+  border:1px solid rgba(200,164,86,0.08);
+  padding:10px 14px;min-width:130px;max-width:180px;
+  cursor:pointer;
+}
+.t-l2 .t-node:hover{border-color:rgba(200,164,86,0.3);background:rgba(200,164,86,0.05);}
+.t-l2 .t-node.sc-open{border-color:rgba(200,164,86,0.3);background:rgba(200,164,86,0.06);}
+.t-l2 .t-node .tn-icon{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:6px;}
+.t-l2 .t-node .tn-title{font-size:12px;font-weight:600;color:var(--wh);}
+.t-l2 .t-node .tn-note{font-size:9px;color:var(--td);margin-top:2px;line-height:1.3;}
+.t-l2 .t-node .tn-stats{margin-top:6px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;}
+.t-l2 .t-node .tn-expand{font-size:9px;color:var(--td);margin-top:4px;transition:color .2s;}
+.t-l2 .t-node:hover .tn-expand{color:var(--gold);}
+
+/* Branch popup */
+.t-branches{
+  display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  z-index:20;margin-top:10px;
+  background:var(--nl);border:1px solid rgba(200,164,86,0.2);
+  border-radius:12px;padding:12px;min-width:300px;max-width:420px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.5);max-height:350px;overflow-y:auto;
+}
+.t-branches.sc-open{display:block;animation:fu .2s ease;}
+.t-branches table{font-size:11px;width:100%;}
+.t-branches th{font-size:10px;padding:6px 8px;}
+.t-branches td{padding:6px 8px;font-size:11px;}
+.t-branches .tb-close{position:absolute;top:8px;right:12px;cursor:pointer;color:var(--td);font-size:14px;transition:color .2s;}
+.t-branches .tb-close:hover{color:var(--gold);}
+
+/* Strategy KPI hero */
+.str-hero{text-align:center;padding:28px 20px 20px;margin-bottom:24px;background:linear-gradient(135deg,rgba(200,164,86,0.06),rgba(91,141,239,0.04));border:1px solid rgba(200,164,86,0.1);border-radius:16px;position:relative;overflow:hidden;}
+.str-hero h2{font-size:24px;font-weight:900;color:var(--wh);margin-bottom:4px;}
+.str-hero p{font-size:12px;color:var(--td);}
+.str-hero .str-kpi-row{display:flex;justify-content:center;gap:28px;margin-top:14px;}
+.str-hero .str-kpi-val{font-size:26px;font-weight:800;color:var(--gold);}
+.str-hero .str-kpi-lbl{font-size:10px;color:var(--td);}
 </style>
 </head>
 <body>
@@ -140,6 +219,8 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
     <div class="ni" data-p="models" onclick="sp('models')"><i class="fa-solid fa-ranking-star"></i> วิเคราะห์ Model</div>
     <div class="ni" data-p="geo" onclick="sp('geo')"><i class="fa-solid fa-location-dot"></i> ภูมิภาค</div>
     <div class="ni" data-p="deep" onclick="sp('deep')"><i class="fa-solid fa-microscope"></i> Deep Analysis</div>
+    <div class="ns">กลยุทธ์</div>
+    <div class="ni" data-p="strategy" onclick="sp('strategy')"><i class="fa-solid fa-sitemap"></i> Model Strategy 2026</div>
   </nav>
   <div class="sb-ft">Nigiwai Group © 2026</div>
 </aside>
@@ -220,6 +301,13 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
   <div class="cc"><h3><i class="fa-solid fa-building-columns" style="color:var(--gold)"></i> ในห้าง vs นอกห้าง</h3><p class="cs">เปรียบเทียบอัตราอยู่รอดตามประเภทที่ตั้ง</p><canvas id="cLoc" style="max-height:260px;"></canvas></div>
 </section>
 
+<!-- STRATEGY 2026 -->
+<section class="pg" id="pg-strategy">
+  <h2 class="st">Nigiwai Group Model Strategy 2026</h2>
+  <p class="sd2">โครงสร้าง Brand Hierarchy ของ Nigiwai Group — แผนยุทธศาสตร์การจัดกลุ่ม Model ปี 2026</p>
+  <div id="strategyTree"></div>
+</section>
+
 </main>
 
 <script>
@@ -282,7 +370,7 @@ function af(){
   F=R.filter(b=>{if(m&&b.model!==m)return false;if(z&&b.zone!==z)return false;if(s&&b.status!==s)return false;return true;});
   rAll();
 }
-function rAll(){rFBL();rKPI();rMR();rDonut();rGrowth();rStatus();rOC();rBA();rLC();rModels();rGeo();rDeep();}
+function rAll(){rFBL();rKPI();rMR();rDonut();rGrowth();rStatus();rOC();rBA();rLC();rModels();rGeo();rDeep();rStrat();}
 
 // ═══ FILTER BRANCH LIST ═══
 function rFBL(){
@@ -450,6 +538,91 @@ function rDeep(){
     {label:'อื่นๆ',data:lLabels.map(l=>lt[l].t-lt[l].o-lt[l].c),backgroundColor:'rgba(200,164,86,0.4)',borderRadius:5}
   ]},options:{responsive:true,aspectRatio:2.5,plugins:{legend:{labels:{color:'#9A9AAA',usePointStyle:true}},tooltip:TT,datalabels:{display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,color:'#fff',font:{size:12,weight:700}}},scales:{x:{stacked:true,ticks:{color:'#9A9AAA'},grid:{display:false}},y:{stacked:true,ticks:{color:'#9A9AAA'},grid:{color:'rgba(200,164,86,0.05)'}}}}});
 }
+
+// ═══ STRATEGY 2026 ═══
+function rStrat(){
+  var S=[
+    {cat:'Nigi Express',icon:'fa-bolt-lightning',color:'#5B8DEF',
+     children:[{name:'Nigi Express',note:'Grab & Go',models:['Nigi Express'],icon:'fa-motorcycle'}]},
+    {cat:'Nigiben Grab & Go',icon:'fa-bag-shopping',color:'#FFA07A',
+     children:[{name:'Nigiben',note:'Airport & High Traffic',models:['Nigiben'],icon:'fa-plane-departure'}]},
+    {cat:'Keng San',icon:'fa-fish',color:'#C8A456',desc:'Nigiwai Sushi เดิม · ตัด Shabu เพิ่ม Yakitori',
+     children:[{name:'Nigiwai Sushi → Keng San',note:'Rebrand',models:['Nigiwai Sushi','Nigiwai X'],icon:'fa-utensils'}]},
+    {cat:'Nigiwai Japanese Restaurant',icon:'fa-torii-gate',color:'#3DD68C',desc:'มี Shabu Matcha Dessert',
+     children:[
+       {name:'Viengviet',note:'เวียดนาม Fusion',models:['Viengviet'],icon:'fa-bowl-rice'},
+       {name:'Nigi Grill',note:'ปิ้งย่างญี่ปุ่น',models:['Nigi Grill'],icon:'fa-fire-burner'},
+       {name:'Asian Hot Pot',note:'หม้อไฟ Premium',models:['Asian Hot Pot By Nigiwai'],icon:'fa-fire'}]},
+    {cat:'Nigiwai International Restaurant',icon:'fa-earth-americas',color:'#A07DE8',
+     children:[
+       {name:'Brunch Drink Japanese',note:'Brunch & Drink',models:['Nigiwai Brunch Drink Japanese'],icon:'fa-champagne-glasses'},
+       {name:'Nigiwai Cuisine',note:'Fine Dining',models:['Nigiwai Cuisine'],icon:'fa-star'}]},
+    {cat:'Nigiwai Buffet',icon:'fa-bowl-food',color:'#F0A040',
+     children:[
+       {name:'Shabu & Sushi',note:'ชาบูบุฟเฟ่ต์',models:['Nigiwai Shabu & Sushi Buffet'],icon:'fa-shrimp'},
+       {name:'Izakaya',note:'อิซากายะ',models:['Nigiwai Izakaya'],icon:'fa-wine-bottle'},
+       {name:'Yakiniku & Sushi',note:'ยากินิกุ',models:['Nigiwai Yakiniku & Sushi Buffet','Nigiwai Yakiniku Buffet'],icon:'fa-drumstick-bite'},
+       {name:'Yuu Pot',note:'Wait For Rename',models:['Yuu Pot'],icon:'fa-pepper-hot'}]},
+    {cat:"Nigiwai Cafe'",icon:'fa-mug-hot',color:'#FF6B9D',
+     children:[
+       {name:'Kin Matcha',note:'ชาเขียว มัทฉะ',models:['Kin Matcha'],icon:'fa-leaf'},
+       {name:'Durianism',note:'ทุเรียนสด 365 วัน',models:["Durianism Cafe'"],icon:'fa-lemon'}]}
+  ];
+  function gM(mns){var t=0,o=0,c=0;R.forEach(function(b){if(mns.indexOf(b.model)>=0){t++;if(b.status==='เปิดอยู่')o++;if(b.status==='ปิดแล้ว')c++;}});return{t:t,o:o,c:c};}
+  function gBr(mns){return R.filter(function(b){return mns.indexOf(b.model)>=0;});}
+  var totalSubs=0;S.forEach(function(g){totalSubs+=g.children.length;});
+  var allMs=[];S.forEach(function(g){g.children.forEach(function(c){c.models.forEach(function(m){allMs.push(m);});});});
+  var allS=gM(allMs);
+  var h='<div class="str-hero"><h2>NIGIWAI GROUP — Model Strategy 2026</h2><p>โครงสร้าง Brand Hierarchy · คลิกที่ Sub-Brand เพื่อดูสาขา</p>';
+  h+='<div class="str-kpi-row"><div><div class="str-kpi-val">'+S.length+'</div><div class="str-kpi-lbl">กลุ่มธุรกิจ</div></div>';
+  h+='<div><div class="str-kpi-val">'+totalSubs+'</div><div class="str-kpi-lbl">Sub-Brands</div></div>';
+  h+='<div><div class="str-kpi-val">'+allS.t+'</div><div class="str-kpi-lbl">สาขาทั้งหมด</div></div>';
+  h+='<div><div class="str-kpi-val" style="color:var(--gr)">'+allS.o+'</div><div class="str-kpi-lbl">เปิดอยู่</div></div></div></div>';
+  // Tree
+  h+='<div class="tree-wrap"><div class="tree"><li class="t-root" style="list-style:none"><div class="t-node"><div class="tn-title">NIGIWAI GROUP</div><div class="tn-sub">'+allS.t+' สาขา · '+S.length+' กลุ่มธุรกิจ · '+totalSubs+' Sub-Brands</div></div><ul>';
+  S.forEach(function(g,gi){
+    var gs=gM(g.children.reduce(function(a,c){return a.concat(c.models);},[]) );
+    h+='<li class="t-l1"><div class="t-node" style="border-color:'+g.color+'30">';
+    h+='<div class="tn-icon" style="background:'+g.color+'18;color:'+g.color+'"><i class="fa-solid '+g.icon+'"></i></div>';
+    h+='<div class="tn-title" style="color:'+g.color+'">'+g.cat.replace(/\n/g,'<br>')+'</div>';
+    if(g.desc) h+='<div class="tn-desc">'+g.desc+'</div>';
+    h+='<div class="tn-stats"><span class="bd" style="background:'+g.color+'18;color:'+g.color+';font-size:10px;padding:2px 8px">'+gs.t+' สาขา</span>';
+    h+='<span class="bd b-o" style="font-size:10px;padding:2px 8px">'+gs.o+' เปิด</span></div></div>';
+    if(g.children.length>0){
+      h+='<ul>';
+      g.children.forEach(function(ch,ci){
+        var cs=gM(ch.models);
+        var bs=gBr(ch.models);
+        var cid=gi+'_'+ci;
+        h+='<li class="t-l2" style="position:relative">';
+        h+='<div class="t-node" id="tn_'+cid+'" onclick="tgSC2(\''+cid+'\',event)" style="border-color:'+g.color+'20">';
+        h+='<div class="tn-icon" style="background:'+g.color+'15;color:'+g.color+'"><i class="fa-solid '+(ch.icon||'fa-store')+'"></i></div>';
+        h+='<div class="tn-title">'+ch.name+'</div>';
+        h+='<div class="tn-note">'+ch.note+'</div>';
+        h+='<div class="tn-stats"><span class="bd b-o" style="font-size:9px;padding:2px 6px">'+cs.o+' เปิด</span>';
+        if(cs.c>0) h+='<span class="bd b-c" style="font-size:9px;padding:2px 6px">'+cs.c+' ปิด</span>';
+        h+='</div><div class="tn-expand"><i class="fa-solid fa-chevron-down" style="font-size:9px;color:var(--td)"></i> ดูสาขา</div></div>';
+        // Branch popup
+        h+='<div class="t-branches" id="tb_'+cid+'">';
+        h+='<div class="tb-close" onclick="tgSC2(\''+cid+'\',event)"><i class="fa-solid fa-xmark"></i></div>';
+        h+='<div style="font-size:13px;font-weight:700;color:var(--gl);margin-bottom:8px;padding-right:20px">'+ch.name+' <span style="font-weight:400;color:var(--td)">('+bs.length+' สาขา)</span></div>';
+        h+='<table><thead><tr><th class="nosort" style="font-size:10px">#</th><th class="nosort" style="font-size:10px">ชื่อสาขา</th><th class="nosort" style="font-size:10px">สถานะ</th><th class="nosort" style="font-size:10px">อายุ</th></tr></thead><tbody>';
+        bs.forEach(function(b,i){
+          var a=cA(b.openDate);
+          h+='<tr><td>'+(i+1)+'</td><td style="font-weight:600;color:var(--wh)">'+b.name+'</td><td><span class="bd '+sB(b.status)+'" style="font-size:9px;padding:2px 6px">'+b.status+'</span></td><td>'+fS(a)+'</td></tr>';
+        });
+        h+='</tbody></table></div></li>';
+      });
+      h+='</ul>';
+    }
+    h+='</li>';
+  });
+  h+='</ul></li></div></div>';
+  document.getElementById('strategyTree').innerHTML=h;
+}
+function tgSC2(id,e){if(e)e.stopPropagation();var nd=document.getElementById('tn_'+id);var br=document.getElementById('tb_'+id);if(nd)nd.classList.toggle('sc-open');if(br)br.classList.toggle('sc-open');}
+
+
 
 // ═══ NAV ═══
 function sp(p){document.querySelectorAll('.pg').forEach(pg=>pg.classList.remove('ac'));document.getElementById('pg-'+p)?.classList.add('ac');document.querySelectorAll('.ni').forEach(n=>n.classList.toggle('ac',n.dataset.p===p));document.getElementById('sb').classList.remove('op');document.getElementById('ov').classList.remove('ac');setTimeout(()=>Object.values(CH).forEach(c=>c.resize&&c.resize()),100);}
