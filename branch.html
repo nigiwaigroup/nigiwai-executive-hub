@@ -126,22 +126,20 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(200,164,86,0.2);border-radius:3px;}
 
 /* ═══ Org Chart Tree ═══ */
-.tree-wrap{overflow-x:auto;padding:12px 0 40px;}
+.tree-wrap{overflow-x:auto;padding:16px 0 20px;}
 .tree{display:flex;flex-direction:column;align-items:center;min-width:max-content;}
-.tree ul{display:flex;justify-content:center;padding-top:28px;position:relative;list-style:none;gap:6px;flex-wrap:nowrap;}
-.tree li{display:flex;flex-direction:column;align-items:center;position:relative;padding-top:28px;}
+.tree ul{display:flex;justify-content:center;padding-top:32px;position:relative;list-style:none;gap:8px;flex-wrap:nowrap;}
+.tree li{display:flex;flex-direction:column;align-items:center;position:relative;padding-top:32px;}
 
-/* ─── Connector lines: vertical from parent ─── */
+/* Vertical connector */
 .tree li::before{
-  content:'';position:absolute;top:0;left:50%;width:3px;height:28px;
-  transform:translateX(-50%);
-  background:var(--clr,rgba(200,164,86,0.3));
-  border-radius:2px;
+  content:'';position:absolute;top:0;left:50%;width:3px;height:32px;
+  transform:translateX(-50%);background:var(--clr,rgba(200,164,86,0.3));border-radius:2px;
 }
-/* ─── Connector: horizontal bar across siblings ─── */
+/* Horizontal connector */
 .tree ul::before{
   content:'';position:absolute;top:0;height:3px;
-  left:calc(50% - 50% + 24px);right:calc(50% - 50% + 24px);
+  left:24px;right:24px;
   background:linear-gradient(90deg,var(--clr-first,rgba(200,164,86,0.2)),var(--clr-mid,rgba(200,164,86,0.25)),var(--clr-last,rgba(200,164,86,0.2)));
   border-radius:2px;
 }
@@ -149,107 +147,72 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 .tree > .t-root::before{display:none;}
 .t-root{padding-top:0;}
 
-/* ─── Animated flow pulse on connectors ─── */
+/* Flow dot animation */
 .tree li::after{
   content:'';position:absolute;top:0;left:50%;
-  width:6px;height:6px;border-radius:50%;
-  transform:translateX(-50%);
-  background:var(--clr,rgba(200,164,86,0.5));
-  box-shadow:0 0 8px var(--clr,rgba(200,164,86,0.3));
-  animation:flowDown 2.5s ease-in-out infinite;
-  opacity:0;
+  width:7px;height:7px;border-radius:50%;transform:translateX(-50%);
+  background:var(--clr,rgba(200,164,86,0.6));
+  box-shadow:0 0 10px var(--clr,rgba(200,164,86,0.4));
+  animation:flowD 2.5s ease-in-out infinite;opacity:0;
 }
 .tree > .t-root::after{display:none;}
-@keyframes flowDown{
-  0%{top:0;opacity:0;} 15%{opacity:1;} 85%{opacity:1;} 100%{top:24px;opacity:0;}
-}
-/* Stagger animation for each L1 */
-.t-l1:nth-child(1)::after{animation-delay:0s;}
-.t-l1:nth-child(2)::after{animation-delay:0.3s;}
-.t-l1:nth-child(3)::after{animation-delay:0.6s;}
-.t-l1:nth-child(4)::after{animation-delay:0.9s;}
-.t-l1:nth-child(5)::after{animation-delay:1.2s;}
-.t-l1:nth-child(6)::after{animation-delay:1.5s;}
-.t-l1:nth-child(7)::after{animation-delay:1.8s;}
-/* L2 flow slightly faster */
-.t-l2::after{animation-duration:2s;}
-.t-l2:nth-child(1)::after{animation-delay:0.2s;}
-.t-l2:nth-child(2)::after{animation-delay:0.5s;}
-.t-l2:nth-child(3)::after{animation-delay:0.8s;}
-.t-l2:nth-child(4)::after{animation-delay:1.1s;}
+@keyframes flowD{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:28px;opacity:0;}}
+.t-l1:nth-child(1)::after{animation-delay:0s;}.t-l1:nth-child(2)::after{animation-delay:.3s;}.t-l1:nth-child(3)::after{animation-delay:.6s;}.t-l1:nth-child(4)::after{animation-delay:.9s;}.t-l1:nth-child(5)::after{animation-delay:1.2s;}.t-l1:nth-child(6)::after{animation-delay:1.5s;}.t-l1:nth-child(7)::after{animation-delay:1.8s;}
+.t-l2::after{animation-duration:2s;}.t-l2:nth-child(1)::after{animation-delay:.15s;}.t-l2:nth-child(2)::after{animation-delay:.4s;}.t-l2:nth-child(3)::after{animation-delay:.65s;}.t-l2:nth-child(4)::after{animation-delay:.9s;}
 
-/* ─── Node base ─── */
-.t-node{
-  text-align:center;padding:8px 10px;min-width:0;max-width:none;
-  border-radius:8px;position:relative;cursor:default;
-  transition:transform .2s,box-shadow .2s,border-color .2s;
-}
+/* Node */
+.t-node{text-align:center;padding:10px 12px;border-radius:10px;position:relative;cursor:default;transition:transform .2s,box-shadow .2s,border-color .2s;}
 .t-node:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
 
-/* Root */
+/* Root — larger */
 .t-root .t-node{
-  background:linear-gradient(135deg,#1a2d5a,#0f1b33);
-  border:2px solid var(--gold);padding:14px 28px;
-  box-shadow:0 0 24px rgba(200,164,86,0.08);
+  background:linear-gradient(135deg,#1a2d5a,#0f1b33);border:2px solid var(--gold);
+  padding:16px 36px;box-shadow:0 0 28px rgba(200,164,86,0.08);
 }
-.t-root .t-node .tn-title{font-size:15px;font-weight:800;color:var(--gold);}
-.t-root .t-node .tn-sub{font-size:10px;color:var(--td);margin-top:2px;}
+.t-root .t-node .tn-title{font-size:18px;font-weight:800;color:var(--gold);}
+.t-root .t-node .tn-sub{font-size:11px;color:var(--td);margin-top:3px;}
 
-/* Level 1 */
+/* L1 — bigger */
 .t-l1 .t-node{
   background:linear-gradient(135deg,var(--nl),rgba(26,45,90,0.8));
-  border:2px solid color-mix(in srgb, var(--clr,#C8A456) 40%, transparent);
-  width:120px;
-  box-shadow:0 0 12px color-mix(in srgb, var(--clr,#C8A456) 10%, transparent);
+  border:2px solid color-mix(in srgb,var(--clr,#C8A456) 40%,transparent);
+  width:150px;box-shadow:0 0 12px color-mix(in srgb,var(--clr,#C8A456) 8%,transparent);
 }
-.t-l1:hover .t-node{border-color:var(--clr,#C8A456);box-shadow:0 0 20px color-mix(in srgb, var(--clr,#C8A456) 20%, transparent);}
-.t-l1 .t-node .tn-icon{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:4px;}
-.t-l1 .t-node .tn-title{font-size:10px;font-weight:700;line-height:1.25;}
-.t-l1 .t-node .tn-stats{margin-top:5px;display:flex;gap:3px;justify-content:center;flex-wrap:wrap;}
-.t-l1 .t-node .tn-desc{font-size:8px;color:var(--td);margin-top:3px;line-height:1.2;}
+.t-l1:hover .t-node{border-color:var(--clr,#C8A456);box-shadow:0 0 22px color-mix(in srgb,var(--clr,#C8A456) 18%,transparent);}
+.t-l1 .t-node .tn-icon{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:5px;}
+.t-l1 .t-node .tn-title{font-size:12px;font-weight:700;line-height:1.3;}
+.t-l1 .t-node .tn-stats{margin-top:6px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;}
+.t-l1 .t-node .tn-desc{font-size:9px;color:var(--td);margin-top:4px;line-height:1.25;}
 
-/* Level 2 */
+/* L2 — bigger */
 .t-l2 .t-node{
   background:rgba(19,32,64,0.9);
-  border:1px solid color-mix(in srgb, var(--clr,#C8A456) 20%, transparent);
-  padding:6px 8px;cursor:pointer;width:100px;
-  transition:all .2s;
+  border:1px solid color-mix(in srgb,var(--clr,#C8A456) 20%,transparent);
+  padding:8px 10px;cursor:pointer;width:120px;transition:all .2s;
 }
-.t-l2 .t-node:hover{
-  border-color:var(--clr,#C8A456);
-  background:color-mix(in srgb, var(--clr,#C8A456) 5%, rgba(19,32,64,0.9));
-  box-shadow:0 0 14px color-mix(in srgb, var(--clr,#C8A456) 12%, transparent);
-}
-.t-l2 .t-node.sc-open{border-color:var(--clr,#C8A456);background:color-mix(in srgb, var(--clr,#C8A456) 6%, rgba(19,32,64,0.9));}
-.t-l2 .t-node .tn-icon{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;margin-bottom:3px;}
-.t-l2 .t-node .tn-title{font-size:9px;font-weight:600;color:var(--wh);line-height:1.2;}
-.t-l2 .t-node .tn-note{font-size:7.5px;color:var(--td);margin-top:1px;line-height:1.2;}
-.t-l2 .t-node .tn-stats{margin-top:4px;display:flex;gap:2px;justify-content:center;flex-wrap:wrap;}
-.t-l2 .t-node .tn-expand{font-size:7.5px;color:var(--td);margin-top:3px;}
+.t-l2 .t-node:hover{border-color:var(--clr,#C8A456);background:color-mix(in srgb,var(--clr,#C8A456) 5%,rgba(19,32,64,0.9));box-shadow:0 0 14px color-mix(in srgb,var(--clr,#C8A456) 12%,transparent);}
+.t-l2 .t-node.sc-open{border-color:var(--clr,#C8A456);background:color-mix(in srgb,var(--clr,#C8A456) 6%,rgba(19,32,64,0.9));}
+.t-l2 .t-node .tn-icon{width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;margin-bottom:4px;}
+.t-l2 .t-node .tn-title{font-size:11px;font-weight:600;color:var(--wh);line-height:1.25;}
+.t-l2 .t-node .tn-note{font-size:8px;color:var(--td);margin-top:2px;line-height:1.2;}
+.t-l2 .t-node .tn-stats{margin-top:5px;display:flex;gap:3px;justify-content:center;flex-wrap:wrap;}
+.t-l2 .t-node .tn-expand{font-size:8px;color:var(--td);margin-top:4px;}
 .t-l2 .t-node:hover .tn-expand{color:var(--clr,var(--gold));}
 
-/* Branch popup */
-.t-branches{
-  display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);
-  z-index:20;margin-top:8px;
-  background:var(--nl);border:1px solid rgba(200,164,86,0.2);
-  border-radius:10px;padding:10px;min-width:280px;max-width:380px;
-  box-shadow:0 10px 36px rgba(0,0,0,0.5);max-height:320px;overflow-y:auto;
-}
-.t-branches.sc-open{display:block;animation:fu .2s ease;}
-.t-branches table{font-size:10px;width:100%;}
-.t-branches th{font-size:9px;padding:5px 6px;}
-.t-branches td{padding:5px 6px;font-size:10px;}
-.t-branches .tb-close{position:absolute;top:6px;right:10px;cursor:pointer;color:var(--td);font-size:13px;}
-.t-branches .tb-close:hover{color:var(--gold);}
+/* Branch table below tree */
+.strat-detail{margin-top:24px;animation:fu .3s ease;}
+.strat-detail .sd-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.strat-detail .sd-title{font-size:16px;font-weight:700;color:var(--gl);}
+.strat-detail .sd-close{cursor:pointer;color:var(--td);font-size:16px;margin-left:auto;transition:color .15s;}
+.strat-detail .sd-close:hover{color:var(--gold);}
 
 /* Hero */
-.str-hero{text-align:center;padding:18px 16px 14px;margin-bottom:18px;background:linear-gradient(135deg,rgba(200,164,86,0.06),rgba(91,141,239,0.04));border:1px solid rgba(200,164,86,0.1);border-radius:12px;}
-.str-hero h2{font-size:18px;font-weight:900;color:var(--wh);margin-bottom:2px;}
+.str-hero{text-align:center;padding:20px 16px 16px;margin-bottom:20px;background:linear-gradient(135deg,rgba(200,164,86,0.06),rgba(91,141,239,0.04));border:1px solid rgba(200,164,86,0.1);border-radius:14px;}
+.str-hero h2{font-size:20px;font-weight:900;color:var(--wh);margin-bottom:3px;}
 .str-hero p{font-size:11px;color:var(--td);}
-.str-hero .str-kpi-row{display:flex;justify-content:center;gap:24px;margin-top:10px;}
-.str-hero .str-kpi-val{font-size:22px;font-weight:800;color:var(--gold);}
-.str-hero .str-kpi-lbl{font-size:9px;color:var(--td);}
+.str-hero .str-kpi-row{display:flex;justify-content:center;gap:28px;margin-top:12px;}
+.str-hero .str-kpi-val{font-size:26px;font-weight:800;color:var(--gold);}
+.str-hero .str-kpi-lbl{font-size:10px;color:var(--td);}
 
 </style>
 </head>
@@ -354,6 +317,7 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
   <h2 class="st">Nigiwai Group Model Strategy 2026</h2>
   <p class="sd2">โครงสร้าง Brand Hierarchy ของ Nigiwai Group — แผนยุทธศาสตร์การจัดกลุ่ม Model ปี 2026</p>
   <div id="strategyTree"></div>
+<div id="stratDetail"></div>
 </section>
 
 </main>
@@ -588,6 +552,7 @@ function rDeep(){
 }
 
 // ═══ STRATEGY 2026 ═══
+var _stratData=null;
 function rStrat(){
   var S=[
     {cat:'Nigi Express',icon:'fa-bolt-lightning',color:'#5B8DEF',
@@ -616,20 +581,20 @@ function rStrat(){
        {name:'Kin Matcha',note:'ชาเขียว มัทฉะ',models:['Kin Matcha'],icon:'fa-leaf'},
        {name:'Durianism',note:'ทุเรียนสด 365 วัน',models:["Durianism Cafe'"],icon:'fa-lemon'}]}
   ];
+  _stratData=S;
   function gM(mns){var t=0,o=0,c=0;R.forEach(function(b){if(mns.indexOf(b.model)>=0){t++;if(b.status==='เปิดอยู่')o++;if(b.status==='ปิดแล้ว')c++;}});return{t:t,o:o,c:c};}
-  function gBr(mns){return R.filter(function(b){return mns.indexOf(b.model)>=0;});}
   var totalSubs=0;S.forEach(function(g){totalSubs+=g.children.length;});
   var allMs=[];S.forEach(function(g){g.children.forEach(function(c){c.models.forEach(function(m){allMs.push(m);});});});
   var allS=gM(allMs);
-  var h='<div class="str-hero"><h2>NIGIWAI GROUP — Model Strategy 2026</h2><p>โครงสร้าง Brand Hierarchy · คลิกที่ Sub-Brand เพื่อดูสาขา</p>';
+  var h='<div class="str-hero"><h2>NIGIWAI GROUP — Model Strategy 2026</h2><p>โครงสร้าง Brand Hierarchy · คลิกที่ Sub-Brand เพื่อดูรายชื่อสาขาด้านล่าง</p>';
   h+='<div class="str-kpi-row"><div><div class="str-kpi-val">'+S.length+'</div><div class="str-kpi-lbl">กลุ่มธุรกิจ</div></div>';
   h+='<div><div class="str-kpi-val">'+totalSubs+'</div><div class="str-kpi-lbl">Sub-Brands</div></div>';
   h+='<div><div class="str-kpi-val">'+allS.t+'</div><div class="str-kpi-lbl">สาขาทั้งหมด</div></div>';
   h+='<div><div class="str-kpi-val" style="color:var(--gr)">'+allS.o+'</div><div class="str-kpi-lbl">เปิดอยู่</div></div></div></div>';
-  // Tree
   h+='<div class="tree-wrap"><div class="tree"><li class="t-root" style="list-style:none"><div class="t-node"><div class="tn-title">NIGIWAI GROUP</div><div class="tn-sub">'+allS.t+' สาขา · '+S.length+' กลุ่มธุรกิจ · '+totalSubs+' Sub-Brands</div></div><ul>';
   S.forEach(function(g,gi){
-    var gs=gM(g.children.reduce(function(a,c){return a.concat(c.models);},[]) );
+    var gModels=[];g.children.forEach(function(c){c.models.forEach(function(m){gModels.push(m);});});
+    var gs=gM(gModels);
     h+='<li class="t-l1" style="--clr:'+g.color+'"><div class="t-node">';
     h+='<div class="tn-icon" style="background:'+g.color+'18;color:'+g.color+'"><i class="fa-solid '+g.icon+'"></i></div>';
     h+='<div class="tn-title" style="color:'+g.color+'">'+g.cat.replace(/\n/g,'<br>')+'</div>';
@@ -640,26 +605,16 @@ function rStrat(){
       h+='<ul>';
       g.children.forEach(function(ch,ci){
         var cs=gM(ch.models);
-        var bs=gBr(ch.models);
         var cid=gi+'_'+ci;
         h+='<li class="t-l2" style="position:relative;--clr:'+g.color+'">';
-        h+='<div class="t-node" id="tn_'+cid+'" onclick="tgSC2(\''+cid+'\',event)" style="border-color:'+g.color+'20">';
+        h+='<div class="t-node" id="tn_'+cid+'" onclick="showBranches('+gi+','+ci+')">';
         h+='<div class="tn-icon" style="background:'+g.color+'15;color:'+g.color+'"><i class="fa-solid '+(ch.icon||'fa-store')+'"></i></div>';
         h+='<div class="tn-title">'+ch.name+'</div>';
         h+='<div class="tn-note">'+ch.note+'</div>';
         h+='<div class="tn-stats"><span class="bd b-o" style="font-size:9px;padding:2px 6px">'+cs.o+' เปิด</span>';
         if(cs.c>0) h+='<span class="bd b-c" style="font-size:9px;padding:2px 6px">'+cs.c+' ปิด</span>';
         h+='</div><div class="tn-expand"><i class="fa-solid fa-chevron-down" style="font-size:9px;color:var(--td)"></i> ดูสาขา</div></div>';
-        // Branch popup
-        h+='<div class="t-branches" id="tb_'+cid+'">';
-        h+='<div class="tb-close" onclick="tgSC2(\''+cid+'\',event)"><i class="fa-solid fa-xmark"></i></div>';
-        h+='<div style="font-size:13px;font-weight:700;color:var(--gl);margin-bottom:8px;padding-right:20px">'+ch.name+' <span style="font-weight:400;color:var(--td)">('+bs.length+' สาขา)</span></div>';
-        h+='<table><thead><tr><th class="nosort" style="font-size:10px">#</th><th class="nosort" style="font-size:10px">ชื่อสาขา</th><th class="nosort" style="font-size:10px">สถานะ</th><th class="nosort" style="font-size:10px">อายุ</th></tr></thead><tbody>';
-        bs.forEach(function(b,i){
-          var a=cA(b.openDate);
-          h+='<tr><td>'+(i+1)+'</td><td style="font-weight:600;color:var(--wh)">'+b.name+'</td><td><span class="bd '+sB(b.status)+'" style="font-size:9px;padding:2px 6px">'+b.status+'</span></td><td>'+fS(a)+'</td></tr>';
-        });
-        h+='</tbody></table></div></li>';
+        h+='</li>';
       });
       h+='</ul>';
     }
@@ -667,8 +622,47 @@ function rStrat(){
   });
   h+='</ul></li></div></div>';
   document.getElementById('strategyTree').innerHTML=h;
+  document.getElementById('stratDetail').innerHTML='';
 }
-function tgSC2(id,e){if(e)e.stopPropagation();var nd=document.getElementById('tn_'+id);var br=document.getElementById('tb_'+id);if(nd)nd.classList.toggle('sc-open');if(br)br.classList.toggle('sc-open');}
+function showBranches(gi,ci){
+  var S=_stratData;if(!S)return;
+  var g=S[gi];var ch=g.children[ci];
+  var bs=R.filter(function(b){return ch.models.indexOf(b.model)>=0;});
+  // Clear all sc-open
+  document.querySelectorAll('.t-l2 .t-node.sc-open').forEach(function(n){n.classList.remove('sc-open');});
+  var nd=document.getElementById('tn_'+gi+'_'+ci);
+  if(nd)nd.classList.add('sc-open');
+  var h='<div class="strat-detail"><div class="tc" style="border-color:'+g.color+'30">';
+  h+='<div class="sd-header"><i class="fa-solid '+(ch.icon||'fa-store')+'" style="font-size:20px;color:'+g.color+'"></i>';
+  h+='<div class="sd-title" style="color:'+g.color+'">'+ch.name+' <span style="font-weight:400;color:var(--td);font-size:13px">('+bs.length+' สาขา)</span></div>';
+  h+='<div class="sd-close" onclick="closeBranches()"><i class="fa-solid fa-xmark"></i></div></div>';
+  h+='<div class="ts"><table><thead><tr>';
+  h+='<th onclick="doSort(\'sdTB\',0)" style="font-size:11px"># <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',1)" style="font-size:11px">ชื่อสาขา <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',2)" style="font-size:11px">สถานะ <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',3)" style="font-size:11px">วันเปิด <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',4)" style="font-size:11px">อายุ <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='<th onclick="doSort(\'sdTB\',5)" style="font-size:11px">ประเภท <span class="si"><i class="fa-solid fa-sort"></i></span></th>';
+  h+='</tr></thead><tbody id="sdTB">';
+  bs.forEach(function(b,i){
+    var a=cA(b.openDate);var av=a!==null?a.toFixed(2):'9999';
+    h+='<tr><td data-sv="'+(i)+'">'+(i+1)+'</td>';
+    h+='<td data-sv="'+b.name+'" style="font-weight:600;color:var(--wh)">'+b.name+'</td>';
+    h+='<td data-sv="'+b.status+'"><span class="bd '+sB(b.status)+'" style="font-size:10px;padding:2px 8px">'+b.status+'</span></td>';
+    h+='<td data-sv="'+(b.openDate||'zzz')+'">'+(b.openDate||'<span style="color:var(--td)">ไม่ทราบ</span>')+'</td>';
+    h+='<td data-sv="'+av+'">'+fS(a)+'</td>';
+    h+='<td data-sv="'+(b.locationType||'zzz')+'">'+(b.locationType||'—')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div></div>';
+  document.getElementById('stratDetail').innerHTML=h;
+  document.getElementById('stratDetail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeBranches(){
+  document.querySelectorAll('.t-l2 .t-node.sc-open').forEach(function(n){n.classList.remove('sc-open');});
+  document.getElementById('stratDetail').innerHTML='';
+}
+
+
 
 
 
