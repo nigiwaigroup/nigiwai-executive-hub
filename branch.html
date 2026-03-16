@@ -215,17 +215,38 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 
 /* Print-specific */
 @media print{
-  .sb,.hd,.ov,.strat-toolbar,.sd-close,.tn-expand,.strat-detail{display:none!important;}
-  .mn{margin-left:0!important;padding:10px!important;}
+  @page{size:landscape;margin:8mm;}
+  .sb,.hd,.ov,.sd-close,.tn-expand,.strat-detail,.strat-btn,.print-hide{display:none!important;}
+  .mn{margin-left:0!important;padding:6px!important;}
   .pg{display:block!important;}
   .pg:not(#pg-strategy){display:none!important;}
-  body{background:#fff!important;color:#333!important;}
-  .t-node{border-color:#999!important;background:#f5f5f5!important;}
+  body{background:#fff!important;color:#333!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  #pg-strategy{transform-origin:top left;width:100%;}
+  .tree-wrap{overflow:visible!important;padding:8px 0!important;}
+  .tree{min-width:0!important;}
+  .t-node{border-color:#999!important;background:#f0f0f0!important;break-inside:avoid;}
   .t-root .t-node{background:#e8e4dc!important;}
-  .str-hero{background:#f5f5f5!important;border-color:#ccc!important;}
-  .str-hero h2,.t-root .t-node .tn-title{color:#333!important;}
-  .str-kpi-box{background:#f5f5f5!important;border-color:#ccc!important;}
+  .t-l1 .t-node,.t-l2 .t-node{width:auto!important;min-width:80px!important;max-width:140px!important;padding:6px 8px!important;font-size:9px!important;}
+  .t-l1 .t-node .tn-title{font-size:10px!important;}
+  .t-l2 .t-node .tn-title{font-size:8px!important;}
+  .t-l2 .t-node .tn-note{font-size:7px!important;}
+  .tn-icon{width:20px!important;height:20px!important;font-size:10px!important;margin-bottom:3px!important;}
+  .tn-stats .bd{font-size:7px!important;padding:1px 4px!important;}
+  .tree ul{gap:4px!important;padding-top:20px!important;}
+  .tree li{padding-top:20px!important;}
+  .tree li::before{height:20px!important;}
+  .tree li::after{display:none!important;}
+  .str-hero{background:#f5f5f5!important;border-color:#ccc!important;padding:10px!important;margin-bottom:10px!important;}
+  .str-hero h2{font-size:16px!important;color:#333!important;}
+  .str-hero p{font-size:9px!important;}
+  .str-kpi-box{background:#f5f5f5!important;border-color:#ccc!important;padding:6px 10px!important;min-width:70px!important;}
+  .str-kpi-box .skb-val{font-size:18px!important;color:#333!important;}
+  .str-kpi-box .skb-lbl{font-size:8px!important;}
+  .str-kpi-box .skb-icon{display:none!important;}
+  .str-kpi-row{gap:8px!important;margin-top:6px!important;}
+  .print-stamp{display:block!important;text-align:right;font-size:9px;color:#666;margin-top:10px;padding-top:6px;border-top:1px solid #ccc;}
 }
+.print-stamp{display:none;}
 
 </style>
 </head>
@@ -328,6 +349,7 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 <!-- STRATEGY 2026 -->
 <section class="pg" id="pg-strategy">
   <div id="strategyTree"></div>
+  <div class="print-stamp" id="printStamp"></div>
   <div id="stratDetail"></div>
 </section>
 
@@ -341,7 +363,7 @@ Chart.register(ChartDataLabels);
 Chart.defaults.font.family="'Noto Sans Thai'";Chart.defaults.font.size=12;
 Chart.defaults.set('plugins.datalabels',{color:'#E8E4DC',font:{family:"'Noto Sans Thai'",size:11,weight:600}});
 
-let F=[...R],CH={};const TD=new Date(2026,2,13);
+let F=[...R],CH={};const TD=new Date();
 const TT={backgroundColor:'#132040',titleColor:'#C8A456',bodyColor:'#E8E4DC',borderColor:'rgba(200,164,86,0.2)',borderWidth:1,cornerRadius:8,titleFont:{family:"'Noto Sans Thai'",size:13},bodyFont:{family:"'Noto Sans Thai'",size:12}};
 
 function pD(s){if(!s)return null;const p=s.split('/');if(p.length===3){let d=+p[0],m=+p[1],y=+p[2];if(y>2500)y-=543;if(y<100)y+=2000;return new Date(y,m-1,d);}const dd=new Date(s);return isNaN(dd)?null:dd;}
@@ -382,7 +404,7 @@ function doSort(tbodyId,ci){
 
 // ═══ INIT ═══
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('hdt').textContent=TD.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('hdt').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const ms=[...new Set(R.map(b=>b.model))].sort(),zs=[...new Set(R.map(b=>b.zone).filter(Boolean))].sort();
   const mf=document.getElementById('fModel');ms.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;mf.appendChild(o);});
   const zf=document.getElementById('fZone');zs.forEach(z=>{const o=document.createElement('option');o.value=z;o.textContent=z;zf.appendChild(o);});
@@ -625,8 +647,8 @@ function rStrat(){
   h+='</div>';
   // Action buttons row
   h+='<div style="display:flex;justify-content:center;gap:10px;margin-top:16px;">';
-  h+='<button class="strat-btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>';
-  h+='<button class="strat-btn btn-red" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> Save as PDF</button>';
+  h+='<button class="strat-btn" onclick="printStrategy()"><i class="fa-solid fa-print"></i> Print</button>';
+  h+='<button class="strat-btn btn-red" onclick="printStrategy()"><i class="fa-solid fa-file-pdf"></i> Save as PDF</button>';
   h+='<button class="strat-btn btn-blue" onclick="resetDrag()"><i class="fa-solid fa-arrow-rotate-left"></i> Reset Layout</button>';
   h+='</div>';
   h+='</div>';
@@ -862,7 +884,15 @@ function initDrag(){
   });
 }
 function resetDrag(){rStrat();}
-function exportPDF(){window.print();}
+function printStrategy(){
+  // Update stamp
+  var now=new Date();
+  var stamp='เอกสารนี้พิมพ์เมื่อ: '+now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})+' เวลา '+now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น. | Nigiwai Group — Model Strategy 2026';
+  var el=document.getElementById('printStamp');
+  if(el)el.textContent=stamp;
+  // Small delay then print
+  setTimeout(function(){window.print();},200);
+}
 
 // ═══ NAV ═══
 function sp(p){document.querySelectorAll('.pg').forEach(pg=>pg.classList.remove('ac'));document.getElementById('pg-'+p)?.classList.add('ac');document.querySelectorAll('.ni').forEach(n=>n.classList.toggle('ac',n.dataset.p===p));document.getElementById('sb').classList.remove('op');document.getElementById('ov').classList.remove('ac');setTimeout(()=>Object.values(CH).forEach(c=>c.resize&&c.resize()),100);}
