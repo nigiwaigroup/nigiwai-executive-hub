@@ -215,36 +215,41 @@ tbody tr{transition:background .15s;}tbody tr:hover{background:rgba(200,164,86,0
 
 /* Print-specific */
 @media print{
-  @page{size:landscape;margin:8mm;}
+  @page{size:landscape;margin:5mm;}
   .sb,.hd,.ov,.sd-close,.tn-expand,.strat-detail,.strat-btn,.print-hide{display:none!important;}
-  .mn{margin-left:0!important;padding:6px!important;}
+  .mn{margin-left:0!important;padding:4px!important;width:100%!important;}
   .pg{display:block!important;}
   .pg:not(#pg-strategy){display:none!important;}
   body{background:#fff!important;color:#333!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  #pg-strategy{transform-origin:top left;width:100%;}
-  .tree-wrap{overflow:visible!important;padding:8px 0!important;}
-  .tree{min-width:0!important;}
+  #pg-strategy{transform-origin:top left;width:277mm;overflow:hidden!important;}
+  .tree-wrap{overflow:visible!important;padding:4px 0!important;width:100%!important;}
+  .tree{min-width:0!important;transform:scale(0.62);transform-origin:top center;margin-bottom:-80px;}
   .t-node{border-color:#999!important;background:#f0f0f0!important;break-inside:avoid;}
-  .t-root .t-node{background:#e8e4dc!important;}
-  .t-l1 .t-node,.t-l2 .t-node{width:auto!important;min-width:80px!important;max-width:140px!important;padding:6px 8px!important;font-size:9px!important;}
-  .t-l1 .t-node .tn-title{font-size:10px!important;}
-  .t-l2 .t-node .tn-title{font-size:8px!important;}
-  .t-l2 .t-node .tn-note{font-size:7px!important;}
-  .tn-icon{width:20px!important;height:20px!important;font-size:10px!important;margin-bottom:3px!important;}
-  .tn-stats .bd{font-size:7px!important;padding:1px 4px!important;}
-  .tree ul{gap:4px!important;padding-top:20px!important;}
-  .tree li{padding-top:20px!important;}
-  .tree li::before{height:20px!important;}
+  .t-root .t-node{background:#e8e4dc!important;padding:10px 20px!important;}
+  .t-root .t-node .tn-title{font-size:14px!important;}
+  .t-root .t-node .tn-sub{font-size:9px!important;}
+  .t-l1 .t-node{width:auto!important;min-width:90px!important;max-width:130px!important;padding:6px 8px!important;}
+  .t-l1 .t-node .tn-title{font-size:9px!important;}
+  .t-l1 .t-node .tn-desc{font-size:7px!important;}
+  .t-l2 .t-node{width:auto!important;min-width:70px!important;max-width:110px!important;padding:4px 6px!important;}
+  .t-l2 .t-node .tn-title{font-size:7px!important;}
+  .t-l2 .t-node .tn-note{font-size:6px!important;}
+  .tn-icon{width:16px!important;height:16px!important;font-size:8px!important;margin-bottom:2px!important;}
+  .tn-stats .bd{font-size:6px!important;padding:1px 3px!important;}
+  .tree ul{gap:3px!important;padding-top:16px!important;}
+  .tree li{padding-top:16px!important;}
+  .tree li::before{height:16px!important;width:2px!important;}
+  .tree ul::before{height:2px!important;}
   .tree li::after{display:none!important;}
-  .str-hero{background:#f5f5f5!important;border-color:#ccc!important;padding:10px!important;margin-bottom:10px!important;}
-  .str-hero h2{font-size:16px!important;color:#333!important;}
-  .str-hero p{font-size:9px!important;}
-  .str-kpi-box{background:#f5f5f5!important;border-color:#ccc!important;padding:6px 10px!important;min-width:70px!important;}
-  .str-kpi-box .skb-val{font-size:18px!important;color:#333!important;}
-  .str-kpi-box .skb-lbl{font-size:8px!important;}
+  .str-hero{background:#f5f5f5!important;border-color:#ccc!important;padding:6px 8px!important;margin-bottom:6px!important;}
+  .str-hero h2{font-size:13px!important;color:#333!important;}
+  .str-hero p{font-size:7px!important;}
+  .str-kpi-box{background:#f5f5f5!important;border-color:#ccc!important;padding:4px 8px!important;min-width:50px!important;}
+  .str-kpi-box .skb-val{font-size:14px!important;color:#333!important;}
+  .str-kpi-box .skb-lbl{font-size:6px!important;}
   .str-kpi-box .skb-icon{display:none!important;}
-  .str-kpi-row{gap:8px!important;margin-top:6px!important;}
-  .print-stamp{display:block!important;text-align:right;font-size:9px;color:#666;margin-top:10px;padding-top:6px;border-top:1px solid #ccc;}
+  .str-kpi-row{gap:6px!important;margin-top:4px!important;}
+  .print-stamp{display:block!important;text-align:right;font-size:8px;color:#666;margin-top:6px;padding-top:4px;border-top:1px solid #ccc;}
 }
 .print-stamp{display:none;}
 
