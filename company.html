@@ -2290,7 +2290,7 @@ async function submitCompanyEditForm(e) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: 'updateAllForCompany',
         companyName: originalCo,
@@ -2492,7 +2492,7 @@ async function submitDirectorEditForm(e) {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
         action: 'updateAllForCompany',
         companyName: co,
@@ -2619,7 +2619,7 @@ async function apiPost(body) {
   }
   try {
     const res = await fetch(API_URL, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(body),
     });
     const json = await res.json();
