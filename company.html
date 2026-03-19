@@ -900,14 +900,25 @@
       <div class="form-grid" style="grid-template-columns:1fr;">
         <div class="form-group">
           <label>กรรมการผู้มีอำนาจ (เดิม / ก่อนปรับ)</label>
-          <input class="form-input" id="dir_before" type="text" placeholder="เช่น นายสมชาย ใจดี">
-          <div style="font-size:10px; color:var(--muted); margin-top:4px;">คั่นด้วย / หากมีหลายคน</div>
+          <div id="dir_before_list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+          <button type="button" onclick="addDirRow('dir_before_list','before')"
+            style="background:rgba(255,255,255,0.05); border:1px dashed var(--border); color:var(--muted);
+                   border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer; width:100%;
+                   transition:all 0.2s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'"
+            onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+            <i class="fas fa-plus" style="margin-right:6px; font-size:10px;"></i>เพิ่มกรรมการ (ก่อนปรับ)
+          </button>
         </div>
         <div class="form-group">
           <label style="color:var(--gold);">กรรมการผู้มีอำนาจ (ปัจจุบัน / หลังปรับ)</label>
-          <input class="form-input" id="dir_after" type="text" placeholder="เช่น นายสมชาย ใจดี / นางสาวมาลี สุข"
-            style="border-color:rgba(201,168,76,0.4);">
-          <div style="font-size:10px; color:var(--muted); margin-top:4px;">คั่นด้วย / หากมีหลายคน</div>
+          <div id="dir_after_list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+          <button type="button" onclick="addDirRow('dir_after_list','after')"
+            style="background:rgba(201,168,76,0.05); border:1px dashed rgba(201,168,76,0.4); color:var(--gold);
+                   border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer; width:100%;
+                   transition:all 0.2s;" onmouseover="this.style.background='rgba(201,168,76,0.1)'"
+            onmouseout="this.style.background='rgba(201,168,76,0.05)'">
+            <i class="fas fa-plus" style="margin-right:6px; font-size:10px;"></i>เพิ่มกรรมการ (ปัจจุบัน)
+          </button>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
           <div class="form-group">
@@ -2299,10 +2310,83 @@ async function submitCompanyEditForm(e) {
   }
 }
 
+/* ── Director name aggregation helper ── */
+/* ── Director List helpers (dynamic add/remove in edit modal) ── */
+function addDirRow(listId, type, value = '') {
+  const list = document.getElementById(listId);
+  const isAfter = type === 'after';
+  const accent  = isAfter ? 'rgba(201,168,76,0.35)' : 'rgba(148,163,184,0.25)';
+  const row = document.createElement('div');
+  row.className = 'dir-input-row';
+  row.style.cssText = 'display:flex; gap:8px; align-items:center;';
+  row.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:center; width:28px; height:36px;
+                background:rgba(255,255,255,0.05); border-radius:6px; flex-shrink:0;">
+      <i class="fas fa-user" style="font-size:11px; color:var(--muted);"></i>
+    </div>
+    <input class="form-input dir-name-input" type="text"
+      style="flex:1; border-color:${accent};"
+      placeholder="ชื่อ-นามสกุล"
+      value="${value.replace(/"/g,'&quot;')}">
+    <button type="button" onclick="removeDirRow(this)"
+      title="ลบ"
+      style="background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.3);
+             color:#F87171; border-radius:6px; width:34px; height:36px; cursor:pointer;
+             font-size:14px; flex-shrink:0; transition:all 0.15s;"
+      onmouseover="this.style.background='rgba(248,113,113,0.25)'"
+      onmouseout="this.style.background='rgba(248,113,113,0.12)'">×</button>`;
+  list.appendChild(row);
+}
+
+function removeDirRow(btn) {
+  const list = btn.closest('#dir_before_list, #dir_after_list');
+  if (!list) return;
+  // Always keep at least 1 row
+  if (list.querySelectorAll('.dir-input-row').length > 1) {
+    btn.closest('.dir-input-row').remove();
+  } else {
+    // Clear the last one instead of removing
+    btn.closest('.dir-input-row').querySelector('input').value = '';
+  }
+}
+
+function setDirList(listId, type, names) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  const items = names.length ? names : [''];  // always show at least 1 empty row
+  items.forEach(n => addDirRow(listId, type, n));
+}
+
+function getDirListValues(listId) {
+  return [...document.querySelectorAll(`#${listId} .dir-name-input`)]
+    .map(i => i.value.trim())
+    .filter(Boolean);
+}
+
+function aggregateDirNames(coRows) {
+  const NON_NAME = ['ดำเนินการ', 'เรียบร้อย', 'รอดำเนินการ', 'ยังไม่', 'ไม่ได้', 'รอ'];
+  const isValid  = s => s.length > 3 && !NON_NAME.some(p => s.includes(p));
+  const split    = str => str.split(/[\/,\n]/).map(s => s.trim()).filter(s => s && s !== '-' && s !== '—' && isValid(s));
+  const normKey  = s => s.replace(/\s+/g, '').toLowerCase();
+
+  const afterMap = new Map(), beforeMap = new Map();
+  coRows.forEach(r => {
+    const a = String(r['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '').trim();
+    const b = String(r['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '').trim();
+    if (a) split(a).forEach(n => afterMap.set(normKey(n), n));
+    if (b) split(b).forEach(n => beforeMap.set(normKey(n), n));
+  });
+  return {
+    afterNames:  [...afterMap.values()],
+    beforeNames: [...beforeMap.values()],
+    afterStr:    [...afterMap.values()].join(' / '),
+    beforeStr:   [...beforeMap.values()].join(' / '),
+  };
+}
+
 /* ── Director Admin Table ── */
 function renderDirectorAdminTable(data) {
   const companies = [...new Set(data.map(r => r['ชื่อบริษัท']))];
-  // Sort by ลำดับ
   companies.sort((a, b) => {
     const ra = data.find(r => r['ชื่อบริษัท'] === a);
     const rb = data.find(r => r['ชื่อบริษัท'] === b);
@@ -2310,23 +2394,19 @@ function renderDirectorAdminTable(data) {
   });
 
   const html = companies.map(co => {
-    const r = data.find(d => d['ชื่อบริษัท'] === co);
-    if (!r) return '';
-    const after  = r['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '';
-    const before = r['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '';
-    const newSh  = r['ผู้ถือหุ้นใหม่'] || '';
-    const status = r['สถานะอัพเดท'] || '';
-    const hasAfter = after && after.trim();
+    const coRows = data.filter(d => d['ชื่อบริษัท'] === co);
+    if (!coRows.length) return '';
+    const r0 = coRows[0]; // for metadata
 
-    // Director tags (after) or before if no after
-    const dirDisplay = (hasAfter ? after : before)
-      .split(/[\/,\n]/)
-      .map(n => n.trim()).filter(Boolean)
+    // Aggregate ALL unique director names from ALL rows
+    const { afterNames, beforeNames, afterStr, beforeStr } = aggregateDirNames(coRows);
+    const hasAfter = afterNames.length > 0;
+    const newSh    = coRows.find(r => r['ผู้ถือหุ้นใหม่'])?.['ผู้ถือหุ้นใหม่'] || '';
+    const status   = coRows.find(r => r['สถานะอัพเดท'])?.['สถานะอัพเดท'] || '';
+
+    const dirDisplay = (hasAfter ? afterNames : beforeNames)
       .map(n => `<span class="director-tag" style="font-size:11px;">${n}</span>`)
       .join('') || '<span style="color:var(--muted);font-size:11px;">—</span>';
-
-    const beforeDisplay = before && before !== after
-      ? `<div style="font-size:10px; color:var(--muted); margin-top:3px;">เดิม: ${before}</div>` : '';
 
     return `<tr>
       <td style="white-space:nowrap;">
@@ -2334,10 +2414,12 @@ function renderDirectorAdminTable(data) {
           <i class="fas fa-pen"></i>
         </button>
       </td>
-      <td style="color:var(--gold); font-weight:700; font-family:'Inter',sans-serif;">${r['ลำดับ']||'—'}</td>
+      <td style="color:var(--gold); font-weight:700; font-family:'Inter',sans-serif;">${r0['ลำดับ']||'—'}</td>
       <td style="font-weight:600; font-size:12.5px; max-width:200px;">${co}</td>
-      <td style="font-size:11px; color:var(--muted); max-width:160px;">${before || '—'}</td>
-      <td style="max-width:200px;">
+      <td style="font-size:11px; color:var(--muted); max-width:180px; line-height:1.6;">
+        ${beforeNames.length ? beforeNames.map(n => `<div>${n}</div>`).join('') : '—'}
+      </td>
+      <td style="max-width:220px;">
         ${dirDisplay}
         ${!hasAfter ? `<div style="font-size:10px; color:#FBBF24; margin-top:3px;"><i class="fas fa-clock"></i> ยังไม่ได้ปรับ</div>` : ''}
       </td>
@@ -2353,16 +2435,21 @@ function renderDirectorAdminTable(data) {
 }
 
 function openDirectorEditModal(coNameJson) {
-  const co  = JSON.parse(coNameJson);
-  const row = state.allData.find(r => r['ชื่อบริษัท'] === co);
-  if (!row) return;
+  const co     = JSON.parse(coNameJson);
+  const coRows = state.allData.filter(r => r['ชื่อบริษัท'] === co);
+  if (!coRows.length) return;
 
-  document.getElementById('directorEditCoName').value      = co;
+  // Aggregate ALL director names from ALL rows for this company
+  const { afterStr, beforeStr } = aggregateDirNames(coRows);
+  const r0 = coRows[0];
+
+  document.getElementById('directorEditCoName').value           = co;
   document.getElementById('directorEditCompanyName').textContent = co;
-  document.getElementById('dir_before').value              = row['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '';
-  document.getElementById('dir_after').value               = row['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '';
-  document.getElementById('dir_newShareholder').value      = row['ผู้ถือหุ้นใหม่'] || '';
-  document.getElementById('dir_status').value              = row['สถานะอัพเดท'] || '';
+  // Populate dynamic lists — one input row per director
+  setDirList('dir_after_list',  'after',  afterNames);
+  setDirList('dir_before_list', 'before', beforeNames);
+  document.getElementById('dir_newShareholder').value           = coRows.find(r => r['ผู้ถือหุ้นใหม่'])?.['ผู้ถือหุ้นใหม่'] || '';
+  document.getElementById('dir_status').value                   = coRows.find(r => r['สถานะอัพเดท'])?.['สถานะอัพเดท'] || '';
 
   openModal('directorEditModal');
 }
@@ -2376,8 +2463,8 @@ async function submitDirectorEditForm(e) {
   spin.style.display = 'block';
 
   const fields = {
-    'กรรมการผู้มีอำนาจ (ก่อนปรับ)': document.getElementById('dir_before').value.trim(),
-    'กรรมการผู้มีอำนาจ (หลังปรับ)': document.getElementById('dir_after').value.trim(),
+    'กรรมการผู้มีอำนาจ (ก่อนปรับ)': getDirListValues('dir_before_list').join(' / '),
+    'กรรมการผู้มีอำนาจ (หลังปรับ)': getDirListValues('dir_after_list').join(' / '),
     'ผู้ถือหุ้นใหม่':                document.getElementById('dir_newShareholder').value.trim(),
     'สถานะอัพเดท':                  document.getElementById('dir_status').value.trim(),
   };
