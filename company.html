@@ -566,6 +566,7 @@
                 <th>#</th>
                 <th>ชื่อบริษัท</th>
                 <th>เลขนิติบุคคล</th>
+                <th>อายุบริษัท</th>
                 <th>กรรมการผู้มีอำนาจ (ปัจจุบัน)</th>
                 <th>ผู้ถือหุ้นใหม่</th>
                 <th>สถานะ</th>
@@ -1136,6 +1137,71 @@ function applyFilter() {
 }
 
 /* ── Company Info Strip ── */
+/* ── Company Age Calculator ─────────────────────────────────
+   รับ dateStr (YYYY-MM-DD หรือ DD/MM/YYYY หรือ DD.MM.YY)
+   คืน { years, months, days, label } นับถึงวันนี้
+──────────────────────────────────────────────────────────── */
+function calcCompanyAge(dateStr) {
+  if (!dateStr || dateStr === '—' || dateStr === '-') return null;
+
+  // Normalise various formats → Date object
+  let d = null;
+  const s = String(dateStr).trim();
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    d = new Date(s);
+  }
+  // DD/MM/YYYY or DD/MM/YY
+  else if (/^\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}$/.test(s)) {
+    const parts = s.split(/[\/\.\-]/);
+    let year = parseInt(parts[2]);
+    if (year < 100) {
+      // 2-digit year: ในไทยมักเป็นเลขท้ายปี พ.ศ. เช่น 66 = 2566
+      const thaiYear = year + 2500 - 543; // แปลง พ.ศ. 2-digit → ค.ศ.
+      const now = new Date().getFullYear();
+      year = (thaiYear >= 1990 && thaiYear <= now + 1) ? thaiYear : (year < 50 ? year + 2000 : year + 1900);
+    }
+    // 4-digit พ.ศ. (> 2400) แปลงเป็น ค.ศ.
+    if (year > 2400) year -= 543;
+    d = new Date(year, parseInt(parts[1]) - 1, parseInt(parts[0]));
+  }
+  // Plain year only e.g. "2018"
+  else if (/^\d{4}$/.test(s)) {
+    d = new Date(parseInt(s), 0, 1);
+  }
+
+  if (!d || isNaN(d.getTime())) return null;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (d > today) return null; // future date
+
+  let years  = today.getFullYear() - d.getFullYear();
+  let months = today.getMonth()    - d.getMonth();
+  let days   = today.getDate()     - d.getDate();
+
+  if (days < 0) {
+    months--;
+    // Days in previous month
+    const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  let label = '';
+  if (years  > 0) label += `${years} ปี `;
+  if (months > 0) label += `${months} เดือน `;
+  if (days   > 0 || label === '') label += `${days} วัน`;
+  label = label.trim();
+
+  return { years, months, days, label };
+}
+
 function renderCompanyInfoStrip(data) {
   const strip = document.getElementById('companyInfoStrip');
   if (!strip) return;
@@ -1157,6 +1223,7 @@ function renderCompanyInfoStrip(data) {
   const regDate = row['วันที่จดทะเบียน']                       || '—';
 
   const hasNew = addrNew && addrNew !== '-' && addrNew !== '—' && addrNew.trim() !== '';
+  const age    = calcCompanyAge(regDate);
 
   strip.innerHTML = `
     <div class="co-info-block">
@@ -1173,6 +1240,12 @@ function renderCompanyInfoStrip(data) {
       <span class="co-info-label">วันที่จดทะเบียน</span>
       <span class="co-info-value">${regDate}</span>
     </div>
+    ${age ? `
+    <div class="co-info-divider"></div>
+    <div class="co-info-block">
+      <span class="co-info-label"><i class="fas fa-clock" style="margin-right:4px; opacity:.7;"></i>อายุบริษัท</span>
+      <span class="co-info-value" style="color:#A78BFA; font-weight:600;">${age.label}</span>
+    </div>` : ''}
     <div class="co-info-divider"></div>
     <div class="co-info-block">
       <span class="co-info-label">ที่อยู่สำนักงานใหญ่ปัจจุบัน</span>
@@ -1581,6 +1654,7 @@ function renderDirectorsTable(data) {
         ลำดับ: r['ลำดับ'],
         ชื่อบริษัท: co,
         เลขนิติบุคคล: r['เลขนิติบุคคล'],
+        วันที่จดทะเบียน: r['วันที่จดทะเบียน'] || '',
         ผู้ถือหุ้นใหม่: r['ผู้ถือหุ้นใหม่'] || '',
         สถานะอัพเดท: r['สถานะอัพเดท'] || '',
         afterDirs:  new Map(), // normKey → display name (หลังปรับ)
@@ -1620,10 +1694,16 @@ function renderDirectorsTable(data) {
     const statusBadge = status && status.trim()
       ? `<span class="badge badge-green">${status}</span>`
       : `<span class="badge badge-gray">—</span>`;
+    const age = calcCompanyAge(r.วันที่จดทะเบียน);
+    const ageCell = age
+      ? `<div style="font-weight:600; font-size:12px; color:#A78BFA;">${age.label}</div>
+         <div style="font-size:10px; color:var(--muted); margin-top:2px;">${r.วันที่จดทะเบียน}</div>`
+      : `<span style="color:var(--muted); font-size:12px;">${r.วันที่จดทะเบียน || '—'}</span>`;
     return `<tr>
       <td style="color:var(--gold); font-weight:700; font-family:'Inter',sans-serif; font-size:12px;">${r.ลำดับ || i+1}</td>
       <td style="font-weight:500;">${r.ชื่อบริษัท}</td>
       <td><span class="mono-id">${r.เลขนิติบุคคล||'—'}</span></td>
+      <td style="white-space:nowrap;">${ageCell}</td>
       <td>${directorTags}</td>
       <td style="color:var(--muted); font-size:12px;">${newSh}</td>
       <td>${statusBadge}</td>
