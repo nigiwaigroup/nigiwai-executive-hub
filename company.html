@@ -2440,7 +2440,7 @@ function openDirectorEditModal(coNameJson) {
   if (!coRows.length) return;
 
   // Aggregate ALL director names from ALL rows for this company
-  const { afterStr, beforeStr } = aggregateDirNames(coRows);
+  const { afterNames, beforeNames } = aggregateDirNames(coRows);
   const r0 = coRows[0];
 
   document.getElementById('directorEditCoName').value           = co;
