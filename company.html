@@ -562,15 +562,7 @@
         <div class="table-wrap">
           <table class="data-table" id="directorsTable">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>ชื่อบริษัท</th>
-                <th>เลขนิติบุคคล</th>
-                <th>อายุบริษัท</th>
-                <th>กรรมการผู้มีอำนาจ (ปัจจุบัน)</th>
-                <th>ผู้ถือหุ้นใหม่</th>
-                <th>สถานะ</th>
-              </tr>
+              <tr id="directorsThead"></tr>
             </thead>
             <tbody id="directorsBody"></tbody>
           </table>
@@ -1065,7 +1057,8 @@ const state = {
   addFormOpen: false,
   adminView: 'company',
   shView: 'grouped',   // 'grouped' | 'flat'
-  shSort: { col: null, dir: 1 }, // col = field key, dir = 1 asc / -1 desc
+  shSort:  { col: null, dir: 1 }, // col = field key, dir = 1 asc / -1 desc
+  dirSort: { col: 'age',  dir: -1 }, // default: sort by age desc (oldest first)
 };
 
 /* ══════════════════════════════════════════════════
@@ -1148,9 +1141,15 @@ function calcCompanyAge(dateStr) {
   let d = null;
   const s = String(dateStr).trim();
 
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+  // ISO timestamp: 2018-06-12T07:00:00.000Z (from Google Sheets API)
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
     d = new Date(s);
+    // Use local date only (strip time)
+    d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  // YYYY-MM-DD
+  else if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    d = new Date(s + 'T00:00:00'); // force local time, avoid UTC shift
   }
   // DD/MM/YYYY or DD/MM/YY
   else if (/^\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}$/.test(s)) {
@@ -1636,6 +1635,41 @@ function renderDebtChart(data) {
   });
 }
 
+/* ── Directors Table Sort ── */
+function sortDirTable(col) {
+  if (state.dirSort.col === col) {
+    state.dirSort.dir *= -1;
+  } else {
+    state.dirSort.col = col;
+    state.dirSort.dir = -1; // default desc
+  }
+  renderDirectorsTable(state.filteredData);
+}
+
+function renderDirThead() {
+  const cols = [
+    { key: 'ลำดับ',          label: '#',                         sortable: true  },
+    { key: 'ชื่อบริษัท',    label: 'ชื่อบริษัท',               sortable: true  },
+    { key: 'เลขนิติบุคคล', label: 'เลขนิติบุคคล',            sortable: false },
+    { key: 'age',             label: 'อายุบริษัท',               sortable: true  },
+    { key: 'directors',       label: 'กรรมการผู้มีอำนาจ (ปัจจุบัน)', sortable: false },
+    { key: 'ผู้ถือหุ้นใหม่', label: 'ผู้ถือหุ้นใหม่',          sortable: true  },
+    { key: 'สถานะอัพเดท',   label: 'สถานะ',                    sortable: true  },
+  ];
+  const sc = state.dirSort.col;
+  const sd = state.dirSort.dir;
+  const arrow = (key) => sc === key ? (sd === -1 ? ' ▼' : ' ▲') : ' ⇅';
+  const thStyle = (key) => `cursor:${cols.find(c=>c.key===key)?.sortable ? 'pointer' : 'default'};
+    user-select:none; white-space:nowrap;
+    ${sc === key ? 'color:var(--gold);' : ''}`;
+
+  document.getElementById('directorsThead').innerHTML = cols.map(c =>
+    c.sortable
+      ? `<th style="${thStyle(c.key)}" onclick="sortDirTable('${c.key}')">${c.label}<span style="font-size:10px; opacity:0.6;">${arrow(c.key)}</span></th>`
+      : `<th>${c.label}</th>`
+  ).join('');
+}
+
 function renderDirectorsTable(data) {
   const NON_NAME = ['ดำเนินการ', 'เรียบร้อย', 'รอดำเนินการ', 'ยังไม่', 'ไม่ได้', 'รอ'];
   const isValidName = s => s.length > 3 && !NON_NAME.some(p => s.includes(p));
@@ -1683,9 +1717,34 @@ function renderDirectorsTable(data) {
     entry.totalDebt = coRows.reduce((s, r) => s + (+r['หนี้สิน (บาท)'] || 0), 0);
   });
 
-  // Sort by debt descending
-  const rows = [...companyMap.values()].sort((a, b) => b.totalDebt - a.totalDebt);
-  document.getElementById('directorsBody').innerHTML = rows.map((r, i) => {
+  // Pre-compute age for each entry (needed for sort)
+  companyMap.forEach(entry => {
+    entry._age = calcCompanyAge(entry.วันที่จดทะเบียน);
+    entry._ageDays = entry._age
+      ? (entry._age.years * 365 + entry._age.months * 30 + entry._age.days)
+      : 0;
+  });
+
+  // Sort by state.dirSort
+  const sc = state.dirSort.col;
+  const sd = state.dirSort.dir;
+  const allRows = [...companyMap.values()];
+  allRows.sort((a, b) => {
+    let va, vb;
+    if (sc === 'age')              { va = a._ageDays;           vb = b._ageDays; }
+    else if (sc === 'ลำดับ')      { va = +a.ลำดับ || 99;       vb = +b.ลำดับ || 99; }
+    else if (sc === 'ชื่อบริษัท') { va = a.ชื่อบริษัท || '';   vb = b.ชื่อบริษัท || ''; }
+    else if (sc === 'ผู้ถือหุ้นใหม่') { va = a.ผู้ถือหุ้นใหม่ || ''; vb = b.ผู้ถือหุ้นใหม่ || ''; }
+    else if (sc === 'สถานะอัพเดท')   { va = a.สถานะอัพเดท || ''; vb = b.สถานะอัพเดท || ''; }
+    else                           { va = a.totalDebt;           vb = b.totalDebt; } // fallback
+    if (typeof va === 'string') return sd * va.localeCompare(vb, 'th');
+    return sd * (vb - va); // numeric: sd=-1 → desc, sd=1 → asc (flip because large=first)
+  });
+
+  // Render thead with sort indicators
+  renderDirThead();
+
+  document.getElementById('directorsBody').innerHTML = allRows.map((r, i) => {
     const directorTags = r.directors.size > 0
       ? [...r.directors.values()].map(n => `<span class="director-tag">${n}</span>`).join('')
       : '<span style="color:var(--muted); font-size:12px;">—</span>';
@@ -1694,11 +1753,13 @@ function renderDirectorsTable(data) {
     const statusBadge = status && status.trim()
       ? `<span class="badge badge-green">${status}</span>`
       : `<span class="badge badge-gray">—</span>`;
-    const age = calcCompanyAge(r.วันที่จดทะเบียน);
+    const age = r._age;
+    // Show clean date (strip ISO time part if present)
+    const regDateDisplay = (r.วันที่จดทะเบียน || '').replace(/T.+$/, '');
     const ageCell = age
       ? `<div style="font-weight:600; font-size:12px; color:#A78BFA;">${age.label}</div>
-         <div style="font-size:10px; color:var(--muted); margin-top:2px;">${r.วันที่จดทะเบียน}</div>`
-      : `<span style="color:var(--muted); font-size:12px;">${r.วันที่จดทะเบียน || '—'}</span>`;
+         <div style="font-size:10px; color:var(--muted); margin-top:2px;">${regDateDisplay}</div>`
+      : `<span style="color:var(--muted); font-size:12px;">${regDateDisplay || '—'}</span>`;
     return `<tr>
       <td style="color:var(--gold); font-weight:700; font-family:'Inter',sans-serif; font-size:12px;">${r.ลำดับ || i+1}</td>
       <td style="font-weight:500;">${r.ชื่อบริษัท}</td>
