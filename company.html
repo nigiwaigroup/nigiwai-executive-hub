@@ -76,8 +76,8 @@
     #filterBar {
       background: var(--bg2);
       border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 8px 24px;
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap;
     }
     .filter-select {
       background: var(--card); border: 1px solid var(--gold-border);
@@ -447,14 +447,6 @@
      FILTER BAR
 ════════════════════════════════════════════════ -->
 <div id="filterBar">
-  <div style="display:flex; align-items:center; gap:8px; color:var(--muted); font-size:13px;">
-    <i class="fas fa-filter" style="color:var(--gold); font-size:11px;"></i>
-    กรองข้อมูล:
-  </div>
-  <select class="filter-select" id="companyFilter" onchange="applyFilter()">
-    <option value="all">— ทุกบริษัทในเครือ —</option>
-  </select>
-
   <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
     <button class="btn btn-outline" style="font-size:12px; padding:6px 14px;" onclick="loadData()">
       <i class="fas fa-rotate-right"></i> รีเฟรชข้อมูล
@@ -477,6 +469,34 @@
 
   <!-- ── DASHBOARD PAGE ── -->
   <div class="page active fade-in" id="pgDashboard">
+
+    <!-- ── Company Selector Hero ── -->
+    <div id="companySelectorHero" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 24px 20px;
+      gap: 10px;
+    ">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <i class="fas fa-building-columns" style="color:var(--gold); font-size:13px;"></i>
+        <span style="font-size:13px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--gold); opacity:.85;">กรุณาเลือกบริษัท</span>
+      </div>
+      <select class="filter-select" id="companyFilter" onchange="applyFilter()" style="
+        min-width: 380px;
+        max-width: 520px;
+        width: 100%;
+        font-size: 14px;
+        padding: 11px 18px;
+        text-align: center;
+        border-color: rgba(201,168,76,0.4);
+        background: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(19,30,48,0.95) 100%);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(201,168,76,0.1);
+      ">
+        <option value="all">— ทุกบริษัทในเครือ —</option>
+      </select>
+    </div>
 
     <!-- Loading -->
     <div id="loadingIndicator"><div class="spinner"></div></div>
@@ -527,7 +547,7 @@
                 <th>#</th>
                 <th>ชื่อบริษัท</th>
                 <th>เลขนิติบุคคล</th>
-                <th>กรรมการผู้มีอำนาจ (หลังปรับ)</th>
+                <th>กรรมการผู้มีอำนาจ (ปัจจุบัน)</th>
                 <th>ผู้ถือหุ้นใหม่</th>
                 <th>สถานะ</th>
               </tr>
@@ -613,7 +633,7 @@
               <th>ชื่อบริษัท</th>
               <th>เลขนิติบุคคล</th>
               <th>ทุนจดทะเบียน</th>
-              <th>กรรมการฯ (หลังปรับ)</th>
+              <th>กรรมการฯ (ปัจจุบัน)</th>
               <th>ที่อยู่ปัจจุบัน</th>
               <th>ที่อยู่ใหม่</th>
               <th>ปัญหา / หมายเหตุ</th>
@@ -769,7 +789,7 @@
           <input class="form-input" name="co_กรรมการผู้มีอำนาจ (ก่อนปรับ)" type="text">
         </div>
         <div class="form-group">
-          <label>กรรมการ (หลังปรับ / ปัจจุบัน)</label>
+          <label>กรรมการผู้มีอำนาจ (ปัจจุบัน)</label>
           <input class="form-input" name="co_กรรมการผู้มีอำนาจ (หลังปรับ)" type="text">
         </div>
       </div>
@@ -1109,18 +1129,18 @@ function renderKPIs(data) {
 
   document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
     <div class="kpi-card kpi-clickable" onclick="openKpiDetail('${k.id}')">
-      <div style="display:flex; align-items:flex-start; justify-content:space-between;">
-        <div style="flex:1; min-width:0;">
-          <div class="kpi-value tech-num" style="color:${k.color}; ">${k.value}</div>
-          <div style="font-size:11px; color:#888; margin-top:2px; font-family:'Noto Sans Thai',sans-serif;">${k.unit}</div>
-          <div class="kpi-label">${k.label}</div>
-          ${k.note ? `<div style="font-size:10px; color:var(--muted); margin-top:4px;">${k.note}</div>` : ''}
-          <div class="kpi-click-hint"><i class="fas fa-arrow-up-right-from-square" style="font-size:8px;"></i> แตะเพื่อดูรายละเอียด</div>
-        </div>
-        <div class="kpi-icon" style="color:${k.color}; border-color:${k.color}30; background:${k.color}12;">
+      <!-- Top row: icon left, hint right -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div class="kpi-icon" style="color:${k.color}; border-color:${k.color}30; background:${k.color}12; width:36px; height:36px; border-radius:9px; font-size:15px;">
           <i class="fas ${k.icon}"></i>
         </div>
+        <div class="kpi-click-hint" style="font-size:9.5px;"><i class="fas fa-arrow-up-right-from-square" style="font-size:8px;"></i> รายละเอียด</div>
       </div>
+      <!-- Number — full width, no competition with icon -->
+      <div class="kpi-value tech-num" style="color:${k.color}; font-size:26px; line-height:1; word-break:break-all; overflow-wrap:break-word;">${k.value}</div>
+      <div style="font-size:11px; color:#888; margin-top:3px; font-family:'Noto Sans Thai',sans-serif;">${k.unit}</div>
+      <div class="kpi-label" style="margin-top:5px;">${k.label}</div>
+      ${k.note ? `<div style="font-size:10px; color:var(--muted); margin-top:3px;">${k.note}</div>` : ''}
     </div>
   `).join('');
 }
@@ -1287,7 +1307,15 @@ function renderCapitalChart(data) {
 }
 
 function renderDirectorsTable(data) {
-  // Aggregate all directors + metadata per company using a Map
+  const NON_NAME = ['ดำเนินการ', 'เรียบร้อย', 'รอดำเนินการ', 'ยังไม่', 'ไม่ได้', 'รอ'];
+  const isValidName = s => s.length > 3 && !NON_NAME.some(p => s.includes(p));
+  const splitNames = str => str
+    .split(/[\n\/,]|และ/)
+    .map(s => s.trim())
+    .filter(s => s && s !== '-' && s !== '—' && isValidName(s));
+  const normKey = s => s.replace(/\s+/g, '').toLowerCase();
+
+  // Aggregate metadata per company — two separate maps for after/before
   const companyMap = new Map();
   data.forEach(r => {
     const co = r['ชื่อบริษัท'];
@@ -1298,34 +1326,30 @@ function renderDirectorsTable(data) {
         เลขนิติบุคคล: r['เลขนิติบุคคล'],
         ผู้ถือหุ้นใหม่: r['ผู้ถือหุ้นใหม่'] || '',
         สถานะอัพเดท: r['สถานะอัพเดท'] || '',
-        directors: new Set(),
+        afterDirs:  new Map(), // normKey → display name (หลังปรับ)
+        beforeDirs: new Map(), // normKey → display name (ก่อนปรับ) — fallback only
       });
     }
     const entry = companyMap.get(co);
-    // Collect from both "after" and "before" fields — prefer "after"
     const after  = String(r['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '').trim();
     const before = String(r['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '').trim();
-    // Non-name patterns to exclude (status notes, not person names)
-    const NON_NAME = ['ดำเนินการ', 'เรียบร้อย', 'รอดำเนินการ', 'ยังไม่', 'ไม่ได้', 'รอ'];
-    const isValidName = s =>
-      s.length > 3 && !NON_NAME.some(p => s.includes(p));
-    // Split on newline, slash, comma, Thai "และ"
-    const splitNames = str => str
-      .split(/[\n\/,]|และ/)
-      .map(s => s.trim())
-      .filter(s => s && s !== '-' && s !== '—' && isValidName(s));
-    // Collect directors from both fields (not mutually exclusive)
-    if (after)  splitNames(after).forEach(n => entry.directors.add(n));
-    if (before) splitNames(before).forEach(n => entry.directors.add(n));
-    // Fill in late-arriving metadata
+    // Collect each field separately — NO mixing
+    if (after)  splitNames(after).forEach(n => { entry.afterDirs.set(normKey(n), n); });
+    if (before) splitNames(before).forEach(n => { entry.beforeDirs.set(normKey(n), n); });
+    // Fill late-arriving metadata
     if (!entry.ผู้ถือหุ้นใหม่ && r['ผู้ถือหุ้นใหม่']) entry.ผู้ถือหุ้นใหม่ = r['ผู้ถือหุ้นใหม่'];
     if (!entry.สถานะอัพเดท && r['สถานะอัพเดท'])   entry.สถานะอัพเดท = r['สถานะอัพเดท'];
+  });
+
+  // Resolve: use "หลังปรับ" exclusively; fall back to "ก่อนปรับ" only if no "หลังปรับ" exists
+  companyMap.forEach(entry => {
+    entry.directors = entry.afterDirs.size > 0 ? entry.afterDirs : entry.beforeDirs;
   });
 
   const rows = [...companyMap.values()];
   document.getElementById('directorsBody').innerHTML = rows.map((r, i) => {
     const directorTags = r.directors.size > 0
-      ? [...r.directors].map(n => `<span class="director-tag">${n}</span>`).join('')
+      ? [...r.directors.values()].map(n => `<span class="director-tag">${n}</span>`).join('')
       : '<span style="color:var(--muted); font-size:12px;">—</span>';
     const newSh = r.ผู้ถือหุ้นใหม่ || '—';
     const status = r.สถานะอัพเดท;
