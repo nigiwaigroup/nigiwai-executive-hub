@@ -957,6 +957,10 @@ const CHART_COLORS = [
 // Register datalabels plugin globally
 Chart.register(ChartDataLabels);
 
+// Global Chart.js defaults — white text on dark background
+Chart.defaults.color = '#E2E8F0';
+Chart.defaults.plugins.legend.labels.color = '#E2E8F0';
+
 /* ══════════════════════════════════════════════════
    ④ STATE
 ══════════════════════════════════════════════════ */
@@ -1191,7 +1195,7 @@ function renderOwnershipChart(data) {
           legend: {
             display: true, position: 'right',
             labels: {
-              color: '#94A3B8',
+              color: '#E2E8F0',
               font: { family: 'Noto Sans Thai', size: 10 },
               boxWidth: 12, padding: 10,
               generateLabels: chart => {
@@ -1204,7 +1208,10 @@ function renderOwnershipChart(data) {
                     fillStyle: ds.backgroundColor[i],
                     strokeStyle: ds.borderColor[i],
                     lineWidth: 1,
+                    fontColor: '#E2E8F0',
+                    color: '#E2E8F0',
                     index: i,
+                    hidden: false,
                   };
                 });
               }
@@ -1291,15 +1298,15 @@ function renderOwnershipChart(data) {
         }
       },
       scales: {
-        x: { min:0, max:100, ticks: { color:'#64748B', font:{size:11,family:'Noto Sans Thai'}, callback: v => v+'%' }, grid:{color:'rgba(255,255,255,.04)'} },
-        y: { ticks: { color:'#94A3B8', font:{size:11,family:'Noto Sans Thai'} }, grid:{display:false} }
+        x: { min:0, max:100, ticks: { color:'#CBD5E1', font:{size:11,family:'Noto Sans Thai'}, callback: v => v+'%' }, grid:{color:'rgba(255,255,255,.04)'} },
+        y: { ticks: { color:'#E2E8F0', font:{size:11,family:'Noto Sans Thai'} }, grid:{display:false} }
       }
     }
   });
 }
 
 function renderCapitalChart(data) {
-  // Collect per-company: ทุนจด, ทุนชำระแล้ว, ค้างชำระ
+  // Collect per-company: ทุนจด, ชำระแล้ว, ค้างชำระ
   const seen = new Set();
   const rows = [];
   data.forEach(r => {
@@ -1307,47 +1314,46 @@ function renderCapitalChart(data) {
       seen.add(r['ชื่อบริษัท']);
       const coRows = data.filter(d => d['ชื่อบริษัท'] === r['ชื่อบริษัท']);
       const capital = +r['ทุนจดทะเบียน (บาท)'] || 0;
-      const paid    = coRows.reduce((s, d) => s + (+d['จำนวนทุนที่ชำระแล้ว (บาท)'] || 0), 0);
-      const unpaid  = coRows.reduce((s, d) => s + (+d['เงินค้างชำระ (บาท)']        || 0), 0);
+      const unpaid  = coRows.reduce((s, d) => s + (+d['เงินค้างชำระ (บาท)'] || 0), 0);
+      // paid = capital − unpaid (ensure non-negative)
+      const paid    = Math.max(0, capital - unpaid);
       rows.push({ label: shortName(r['ชื่อบริษัท']), capital, paid, unpaid });
     }
   });
   // Sort by ทุนจดทะเบียน descending
   rows.sort((a, b) => b.capital - a.capital);
 
-  const labels  = rows.map(r => r.label);
-  const capitals = rows.map(r => r.capital);
+  const labels   = rows.map(r => r.label);
   const paids    = rows.map(r => r.paid);
   const unpaids  = rows.map(r => r.unpaid);
+  const capitals = rows.map(r => r.capital);
 
   const ctx = document.getElementById('capitalChart');
   if (state.charts.capital) state.charts.capital.destroy();
-  const fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1) + 'M' : v >= 1e3 ? (v/1e3).toFixed(0) + 'K' : String(v);
+  const abbr = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : String(Math.round(v));
+
   state.charts.capital = new Chart(ctx, {
     type: 'bar',
     data: {
       labels,
       datasets: [
         {
-          label: 'ทุนจดทะเบียน',
-          data: capitals,
-          backgroundColor: 'rgba(96,165,250,0.55)',
-          borderColor: '#60A5FA',
-          borderWidth: 1, borderRadius: 4, borderSkipped: false,
-        },
-        {
           label: 'ทุนชำระแล้ว',
           data: paids,
-          backgroundColor: 'rgba(52,211,153,0.55)',
+          backgroundColor: 'rgba(52,211,153,0.65)',
           borderColor: '#34D399',
-          borderWidth: 1, borderRadius: 4, borderSkipped: false,
+          borderWidth: 0, borderRadius: { topLeft:4, bottomLeft:4, topRight:0, bottomRight:0 },
+          borderSkipped: false,
+          stack: 'capital',
         },
         {
           label: 'ค้างชำระ',
           data: unpaids,
-          backgroundColor: 'rgba(248,113,113,0.55)',
+          backgroundColor: 'rgba(248,113,113,0.70)',
           borderColor: '#F87171',
-          borderWidth: 1, borderRadius: 4, borderSkipped: false,
+          borderWidth: 0, borderRadius: { topLeft:0, bottomLeft:0, topRight:4, bottomRight:4 },
+          borderSkipped: false,
+          stack: 'capital',
         },
       ]
     },
@@ -1356,37 +1362,48 @@ function renderCapitalChart(data) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: true,
-          position: 'top',
-          labels: { color: '#94A3B8', font: { family: 'Noto Sans Thai', size: 11 }, boxWidth: 12, padding: 14 }
+          display: true, position: 'top',
+          labels: { color: '#E2E8F0', font: { family: 'Noto Sans Thai', size: 11 }, boxWidth: 12, padding: 16 }
         },
         tooltip: {
-          callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.x.toLocaleString('th-TH')} บาท` },
+          callbacks: {
+            title: items => items[0].label,
+            afterBody: items => {
+              const i = items[0].dataIndex;
+              return [`ทุนจดทะเบียน: ${capitals[i].toLocaleString('th-TH')} บาท`];
+            },
+            label: c => ` ${c.dataset.label}: ${Math.round(c.parsed.x).toLocaleString('th-TH')} บาท`,
+          },
           bodyFont: { family: 'Noto Sans Thai', size: 12 },
           titleFont: { family: 'Noto Sans Thai', size: 12 },
           backgroundColor: 'rgba(15,23,42,0.95)',
           borderColor: 'rgba(201,168,76,0.35)', borderWidth: 1, padding: 10,
         },
         datalabels: {
-          color: '#CBD5E1', anchor: 'center', align: 'center',
-          font: { family: 'Inter', size: 8, weight: '600' },
-          formatter: v => v > 0 ? fmtM(v) : '',
+          color: '#fff',
+          anchor: 'center', align: 'center',
+          font: { family: 'Inter', size: 9, weight: '700' },
+          formatter: (v, ctx) => {
+            // Only label the paid segment, showing total capital
+            if (ctx.datasetIndex === 0 && v > 0) return abbr(capitals[ctx.dataIndex]);
+            return '';
+          },
           clamp: true,
         }
       },
       scales: {
         x: {
-          ticks: {
-            color: '#64748B', font: { size: 10, family: 'Inter' },
-            callback: v => fmtM(v)
-          },
+          stacked: true,
+          ticks: { color: '#CBD5E1', font: { size: 10, family: 'Inter' }, callback: v => abbr(v) },
           grid: { color: 'rgba(255,255,255,.04)' }
         },
         y: {
-          ticks: { color: '#94A3B8', font: { size: 10, family: 'Noto Sans Thai' } },
+          stacked: true,
+          ticks: { color: '#E2E8F0', font: { size: 10.5, family: 'Noto Sans Thai' } },
           grid: { display: false }
         }
-      }
+      },
+      layout: { padding: { right: 8 } }
     }
   });
 }
@@ -1442,13 +1459,13 @@ function renderDebtChart(data) {
       scales: {
         x: {
           ticks: {
-            color: '#64748B', font: { size: 10, family: 'Inter' },
+            color: '#CBD5E1', font: { size: 10, family: 'Inter' },
             callback: v => fmtM(v)
           },
           grid: { color: 'rgba(255,255,255,.04)' }
         },
         y: {
-          ticks: { color: '#94A3B8', font: { size: 10, family: 'Noto Sans Thai' } },
+          ticks: { color: '#E2E8F0', font: { size: 10, family: 'Noto Sans Thai' } },
           grid: { display: false }
         }
       },
@@ -2358,18 +2375,18 @@ function showToast(msg, type = 'info') {
    ⑩ FORMAT HELPERS
 ══════════════════════════════════════════════════ */
 function fmt(n) {
-  const v = +n;
-  if (!v && v !== 0) return '—';
+  const v = Math.round(+n);
+  if (isNaN(v)) return '—';
   return v.toLocaleString('th-TH');
 }
 function fmtTHB(n) {
-  const v = +n;
-  if (!v && v !== 0) return '—';
+  const v = Math.round(+n);
+  if (isNaN(v) || (!v && v !== 0)) return '—';
   return v.toLocaleString('th-TH');
 }
 function fmtM(n) {
-  const v = +n;
-  if (!v) return '0';
+  const v = Math.round(+n);
+  if (!v && v !== 0) return '0';
   return v.toLocaleString('th-TH');
 }
 function shortName(n) {
