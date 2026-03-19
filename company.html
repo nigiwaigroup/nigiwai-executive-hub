@@ -623,6 +623,10 @@
         style="padding:10px 22px; border:none; background:none; cursor:pointer; font-family:'Noto Sans Thai',sans-serif; font-size:13px; font-weight:600; color:var(--muted); border-bottom:2px solid transparent; transition:all .2s;">
         <i class="fas fa-users" style="margin-right:6px;"></i>ผู้ถือหุ้น
       </button>
+      <button id="adminTabDirector" onclick="setAdminView('director')"
+        style="padding:10px 22px; border:none; background:none; cursor:pointer; font-family:'Noto Sans Thai',sans-serif; font-size:13px; font-weight:600; color:var(--muted); border-bottom:2px solid transparent; transition:all .2s;">
+        <i class="fas fa-user-tie" style="margin-right:6px;"></i>กรรมการ
+      </button>
     </div>
 
     <!-- ══ TAB: บริษัท ══ -->
@@ -695,6 +699,30 @@
             </tr>
           </thead>
           <tbody id="adminBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ TAB: กรรมการ ══ -->
+    <div id="adminViewDirector" style="display:none;">
+      <div style="margin-bottom:16px; font-size:12px; color:var(--muted);">
+        <i class="fas fa-circle-info" style="color:var(--accent); margin-right:6px;"></i>
+        แก้ไขข้อมูลกรรมการผู้มีอำนาจ — การเปลี่ยนแปลงจะอัพเดทในทุก row ของบริษัทนั้นพร้อมกัน
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:80px;">Actions</th>
+              <th>#</th>
+              <th>ชื่อบริษัท</th>
+              <th>กรรมการผู้มีอำนาจ (เดิม)</th>
+              <th>กรรมการผู้มีอำนาจ (ปัจจุบัน)</th>
+              <th>ผู้ถือหุ้นใหม่</th>
+              <th>สถานะ</th>
+            </tr>
+          </thead>
+          <tbody id="directorAdminBody"></tbody>
         </table>
       </div>
     </div>
@@ -848,6 +876,56 @@
         <div id="companyEditSpinner" style="display:none; color:var(--muted); font-size:12px;">
           <i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...
         </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     DIRECTOR EDIT MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="directorEditModal">
+  <div class="modal-box" style="max-width:560px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <div>
+        <div style="font-size:16px; font-weight:700; color:var(--gold);">
+          <i class="fas fa-user-tie" style="margin-right:8px;"></i>แก้ไขกรรมการผู้มีอำนาจ
+        </div>
+        <div id="directorEditCompanyName" style="font-size:12px; color:var(--muted); margin-top:3px;"></div>
+      </div>
+      <button onclick="closeModal('directorEditModal')" style="background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; line-height:1;">×</button>
+    </div>
+    <form id="directorEditForm" onsubmit="submitDirectorEditForm(event)">
+      <input type="hidden" id="directorEditCoName">
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>กรรมการผู้มีอำนาจ (เดิม / ก่อนปรับ)</label>
+          <input class="form-input" id="dir_before" type="text" placeholder="เช่น นายสมชาย ใจดี">
+          <div style="font-size:10px; color:var(--muted); margin-top:4px;">คั่นด้วย / หากมีหลายคน</div>
+        </div>
+        <div class="form-group">
+          <label style="color:var(--gold);">กรรมการผู้มีอำนาจ (ปัจจุบัน / หลังปรับ)</label>
+          <input class="form-input" id="dir_after" type="text" placeholder="เช่น นายสมชาย ใจดี / นางสาวมาลี สุข"
+            style="border-color:rgba(201,168,76,0.4);">
+          <div style="font-size:10px; color:var(--muted); margin-top:4px;">คั่นด้วย / หากมีหลายคน</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-group">
+            <label>ผู้ถือหุ้นใหม่</label>
+            <input class="form-input" id="dir_newShareholder" type="text" placeholder="ชื่อผู้ถือหุ้นใหม่ (ถ้ามี)">
+          </div>
+          <div class="form-group">
+            <label>สถานะอัพเดท</label>
+            <input class="form-input" id="dir_status" type="text" placeholder="เช่น เรียบร้อย">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+        <button type="button" class="btn btn-outline" onclick="closeModal('directorEditModal')">ยกเลิก</button>
+        <button type="submit" class="btn btn-gold"><i class="fas fa-floppy-disk"></i> บันทึก</button>
+      </div>
+      <div id="directorEditSaving" style="display:none; text-align:center; color:var(--muted); font-size:12px; margin-top:10px;">
+        <i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...
       </div>
     </form>
   </div>
@@ -2067,16 +2145,19 @@ function adminLogout() {
 /* ── Admin Tab Switch ── */
 function setAdminView(view) {
   state.adminView = view;
-  const isCompany = view === 'company';
-  document.getElementById('adminViewCompany').style.display    = isCompany ? '' : 'none';
-  document.getElementById('adminViewShareholder').style.display = isCompany ? 'none' : '';
-  // tab button styles
-  const tabCo = document.getElementById('adminTabCompany');
-  const tabSh = document.getElementById('adminTabShareholder');
-  tabCo.style.color        = isCompany ? 'var(--gold)'  : 'var(--muted)';
-  tabCo.style.borderBottom = isCompany ? '2px solid var(--gold)' : '2px solid transparent';
-  tabSh.style.color        = isCompany ? 'var(--muted)' : 'var(--gold)';
-  tabSh.style.borderBottom = isCompany ? '2px solid transparent' : '2px solid var(--gold)';
+  const views = ['company', 'shareholder', 'director'];
+  views.forEach(v => {
+    const el = document.getElementById('adminView' + v.charAt(0).toUpperCase() + v.slice(1));
+    if (el) el.style.display = v === view ? '' : 'none';
+  });
+  ['Company','Shareholder','Director'].forEach(v => {
+    const btn = document.getElementById('adminTab' + v);
+    if (!btn) return;
+    const active = view === v.toLowerCase();
+    btn.style.color        = active ? 'var(--gold)'  : 'var(--muted)';
+    btn.style.borderBottom = active ? '2px solid var(--gold)' : '2px solid transparent';
+  });
+  if (view === 'director') renderDirectorAdminTable(state.allData);
 }
 
 /* ── Company Admin Table ── */
@@ -2215,6 +2296,133 @@ async function submitCompanyEditForm(e) {
     showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
   } finally {
     btn.disabled = false; spin.style.display = 'none';
+  }
+}
+
+/* ── Director Admin Table ── */
+function renderDirectorAdminTable(data) {
+  const companies = [...new Set(data.map(r => r['ชื่อบริษัท']))];
+  // Sort by ลำดับ
+  companies.sort((a, b) => {
+    const ra = data.find(r => r['ชื่อบริษัท'] === a);
+    const rb = data.find(r => r['ชื่อบริษัท'] === b);
+    return (+ra?.['ลำดับ'] || 99) - (+rb?.['ลำดับ'] || 99);
+  });
+
+  const html = companies.map(co => {
+    const r = data.find(d => d['ชื่อบริษัท'] === co);
+    if (!r) return '';
+    const after  = r['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '';
+    const before = r['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '';
+    const newSh  = r['ผู้ถือหุ้นใหม่'] || '';
+    const status = r['สถานะอัพเดท'] || '';
+    const hasAfter = after && after.trim();
+
+    // Director tags (after) or before if no after
+    const dirDisplay = (hasAfter ? after : before)
+      .split(/[\/,\n]/)
+      .map(n => n.trim()).filter(Boolean)
+      .map(n => `<span class="director-tag" style="font-size:11px;">${n}</span>`)
+      .join('') || '<span style="color:var(--muted);font-size:11px;">—</span>';
+
+    const beforeDisplay = before && before !== after
+      ? `<div style="font-size:10px; color:var(--muted); margin-top:3px;">เดิม: ${before}</div>` : '';
+
+    return `<tr>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-outline btn-sm" onclick='openDirectorEditModal(${JSON.stringify(JSON.stringify(co))})' title="แก้ไขกรรมการ">
+          <i class="fas fa-pen"></i>
+        </button>
+      </td>
+      <td style="color:var(--gold); font-weight:700; font-family:'Inter',sans-serif;">${r['ลำดับ']||'—'}</td>
+      <td style="font-weight:600; font-size:12.5px; max-width:200px;">${co}</td>
+      <td style="font-size:11px; color:var(--muted); max-width:160px;">${before || '—'}</td>
+      <td style="max-width:200px;">
+        ${dirDisplay}
+        ${!hasAfter ? `<div style="font-size:10px; color:#FBBF24; margin-top:3px;"><i class="fas fa-clock"></i> ยังไม่ได้ปรับ</div>` : ''}
+      </td>
+      <td style="font-size:11px; color:var(--muted);">${newSh || '—'}</td>
+      <td>${status && status.trim()
+        ? `<span class="badge badge-green" style="font-size:10px;">${status}</span>`
+        : `<span class="badge badge-gray" style="font-size:10px;">—</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('directorAdminBody').innerHTML = html || '<tr><td colspan="7" style="text-align:center; color:var(--muted);">ไม่มีข้อมูล</td></tr>';
+}
+
+function openDirectorEditModal(coNameJson) {
+  const co  = JSON.parse(coNameJson);
+  const row = state.allData.find(r => r['ชื่อบริษัท'] === co);
+  if (!row) return;
+
+  document.getElementById('directorEditCoName').value      = co;
+  document.getElementById('directorEditCompanyName').textContent = co;
+  document.getElementById('dir_before').value              = row['กรรมการผู้มีอำนาจ (ก่อนปรับ)'] || '';
+  document.getElementById('dir_after').value               = row['กรรมการผู้มีอำนาจ (หลังปรับ)'] || '';
+  document.getElementById('dir_newShareholder').value      = row['ผู้ถือหุ้นใหม่'] || '';
+  document.getElementById('dir_status').value              = row['สถานะอัพเดท'] || '';
+
+  openModal('directorEditModal');
+}
+
+async function submitDirectorEditForm(e) {
+  e.preventDefault();
+  const co     = document.getElementById('directorEditCoName').value;
+  const btn    = e.submitter || e.target.querySelector('[type=submit]');
+  const spin   = document.getElementById('directorEditSaving');
+  if (btn) btn.disabled = true;
+  spin.style.display = 'block';
+
+  const fields = {
+    'กรรมการผู้มีอำนาจ (ก่อนปรับ)': document.getElementById('dir_before').value.trim(),
+    'กรรมการผู้มีอำนาจ (หลังปรับ)': document.getElementById('dir_after').value.trim(),
+    'ผู้ถือหุ้นใหม่':                document.getElementById('dir_newShareholder').value.trim(),
+    'สถานะอัพเดท':                  document.getElementById('dir_status').value.trim(),
+  };
+
+  // Update local state immediately (demo + live)
+  state.allData.forEach(r => {
+    if (r['ชื่อบริษัท'] === co) {
+      Object.assign(r, fields);
+    }
+  });
+  state.filteredData = state.selectedCompany === 'all'
+    ? state.allData
+    : state.allData.filter(r => r['ชื่อบริษัท'] === state.selectedCompany);
+  renderDashboard(state.filteredData);
+  renderDirectorAdminTable(state.allData);
+
+  if (state.isDemo) {
+    showToast(`Demo: อัพเดทกรรมการ "${co}" แล้ว (ไม่ได้บันทึกลง Sheet จริง)`, 'info');
+    closeModal('directorEditModal');
+    if (btn) btn.disabled = false;
+    spin.style.display = 'none';
+    return;
+  }
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateAllForCompany',
+        companyName: co,
+        fields,
+        password: state.adminPassword
+      })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'เกิดข้อผิดพลาด');
+    showToast(`อัพเดทกรรมการ "${co}" สำเร็จ`, 'success');
+    closeModal('directorEditModal');
+    await loadData();
+  } catch (err) {
+    showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    spin.style.display = 'none';
   }
 }
 
