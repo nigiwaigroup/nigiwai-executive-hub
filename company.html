@@ -88,6 +88,14 @@
     .filter-select:focus { border-color: var(--gold); }
     .filter-select option { background: var(--card2); }
 
+    /* ── Sortable column headers ── */
+    th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+    th.sortable:hover { color: var(--gold); }
+    th.sortable .sort-icon { margin-left: 4px; font-size: 9px; opacity: 0.45; }
+    th.sortable.sort-asc .sort-icon::after  { content: ' ▲'; opacity: 1; color: var(--gold); }
+    th.sortable.sort-desc .sort-icon::after { content: ' ▼'; opacity: 1; color: var(--gold); }
+    th.sortable:not(.sort-asc):not(.sort-desc) .sort-icon::after { content: ' ⇅'; }
+
     /* ── Company Info Strip ── */
     #companyInfoStrip {
       background: linear-gradient(90deg, rgba(201,168,76,0.08) 0%, rgba(30,41,59,0.6) 100%);
@@ -96,6 +104,7 @@
       padding: 10px 24px;
       display: none;
       align-items: flex-start;
+      justify-content: center;
       gap: 32px;
       flex-wrap: wrap;
     }
@@ -521,18 +530,28 @@
         </div>
       </div>
 
-      <!-- Charts Row -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+      <!-- Charts Row 1: Ownership + Capital -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
         <div class="chart-card">
-          <h3>สัดส่วนการถือหุ้นของ Nigiwai Group</h3>
-          <div style="position:relative; height:300px;">
+          <h3 id="ownershipChartTitle">สัดส่วนการถือหุ้นของ Nigiwai Group</h3>
+          <div style="position:relative; height:320px;">
             <canvas id="ownershipChart"></canvas>
           </div>
         </div>
         <div class="chart-card">
           <h3>ทุนจดทะเบียนแยกตามบริษัท (บาท)</h3>
-          <div style="position:relative; height:300px;">
+          <div style="position:relative; height:320px;">
             <canvas id="capitalChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Debt -->
+      <div style="margin-bottom:24px;">
+        <div class="chart-card">
+          <h3>หนี้สินแยกตามบริษัท (บาท) — เรียงมากไปน้อย</h3>
+          <div style="position:relative; height:280px;">
+            <canvas id="debtChart"></canvas>
           </div>
         </div>
       </div>
@@ -572,19 +591,7 @@
         </div>
         <div class="table-wrap">
           <table class="data-table" id="shareholdersTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>ชื่อผู้ถือหุ้น</th>
-                <th style="text-align:right;">จำนวนหุ้น</th>
-                <th style="text-align:center;">สัดส่วน (%)</th>
-                <th style="text-align:right;">เงินลงทุน (บาท)</th>
-                <th style="text-align:right;">เงินค้างชำระ (บาท)</th>
-                <th style="text-align:center;">ทุนชำระแล้ว</th>
-                <th style="text-align:right;">หนี้สิน (บาท)</th>
-                <th>ปัญหา</th>
-              </tr>
-            </thead>
+            <thead id="shareholdersHead"></thead>
             <tbody id="shareholdersBody"></tbody>
           </table>
         </div>
@@ -875,7 +882,7 @@
 /* ══════════════════════════════════════════════════
    ① CONFIG — แก้ไขค่านี้หลัง Deploy Google Apps Script
 ══════════════════════════════════════════════════ */
-const API_URL = 'https://script.google.com/macros/s/AKfycbz-nl3CKGqaOHXu9OKYJRsN3yaEGWNBWpiTDL7bapXDtK2naTBYREZhMQF3rLDuI50v/exec'; // ← ใส่ URL ของ Apps Script ที่นี่
+const API_URL = 'https://script.google.com/macros/s/AKfycbz-nl3CKGqaOHXu9OKYJRsN3yaEGWNBWpiTDL7bapXDtK2naTBYREZhMQF3rLDuI50v/exec';
 
 /* ══════════════════════════════════════════════════
    ② DEMO DATA — ใช้เมื่อ API ยังไม่ได้ตั้งค่า
@@ -964,6 +971,7 @@ const state = {
   addFormOpen: false,
   adminView: 'company',
   shView: 'grouped',   // 'grouped' | 'flat'
+  shSort: { col: null, dir: 1 }, // col = field key, dir = 1 asc / -1 desc
 };
 
 /* ══════════════════════════════════════════════════
@@ -1096,6 +1104,7 @@ function renderDashboard(data) {
   renderHealthMetrics(data);
   renderOwnershipChart(data);
   renderCapitalChart(data);
+  renderDebtChart(data);
   renderDirectorsTable(data);
   renderShareholdersTable(data);
 }
@@ -1146,6 +1155,94 @@ function renderKPIs(data) {
 }
 
 function renderOwnershipChart(data) {
+  const ctx = document.getElementById('ownershipChart');
+  if (state.charts.ownership) state.charts.ownership.destroy();
+
+  const selected = state.selectedCompany;
+  const titleEl  = document.getElementById('ownershipChartTitle');
+
+  // ── PIE: specific company selected ──
+  if (selected && selected !== 'all') {
+    const coRows = data.filter(r => r['ชื่อบริษัท'] === selected);
+    const totalShares = coRows.reduce((s, r) => s + (+r['จำนวนหุ้น'] || 0), 0);
+    const sorted = [...coRows]
+      .sort((a, b) => (+b['จำนวนหุ้น'] || 0) - (+a['จำนวนหุ้น'] || 0));
+    const pieLabels = sorted.map(r => r['ชื่อผู้ถือหุ้น'] || '—');
+    const pieShares = sorted.map(r => +r['จำนวนหุ้น'] || 0);
+    const pieInvest = sorted.map(r => +r['เงินลงทุน (บาท)'] || 0);
+    if (titleEl) titleEl.textContent = 'รายละเอียดผู้ถือหุ้นและทุน';
+
+    state.charts.ownership = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: pieLabels,
+        datasets: [{
+          data: pieShares,
+          backgroundColor: CHART_COLORS.map(c => c + 'CC'),
+          borderColor: CHART_COLORS,
+          borderWidth: 2,
+          hoverOffset: 10,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '52%',
+        plugins: {
+          legend: {
+            display: true, position: 'right',
+            labels: {
+              color: '#94A3B8',
+              font: { family: 'Noto Sans Thai', size: 10 },
+              boxWidth: 12, padding: 10,
+              generateLabels: chart => {
+                const ds = chart.data.datasets[0];
+                return chart.data.labels.map((lbl, i) => {
+                  const pct = totalShares > 0
+                    ? (ds.data[i] / totalShares * 100).toFixed(1) : 0;
+                  return {
+                    text: `${lbl} (${pct}%)`,
+                    fillStyle: ds.backgroundColor[i],
+                    strokeStyle: ds.borderColor[i],
+                    lineWidth: 1,
+                    index: i,
+                  };
+                });
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: c => {
+                const pct = totalShares > 0 ? (c.parsed / totalShares * 100).toFixed(2) : 0;
+                const invest = pieInvest[c.dataIndex];
+                return [
+                  ` ${c.parsed.toLocaleString('th-TH')} หุ้น (${pct}%)`,
+                  ` ทุน: ${invest.toLocaleString('th-TH')} บาท`,
+                ];
+              }
+            },
+            bodyFont: { family: 'Noto Sans Thai', size: 12 },
+            titleFont: { family: 'Noto Sans Thai', size: 12 },
+            backgroundColor: 'rgba(15,23,42,0.95)',
+            borderColor: 'rgba(201,168,76,0.35)', borderWidth: 1, padding: 10,
+          },
+          datalabels: {
+            color: '#fff',
+            font: { family: 'Inter', size: 10, weight: '700' },
+            formatter: (v, c) => {
+              const pct = totalShares > 0 ? (v / totalShares * 100) : 0;
+              return pct >= 8 ? pct.toFixed(1) + '%' : '';
+            },
+            anchor: 'center', align: 'center',
+          }
+        }
+      }
+    });
+    return;
+  }
+
+  // ── BAR: all companies — Nigiwai ownership % ──
+  if (titleEl) titleEl.textContent = 'สัดส่วนการถือหุ้นของ Nigiwai Group';
   const companies = [...new Set(data.map(r => r['ชื่อบริษัท']))]
     .filter(co => !co.includes('นิกิวาอิ กรุ๊ป'));
 
@@ -1156,20 +1253,13 @@ function renderOwnershipChart(data) {
     const ngw = rows
       .filter(r => String(r['ชื่อผู้ถือหุ้น']).includes('นิกิวาอิ กรุ๊ป'))
       .reduce((s, r) => s + (+r['จำนวนหุ้น'] || 0), 0);
-    if (total > 0) {
-      labels.push(shortName(co));
-      values.push(Math.round(ngw / total * 100));
-    }
+    if (total > 0) { labels.push(shortName(co)); values.push(Math.round(ngw / total * 100)); }
   });
 
-  // Sort descending for cleaner bar layout
-  const sorted = labels.map((l, i) => ({ l, v: values[i] }))
-    .sort((a, b) => b.v - a.v);
+  const sorted = labels.map((l, i) => ({ l, v: values[i] })).sort((a, b) => b.v - a.v);
   const sortedLabels = sorted.map(x => x.l);
   const sortedValues = sorted.map(x => x.v);
 
-  const ctx = document.getElementById('ownershipChart');
-  if (state.charts.ownership) state.charts.ownership.destroy();
   state.charts.ownership = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -1177,19 +1267,9 @@ function renderOwnershipChart(data) {
       datasets: [{
         label: 'สัดส่วนถือหุ้น (%)',
         data: sortedValues,
-        backgroundColor: sortedValues.map(v =>
-          v >= 80 ? 'rgba(96,165,250,0.75)' :
-          v >= 50 ? 'rgba(201,168,76,0.75)' :
-                    'rgba(148,163,184,0.55)'
-        ),
-        borderColor: sortedValues.map(v =>
-          v >= 80 ? '#60A5FA' :
-          v >= 50 ? '#C9A84C' :
-                    '#94A3B8'
-        ),
-        borderWidth: 1,
-        borderRadius: 5,
-        borderSkipped: false,
+        backgroundColor: sortedValues.map(v => v>=80?'rgba(96,165,250,0.75)':v>=50?'rgba(201,168,76,0.75)':'rgba(148,163,184,0.55)'),
+        borderColor: sortedValues.map(v => v>=80?'#60A5FA':v>=50?'#C9A84C':'#94A3B8'),
+        borderWidth: 1, borderRadius: 5, borderSkipped: false,
       }]
     },
     options: {
@@ -1198,39 +1278,112 @@ function renderOwnershipChart(data) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: ctx => ` Nigiwai ถือ ${ctx.parsed.x}% ใน ${ctx.label}`
-          },
+          callbacks: { label: c => ` Nigiwai ถือ ${c.parsed.x}% ใน ${c.label}` },
           bodyFont: { family: 'Noto Sans Thai', size: 12 },
           titleFont: { family: 'Noto Sans Thai', size: 12 },
           backgroundColor: 'rgba(15,23,42,0.95)',
-          borderColor: 'rgba(201,168,76,0.35)',
-          borderWidth: 1,
-          padding: 10,
+          borderColor: 'rgba(201,168,76,0.35)', borderWidth: 1, padding: 10,
         },
         datalabels: {
-          color: '#E2E8F0',
-          anchor: 'center',
-          align: 'center',
+          color: '#E2E8F0', anchor: 'center', align: 'center',
           font: { family: 'Inter', size: 11, weight: '700' },
           formatter: v => v + '%',
         }
       },
       scales: {
+        x: { min:0, max:100, ticks: { color:'#64748B', font:{size:11,family:'Noto Sans Thai'}, callback: v => v+'%' }, grid:{color:'rgba(255,255,255,.04)'} },
+        y: { ticks: { color:'#94A3B8', font:{size:11,family:'Noto Sans Thai'} }, grid:{display:false} }
+      }
+    }
+  });
+}
+
+function renderCapitalChart(data) {
+  // Collect per-company: ทุนจด, ทุนชำระแล้ว, ค้างชำระ
+  const seen = new Set();
+  const rows = [];
+  data.forEach(r => {
+    if (!seen.has(r['ชื่อบริษัท'])) {
+      seen.add(r['ชื่อบริษัท']);
+      const coRows = data.filter(d => d['ชื่อบริษัท'] === r['ชื่อบริษัท']);
+      const capital = +r['ทุนจดทะเบียน (บาท)'] || 0;
+      const paid    = coRows.reduce((s, d) => s + (+d['จำนวนทุนที่ชำระแล้ว (บาท)'] || 0), 0);
+      const unpaid  = coRows.reduce((s, d) => s + (+d['เงินค้างชำระ (บาท)']        || 0), 0);
+      rows.push({ label: shortName(r['ชื่อบริษัท']), capital, paid, unpaid });
+    }
+  });
+  // Sort by ทุนจดทะเบียน descending
+  rows.sort((a, b) => b.capital - a.capital);
+
+  const labels  = rows.map(r => r.label);
+  const capitals = rows.map(r => r.capital);
+  const paids    = rows.map(r => r.paid);
+  const unpaids  = rows.map(r => r.unpaid);
+
+  const ctx = document.getElementById('capitalChart');
+  if (state.charts.capital) state.charts.capital.destroy();
+  const fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1) + 'M' : v >= 1e3 ? (v/1e3).toFixed(0) + 'K' : String(v);
+  state.charts.capital = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'ทุนจดทะเบียน',
+          data: capitals,
+          backgroundColor: 'rgba(96,165,250,0.55)',
+          borderColor: '#60A5FA',
+          borderWidth: 1, borderRadius: 4, borderSkipped: false,
+        },
+        {
+          label: 'ทุนชำระแล้ว',
+          data: paids,
+          backgroundColor: 'rgba(52,211,153,0.55)',
+          borderColor: '#34D399',
+          borderWidth: 1, borderRadius: 4, borderSkipped: false,
+        },
+        {
+          label: 'ค้างชำระ',
+          data: unpaids,
+          backgroundColor: 'rgba(248,113,113,0.55)',
+          borderColor: '#F87171',
+          borderWidth: 1, borderRadius: 4, borderSkipped: false,
+        },
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: '#94A3B8', font: { family: 'Noto Sans Thai', size: 11 }, boxWidth: 12, padding: 14 }
+        },
+        tooltip: {
+          callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.x.toLocaleString('th-TH')} บาท` },
+          bodyFont: { family: 'Noto Sans Thai', size: 12 },
+          titleFont: { family: 'Noto Sans Thai', size: 12 },
+          backgroundColor: 'rgba(15,23,42,0.95)',
+          borderColor: 'rgba(201,168,76,0.35)', borderWidth: 1, padding: 10,
+        },
+        datalabels: {
+          color: '#CBD5E1', anchor: 'center', align: 'center',
+          font: { family: 'Inter', size: 8, weight: '600' },
+          formatter: v => v > 0 ? fmtM(v) : '',
+          clamp: true,
+        }
+      },
+      scales: {
         x: {
-          min: 0, max: 100,
           ticks: {
-            color: '#64748B',
-            font: { size: 11, family: 'Noto Sans Thai' },
-            callback: v => v + '%'
+            color: '#64748B', font: { size: 10, family: 'Inter' },
+            callback: v => fmtM(v)
           },
           grid: { color: 'rgba(255,255,255,.04)' }
         },
         y: {
-          ticks: {
-            color: '#94A3B8',
-            font: { size: 11, family: 'Noto Sans Thai' }
-          },
+          ticks: { color: '#94A3B8', font: { size: 10, family: 'Noto Sans Thai' } },
           grid: { display: false }
         }
       }
@@ -1238,70 +1391,68 @@ function renderOwnershipChart(data) {
   });
 }
 
-function renderCapitalChart(data) {
-  const seen = new Set(); const labels = [], values = [];
-  data.forEach(r => {
-    if (!seen.has(r['ชื่อบริษัท']) && r['ทุนจดทะเบียน (บาท)']) {
-      seen.add(r['ชื่อบริษัท']);
-      labels.push(shortName(r['ชื่อบริษัท']));
-      values.push(+r['ทุนจดทะเบียน (บาท)'] || 0);  // raw บาท
-    }
+function renderDebtChart(data) {
+  // Sum debt per company
+  const seen = new Set();
+  const rows = [];
+  [...new Set(data.map(r => r['ชื่อบริษัท']))].forEach(co => {
+    const coRows = data.filter(r => r['ชื่อบริษัท'] === co);
+    const debt = coRows.reduce((s, r) => s + (+r['หนี้สิน (บาท)'] || 0), 0);
+    if (debt > 0) rows.push({ label: shortName(co), debt });
   });
+  rows.sort((a, b) => b.debt - a.debt);
 
-  const ctx = document.getElementById('capitalChart');
-  if (state.charts.capital) state.charts.capital.destroy();
-  state.charts.capital = new Chart(ctx, {
+  const ctx = document.getElementById('debtChart');
+  if (state.charts.debt) state.charts.debt.destroy();
+  if (rows.length === 0) { ctx.parentElement.parentElement.style.display = 'none'; return; }
+  ctx.parentElement.parentElement.style.display = '';
+
+  const fmtM = v => v >= 1e6 ? (v/1e6).toFixed(2) + 'M' : v >= 1e3 ? (v/1e3).toFixed(0) + 'K' : String(v);
+  state.charts.debt = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels,
+      labels: rows.map(r => r.label),
       datasets: [{
-        label: 'ทุนจดทะเบียน (บาท)',
-        data: values,
-        backgroundColor: values.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + 'CC'),
-        borderColor: values.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
-        borderWidth: 1, borderRadius: 6, borderSkipped: false,
+        label: 'หนี้สิน (บาท)',
+        data: rows.map(r => r.debt),
+        backgroundColor: rows.map((_, i) => i === 0 ? 'rgba(248,113,113,0.7)' : 'rgba(248,113,113,0.38)'),
+        borderColor: '#F87171',
+        borderWidth: 1, borderRadius: 5, borderSkipped: false,
       }]
     },
     options: {
+      indexAxis: 'y',
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.parsed.y.toLocaleString('th-TH')} บาท`
-          },
+          callbacks: { label: c => ` หนี้สิน: ${c.parsed.x.toLocaleString('th-TH')} บาท` },
           bodyFont: { family: 'Noto Sans Thai', size: 12 },
           titleFont: { family: 'Noto Sans Thai', size: 12 },
           backgroundColor: 'rgba(15,23,42,0.95)',
-          borderColor: 'rgba(201,168,76,0.35)', borderWidth: 1,
-          padding: 10,
+          borderColor: 'rgba(248,113,113,0.4)', borderWidth: 1, padding: 10,
         },
         datalabels: {
-          color: '#CBD5E1',
-          anchor: 'end',
-          align: 'end',
-          offset: 4,
-          rotation: -65,
-          font: { family: 'Inter', size: 8, weight: '600' },
-          formatter: v => v.toLocaleString('th-TH'),
+          color: '#FCA5A5', anchor: 'end', align: 'end', offset: 4,
+          font: { family: 'Inter', size: 10, weight: '700' },
+          formatter: v => fmtM(v),
           clamp: true,
         }
       },
       scales: {
         x: {
-          ticks: { color: '#64748B', font: { size: 10, family: 'Noto Sans Thai' }, maxRotation: 40 },
+          ticks: {
+            color: '#64748B', font: { size: 10, family: 'Inter' },
+            callback: v => fmtM(v)
+          },
           grid: { color: 'rgba(255,255,255,.04)' }
         },
         y: {
-          ticks: {
-            color: '#64748B',
-            font: { size: 10, family: 'Noto Sans Thai' },
-            callback: v => v >= 1e6 ? (v/1e6).toFixed(0) + 'M' : v.toLocaleString('th-TH')
-          },
-          grid: { color: 'rgba(255,255,255,.04)' }
+          ticks: { color: '#94A3B8', font: { size: 10, family: 'Noto Sans Thai' } },
+          grid: { display: false }
         }
       },
-      layout: { padding: { top: 32 } }
+      layout: { padding: { right: 60 } }
     }
   });
 }
@@ -1346,7 +1497,14 @@ function renderDirectorsTable(data) {
     entry.directors = entry.afterDirs.size > 0 ? entry.afterDirs : entry.beforeDirs;
   });
 
-  const rows = [...companyMap.values()];
+  // Compute total debt per company for sorting
+  companyMap.forEach((entry, co) => {
+    const coRows = data.filter(r => r['ชื่อบริษัท'] === co);
+    entry.totalDebt = coRows.reduce((s, r) => s + (+r['หนี้สิน (บาท)'] || 0), 0);
+  });
+
+  // Sort by debt descending
+  const rows = [...companyMap.values()].sort((a, b) => b.totalDebt - a.totalDebt);
   document.getElementById('directorsBody').innerHTML = rows.map((r, i) => {
     const directorTags = r.directors.size > 0
       ? [...r.directors.values()].map(n => `<span class="director-tag">${n}</span>`).join('')
@@ -1598,6 +1756,7 @@ function openKpiDetail(type) {
 ══════════════════════════════════════════════════ */
 function setSHView(mode) {
   state.shView = mode;
+  state.shSort = { col: null, dir: 1 }; // reset sort on view change
   document.getElementById('shViewGrouped').style.borderColor = mode==='grouped' ? 'var(--gold)' : '';
   document.getElementById('shViewGrouped').style.color       = mode==='grouped' ? 'var(--gold)' : '';
   document.getElementById('shViewFlat').style.borderColor    = mode==='flat' ? 'var(--gold)' : '';
@@ -1605,37 +1764,93 @@ function setSHView(mode) {
   renderShareholdersTable(state.filteredData);
 }
 
+function sortSH(col) {
+  if (state.shSort.col === col) {
+    state.shSort.dir *= -1; // toggle direction
+  } else {
+    state.shSort.col = col;
+    state.shSort.dir = -1; // default: descending for numbers, ascending for text
+  }
+  renderShareholdersTable(state.filteredData);
+}
+
 function renderShareholdersTable(data) {
   // ── Flat / Directory view ──
   if (state.shView === 'flat') {
+    // Define columns with sort metadata
+    const FLAT_COLS = [
+      { label: '#',                  key: null,                     align: '',       numeric: false },
+      { label: 'ชื่อผู้ถือหุ้น',   key: 'ชื่อผู้ถือหุ้น',        align: '',       numeric: false },
+      { label: 'ชื่อบริษัท',        key: 'ชื่อบริษัท',            align: '',       numeric: false },
+      { label: 'จำนวนหุ้น',         key: 'จำนวนหุ้น',             align: 'right',  numeric: true  },
+      { label: 'สัดส่วน (%)',        key: '_pct',                  align: 'center', numeric: true  },
+      { label: 'เงินลงทุน (บาท)',   key: 'เงินลงทุน (บาท)',       align: 'right',  numeric: true  },
+      { label: 'ค้างชำระ (บาท)',    key: 'เงินค้างชำระ (บาท)',    align: 'right',  numeric: true  },
+      { label: 'ทุนชำระแล้ว',       key: 'ทุนที่ชำระแล้ว (%)',   align: 'center', numeric: true  },
+      { label: 'หนี้สิน (บาท)',     key: 'หนี้สิน (บาท)',         align: 'right',  numeric: true  },
+      { label: 'ปัญหา',             key: null,                     align: '',       numeric: false },
+    ];
+
+    // Build sortable thead
+    const sc = state.shSort.col;
+    const sd = state.shSort.dir;
+    const theadHtml = '<tr>' + FLAT_COLS.map(c => {
+      if (!c.key) return `<th style="text-align:${c.align||'left'};">${c.label}</th>`;
+      const active = sc === c.key;
+      const cls = 'sortable' + (active ? (sd === -1 ? ' sort-desc' : ' sort-asc') : '');
+      return `<th class="${cls}" style="text-align:${c.align||'left'}; cursor:pointer;" onclick="sortSH('${c.key}')">${c.label}<span class="sort-icon"></span></th>`;
+    }).join('') + '</tr>';
+    document.getElementById('shareholdersHead').innerHTML = theadHtml;
+
+    // Compute per-company total shares for %
     const companyTotalShares = new Map();
     data.forEach(r => {
       const co = r['ชื่อบริษัท'];
       companyTotalShares.set(co, (companyTotalShares.get(co) || 0) + (+r['จำนวนหุ้น'] || 0));
     });
-    // Sort flat by company then shares desc
-    const flatSorted = [...data].sort((a, b) => {
-      const coCmp = a['ชื่อบริษัท'].localeCompare(b['ชื่อบริษัท'], 'th');
-      if (coCmp !== 0) return coCmp;
-      return (+b['จำนวนหุ้น'] || 0) - (+a['จำนวนหุ้น'] || 0);
-    });
+
+    // Enrich with computed _pct
+    const enriched = data.map(r => ({
+      ...r,
+      _pct: companyTotalShares.get(r['ชื่อบริษัท']) > 0
+        ? +r['จำนวนหุ้น'] / companyTotalShares.get(r['ชื่อบริษัท']) * 100
+        : 0
+    }));
+
+    // Sort
+    let flatSorted;
+    if (sc) {
+      flatSorted = [...enriched].sort((a, b) => {
+        const av = sc === '_pct' ? a._pct : (isNaN(+a[sc]) ? a[sc] || '' : +a[sc]);
+        const bv = sc === '_pct' ? b._pct : (isNaN(+b[sc]) ? b[sc] || '' : +b[sc]);
+        if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sd;
+        return String(av).localeCompare(String(bv), 'th') * sd;
+      });
+    } else {
+      // Default: company asc, then shares desc
+      flatSorted = [...enriched].sort((a, b) => {
+        const coCmp = a['ชื่อบริษัท'].localeCompare(b['ชื่อบริษัท'], 'th');
+        if (coCmp !== 0) return coCmp;
+        return (+b['จำนวนหุ้น'] || 0) - (+a['จำนวนหุ้น'] || 0);
+      });
+    }
+
     let flatHtml = '';
     flatSorted.forEach((r, i) => {
-      const totalSh = companyTotalShares.get(r['ชื่อบริษัท']) || 1;
-      const shares = +r['จำนวนหุ้น'] || 0;
-      const pct = (shares / totalSh * 100).toFixed(1);
-      const pctW = Math.min(100, Math.round(+pct));
+      const pct  = r._pct.toFixed(1);
+      const pctW = Math.min(100, Math.round(r._pct));
       const hasIssue = r['ปัญหา'] && String(r['ปัญหา']).trim() && String(r['ปัญหา']).trim() !== '-';
       flatHtml += `<tr>
         <td style="color:var(--gold); font-family:'Inter',sans-serif; font-size:11px;">${i+1}</td>
         <td style="font-size:12px; font-weight:500;">${r['ชื่อผู้ถือหุ้น'] || '—'}</td>
-        <td style="text-align:right; font-family:'Inter',sans-serif; font-size:11px; color:var(--accent); font-variant-numeric:tabular-nums;">${fmt(shares)}</td>
+        <td style="font-size:11px; color:var(--muted);">${r['ชื่อบริษัท'] || '—'}</td>
+        <td style="text-align:right; font-family:'Inter',sans-serif; font-size:11px; color:var(--accent); font-variant-numeric:tabular-nums;">${fmt(+r['จำนวนหุ้น']||0)}</td>
         <td style="text-align:center; min-width:110px;">
           <div style="display:flex; align-items:center; gap:6px; justify-content:center;">
             <div style="background:rgba(30,41,59,0.8); border-radius:3px; height:5px; width:50px; overflow:hidden; flex-shrink:0;">
-              <div style="width:${pctW}%; height:100%; background:${+pct>=50?'var(--accent)':'var(--gold)'}; border-radius:3px;"></div>
+              <div style="width:${pctW}%; height:100%; background:${r._pct>=50?'var(--accent)':'var(--gold)'}; border-radius:3px;"></div>
             </div>
-            <span style="font-family:'Inter',sans-serif; font-size:11px; color:${+pct>=50?'var(--accent)':'var(--gold)'}; font-weight:700;">${pct}%</span>
+            <span style="font-family:'Inter',sans-serif; font-size:11px; color:${r._pct>=50?'var(--accent)':'var(--gold)'}; font-weight:700;">${pct}%</span>
           </div>
         </td>
         <td style="text-align:right; font-family:'Inter',sans-serif; font-size:11px; font-variant-numeric:tabular-nums;">${fmtTHB(r['เงินลงทุน (บาท)'])}</td>
@@ -1648,6 +1863,19 @@ function renderShareholdersTable(data) {
     document.getElementById('shareholdersBody').innerHTML = flatHtml;
     return;
   }
+
+  // ── Grouped view — reset thead to static ──
+  document.getElementById('shareholdersHead').innerHTML = `<tr>
+    <th>#</th>
+    <th>ชื่อผู้ถือหุ้น</th>
+    <th style="text-align:right;">จำนวนหุ้น</th>
+    <th style="text-align:center;">สัดส่วน (%)</th>
+    <th style="text-align:right;">เงินลงทุน (บาท)</th>
+    <th style="text-align:right;">เงินค้างชำระ (บาท)</th>
+    <th style="text-align:center;">ทุนชำระแล้ว</th>
+    <th style="text-align:right;">หนี้สิน (บาท)</th>
+    <th>ปัญหา</th>
+  </tr>`;
 
   // ── Grouped view ──
   // Gather per-company metadata
@@ -1704,8 +1932,6 @@ function renderShareholdersTable(data) {
                 <span style="color:#CBD5E1; font-family:'Inter',sans-serif; font-size:12px; margin-left:4px; font-variant-numeric:tabular-nums;">${fmt(totalShares)}</span>
                 <span style="color:var(--muted); font-size:10px; margin-left:2px;">หุ้น</span>
               </span>
-              ${m.address ? `<span><i class="fas fa-location-dot" style="color:var(--accent); margin-right:4px;"></i><span style="color:#94A3B8;">ที่อยู่ปัจจุบัน:</span> ${m.address}</span>` : ''}
-              ${m.newAddress ? `<span><i class="fas fa-location-arrow" style="color:var(--success); margin-right:4px;"></i><span style="color:#94A3B8;">ที่อยู่ใหม่:</span> <span style="color:var(--success);">${m.newAddress}</span></span>` : ''}
             </div>
           </div>
           ${m.totalLiab > 0 ? `
