@@ -325,73 +325,82 @@ function saveDB(){
 }
 
 // ══════════════════════════════════════════════════════
-// GAS COMMUNICATION — แก้ปัญหา CORS
-// GAS Deployment redirect → fetch POST แบบปกติโดน block
-// วิธีแก้: ใช้ no-cors สำหรับ POST (fire-and-forget)
-//          ใช้ JSONP (script tag inject) สำหรับ GET
+// GAS COMMUNICATION
+// วิธีที่ทำงานได้จริงกับ GAS Web App:
+// → ใช้ JSONP (inject script tag แบบ src="GAS_URL?data=...")
+//   GAS รองรับ GET + callback parameter
+//   ส่ง data ทุกประเภทผ่าน URL parameter แบบ JSON encoded
 // ══════════════════════════════════════════════════════
 
 function setGASStatus(state, msg){
   const s = document.getElementById('syncStatus');
   if(!s) return;
   const now = new Date().toLocaleTimeString('th-TH');
-  if(state==='ok')      s.textContent = '🟢 ' + (msg||'GAS อัปเดตแล้ว') + ' · ' + now;
-  else if(state==='err')s.textContent = '🔴 ' + (msg||'GAS เชื่อมต่อไม่ได้');
-  else if(state==='saving')s.textContent = '⏳ กำลังบันทึก...';
+  if(state==='ok')       s.textContent = '🟢 ' + (msg||'Sheet อัปเดตแล้ว') + ' · ' + now;
+  else if(state==='err') s.textContent = '🔴 ' + (msg||'GAS เชื่อมต่อไม่ได้');
+  else if(state==='saving') s.textContent = '⏳ กำลังบันทึก...';
 }
 
-// POST to GAS — ใช้ no-cors (fire & forget, ไม่อ่าน response)
-// GAS จะรับและเขียนข้อมูล แม้ browser จะได้ opaque response
-async function gasPost(payload){
-  if(!GAS_URL || GAS_URL.includes('YOUR_')) return false;
-  try {
-    // mode:'no-cors' แก้ปัญหา CORS redirect ของ GAS
-    await fetch(GAS_URL, {
-      method:  'POST',
-      mode:    'no-cors',           // ← key fix
-      headers: {'Content-Type':'text/plain'},
-      body:    JSON.stringify(payload)
-    });
-    // no-cors response type = 'opaque' ไม่สามารถ .json() ได้
-    // แต่ GAS ได้รับและประมวลผลแล้ว
-    setGASStatus('ok');
-    return true;
-  } catch(e) {
-    setGASStatus('err', 'Network error');
-    console.warn('GAS POST error:', e.message);
-    return false;
+// JSONP call — ส่ง payload ผ่าน ?data= parameter
+// GAS doGet จะ parse และเขียน Sheet ตาม payload.action
+function gasCall(payload, onSuccess, onError){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')){
+    if(onError) onError('GAS URL ยังไม่ได้ตั้งค่า');
+    return;
   }
-}
-
-// GET จาก GAS — ใช้ JSONP เพื่อข้าม CORS (GAS GET รองรับ callback)
-function gasGet(params, callback){
-  if(!GAS_URL || GAS_URL.includes('YOUR_')){ callback(null); return; }
-  const cbName = '_gasCallback_' + Date.now();
+  const cbName = '_gas_' + Date.now() + '_' + Math.random().toString(36).slice(2);
   const script = document.createElement('script');
-  const url    = GAS_URL + '?' + Object.entries({...params, callback:cbName})
-                   .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
-  window[cbName] = (data) => {
+  let   done   = false;
+
+  const cleanup = () => {
+    done = true;
     delete window[cbName];
-    document.head.removeChild(script);
-    callback(data);
+    if(script.parentNode) script.parentNode.removeChild(script);
   };
-  script.onerror = () => { delete window[cbName]; document.head.removeChild(script); callback(null); };
-  script.src = url;
+
+  window[cbName] = (res) => {
+    cleanup();
+    if(res && res.status === 'ok'){ setGASStatus('ok'); if(onSuccess) onSuccess(res); }
+    else { setGASStatus('err', res && res.message); if(onError) onError(res); }
+  };
+
+  // timeout 15 วินาที
+  const timer = setTimeout(() => {
+    if(!done){ cleanup(); setGASStatus('err','Timeout — GAS ไม่ตอบสนอง'); if(onError) onError('timeout'); }
+  }, 15000);
+
+  script.onerror = () => {
+    clearTimeout(timer); cleanup();
+    setGASStatus('err','Script load error');
+    if(onError) onError('script error');
+  };
+
+  // encode payload เป็น JSON แล้วส่งใน URL parameter
+  const dataParam = encodeURIComponent(JSON.stringify(payload));
+  script.src = GAS_URL + '?callback=' + cbName + '&data=' + dataParam;
   document.head.appendChild(script);
 }
 
-// Push single employee (upsert)
+// Push employee (upsert) → GAS เขียน/อัปเดต row นั้น
 function pushEmp(emp, action='upsert'){
   if(!GAS_URL || GAS_URL.includes('YOUR_')) return;
   setGASStatus('saving');
-  gasPost({ action, employee: emp });
+  gasCall(
+    { action, employee: emp },
+    (res) => console.log('GAS upsert ok:', emp.id, res),
+    (err) => console.warn('GAS upsert fail:', err)
+  );
 }
 
 // Delete employee from GAS
 function deleteEmpGAS(id){
   if(!GAS_URL || GAS_URL.includes('YOUR_')) return;
   setGASStatus('saving');
-  gasPost({ action:'delete', id });
+  gasCall(
+    { action:'delete', id },
+    () => console.log('GAS delete ok:', id),
+    (err) => console.warn('GAS delete fail:', err)
+  );
 }
 
 // ══════════════════════════════════════════════════════
@@ -549,18 +558,24 @@ function saveMobility(){
   const i = DB.findIndex(e => e.id === id);
   if(i === -1) return;
 
-  // บริษัทต้นทางของการย้ายครั้งนี้
+  // บริษัทต้นทางของการย้ายครั้งนี้ (ใช้ชื่อเต็มสำหรับ history)
   const fromBrand = DB[i].brandNew || DB[i].brandOld || ccFull(DB[i].brand);
 
   // เก็บ history ก่อน
   if(!Array.isArray(DB[i].moveHistory)) DB[i].moveHistory = [];
   DB[i].moveHistory.push({ from: fromBrand, to: brandNew, date });
 
-  // อัปเดต field หลัก
-  // brandOld = บริษัทแรกสุดที่เคยสังกัด (ไม่เปลี่ยน ถ้ามีแล้ว)
+  // brandOld = ชื่อเต็มบริษัทแรกสุด (ไม่เปลี่ยน ถ้ามีแล้ว)
   if(!DB[i].brandOld) DB[i].brandOld = ccFull(DB[i].brand);
-  DB[i].brandNew  = brandNew;   // บริษัทปัจจุบัน (ล่าสุด)
+
+  // brandNew = ชื่อเต็มบริษัทปัจจุบัน (ล่าสุด)
+  DB[i].brandNew  = brandNew;
   DB[i].moveDate  = date;
+
+  // ── สำคัญ: อัปเดต brand (key) ให้ตรงกับ CC ใหม่ ──────────
+  // เพื่อให้ตาราง Headcount / Cost Center แสดงถูก
+  const newCC = CC.find(cc => cc.full === brandNew);
+  if(newCC) DB[i].brand = newCC.key;
 
   saveDB();
   pushEmp(DB[i], 'upsert');    // ── อัปเดต Google Sheets ทันที
@@ -677,36 +692,59 @@ function delCC(i){
 // ══════════════════════════════════════════════════════
 // SYNC — Full sync (manual backup)
 // ══════════════════════════════════════════════════════
-// Full sync — ส่งข้อมูลทั้งหมดไปเขียนทับใน GAS
-async function syncSheet(){
+// Full sync — ส่งข้อมูลทั้งหมดใน chunks (GAS URL มีขนาดจำกัด)
+function syncSheet(){
   if(!GAS_URL || GAS_URL.includes('YOUR_')){
-    toast('⚠ ยังไม่ได้ตั้งค่า GAS URL ใน code.gs','err'); return;
+    toast('⚠ ยังไม่ได้ตั้งค่า GAS URL','err'); return;
   }
   setGASStatus('saving');
-  const ok = await gasPost({ action:'sync', data: DB });
-  if(ok){
-    toast('☁ Full Sync สำเร็จ — ' + DB.length + ' รายการ — GAS กำลังประมวลผล','ok');
-    setGASStatus('ok','Full Sync สำเร็จ');
-  } else {
-    toast('❌ Sync ล้มเหลว — ตรวจสอบ GAS URL และ Deploy settings','err');
-  }
+  toast('⏳ กำลัง Full Sync ' + DB.length + ' รายการ...','ok');
+  gasCall(
+    { action:'sync', data: DB },
+    (res) => {
+      setGASStatus('ok','Full Sync สำเร็จ — ' + DB.length + ' รายการ');
+      toast('☁ Full Sync สำเร็จ!','ok');
+    },
+    (err) => {
+      // ถ้า timeout (data ใหญ่เกิน URL limit) ให้ sync ทีละ chunk
+      if(err === 'timeout' || err === 'script error'){
+        toast('⚠ Data ใหญ่เกิน URL limit — กำลัง Sync แบบ chunk...','ok');
+        syncChunks(0);
+      } else {
+        toast('❌ Sync ล้มเหลว: ' + err,'err');
+      }
+    }
+  );
 }
 
-// ตรวจสอบการเชื่อมต่อ GAS ด้วย JSONP
+// Sync ทีละ 10 คน (ถ้า full sync timeout เพราะ URL limit)
+function syncChunks(offset){
+  const CHUNK = 10;
+  const slice = DB.slice(offset, offset + CHUNK);
+  if(slice.length === 0){
+    setGASStatus('ok','Chunk Sync สำเร็จ — ' + DB.length + ' รายการ');
+    toast('☁ Chunk Sync สำเร็จ!','ok');
+    return;
+  }
+  gasCall(
+    { action: offset === 0 ? 'sync' : 'append', data: slice, offset },
+    () => syncChunks(offset + CHUNK),
+    (err) => toast('❌ Chunk Sync ล้มเหลวที่ ' + offset + ': ' + err,'err')
+  );
+}
+
+// ตรวจสอบการเชื่อมต่อ GAS
 function checkGAS(){
   if(!GAS_URL || GAS_URL.includes('YOUR_')){
     document.getElementById('syncStatus').textContent = '⚠ ยังไม่ได้ตั้งค่า GAS URL';
     return;
   }
-  document.getElementById('syncStatus').textContent = '⏳ กำลังตรวจสอบ GAS...';
-  gasGet({ action:'summary' }, (data) => {
-    if(data && data.status === 'ok'){
-      setGASStatus('ok', 'GAS เชื่อมต่อแล้ว — ' + (data.headcount||0) + ' รายการใน Sheet');
-    } else {
-      document.getElementById('syncStatus').textContent =
-        '⚠ GAS ตอบสนองแต่มีปัญหา — ลอง Full Sync ดู';
-    }
-  });
+  document.getElementById('syncStatus').textContent = '⏳ กำลังตรวจสอบ...';
+  gasCall(
+    { action:'ping' },
+    (res) => setGASStatus('ok', 'GAS เชื่อมต่อแล้ว' + (res.headcount ? ' — '+res.headcount+' รายการ' : '')),
+    ()    => document.getElementById('syncStatus').textContent = '⚠ GAS ตอบสนองตัวเอง — ลอง Full Sync'
+  );
 }
 
 // ══════════════════════════════════════════════════════
