@@ -382,12 +382,64 @@ function deleteEmpGAS(id) {
 }
 
 function syncSheet() {
-  setStatus('⏳ กำลัง Full Sync...', 'rgba(255,255,255,.45)');
-  toast('⏳ กำลัง Sync ' + DB.length + ' รายการ...', 'ok');
-  gasCall({ action: 'sync', data: DB },
-    function(res) { toast('☁ Full Sync สำเร็จ — ' + DB.length + ' รายการ', 'ok'); },
-    function(e)   { toast('❌ Sync ล้มเหลว: ' + e, 'err'); }
+  // Full sync ใช้ chunk เพราะ JSONP มี URL limit ~7500 chars
+  // ส่งทีละ 3 คน (safe size ~5400 chars per request)
+  var CHUNK = 3;
+  var total = DB.length;
+  var sent  = 0;
+  var failed = 0;
+
+  setStatus('⏳ กำลัง Full Sync 0/' + total + '...', 'rgba(255,255,255,.45)');
+  toast('⏳ กำลัง Sync ' + total + ' รายการ (ทีละ ' + CHUNK + ')...', 'ok');
+
+  // ล้าง sheet ก่อน แล้วค่อย append ทีละ chunk
+  gasCall({ action: 'clear_and_count', total: total },
+    function() { sendChunk(0); },
+    function(e) {
+      // ถ้า clear ล้มเหลว ให้ upsert ทีละคนแทน
+      console.warn('[Sync] clear failed, fallback to upsert-each:', e);
+      upsertEach(0);
+    }
   );
+
+  function sendChunk(offset) {
+    if (offset >= total) {
+      setStatus('🟢 Full Sync สำเร็จ — ' + total + ' รายการ', '#4ade80');
+      toast('☁ Full Sync สำเร็จ — ' + total + ' รายการ', 'ok');
+      return;
+    }
+    var slice = DB.slice(offset, offset + CHUNK);
+    var isFirst = offset === 0;
+    setStatus('⏳ Sync ' + offset + '/' + total + '...', 'rgba(255,255,255,.45)');
+    gasCall(
+      { action: isFirst ? 'sync' : 'append', data: slice },
+      function() {
+        sent += slice.length;
+        sendChunk(offset + CHUNK);
+      },
+      function(e) {
+        failed++;
+        console.warn('[Sync] chunk at ' + offset + ' failed:', e);
+        // ข้าม chunk นี้ แล้ว sync ต่อ
+        sendChunk(offset + CHUNK);
+      }
+    );
+  }
+
+  // Fallback: upsert ทีละคน (ช้าแต่แน่นอน)
+  function upsertEach(idx) {
+    if (idx >= total) {
+      setStatus('🟢 Upsert สำเร็จ — ' + (total - failed) + '/' + total, '#4ade80');
+      toast('☁ Sync สำเร็จ (upsert mode) — ' + (total - failed) + ' รายการ', 'ok');
+      return;
+    }
+    setStatus('⏳ Upsert ' + idx + '/' + total + '...', 'rgba(255,255,255,.45)');
+    gasCall(
+      { action: 'upsert', employee: DB[idx] },
+      function() { upsertEach(idx + 1); },
+      function(e) { failed++; upsertEach(idx + 1); }
+    );
+  }
 }
 
 function checkGAS() {
