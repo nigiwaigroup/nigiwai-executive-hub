@@ -3,1011 +3,529 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HR Dashboard 2026 — Cost Center Analysis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>HR & Manpower Cost Dashboard — Nigiwai Group 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════
-   HR DASHBOARD 2026 — LIGHT / WHITE THEME
-   ═══════════════════════════════════════ */
-:root {
-  --bg:       #f0f4f8;
-  --bg2:      #e8edf3;
-  --card:     #ffffff;
-  --card2:    #f8fafc;
-  --border:   #dde3ec;
-  --border2:  #c8d3e0;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; font-size: 13px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f0f2f5; }
+::-webkit-scrollbar-thumb { background: #c8d0e0; border-radius: 3px; }
 
-  --accent:   #1d6ff3;   /* blue */
-  --accent2:  #6d28d9;   /* violet */
-  --accent3:  #0d9e6e;   /* green */
-  --accent4:  #c97c10;   /* amber */
-  --accent5:  #c8332a;   /* red */
+.top-nav { background: #fff; border-bottom: 1px solid #e8ecf2; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.nav-tab { display: flex; align-items: center; gap: 6px; padding: 0 18px; height: 46px; font-size: 12.5px; font-weight: 500; color: #6b7a99; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; text-decoration: none; }
+.nav-tab:hover { color: #2563eb; background: #f5f7ff; }
+.nav-tab.active { color: #2563eb; border-bottom-color: #2563eb; background: #f0f4ff; }
 
-  --text:     #1a2333;
-  --text2:    #374151;
-  --muted:    #5e7080;
-  --muted2:   #8fa0b0;
+.page-header { background: #fff; border-bottom: 1px solid #e8ecf2; padding: 12px 20px; display: flex; align-items: center; gap: 8px; }
+.page-header h1 { font-size: 15px; font-weight: 700; color: #1a1a2e; }
 
-  --header:   #1a2333;
-}
+.stat-card { background: #fff; border-radius: 10px; border: 1px solid #e8ecf2; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s; }
+.stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.stat-label { font-size: 11px; font-weight: 500; color: #8896b3; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -0.5px; }
+.stat-sub { font-size: 11px; color: #8896b3; margin-top: 4px; }
+.stat-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 20px; margin-top: 4px; }
+.badge-green { background: #e8faf2; color: #12a05c; }
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+.section-card { background: #fff; border-radius: 10px; border: 1px solid #e8ecf2; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.section-title { font-size: 12.5px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 15px;
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+.hbar-row { display: grid; grid-template-columns: 220px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hbar-label { font-size: 11.5px; color: #3a4460; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hbar-track { background: #f0f2f8; border-radius: 3px; height: 20px; overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 3px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+.hbar-count { font-size: 11.5px; font-weight: 600; color: #3a4460; text-align: right; }
 
-/* ── HEADER ── */
-.header {
-  background: var(--header);
-  border-bottom: 1px solid #2d3f55;
-  padding: 13px 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 200;
-  box-shadow: 0 2px 16px rgba(0,0,0,.18);
-}
-.hlogo { display:flex; align-items:center; gap:14px; }
-.hicon {
-  width:46px; height:46px; flex-shrink:0;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius:12px; display:flex; align-items:center; justify-content:center;
-  font-size:22px; box-shadow: 0 3px 10px rgba(29,111,243,.4);
-}
-.header h1 {
-  font-size:20px; font-weight:700; color:#f0f5ff; letter-spacing:-.3px;
-}
-.header-sub { font-size:12px; color:#8fa0b0; margin-top:2px; }
-.hright { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.rev-badge {
-  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
-  border-radius:8px; padding:5px 14px;
-  font-size:12px; font-family:"IBM Plex Mono",monospace; color:#93c5fd;
-}
-.btn {
-  background: var(--accent); border:none; border-radius:9px;
-  padding:8px 18px; color:#fff;
-  font-family:"Noto Sans Thai",sans-serif; font-size:14px; font-weight:600;
-  cursor:pointer; display:flex; align-items:center; gap:7px;
-  transition:all .17s; box-shadow:0 2px 8px rgba(29,111,243,.35);
-}
-.btn:hover { background:#1558d6; transform:translateY(-1px); box-shadow:0 4px 14px rgba(29,111,243,.45); }
-.btn-ghost {
-  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.2);
-  box-shadow:none;
-}
-.btn-ghost:hover { background:rgba(255,255,255,.16); transform:none; }
-#fileInput { display:none; }
+.ibar-row { display: grid; grid-template-columns: 220px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ibar-val { font-size: 11.5px; font-weight: 600; color: #1a1a2e; text-align: right; }
 
-/* ── REVISION PANEL ── */
-.rev-panel {
-  display:none; background:#fff; border:1px solid var(--border);
-  border-radius:12px; padding:16px 22px; margin:14px 32px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,.07);
-}
-.rev-panel.show { display:block; }
-.rev-title { color:var(--accent); font-weight:700; margin-bottom:10px; font-size:13px; }
-.rev-list { display:flex; flex-wrap:wrap; gap:8px; }
-.rev-item {
-  background:var(--bg2); border:1.5px solid var(--border); border-radius:8px;
-  padding:5px 14px; cursor:pointer;
-  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted);
-  transition:all .15s;
-}
-.rev-item:hover, .rev-item.active {
-  border-color:var(--accent); color:var(--accent); background:#eff6ff;
-}
+.legend-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f2f5; }
+.legend-row:last-child { border-bottom: none; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 11.5px; color: #3a4460; flex: 1; margin-left: 8px; }
+.legend-val { font-size: 11.5px; font-weight: 600; color: #1a1a2e; }
 
-/* ── TABS ── */
-.tabs-wrap {
-  background:#fff; border-bottom:2px solid var(--border);
-  padding:0 32px;
-  box-shadow:0 1px 6px rgba(0,0,0,.06);
-}
-.tabs { display:flex; gap:0; overflow-x:auto; }
-.tab-btn {
-  background:transparent; border:none;
-  border-bottom:3px solid transparent; margin-bottom:-2px;
-  padding:15px 22px;
-  color:var(--muted); font-family:"Noto Sans Thai",sans-serif;
-  font-size:14.5px; font-weight:500;
-  cursor:pointer; transition:all .17s;
-  display:flex; align-items:center; gap:8px; white-space:nowrap;
-}
-.tab-btn:hover { color:var(--text2); background:#f6f9fc; }
-.tab-btn.active {
-  color:var(--accent); border-bottom-color:var(--accent);
-  font-weight:700; background:#f0f7ff;
-}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-/* ── LAYOUT ── */
-.content { padding:28px 32px; }
-.tab-panel { display:none; }
-.tab-panel.active { display:block; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { background: #f5f7fb; color: #6b7a99; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.4px; border-bottom: 1px solid #e8ecf2; white-space: nowrap; }
+.data-table td { padding: 9px 12px; border-bottom: 1px solid #f0f2f5; color: #2d3a50; vertical-align: middle; }
+.data-table tr:hover td { background: #f8f9fd; }
+.data-table tr:last-child td { border-bottom: none; }
 
-.g2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-.g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-.g5 { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
-.sp2 { grid-column:span 2; }
+.lvl-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10.5px; font-weight: 600; }
+.lvl-officer    { background: #e8f0ff; color: #2563eb; }
+.lvl-leader     { background: #f5e8ff; color: #7c3aed; }
+.lvl-manager    { background: #fff4e6; color: #d97706; }
+.lvl-chief      { background: #ffe8e8; color: #dc2626; }
+.lvl-senior     { background: #e8fff5; color: #059669; }
+.lvl-consultant { background: #fef9e6; color: #b45309; }
 
-/* ── CARD ── */
-.card {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:14px; padding:22px 24px;
-  box-shadow:0 1px 5px rgba(0,0,0,.06);
-}
-.ctitle {
-  font-size:12px; font-weight:700; text-transform:uppercase;
-  letter-spacing:1px; color:var(--muted); margin-bottom:18px;
-  display:flex; align-items:center; gap:7px;
-}
+.ctrl-input { border: 1px solid #dde1ea; border-radius: 7px; padding: 6px 11px; font-family: inherit; font-size: 12px; color: #2d3a50; outline: none; transition: border-color 0.2s; background: #fff; }
+.ctrl-input:focus { border-color: #2563eb; }
 
-/* ── KPI ── */
-.kpi {
-  background:var(--card); border:1px solid var(--border); border-radius:14px;
-  padding:20px 22px 18px 28px; position:relative; overflow:hidden;
-  transition:transform .17s, box-shadow .17s;
-  box-shadow:0 1px 5px rgba(0,0,0,.06);
-}
-.kpi:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.1); }
-.kpi-bar {
-  width:5px; height:56px; border-radius:3px;
-  position:absolute; left:0; top:50%; transform:translateY(-50%);
-}
-.kpi-lbl { font-size:12px; color:var(--muted); font-weight:500; margin-bottom:7px; }
-.kpi-val {
-  font-size:34px; font-weight:700;
-  font-family:"IBM Plex Mono",monospace; line-height:1; color:var(--text);
-}
-.kpi-sub { font-size:12.5px; color:var(--muted); margin-top:7px; }
+.page-btn { border: 1px solid #dde1ea; background: #fff; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; cursor: pointer; color: #3a4460; transition: all 0.15s; }
+.page-btn:hover, .page-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
 
-.badge {
-  display:inline-flex; align-items:center; gap:3px;
-  font-size:11px; padding:3px 10px; border-radius:20px; font-weight:700;
-  margin-top:5px;
-}
-.b-up { background:#dcfce7; color:#166534; }
-.b-dn { background:#fee2e2; color:#991b1b; }
-.b-ne { background:#f1f5f9; color:var(--muted); }
-
-/* ── BAR CHART ── */
-.barchart { display:flex; flex-direction:column; gap:11px; }
-.brow { display:flex; align-items:center; gap:10px; }
-.blabel {
-  font-size:12.5px; color:var(--text2); width:240px; min-width:240px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.bwrap {
-  flex:1; background:#eef2f7; border-radius:6px; height:22px; overflow:hidden;
-}
-.bfill {
-  height:100%; border-radius:6px;
-  background:linear-gradient(90deg,#3b82f6,#1d6ff3);
-  transition:width .8s cubic-bezier(.4,0,.2,1);
-}
-.bfill.green { background:linear-gradient(90deg,#10b981,#0d9e6e); }
-.bfill.amber { background:linear-gradient(90deg,#f59e0b,#c97c10); }
-.bfill.red   { background:linear-gradient(90deg,#f87171,#c8332a); }
-.bval {
-  font-size:12px; font-family:"IBM Plex Mono",monospace;
-  color:var(--muted); width:95px; text-align:right; flex-shrink:0;
-}
-
-/* ── TABLE ── */
-.twrap { overflow-x:auto; }
-table { width:100%; border-collapse:collapse; font-size:13.5px; }
-thead th {
-  text-align:left; padding:12px 15px;
-  font-size:11.5px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.7px; color:var(--muted);
-  background:#f3f6fb; border-bottom:2px solid var(--border);
-  white-space:nowrap; user-select:none;
-}
-thead th.sortable { cursor:pointer; }
-thead th.sortable:hover { color:var(--accent); background:#ebf2fe; }
-thead th .sort-icon { margin-left:4px; opacity:.5; }
-thead th.sort-asc  .sort-icon::after { content:"▲"; }
-thead th.sort-desc .sort-icon::after { content:"▼"; }
-thead th:not(.sort-asc):not(.sort-desc) .sort-icon::after { content:"⇅"; }
-
-tbody tr { border-bottom:1px solid var(--border); transition:background .12s; }
-tbody tr:hover { background:#f0f7ff; }
-tbody td { padding:11px 15px; vertical-align:middle; }
-
-.emp-id {
-  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted2);
-  background:#f3f6fb; border-radius:5px; padding:2px 7px;
-  display:inline-block; letter-spacing:.3px;
-}
-.emp-name { font-weight:600; font-size:14px; color:var(--text); }
-.emp-nick { font-size:12px; color:var(--muted); margin-top:1px; }
-
-/* ── NAME EXPAND BUTTON (salary adj) ── */
-.name-btn {
-  background:none; border:none; color:var(--text);
-  font-family:"Noto Sans Thai",sans-serif; font-size:14px; font-weight:600;
-  cursor:pointer; text-align:left; padding:0;
-  display:flex; align-items:center; gap:7px; transition:color .15s;
-}
-.name-btn:hover { color:var(--accent); }
-.name-btn .expand-icon {
-  font-size:11px; color:var(--muted2); transition:transform .2s;
-  width:18px; height:18px; background:#eef2f7; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.name-btn.open .expand-icon { transform:rotate(90deg); color:var(--accent); background:#dbeafe; }
-
-/* ── SALARY DETAIL DROPDOWN ── */
-.salary-detail {
-  display:none; background:#f0f7ff; border:1.5px solid #bfdbfe;
-  border-radius:10px; padding:14px 18px; margin-top:9px;
-}
-.salary-detail.show { display:block; }
-.sd-row {
-  display:flex; align-items:center; gap:10px;
-  padding:6px 0; border-bottom:1px solid #dbeafe; font-size:13px;
-}
-.sd-row:last-child { border-bottom:none; }
-.sd-label { color:var(--muted); width:175px; flex-shrink:0; font-weight:500; }
-.sd-v68 {
-  font-family:"IBM Plex Mono",monospace; width:88px;
-  text-align:right; color:var(--muted);
-}
-.sd-arrow { color:var(--muted2); padding:0 8px; font-size:14px; }
-.sd-v69 {
-  font-family:"IBM Plex Mono",monospace; width:88px;
-  text-align:right; color:#065f46; font-weight:700;
-}
-.sd-diff {
-  font-family:"IBM Plex Mono",monospace; font-size:12px;
-  background:#d1fae5; color:#065f46;
-  border-radius:12px; padding:2px 9px; font-weight:700;
-}
-
-/* ── LEVEL BADGES ── */
-.lv-badge {
-  display:inline-block; padding:3px 10px; border-radius:20px;
-  font-size:11.5px; font-weight:600; white-space:nowrap;
-}
-.lv-c  { background:#fef3c7; color:#92400e; }
-.lv-m  { background:#ede9fe; color:#5b21b6; }
-.lv-l  { background:#dbeafe; color:#1e40af; }
-.lv-s  { background:#d1fae5; color:#065f46; }
-.lv-o  { background:#f1f5f9; color:#475569; }
-.lv-co { background:#fee2e2; color:#991b1b; }
-
-.num { font-family:"IBM Plex Mono",monospace; font-size:13px; }
-.num-up { color:#065f46; font-weight:700; }
-.num-dn { color:#991b1b; font-weight:700; }
-.num-ne { color:var(--muted); }
-
-/* ── FILTERS ── */
-.frow { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
-.sbox {
-  background:#fff; border:1.5px solid var(--border2); border-radius:9px;
-  padding:10px 15px; color:var(--text);
-  font-family:"Noto Sans Thai",sans-serif; font-size:14px;
-  outline:none; flex:1; min-width:210px;
-  box-shadow:0 1px 3px rgba(0,0,0,.05); transition:border-color .15s, box-shadow .15s;
-}
-.sbox:focus { border-color:var(--accent); box-shadow:0 0 0 3px #dbeafe; }
-.fsel {
-  background:#fff; border:1.5px solid var(--border2); border-radius:9px;
-  padding:10px 15px; color:var(--text);
-  font-family:"Noto Sans Thai",sans-serif; font-size:14px;
-  outline:none; cursor:pointer; max-width:320px;
-  box-shadow:0 1px 3px rgba(0,0,0,.05); transition:border-color .15s;
-}
-.fsel:focus { border-color:var(--accent); box-shadow:0 0 0 3px #dbeafe; }
-.cnt-badge {
-  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted);
-  margin-left:auto; white-space:nowrap;
-  background:#eef2f7; border-radius:20px; padding:5px 14px;
-}
-
-/* ── SECTION HEAD ── */
-.sh { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
-.sh h2 { font-size:19px; font-weight:700; color:var(--text); white-space:nowrap; }
-.sh .line { flex:1; height:1px; background:var(--border); }
-
-/* ── MOBILITY CARDS ── */
-.mob-card {
-  display:flex; align-items:flex-start; gap:16px;
-  padding:16px 20px; background:#fff; border:1px solid var(--border);
-  border-radius:12px; margin-bottom:10px;
-  transition:box-shadow .17s, border-color .17s;
-  box-shadow:0 1px 4px rgba(0,0,0,.05);
-}
-.mob-card:hover { border-color:#93c5fd; box-shadow:0 4px 18px rgba(29,111,243,.12); }
-.mob-info { flex:0 0 210px; }
-.mob-name { font-size:14.5px; font-weight:700; color:var(--text); }
-.mob-nick { font-size:12px; color:var(--muted); }
-.mob-pos  { font-size:12px; color:var(--muted); margin-top:3px; }
-.mob-flow { flex:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.mob-from {
-  font-size:12.5px; color:#475569; background:#f6f9fc;
-  border:1px solid var(--border); border-radius:8px; padding:7px 13px; flex:1;
-}
-.mob-arrow { color:#7c3aed; font-size:22px; flex-shrink:0; }
-.mob-to {
-  font-size:12.5px; color:#1e40af; background:#eff6ff;
-  border:1px solid #bfdbfe; border-radius:8px; padding:7px 13px; flex:1; font-weight:600;
-}
-.mob-meta { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
-.mob-salary { font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); font-weight:600; }
-.mob-stamp {
-  font-size:11px; color:#5b21b6; background:#f5f3ff;
-  border:1px solid #ddd6fe; border-radius:6px; padding:3px 10px;
-  font-family:"IBM Plex Mono",monospace;
-}
-
-/* ── PAYROLL ── */
-.pay-cmp { display:flex; flex-direction:column; gap:18px; }
-.pay-sub-lbl { font-size:12px; color:var(--muted); width:38px; flex-shrink:0; font-weight:700; }
-.pay-bar-row { display:flex; align-items:center; gap:8px; }
-.pay-bwrap { flex:1; background:#eef2f7; border-radius:5px; height:22px; overflow:hidden; }
-.pay-bfill68 { height:100%; border-radius:5px; background:#93c5fd; }
-.pay-bfill69 { height:100%; border-radius:5px; background:linear-gradient(90deg,#34d399,#0d9e6e); }
-.pay-num {
-  font-size:12.5px; font-family:"IBM Plex Mono",monospace;
-  color:var(--muted); width:105px; text-align:right; flex-shrink:0; font-weight:600;
-}
-
-/* ── DONUT ── */
-.donut-wrap { display:flex; align-items:center; gap:24px; }
-.donut-legend { flex:1; display:flex; flex-direction:column; gap:9px; }
-.leg-item { display:flex; align-items:center; gap:9px; font-size:12.5px; }
-.leg-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
-.leg-lbl { color:var(--muted); flex:1; }
-.leg-val { font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--text); font-weight:600; }
-
-/* ── TOAST ── */
-.toast {
-  position:fixed; bottom:28px; right:28px;
-  background:#1a2333; border:1px solid #2d3f55; border-radius:12px;
-  padding:13px 22px; font-size:14px; color:#f0f5ff;
-  box-shadow:0 8px 30px rgba(0,0,0,.2);
-  transform:translateY(80px); opacity:0; transition:all .3s; z-index:999;
-}
-.toast.show { transform:translateY(0); opacity:1; }
-
-/* ── RESPONSIVE ── */
-@media (max-width:960px) {
-  .g4, .g5 { grid-template-columns:1fr 1fr; }
-  .g3       { grid-template-columns:1fr 1fr; }
-  .g2       { grid-template-columns:1fr; }
-  .content  { padding:18px 16px; }
-  .tabs-wrap { padding:0 16px; }
-  .header   { padding:12px 16px; }
-  .mob-info { flex:0 0 150px; }
-  .blabel   { width:160px; min-width:160px; }
-}
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.fade-up { animation: fadeUp 0.35s ease forwards; }
 </style>
 </head>
-
-</head>
 <body>
-<header class="header">
-  <div class="hlogo">
-    <div class="hicon">📊</div>
-    <div><h1>HR Dashboard 2026</h1><div class="header-sub">Cost Center Analysis — ปีงบประมาณ 2569</div></div>
-  </div>
-  <div class="hright">
-    <div class="rev-badge" id="revBadge">REV: 17/03/26</div>
-    <button class="btn" onclick="document.getElementById('fileInput').click()">⬆ อัพโหลด Excel</button>
-    <button class="btn btn-ghost" onclick="toggleRevisions()">🕐 History</button>
-    <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleUpload(event)">
-  </div>
-</header>
-<div class="rev-panel" id="revPanel">
-  <div class="rev-title">📁 Revision History</div>
-  <div class="rev-list" id="revList"></div>
-</div>
-<div class="tabs-wrap">
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="overview">🏠 ภาพรวม</button>
-    <button class="tab-btn" data-tab="headcount">👥 Headcount</button>
-    <button class="tab-btn" data-tab="salaryadj">💰 ปรับเงินเดือน #01/26</button>
-    <button class="tab-btn" data-tab="payroll">📈 Payroll Distribution</button>
-    <button class="tab-btn" data-tab="mobility">🔄 Internal Mobility</button>
-  </div>
-</div>
-<div class="content">
 
-<!-- OVERVIEW -->
-<div class="tab-panel active" id="tab-overview">
-  <div class="sh"><h2>📊 ภาพรวมองค์กร</h2><div class="line"></div></div>
-  <div class="g5" style="margin-bottom:18px;">
-    <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(to bottom,var(--accent),var(--accent2));"></div><div class="kpi-lbl">👥 Headcount รวม</div><div class="kpi-val" id="k-total" style="color:var(--accent);">—</div><div class="kpi-sub">Total H/C</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(to bottom,var(--accent4),#f97316);"></div><div class="kpi-lbl">💰 ปรับ #01/26</div><div class="kpi-val" id="k-adj" style="color:var(--accent4);">—</div><div class="kpi-sub" id="k-adj-pct">—%</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(to bottom,var(--accent2),#6d28d9);"></div><div class="kpi-lbl">🔄 โอนย้าย</div><div class="kpi-val" id="k-trans" style="color:#a78bfa;">—</div><div class="kpi-sub">Internal Mobility</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(to bottom,var(--accent3),#059669);"></div><div class="kpi-lbl">🏢 Cost Centers</div><div class="kpi-val" id="k-cc" style="color:var(--accent3);">—</div><div class="kpi-sub">กลุ่มบริษัท</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:linear-gradient(to bottom,#f472b6,#ec4899);"></div><div class="kpi-lbl">📦 งบเพิ่มขึ้น</div><div class="kpi-val" id="k-inc" style="color:#f472b6;font-size:20px;">—</div><div class="kpi-sub">บาท/เดือน (จากปรับ)</div></div>
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div style="display:flex;align-items:center;padding:0 16px;overflow-x:auto;">
+    <a class="nav-tab active" onclick="switchTab('overview',this);return false;" href="#">
+      <span>🏢</span> ภาพรวม
+    </a>
+    <a class="nav-tab" onclick="switchTab('headcount',this);return false;" href="#">
+      <span>👥</span> Headcount
+    </a>
+    <a class="nav-tab" onclick="switchTab('payroll',this);return false;" href="#">
+      <span>💰</span> ปรับเงินเดือน #01/26
+    </a>
+    <a class="nav-tab" onclick="switchTab('distribution',this);return false;" href="#">
+      <span>📊</span> Payroll Distribution
+    </a>
+    <a class="nav-tab" onclick="switchTab('mobility',this);return false;" href="#">
+      <span>🔄</span> Internal Mobility
+    </a>
+    <div style="flex:1"></div>
+    <a href="admin.html" style="margin-left:12px;font-size:11.5px;padding:6px 14px;background:#2563eb;color:#fff;border-radius:7px;text-decoration:none;font-weight:600;white-space:nowrap;flex-shrink:0;">⚙ Admin</a>
   </div>
-  <div class="g4" style="margin-bottom:20px;">
-    <div class="kpi sp2"><div class="kpi-bar" style="background:linear-gradient(to bottom,#06b6d4,var(--accent));"></div>
-      <div class="kpi-lbl">💼 รายได้รวม ปี 68</div>
-      <div class="kpi-val" id="k-base68" style="color:#67e8f9;font-size:22px;">—</div>
-      <div class="kpi-sub">บาท/เดือน</div>
+</nav>
+
+<!-- ══ TAB: ภาพรวม ══════════════════════════════════════ -->
+<div id="tab-overview" class="tab-content active">
+  <div class="page-header">
+    <span style="font-size:18px">🏢</span>
+    <h1>ภาพรวมองค์กร</h1>
+  </div>
+  <div style="padding:16px 20px;">
+
+    <!-- KPI ROW 1 -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;">
+      <div class="stat-card fade-up" style="border-top:3px solid #2563eb;">
+        <div class="stat-label">👥 Headcount รวม</div>
+        <div class="stat-value" style="color:#2563eb">53</div>
+        <div class="stat-sub">Total H/C</div>
+      </div>
+      <div class="stat-card fade-up" style="border-top:3px solid #f59e0b;animation-delay:.05s">
+        <div class="stat-label">📋 ปรับ #01/26</div>
+        <div class="stat-value" style="color:#f59e0b">16</div>
+        <div class="stat-sub">30.2% ของพนักงานทั้งหมด</div>
+      </div>
+      <div class="stat-card fade-up" style="border-top:3px solid #8b5cf6;animation-delay:.1s">
+        <div class="stat-label">🔄 โยกย้าย</div>
+        <div class="stat-value" style="color:#8b5cf6">17</div>
+        <div class="stat-sub">Internal Mobility</div>
+      </div>
+      <div class="stat-card fade-up" style="border-top:3px solid #10b981;animation-delay:.15s">
+        <div class="stat-label">🏗 Cost Centers</div>
+        <div class="stat-value" style="color:#10b981">8</div>
+        <div class="stat-sub">กลุ่มบริษัท</div>
+      </div>
+      <div class="stat-card fade-up" style="border-top:3px solid #ec4899;animation-delay:.2s">
+        <div class="stat-label">💵 ขยพื้น</div>
+        <div class="stat-value" style="color:#ec4899;font-size:22px">23,139</div>
+        <div class="stat-sub">บาท/เดือน (รวมนับรับ)</div>
+      </div>
     </div>
-    <div class="kpi sp2"><div class="kpi-bar" style="background:linear-gradient(to bottom,var(--accent3),#059669);"></div>
-      <div class="kpi-lbl">💼 รายได้รวม ปี 69</div>
-      <div class="kpi-val" id="k-base69" style="color:var(--accent3);font-size:22px;">—</div>
-      <div class="kpi-sub">บาท/เดือน <span id="k-base-diff" class="badge b-up"></span></div>
+
+    <!-- KPI ROW 2 — รายได้รวม -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="stat-card fade-up" style="animation-delay:.05s">
+        <div class="stat-label">📆 รายได้รวม ปี 68</div>
+        <div style="font-size:26px;font-weight:800;color:#3b82f6;letter-spacing:-0.5px">1,610,045</div>
+        <div class="stat-sub">บาท/เดือน</div>
+      </div>
+      <div class="stat-card fade-up" style="animation-delay:.1s">
+        <div class="stat-label">📆 รายได้รวม ปี 69</div>
+        <div style="font-size:26px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px">1,618,185</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+          <div class="stat-sub">บาท/เดือน</div>
+          <span class="stat-badge badge-green">▲ +8,139</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="g2" style="margin-bottom:18px;">
-    <div class="card"><div class="ctitle">🏢 พนักงานตาม Cost Center (ปัจจุบัน)</div><div class="barchart" id="ov-cc"></div></div>
-    <div class="card"><div class="ctitle">🏷️ สัดส่วนตามระดับตำแหน่ง</div><div class="donut-wrap"><canvas id="donutLevel" width="128" height="128"></canvas><div class="donut-legend" id="donutLegendLevel"></div></div></div>
-  </div>
-  <div class="g2">
-    <div class="card"><div class="ctitle">🗂️ พนักงานตามแผนก</div><div class="barchart" id="ov-dept"></div></div>
-    <div class="card"><div class="ctitle">💰 รายได้รวม ปี 69 ตาม Cost Center (ปัจจุบัน)</div><div class="barchart" id="ov-pay"></div></div>
+
+    <!-- MAIN GRID -->
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px;">
+      <div class="section-card fade-up">
+        <div class="section-title"><span style="color:#2563eb;margin-right:2px">▌</span> พนักงานตาม COST CENTER (ปัจจุบัน)</div>
+        <div id="costCenterBars"></div>
+      </div>
+      <div class="section-card fade-up" style="animation-delay:.05s">
+        <div class="section-title"><span style="color:#f59e0b;margin-right:2px">▌</span> สัดส่วนระดับตำแหน่ง</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <div style="position:relative;width:180px;height:180px;">
+            <canvas id="donutLevel" width="180" height="180"></canvas>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
+              <div style="font-size:22px;font-weight:800;color:#1a1a2e">53</div>
+              <div style="font-size:10px;color:#8896b3;font-weight:500">คน</div>
+            </div>
+          </div>
+          <div style="width:100%" id="levelLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="section-card fade-up">
+        <div class="section-title"><span style="color:#10b981;margin-right:2px">▌</span> พนักงานตามแผนก</div>
+        <div id="deptBars"></div>
+      </div>
+      <div class="section-card fade-up" style="animation-delay:.05s">
+        <div class="section-title"><span style="color:#f59e0b;margin-right:2px">▌</span> รายได้รวม ปี 69 ตาม COST CENTER (ปัจจุบัน)</div>
+        <div id="incomeBars"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- HEADCOUNT -->
-<div class="tab-panel" id="tab-headcount">
-  <div class="sh"><h2>👥 ฐานข้อมูลพนักงานทั้งหมด</h2><div class="line"></div></div>
-  <div class="frow">
-    <input class="sbox" type="text" id="hc-q" placeholder="🔍 ค้นหาชื่อ, รหัส, ตำแหน่ง, ชื่อเล่น..." oninput="renderHC()">
-    <select class="fsel" id="hc-cc" onchange="renderHC()"><option value="">🏢 ทุก Cost Center</option></select>
-    <select class="fsel" id="hc-dept" onchange="renderHC()"><option value="">🗂️ ทุกแผนก</option></select>
-    <select class="fsel" id="hc-level" onchange="renderHC()"><option value="">🏷️ ทุกระดับ</option></select>
-    <span class="cnt-badge" id="hc-cnt">0 รายการ</span>
-  </div>
-  <div class="card" style="padding:0;">
-    <div class="twrap">
-      <table>
-        <thead><tr>
-          <th>รหัส</th><th>ชื่อ - นามสกุล</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th>
-          <th>Cost Center (บริษัทปัจจุบัน)</th><th>รายได้รวม ปี 69</th>
-        </tr></thead>
-        <tbody id="hc-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- SALARY ADJ -->
-<div class="tab-panel" id="tab-salaryadj">
-  <div class="sh"><h2>💰 พนักงานที่ได้รับการปรับเงินเดือน #01/26</h2><div class="line"></div></div>
-  <div class="g4" style="margin-bottom:18px;">
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent4);"></div><div class="kpi-lbl">จำนวนที่ปรับ</div><div class="kpi-val" id="aj-cnt" style="color:var(--accent4);">—</div><div class="kpi-sub">คน</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent3);"></div><div class="kpi-lbl">งบเพิ่มรวม/เดือน</div><div class="kpi-val" id="aj-inc" style="color:var(--accent3);font-size:20px;">—</div><div class="kpi-sub">บาท</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:#a78bfa;"></div><div class="kpi-lbl">% ของ Payroll</div><div class="kpi-val" id="aj-pct" style="color:#a78bfa;">—</div><div class="kpi-sub">% เพิ่มขึ้น</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent);"></div><div class="kpi-lbl">เฉลี่ย/คน</div><div class="kpi-val" id="aj-avg" style="color:var(--accent);font-size:20px;">—</div><div class="kpi-sub">บาท/เดือน</div></div>
-  </div>
-  <div class="g2" style="margin-bottom:18px;">
-    <div class="card"><div class="ctitle">📊 การปรับตาม Cost Center (ปัจจุบัน)</div><div class="barchart" id="aj-cc"></div></div>
-    <div class="card"><div class="ctitle">📊 การปรับตามแผนก</div><div class="barchart" id="aj-dept"></div></div>
-  </div>
-  <div class="frow">
-    <input class="sbox" type="text" id="aj-q" placeholder="🔍 ค้นหา..." oninput="renderAJ()" style="max-width:260px;">
-    <select class="fsel" id="aj-cc-f" onchange="renderAJ()"><option value="">🏢 ทุก Cost Center</option></select>
-    <select class="fsel" id="aj-dept-f" onchange="renderAJ()"><option value="">🗂️ ทุกแผนก</option></select>
-    <span class="cnt-badge" id="aj-cnt2">0 รายการ</span>
-  </div>
-  <div class="card" style="padding:0;">
-    <div class="twrap">
-      <table id="aj-table">
-        <thead><tr>
-          <th>รหัส</th>
-          <th class="sortable" data-col="name">ชื่อ - นามสกุล <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="position">ตำแหน่ง <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="currentCompany">บริษัทปัจจุบัน <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="total68">รายได้รวม 68 <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="total69">รายได้รวม 69 <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="inc">เพิ่มขึ้น <span class="sort-icon"></span></th>
-          <th class="sortable" data-col="pct">% เพิ่ม <span class="sort-icon"></span></th>
-        </tr></thead>
-        <tbody id="aj-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- PAYROLL -->
-<div class="tab-panel" id="tab-payroll">
-  <div class="sh"><h2>📈 งบประมาณรวมตาม Cost Center</h2><div class="line"></div></div>
-  <div class="g2" style="margin-bottom:18px;">
-    <div class="card" style="grid-column:span 2;">
-      <div class="ctitle">💼 เปรียบเทียบ รายได้รวม ปี 68 vs ปี 69 แยก Cost Center (ปัจจุบัน)</div>
-      <div id="pay-cmp" class="pay-cmp"></div>
-    </div>
-  </div>
-  <div class="g2" style="margin-bottom:18px;">
-    <div class="card"><div class="ctitle">📊 สัดส่วน Payroll ปี 69</div><div class="donut-wrap"><canvas id="donutPay" width="150" height="150"></canvas><div class="donut-legend" id="donutLegendPay"></div></div></div>
-    <div class="card"><div class="ctitle">📊 สัดส่วนพนักงาน</div><div class="donut-wrap"><canvas id="donutHC" width="150" height="150"></canvas><div class="donut-legend" id="donutLegendHC"></div></div></div>
-  </div>
-  <div class="card" style="padding:0;">
-    <div style="padding:14px 18px 0;"><div class="ctitle">📋 รายละเอียด Payroll ตาม Cost Center</div></div>
-    <div class="twrap">
-      <table>
-        <thead><tr>
-          <th>Cost Center</th><th>จำนวน (คน)</th>
-          <th>รายได้รวม ปี 68 (฿/เดือน)</th>
-          <th>รายได้รวม ปี 69 (฿/เดือน)</th>
-          <th>เปลี่ยนแปลง</th><th>%</th><th>เฉลี่ย/คน ปี 69</th>
-        </tr></thead>
-        <tbody id="pay-tbody"></tbody>
-      </table>
+<!-- ══ TAB: Headcount ════════════════════════════════════ -->
+<div id="tab-headcount" class="tab-content">
+  <div class="page-header"><span style="font-size:18px">👥</span><h1>Headcount — รายชื่อพนักงานทั้งหมด</h1></div>
+  <div style="padding:16px 20px;">
+    <div class="section-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="section-title" style="margin-bottom:0">พนักงานทั้งหมด</div>
+          <span style="background:#e8f0ff;color:#2563eb;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600" id="hcCount">53</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" class="ctrl-input" id="hcSearch" placeholder="🔍 ค้นหา..." style="width:160px">
+          <select class="ctrl-input" id="hcBrandF"><option value="">— Cost Center —</option></select>
+          <select class="ctrl-input" id="hcDeptF"><option value="">— แผนก —</option></select>
+          <select class="ctrl-input" id="hcLevelF"><option value="">— ระดับ —</option></select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;border-radius:8px;border:1px solid #e8ecf2;">
+        <table class="data-table">
+          <thead><tr>
+            <th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th>
+            <th style="text-align:right">ฐานเงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">เพิ่มขึ้น</th>
+          </tr></thead>
+          <tbody id="hcTableBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span style="font-size:11.5px;color:#8896b3" id="hcPageInfo"></span>
+        <div style="display:flex;gap:4px" id="hcPagination"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MOBILITY -->
-<div class="tab-panel" id="tab-mobility">
-  <div class="sh"><h2>🔄 การโอนย้ายพนักงาน (Internal Mobility)</h2><div class="line"></div></div>
-  <div class="g3" style="margin-bottom:18px;">
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent2);"></div><div class="kpi-lbl">โอนย้ายทั้งหมด</div><div class="kpi-val" id="mb-total" style="color:#a78bfa;">—</div><div class="kpi-sub">รายการ</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent);"></div><div class="kpi-lbl">% จาก Headcount</div><div class="kpi-val" id="mb-pct" style="color:var(--accent);">—</div><div class="kpi-sub">ของพนักงานทั้งหมด</div></div>
-    <div class="kpi"><div class="kpi-bar" style="background:var(--accent3);"></div><div class="kpi-lbl">บริษัทปลายทาง</div><div class="kpi-val" id="mb-dest" style="color:var(--accent3);">—</div><div class="kpi-sub">Cost Centers</div></div>
+<!-- ══ TAB: ปรับเงินเดือน ════════════════════════════════ -->
+<div id="tab-payroll" class="tab-content">
+  <div class="page-header"><span style="font-size:18px">💰</span><h1>ปรับเงินเดือนรอบ #01/26 — มีนาคม 2026</h1></div>
+  <div style="padding:16px 20px;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
+      <div class="stat-card" style="border-top:3px solid #f59e0b"><div class="stat-label">📋 จำนวนที่ปรับ</div><div class="stat-value" style="color:#f59e0b" id="adj_count">—</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card" style="border-top:3px solid #10b981"><div class="stat-label">💵 เพิ่มขึ้นรวม</div><div class="stat-value" style="color:#10b981;font-size:20px" id="adj_total">—</div><div class="stat-sub">บาท/เดือน</div></div>
+      <div class="stat-card" style="border-top:3px solid #2563eb"><div class="stat-label">📈 เพิ่มเฉลี่ยต่อคน</div><div class="stat-value" style="color:#2563eb;font-size:20px" id="adj_avg">—</div><div class="stat-sub">บาท/เดือน</div></div>
+      <div class="stat-card" style="border-top:3px solid #8b5cf6"><div class="stat-label">% เปลี่ยนแปลง</div><div class="stat-value" style="color:#8b5cf6;font-size:20px" id="adj_pct">—</div><div class="stat-sub">เฉลี่ยของผู้ถูกปรับ</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title"><span style="color:#f59e0b;margin-right:2px">▌</span> รายชื่อพนักงานที่ได้รับการปรับ</div>
+      <div style="overflow-x:auto;border-radius:8px;border:1px solid #e8ecf2;">
+        <table class="data-table">
+          <thead><tr>
+            <th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>ตำแหน่ง</th>
+            <th style="text-align:right">รายได้รวม ปี 68</th><th style="text-align:right">รายได้รวม ปี 69</th>
+            <th style="text-align:right">เพิ่มขึ้น</th><th style="text-align:right">% เปลี่ยน</th><th>หมายเหตุ</th>
+          </tr></thead>
+          <tbody id="adjTableBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <div class="g2" style="margin-bottom:18px;">
-    <div class="card"><div class="ctitle">📤 โอนออกจาก Cost Center</div><div class="barchart" id="mb-from"></div></div>
-    <div class="card"><div class="ctitle">📥 โอนเข้าสู่ Cost Center</div><div class="barchart" id="mb-to"></div></div>
-  </div>
-  <div class="card"><div class="ctitle">🔄 รายละเอียดการโอนย้าย</div><div id="mb-list"></div></div>
 </div>
 
+<!-- ══ TAB: Payroll Distribution ═══════════════════════ -->
+<div id="tab-distribution" class="tab-content">
+  <div class="page-header"><span style="font-size:18px">📊</span><h1>Payroll Distribution — การกระจายเงินเดือน</h1></div>
+  <div style="padding:16px 20px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="section-card"><div class="section-title"><span style="color:#2563eb;margin-right:2px">▌</span> รายได้รวม ปี 69 แยกตาม Cost Center</div><canvas id="distBarBrand" height="200"></canvas></div>
+      <div class="section-card"><div class="section-title"><span style="color:#10b981;margin-right:2px">▌</span> รายได้รวม ปี 69 แยกตามแผนก</div><canvas id="distBarDept" height="200"></canvas></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="section-card"><div class="section-title"><span style="color:#f59e0b;margin-right:2px">▌</span> เปรียบเทียบ ปี 68 vs 69</div><canvas id="distYoY" height="220"></canvas></div>
+      <div class="section-card"><div class="section-title"><span style="color:#8b5cf6;margin-right:2px">▌</span> การกระจายตามระดับตำแหน่ง</div><canvas id="distLevel" height="220"></canvas></div>
+    </div>
+  </div>
 </div>
-<div class="toast" id="toast"></div>
 
+<!-- ══ TAB: Internal Mobility ════════════════════════════ -->
+<div id="tab-mobility" class="tab-content">
+  <div class="page-header"><span style="font-size:18px">🔄</span><h1>Internal Mobility — การโยกย้ายภายในองค์กร</h1></div>
+  <div style="padding:16px 20px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
+      <div class="stat-card" style="border-top:3px solid #10b981"><div class="stat-label">✅ โยกย้าย/เปลี่ยน Cost Center</div><div class="stat-value" style="color:#10b981" id="mob_transfer">—</div><div class="stat-sub">คน</div></div>
+      <div class="stat-card" style="border-top:3px solid #f59e0b"><div class="stat-label">📋 Cost Center ที่เกี่ยวข้อง</div><div class="stat-value" style="color:#f59e0b" id="mob_brands">—</div><div class="stat-sub">Cost Center</div></div>
+      <div class="stat-card" style="border-top:3px solid #2563eb"><div class="stat-label">📊 % ของพนักงานทั้งหมด</div><div class="stat-value" style="color:#2563eb" id="mob_pct">—</div><div class="stat-sub">ที่มีการโยกย้าย</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title"><span style="color:#2563eb;margin-right:2px">▌</span> รายละเอียดการโยกย้าย</div>
+      <div style="overflow-x:auto;border-radius:8px;border:1px solid #e8ecf2;">
+        <table class="data-table">
+          <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>ตำแหน่ง</th><th>Cost Center เดิม</th><th>Cost Center ใหม่</th><th>สถานะ</th></tr></thead>
+          <tbody id="mobTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const SEED = [{"id": "660104", "name": "นางสาวสาวิตรี สิงห์เหม้น", "nickname": "ทราย", "newCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (003 สนามบินภูเก็ต)", "oldCompany": "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Core Team Supervisor- Level I", "level": "Leader and Supervisor", "base68": 21000.0, "base69": 21000.0, "total68": 25000.0, "total69": 25000.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "670601", "name": "นางสาวรัตติกาล สกุลอินทร์", "nickname": "โบ", "newCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Sales", "position": "Tele Sale", "level": "Officer", "base68": 19000.0, "base69": 19000.0, "total68": 19000.0, "total69": 19000.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "681001", "name": "นางสาวพรวิไล มีชัย", "nickname": "ออน", "newCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Warehouse & Logistics", "position": "Admin Purchasing", "level": "Officer", "base68": 16000.0, "base69": 16000.0, "total68": 16000.0, "total69": 17000.0, "adjusted": true, "remark": "ปรับ #01 03.26 ( ตามเงื่อนไข Probation )", "transferred": true, "salaryDetail": [{"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}]}, {"id": "651003", "name": "นางสาวกชชลจรรย์ สุทธิกิตติพงศ์", "nickname": "เมย์", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Financial And Account", "position": "Acc Supervisor", "level": "Leader and Supervisor", "base68": 26000.0, "base69": 26000.0, "total68": 29300.0, "total69": 30500.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 2300.0, "v69": 3000.0, "diff": 700.0}, {"label": "ค่าตำแหน่ง", "v68": 1000.0, "v69": 1500.0, "diff": 500.0}]}, {"id": "650206", "name": "นายกฤษฎา จันทร์ฝา", "nickname": "ภูมิ", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Human Resource", "position": "Human Resources Supervisor", "level": "Leader and Supervisor", "base68": 18564.0, "base69": 19000.0, "total68": 20064.0, "total69": 22000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 18564.0, "v69": 19000.0, "diff": 436.0}, {"label": "ค่าชำนาญการ", "v68": 1000.0, "v69": 1500.0, "diff": 500.0}, {"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}]}, {"id": "650104", "name": "นางสาวช้องนาง หินขาว", "nickname": "หนูนา", "newCompany": "บริษัท ภูเก็ตโอเชี่ยนกรุ๊ป (The Oceanic Sportel)", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Core Team - Level II", "level": "Officer", "base68": 18900.0, "base69": 19000.0, "total68": 20900.0, "total69": 22000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 18900.0, "v69": 19000.0, "diff": 100.0}, {"label": "ค่าชำนาญการ", "v68": 1000.0, "v69": 2000.0, "diff": 1000.0}]}, {"id": "660409", "name": "นางสาวพานทอง รุ่งอนันต์กุลสิริ", "nickname": "ปิงปิง", "newCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "Executive Assistant - Level I", "level": "Senior Officer", "base68": 25000.0, "base69": 25000.0, "total68": 26812.8, "total69": 28400.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 1812.8, "v69": 2200.0, "diff": 387.2}, {"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 1200.0, "diff": 1200.0}]}, {"id": "651101", "name": "นางสาวณัฐชานันท์ ธนังชูศิลป์", "nickname": "ชามุก", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Sales", "position": "Sales Manager (Acting)", "level": "Manager", "base68": 25000.0, "base69": 25000.0, "total68": 28000.0, "total69": 28000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "631202", "name": "นางสาวสาริศา กมลอรรฆ", "nickname": "น้ำ", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "Executive Assistant - Level III", "level": "Leader and Supervisor", "base68": 26000.0, "base69": 26000.0, "total68": 30500.0, "total69": 30500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "651201", "name": "นางสาวกนกพิชญ์ พิบูลย์", "nickname": "ออ", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Financial And Account", "position": "Financial & Account Manager", "level": "Manager", "base68": 42000.0, "base69": 42000.0, "total68": 42000.0, "total69": 42000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "640502", "name": "นายณรุจ พลับศิริ", "nickname": "โอ๊ต", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Senior Creative & Content Marketing", "level": "Leader and Supervisor", "base68": 24979.5, "base69": 24979.5, "total68": 24979.5, "total69": 24979.5, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "650106", "name": "นางสาวนัชชา ธนเกริกกวิน", "nickname": "ป้อ", "newCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Sales", "position": "After Sales - Level III", "level": "Senior Officer", "base68": 21800.0, "base69": 21800.0, "total68": 25640.0, "total69": 25640.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "640601", "name": "นายไกรเจต สมพงษ์", "nickname": "คุณเจต", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "CTO & COO", "level": "Chief and Director", "base68": 50000.0, "base69": 50000.0, "total68": 75000.0, "total69": 75000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "641103", "name": "นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์", "nickname": "ไบร์ท", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Project Leader", "level": "Consultant", "base68": 12000.0, "base69": 12000.0, "total68": 12000.0, "total69": 12000.0, "adjusted": false, "remark": "ให้ห้ค่า Project ตามเนื้องาน 5,000 - 10,000 บาท", "transferred": false, "salaryDetail": []}, {"id": "681101", "name": "นายภัทรพล เดือนฉาย", "nickname": "ฟัด", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Human Resource", "position": "Senior Recruite", "level": "Leader and Supervisor", "base68": 27000.0, "base69": 27000.0, "total68": 27000.0, "total69": 27000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "681002", "name": "นางสาววิภาวี  เรืองจรูญ", "nickname": "บิว", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "dept": "Human Resource", "position": "Recruite Officer", "level": "Officer", "base68": 16500.0, "base69": 16500.0, "total68": 16500.0, "total69": 16500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "610701", "name": "นางสาวอรอริยา สุดสุข", "nickname": "ออน", "newCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "ART Operation- Lv.III", "level": "Leader and Supervisor", "base68": 28500.0, "base69": 28500.0, "total68": 35889.15, "total69": 37000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ค่าตำแหน่ง", "v68": 2389.15, "v69": 3500.0, "diff": 1110.85}]}, {"id": "660504", "name": "นางสาวภัรตรา เพ็ญภู่", "nickname": "มะปราง", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Sales", "position": "After Sales - Level II", "level": "Officer", "base68": 16500.0, "base69": 16500.0, "total68": 16500.0, "total69": 18000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}, {"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 500.0, "diff": 500.0}]}, {"id": "680901", "name": "นายณัฐกิจ ต้นโต", "nickname": "ที", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Warehouse & Logistics", "position": "พนักงานขนส่ง", "level": "Officer", "base68": 13000.0, "base69": 14000.0, "total68": 13000.0, "total69": 15000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 13000.0, "v69": 14000.0, "diff": 1000.0}, {"label": "ค่าชำนาญการ", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}]}, {"id": "AS670308", "name": "นางสาวมณีรัตน์ ธงทอง", "nickname": "ผึ้ง", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Production Staff", "level": "Officer", "base68": 13000.0, "base69": 13000.0, "total68": 13000.0, "total69": 14000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}]}, {"id": "VV660302", "name": "นางสาวศิริวรรณ กำรัตน์", "nickname": "นิว", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Chef - Lv.II", "level": "Officer", "base68": 15000.0, "base69": 15000.0, "total68": 15000.0, "total69": 16000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 0.0, "v69": 1000.0, "diff": 1000.0}]}, {"id": "660201", "name": "นางสาวธิติญา ปัญญายิ่ง", "nickname": "อุ้ม", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Graphic Designer - Lv III", "level": "Officer", "base68": 23690.0, "base69": 23690.0, "total68": 23690.0, "total69": 23690.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "610601", "name": "นายสุทธิพร ตั้งสกุลสันติ", "nickname": "คุณใหม่", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "President & Group CEO", "level": "Chief and Director", "base68": 180000.0, "base69": 180000.0, "total68": 180000.0, "total69": 180000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "670401", "name": "นายพงศธร โชติยะศิลป์", "nickname": "แบงค์", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "Chief Financial Officer", "level": "Manager", "base68": 65000.0, "base69": 50000.0, "total68": 65000.0, "total69": 50000.0, "adjusted": false, "remark": "จะมีการพิจารณาปรับขึ้นเมื่อสามารถ Funding ได้", "transferred": false, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 65000.0, "v69": 50000.0, "diff": -15000.0}]}, {"id": "650208", "name": "นายขวัญวิชัย ไกรงาม", "nickname": "ชัย", "newCompany": "บริษัท ภูเก็ตโอเชี่ยนกรุ๊ป (The Oceanic Sportel)", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Head Chef - Level II", "level": "Officer", "base68": 27037.5, "base69": 27037.5, "total68": 28037.5, "total69": 28037.5, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "640202", "name": "นางสาวคณิตตา จำเริญพงษ์", "nickname": "ฝน", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Warehouse & Logistics", "position": "ART Supply Chain - Level III", "level": "Manager", "base68": 26000.0, "base69": 26000.0, "total68": 33000.0, "total69": 33000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "670202", "name": "นางสาวกัลยรักษ์ ตระกูลอินทร์", "nickname": "กุ้ง", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Financial And Account", "position": "Senior Accounting Officer", "level": "Senior Officer", "base68": 24000.0, "base69": 24000.0, "total68": 24000.0, "total69": 24000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "660801", "name": "นางสาวฐิติกานต์ รักเมือง", "nickname": "หยก", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Graphic Designer - Lv I", "level": "Officer", "base68": 15500.0, "base69": 15500.0, "total68": 16000.0, "total69": 17000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 500.0, "v69": 1000.0, "diff": 500.0}, {"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 500.0, "diff": 500.0}]}, {"id": "660804", "name": "นายจิติวัฒน์ อุปวรรณะ", "nickname": "นิว", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Construction", "position": "Senior Interior Designer", "level": "Officer", "base68": 25000.0, "base69": 26000.0, "total68": 26000.0, "total69": 30000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 25000.0, "v69": 26000.0, "diff": 1000.0}, {"label": "ค่าชำนาญการ", "v68": 1000.0, "v69": 2000.0, "diff": 1000.0}, {"label": "ค่าตำแหน่ง", "v68": 0.0, "v69": 2000.0, "diff": 2000.0}]}, {"id": "670201", "name": "นายศักดิ์จรินทร์ ดวงฤทัย", "nickname": "เคน", "newCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Information Technology", "position": "IT Support", "level": "Officer", "base68": 15000.0, "base69": 16000.0, "total68": 15000.0, "total69": 16000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 15000.0, "v69": 16000.0, "diff": 1000.0}]}, {"id": "660401", "name": "นายพิชญา บัวบรรจง", "nickname": "พีพี", "newCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Information Technology", "position": "IT Specialist", "level": "Leader and Supervisor", "base68": 31500.0, "base69": 31500.0, "total68": 33705.0, "total69": 33705.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "610602", "name": "นายวรันธร แดงใหญ่", "nickname": "คุณเก้ง", "newCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "CEO", "level": "Chief and Director", "base68": 120000.0, "base69": 120000.0, "total68": 120000.0, "total69": 120000.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "641105", "name": "นายอรรถสิทธิ์ สุปัดคำ", "nickname": "เก้", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Construction", "position": "Project Coordinator - Level I", "level": "Leader and Supervisor", "base68": 25000.0, "base69": 25000.0, "total68": 25000.0, "total69": 25000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "671002", "name": "นายนิรันดร์ ดวงสุวรรณ", "nickname": "อาร์ท", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Executive", "position": "Construction Director", "level": "Chief and Director", "base68": 100000.0, "base69": 100000.0, "total68": 100000.0, "total69": 100000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "671101", "name": "นางสาวนุชนารถ แตงอ่อน", "nickname": "ถุงแป้ง", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Construction", "position": "Interior Designer", "level": "Officer", "base68": 25000.0, "base69": 25000.0, "total68": 25000.0, "total69": 25000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "650702", "name": "นางสาวอรนิดา แพสถิตถาวร", "nickname": "กุ๊ก", "newCompany": "บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Human Resource", "position": "House Keeper", "level": "Officer", "base68": 12360.0, "base69": 12360.0, "total68": 12860.0, "total69": 12860.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "631204", "name": "นายพงศธร อภัยนุกูล", "nickname": "บลู", "newCompany": "บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Video Production Supervisor", "level": "Leader and Supervisor", "base68": 24150.0, "base69": 24150.0, "total68": 26150.0, "total69": 26150.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "999901", "name": "นายสุวคนธ์ อินทร์ประคอง", "nickname": "หมู", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Degital Marketing Consultant", "level": "Consultant", "base68": 16000.0, "base69": 16000.0, "total68": 16000.0, "total69": 16000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "641001", "name": "นายวีระพจน์ สังเกตุ", "nickname": "พจน์", "newCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)", "dept": "Warehouse & Logistics", "position": "Driver &Technician", "level": "Officer", "base68": 16222.5, "base69": 16222.5, "total68": 16222.5, "total69": 16222.5, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "630601", "name": "นางสาวธนภรณ์ ผ่องประทุม", "nickname": "เติ้ล", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Marketing", "position": "Art Supervisor", "level": "Leader and Supervisor", "base68": 26382.72, "base69": 26500.0, "total68": 29674.2, "total69": 30000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": false, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 26382.72, "v69": 26500.0, "diff": 117.28}, {"label": "ค่าตำแหน่ง", "v68": 2791.48, "v69": 3000.0, "diff": 208.52}]}, {"id": "650102", "name": "นายวินัย หนองแพ", "nickname": "บู๊", "newCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Executive Chef - Lv.II", "level": "Leader and Supervisor", "base68": 30000.0, "base69": 30000.0, "total68": 36378.13, "total69": 37500.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ค่าชำนาญการ", "v68": 2000.0, "v69": 2500.0, "diff": 500.0}, {"label": "ค่าตำแหน่ง", "v68": 4378.13, "v69": 5000.0, "diff": 621.87}]}, {"id": "650207", "name": "นางสาวเสาวณี พันสุวรรณ์", "nickname": "บี", "newCompany": "บริษัท สุดสาครกรุ๊ป จำกัด ( Andamanda )", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Core Team - Level II", "level": "Officer", "base68": 17850.0, "base69": 19000.0, "total68": 19742.5, "total69": 22000.0, "adjusted": true, "remark": "ปรับ #01 03.26", "transferred": true, "salaryDetail": [{"label": "ฐานเงินเดือน", "v68": 17850.0, "v69": 19000.0, "diff": 1150.0}, {"label": "ค่าชำนาญการ", "v68": 892.5, "v69": 2000.0, "diff": 1107.5}]}, {"id": "650903", "name": "นายกันต์ศักย์ ปานมงคล", "nickname": "อ้น", "newCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Quality Control & Audit Manager", "level": "Manager", "base68": 36050.0, "base69": 36050.0, "total68": 36050.0, "total69": 36050.0, "adjusted": false, "remark": "", "transferred": true, "salaryDetail": []}, {"id": "660101", "name": "นางสาวกรวรรณ สุวรรณพรรค", "nickname": "หมวย", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Financial And Account", "position": "Accounts Payable", "level": "Officer", "base68": 22050.0, "base69": 22050.0, "total68": 22050.0, "total69": 22050.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "660503", "name": "นายภูรินทร์ บุญวรรณ", "nickname": "ก้อนเมฆ", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)", "dept": "Financial And Account", "position": "Accounts Receivable", "level": "Officer", "base68": 18900.0, "base69": 18900.0, "total68": 18900.0, "total69": 18900.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690201", "name": "นางสาววัชรินทร์ เกงขุนทด", "nickname": "วา", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "dept": "Operation", "position": "Cashier & Service", "level": "Officer", "base68": 14000.0, "base69": 14000.0, "total68": 15500.0, "total69": 15500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690202", "name": "นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา", "nickname": "บอม", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "dept": "Operation", "position": "Cashier & Service", "level": "Officer", "base68": 15000.0, "base69": 15000.0, "total68": 16500.0, "total69": 16500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690203", "name": "นางสาวจิรักษา ภูฆัง", "nickname": "แจม", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "dept": "Operation", "position": "Cashier & Service", "level": "Officer", "base68": 15000.0, "base69": 15000.0, "total68": 16500.0, "total69": 16500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690204", "name": "นางสาววัทนวิภา แซ่กั้ว", "nickname": "ยุ้ย", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "dept": "Operation", "position": "Cashier & Service", "level": "Officer", "base68": 15000.0, "base69": 15000.0, "total68": 16500.0, "total69": 16500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690206", "name": "นายธนวิทย์ เชาวนะ", "nickname": "ไบร์ท", "newCompany": "", "oldCompany": "บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)", "dept": "Operation", "position": "Cashier & Service", "level": "Officer", "base68": 14000.0, "base69": 14000.0, "total68": 15500.0, "total69": 15500.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690207", "name": "นายเริงชัย หมู่แก้ว", "nickname": "ต้อม", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Chef", "level": "Officer", "base68": 18000.0, "base69": 18000.0, "total68": 19000.0, "total69": 19000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690208", "name": "นายพลชนะ พันลำภักดิ์", "nickname": "เจมส์", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Chef", "level": "Officer", "base68": 15000.0, "base69": 15000.0, "total68": 16000.0, "total69": 16000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}, {"id": "NBD690209", "name": "นายแม็ก ซอ เมี๊ยด", "nickname": "วัน", "newCompany": "", "oldCompany": "บริษัท นิกิวาอิ กู๊ดส์ เวลท์ จำกัด (สำนักงานใหญ่)", "dept": "Operation", "position": "Chef", "level": "Officer", "base68": 13000.0, "base69": 13000.0, "total68": 14000.0, "total69": 14000.0, "adjusted": false, "remark": "", "transferred": false, "salaryDetail": []}];
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const EMPLOYEES = [{"id":"660104","name":"นางสาวสาวิตรี สิงห์เหม้น","nickname":"ทราย","brand":"Kinosuke Group","dept":"Operation","position":"Core Team Supervisor- Level I","level":"Leader and Supervisor","baseSalary68":21000,"baseSalary69":21000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (003 สนามบินภูเก็ต)"},{"id":"670601","name":"นางสาวรัตติกาล สกุลอินทร์","nickname":"โบ","brand":"Kinosuke Group","dept":"Sales","position":"Tele Sale","level":"Officer","baseSalary68":19000,"baseSalary69":19000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ คอนสตรัคชั่น (สำนักงานใหญ่)"},{"id":"681001","name":"นางสาวพรวิไล มีชัย","nickname":"ออน","brand":"Kinosuke Group","dept":"Warehouse & Logistics","position":"Admin Purchasing","level":"Officer","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)"},{"id":"651003","name":"นางสาวกชชลจรรย์ สุทธิกิตติพงศ์","nickname":"เมย์","brand":"Nigiwai Group","dept":"Financial And Account","position":"Acc Supervisor","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":29300,"totalIncome69":30500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650206","name":"นายกฤษฎา จันทร์ฝา","nickname":"ภูมิ","brand":"Nigiwai Group","dept":"Human Resource","position":"Human Resources Supervisor","level":"Leader and Supervisor","baseSalary68":18564,"baseSalary69":19000,"totalIncome68":20064,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650104","name":"นางสาวช้องนาง หินขาว","nickname":"หนูนา","brand":"Nigiwai Group","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":18900,"baseSalary69":19000,"totalIncome68":20900,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660409","name":"นางสาวพานทอง รุ่งอนันต์กุลสิริ","nickname":"ปิงปิง","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level I","level":"Senior Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":26813,"totalIncome69":28400,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (สำนักงานใหญ่)"},{"id":"651101","name":"นางสาวณัฐชานันท์ ธนังชูศิลป์","nickname":"ชามุก","brand":"Nigiwai Group","dept":"Sales","position":"Sales Manager (Acting)","level":"Manager","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":28000,"totalIncome69":28000,"remark":"","brandOld":"","brandNew":""},{"id":"631202","name":"นางสาวสาริศา กมลอรรฆ","nickname":"น้ำ","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level III","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":30500,"totalIncome69":30500,"remark":"","brandOld":"","brandNew":""},{"id":"651201","name":"นางสาวกนกพิชญ์ พิบูลย์","nickname":"ออ","brand":"Nigiwai Group","dept":"Financial And Account","position":"Financial & Account Manager","level":"Manager","baseSalary68":42000,"baseSalary69":42000,"totalIncome68":42000,"totalIncome69":42000,"remark":"","brandOld":"","brandNew":""},{"id":"640502","name":"นายณรุจ พลับศิริ","nickname":"โอ๊ต","brand":"Nigiwai Group","dept":"Marketing","position":"Senior Creative & Content Marketing","level":"Leader and Supervisor","baseSalary68":24980,"baseSalary69":24980,"totalIncome68":24980,"totalIncome69":24980,"remark":"","brandOld":"","brandNew":""},{"id":"650106","name":"นางสาวนัชชา ธนเกริกกวิน","nickname":"ป้อ","brand":"Nigiwai Group","dept":"Sales","position":"After Sales - Level III","level":"Senior Officer","baseSalary68":21800,"baseSalary69":21800,"totalIncome68":25640,"totalIncome69":25640,"remark":"","brandOld":"","brandNew":""},{"id":"640601","name":"นายไกรเจต สมพงษ์","nickname":"คุณเจต","brand":"Nigiwai Group","dept":"Executive","position":"CTO & COO","level":"Chief and Director","baseSalary68":50000,"baseSalary69":50000,"totalIncome68":75000,"totalIncome69":75000,"remark":"","brandOld":"","brandNew":""},{"id":"641103","name":"นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์","nickname":"ไบร์ท","brand":"Nigiwai Group","dept":"Operation","position":"Project Leader","level":"Consultant","baseSalary68":12000,"baseSalary69":12000,"totalIncome68":12000,"totalIncome69":12000,"remark":"","brandOld":"","brandNew":""},{"id":"681101","name":"นายภัทรพล เดือนฉาย","nickname":"ฟัด","brand":"Nigiwai Group","dept":"Human Resource","position":"Senior Recruite","level":"Leader and Supervisor","baseSalary68":27000,"baseSalary69":27000,"totalIncome68":27000,"totalIncome69":27000,"remark":"","brandOld":"","brandNew":""},{"id":"681002","name":"นางสาววิภาวี เรืองจรูญ","nickname":"บิว","brand":"Nigiwai Group","dept":"Human Resource","position":"Recruite Officer","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"610701","name":"นางสาวอรอริยา สุดสุข","nickname":"ออน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"ART Operation- Lv.III","level":"Leader and Supervisor","baseSalary68":28500,"baseSalary69":28500,"totalIncome68":35889,"totalIncome69":37000,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)"},{"id":"660504","name":"นางสาวภัรตรา เพ็ญภู่","nickname":"มะปราง","brand":"Nigiwai Goods Wealth","dept":"Sales","position":"After Sales - Level II","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":18000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"680901","name":"นายณัฐกิจ ต้นโต","nickname":"ที","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"พนักงานขนส่ง","level":"Officer","baseSalary68":13000,"baseSalary69":14000,"totalIncome68":13000,"totalIncome69":15000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"AS670308","name":"นางสาวมณีรัตน์ ธงทอง","nickname":"ผึ้ง","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Production Staff","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":13000,"totalIncome69":14000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"VV660302","name":"นางสาวศิริวรรณ กำรัตน์","nickname":"นิว","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef - Lv.II","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660201","name":"นางสาวธิติญา ปัญญายิ่ง","nickname":"อุ้ม","brand":"Nigiwai Goods Wealth","dept":"Marketing","position":"Graphic Designer - Lv III","level":"Officer","baseSalary68":23690,"baseSalary69":23690,"totalIncome68":23690,"totalIncome69":23690,"remark":"","brandOld":"","brandNew":""},{"id":"610601","name":"นายสุทธิพร ตั้งสกุลสันติ","nickname":"คุณใหม่","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"President & Group CEO","level":"Chief and Director","baseSalary68":180000,"baseSalary69":180000,"totalIncome68":180000,"totalIncome69":180000,"remark":"","brandOld":"","brandNew":""},{"id":"670401","name":"นายพงศธร โชติยะศิลป์","nickname":"แบงค์","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"Chief Financial Officer","level":"Manager","baseSalary68":65000,"baseSalary69":50000,"totalIncome68":65000,"totalIncome69":50000,"remark":"","brandOld":"","brandNew":""},{"id":"650208","name":"นายขวัญวิชัย ไกรงาม","nickname":"ชัย","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Head Chef - Level II","level":"Officer","baseSalary68":27038,"baseSalary69":27038,"totalIncome68":28038,"totalIncome69":28038,"remark":"","brandOld":"","brandNew":""},{"id":"640202","name":"นางสาวคณิตตา จำเริญพงษ์","nickname":"ฝน","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"ART Supply Chain - Level III","level":"Manager","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":33000,"totalIncome69":33000,"remark":"","brandOld":"","brandNew":""},{"id":"670202","name":"นางสาวกัลยรักษ์ ตระกูลอินทร์","nickname":"กุ้ง","brand":"Nigiwai Goods Wealth","dept":"Financial And Account","position":"Senior Accounting Officer","level":"Senior Officer","baseSalary68":24000,"baseSalary69":24000,"totalIncome68":24000,"totalIncome69":24000,"remark":"","brandOld":"","brandNew":""},{"id":"660801","name":"นางสาวฐิติกานต์ รักเมือง","nickname":"หยก","brand":"Nigiwai Construction","dept":"Marketing","position":"Graphic Designer - Lv I","level":"Officer","baseSalary68":15500,"baseSalary69":15500,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660804","name":"นายจิติวัฒน์ อุปวรรณะ","nickname":"นิว","brand":"Nigiwai Construction","dept":"Construction","position":"Senior Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":26000,"totalIncome68":26000,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"670201","name":"นายศักดิ์จรินทร์ ดวงฤทัย","nickname":"เคน","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Support","level":"Officer","baseSalary68":15000,"baseSalary69":16000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660401","name":"นายพิชญา บัวบรรจง","nickname":"พีพี","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Specialist","level":"Leader and Supervisor","baseSalary68":31500,"baseSalary69":31500,"totalIncome68":33705,"totalIncome69":33705,"remark":"","brandOld":"","brandNew":""},{"id":"610602","name":"นายวรันธร แดงใหญ่","nickname":"คุณเก้ง","brand":"Nigiwai Construction","dept":"Executive","position":"CEO","level":"Chief and Director","baseSalary68":120000,"baseSalary69":120000,"totalIncome68":120000,"totalIncome69":120000,"remark":"","brandOld":"","brandNew":""},{"id":"641105","name":"นายอรรถสิทธิ์ สุปัดคำ","nickname":"เก้","brand":"Nigiwai Construction","dept":"Construction","position":"Project Coordinator - Level I","level":"Leader and Supervisor","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"671002","name":"นายนิรันดร์ ดวงสุวรรณ","nickname":"อาร์ท","brand":"Nigiwai Construction","dept":"Executive","position":"Construction Director","level":"Chief and Director","baseSalary68":100000,"baseSalary69":100000,"totalIncome68":100000,"totalIncome69":100000,"remark":"","brandOld":"","brandNew":""},{"id":"671101","name":"นางสาวนุชนารถ แตงอ่อน","nickname":"ถุงแป้ง","brand":"Nigiwai Construction","dept":"Construction","position":"Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"650702","name":"นางสาวอรนิดา แพสถิตถาวร","nickname":"กุ๊ก","brand":"Nigiwai Construction","dept":"Human Resource","position":"House Keeper","level":"Officer","baseSalary68":12360,"baseSalary69":12360,"totalIncome68":12860,"totalIncome69":12860,"remark":"","brandOld":"","brandNew":""},{"id":"631204","name":"นายพงศธร อภัยนุกูล","nickname":"บลู","brand":"Nigiwai Construction","dept":"Marketing","position":"Video Production Supervisor","level":"Leader and Supervisor","baseSalary68":24150,"baseSalary69":24150,"totalIncome68":26150,"totalIncome69":26150,"remark":"","brandOld":"","brandNew":""},{"id":"999901","name":"นายสุวคนธ์ อินทร์ประคอง","nickname":"หมู","brand":"Nigiwai Construction","dept":"Marketing","position":"Digital Marketing Consultant","level":"Consultant","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"641001","name":"นายวีระพจน์ สังเกตุ","nickname":"พจน์","brand":"Nigiwai Construction","dept":"Warehouse & Logistics","position":"Driver & Technician","level":"Officer","baseSalary68":16223,"baseSalary69":16223,"totalIncome68":16223,"totalIncome69":16223,"remark":"","brandOld":"","brandNew":""},{"id":"630601","name":"นางสาวธนภรณ์ ผ่องประทุม","nickname":"เติ้ล","brand":"NGWC HQ","dept":"Marketing","position":"Art Supervisor","level":"Leader and Supervisor","baseSalary68":26383,"baseSalary69":26500,"totalIncome68":29674,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650102","name":"นายวินัย หนองแพ","nickname":"บู๊","brand":"NGWC HQ","dept":"Operation","position":"Executive Chef - Lv.II","level":"Leader and Supervisor","baseSalary68":30000,"baseSalary69":30000,"totalIncome68":36378,"totalIncome69":37500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650207","name":"นางสาวเสาวณี พันสุวรรณ์","nickname":"บี","brand":"NGWC HQ","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":17850,"baseSalary69":19000,"totalIncome68":19743,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650903","name":"นายกันต์ศักย์ ปานมงคล","nickname":"อ้น","brand":"NGWC HQ","dept":"Operation","position":"Quality Control & Audit Manager","level":"Manager","baseSalary68":36050,"baseSalary69":36050,"totalIncome68":36050,"totalIncome69":36050,"remark":"","brandOld":"","brandNew":""},{"id":"660101","name":"นางสาวกรวรรณ สุวรรณพรรค","nickname":"หมวย","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Payable","level":"Officer","baseSalary68":22050,"baseSalary69":22050,"totalIncome68":22050,"totalIncome69":22050,"remark":"","brandOld":"","brandNew":""},{"id":"660503","name":"นายภูรินทร์ บุญวรรณ","nickname":"ก้อนเมฆ","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Receivable","level":"Officer","baseSalary68":18900,"baseSalary69":18900,"totalIncome68":18900,"totalIncome69":18900,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690201","name":"นางสาววัชรินทร์ เกงขุนทด","nickname":"วา","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690202","name":"นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา","nickname":"บอม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690203","name":"นางสาวจิรักษา ภูฆัง","nickname":"แจม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690204","name":"นางสาววัทนวิภา แซ่กั้ว","nickname":"ยุ้ย","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690206","name":"นายธนวิทย์ เชาวนะ","nickname":"ไบร์ท","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690207","name":"นายเริงชัย หมู่แก้ว","nickname":"ต้อม","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":18000,"baseSalary69":18000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690208","name":"นายพลชนะ พันลำภักดิ์","nickname":"เจมส์","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690209","name":"นายแม็ก ซอ เมี๊ยด","nickname":"วัน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":14000,"totalIncome69":14000,"remark":"","brandOld":"","brandNew":""}];
 
-let revisions=[], curRev=0;
-let ajSort={col:"name",dir:"asc"};
-
-const SEED_VERSION = "17032026_v7";
-function loadStorage(){
-  try{
-    const ver=localStorage.getItem("hr3_seed_ver");
-    if(ver !== SEED_VERSION){
-      localStorage.removeItem("hr3_revs");
-      localStorage.setItem("hr3_seed_ver", SEED_VERSION);
-    }
-    const s=localStorage.getItem("hr3_revs");
-    if(s) revisions=JSON.parse(s);
-  }catch(e){}
-  if(!revisions.length){
-    revisions=[{label:"REV: 17/03/26",date:"17/03/26",filename:"Cost_Center_2026_Reviesd_17_03_26.xlsx",uploadedAt:"17/03/2026 00:00",data:SEED}];
-    saveStorage();
-  }
-  curRev=0;
-}
-function saveStorage(){try{localStorage.setItem("hr3_revs",JSON.stringify(revisions));}catch(e){}}
-function D(){return revisions[curRev]?.data||[];}
-function currentCC(d){return (d.newCompany&&d.newCompany.trim())?d.newCompany:d.oldCompany;}
-
-// GROUP CC = บริษัทในเครือ Nikiwa/Kinnosuke/NGWC group (ไม่นับ Oceanic/Viet/Andamanda ภายนอก)
-function isGroupCC(name){
-  return ["นิกิวาอิ","คินโนะสุเกะ","เอ็นจีดับบลิวซี","ภูเก็ตโอเชี่ยนกรุ๊ป"].some(k=>name.includes(k));
-}
-function countGroupCC(data){
-  const s=new Set();
-  data.forEach(d=>{
-    if(d.oldCompany) s.add(d.oldCompany);
-    if(d.newCompany&&isGroupCC(d.newCompany)) s.add(d.newCompany);
-  });
-  return s.size;
-}
-
-// TABS
-document.querySelectorAll(".tab-btn").forEach(btn=>{
-  btn.addEventListener("click",function(){
-    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-    this.classList.add("active");
-    document.getElementById("tab-"+this.dataset.tab).classList.add("active");
-    renderTab(this.dataset.tab);
-  });
-});
-
-// Sort headers
-document.querySelectorAll("#aj-table thead th.sortable").forEach(th=>{
-  th.addEventListener("click",function(){
-    const col=this.dataset.col;
-    if(ajSort.col===col) ajSort.dir=ajSort.dir==="asc"?"desc":"asc";
-    else{ajSort.col=col;ajSort.dir="asc";}
-    document.querySelectorAll("#aj-table thead th").forEach(t=>{t.classList.remove("sort-asc","sort-desc");});
-    this.classList.add(ajSort.dir==="asc"?"sort-asc":"sort-desc");
-    renderAJ();
-  });
-});
-
-function renderTab(t){
-  if(t==="overview") renderOverview();
-  else if(t==="headcount") renderHC();
-  else if(t==="salaryadj") renderAJ();
-  else if(t==="payroll") renderPayroll();
-  else if(t==="mobility") renderMobility();
-}
-
-// REVISION
-function toggleRevisions(){document.getElementById("revPanel").classList.toggle("show");renderRevList();}
-function renderRevList(){
-  document.getElementById("revList").innerHTML=revisions.map((r,i)=>
-    `<div class="rev-item ${i===curRev?"active":""}" onclick="switchRev(${i})">
-      📄 ${r.label} — ${r.filename} <span style="color:var(--accent2);margin-left:4px;">${r.uploadedAt||""}</span>
-    </div>`).join("");
-}
-function switchRev(i){curRev=i;document.getElementById("revBadge").textContent="REV: "+revisions[i].date;renderRevList();renderAll();showToast("⏪ โหลด "+revisions[i].label+" แล้ว");}
-
-// UPLOAD
-function handleUpload(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    try{
-      const wb=XLSX.read(ev.target.result,{type:"binary"});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const raw=XLSX.utils.sheet_to_json(ws,{header:1});
-      const parsed=parseExcel(raw);
-      if(!parsed.length){showToast("❌ ไม่พบข้อมูลพนักงาน");return;}
-      const now=new Date();
-      const pad=n=>String(n).padStart(2,"0");
-      const date=`${pad(now.getDate())}/${pad(now.getMonth()+1)}/${String(now.getFullYear()).slice(-2)}`;
-      const stamp=`${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      revisions.unshift({label:"REV: "+date,date,filename:file.name,uploadedAt:stamp,data:parsed});
-      curRev=0;saveStorage();
-      document.getElementById("revBadge").textContent="REV: "+date;
-      renderAll();renderRevList();showToast("✅ อัพโหลดสำเร็จ! "+parsed.length+" คน");
-    }catch(err){showToast("❌ Error: "+err.message);}
-  };
-  reader.readAsBinaryString(file);
-  e.target.value="";
-}
-function parseExcel(raw){
-  let hRow=-1;
-  for(let i=0;i<Math.min(5,raw.length);i++){if(raw[i]&&raw[i].some(c=>c&&String(c).includes("รหัสพนักงาน"))){hRow=i;break;}}
-  if(hRow<0)return[];
-  const h=raw[hRow];
-  const get=(row,kw)=>{const idx=h.findIndex(c=>c&&String(c).includes(kw));return idx>=0?row[idx]:undefined;};
-  return raw.slice(hRow+1).filter(r=>r&&r[1]&&String(r[2]||'').trim()&&!String(r[2]).includes('Total')).map(r=>{
-    const remark=String(get(r,"หมายเหตุ")||"");
-    const nc=String(get(r,"บริษัทใหม่")||"").trim();
-    return{
-      id:String(get(r,"รหัสพนักงาน")||""),
-      name:String(get(r,"ชื่อ")||"").trim(),
-      nickname:String(get(r,"ชื่อเล่น")||"").trim(),
-      newCompany:nc==="nan"?"":nc,
-      oldCompany:String(get(r,"บริษัทเดิม")||"").trim(),
-      dept:String(get(r,"แผนก")||"").trim(),
-      position:String(get(r,"ตำแหน่ง")||"").trim(),
-      level:String(get(r,"ระดับ")||"").trim(),
-      base68:parseFloat(get(r,"ฐานเงินเดือนปี 68")||0)||0,
-      base69:parseFloat(get(r,"ฐานเงินเดือนปี 69")||0)||0,
-      total68:parseFloat(get(r,"รายได้รวมปี 68")||0)||0,
-      total69:parseFloat(get(r,"รายได้รวมปี 69")||0)||0,
-      adjusted:remark.includes("#01"),
-      remark:remark==="nan"?"":remark,
-      transferred:!!(nc&&nc!=="nan"),
-      salaryDetail:[]
-    };
-  });
-}
-
+// ═══════════════════════════════════════════════
 // HELPERS
-const fmt=n=>Math.round(n).toLocaleString("th-TH");
-const groupBy=(arr,k)=>arr.reduce((a,i)=>{const v=i[k]||"ไม่ระบุ";(a[v]=a[v]||[]).push(i);return a;},{});
-const COLORS=["#00d4ff","#7c3aed","#10b981","#f59e0b","#ef4444","#f472b6","#a78bfa","#34d399","#fb923c","#60a5fa","#818cf8","#4ade80"];
+// ═══════════════════════════════════════════════
+const BRAND_FULL = {
+  'Nigiwai Goods Wealth': 'บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)',
+  'Nigiwai Group':        'บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)',
+  'Nigiwai Construction': 'บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่...)',
+  'NGWC HQ':              'บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)',
+  'NGWC Don Mueang':      'บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง...)',
+  'Kinosuke Group':       'บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)',
+};
+function groupBy(arr, key) { return arr.reduce((a, i) => { const k = i[key]||'Unknown'; if (!a[k]) a[k]=[]; a[k].push(i); return a; }, {}); }
+function sumBy(arr, key) { return arr.reduce((s, i) => s + (i[key]||0), 0); }
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
 
-function lvCls(lv){
-  if(!lv)return"lv-o";
-  if(lv.includes("Chief"))return"lv-c";
-  if(lv.includes("Manager"))return"lv-m";
-  if(lv.includes("Leader"))return"lv-l";
-  if(lv.includes("Senior"))return"lv-s";
-  if(lv.includes("Consultant"))return"lv-co";
-  return"lv-o";
-}
-function renderBars(id,data,cls=""){
-  const el=document.getElementById(id);if(!el)return;
-  const max=Math.max(...data.map(d=>d.val),1);
-  el.innerHTML=data.map(d=>`
-    <div class="brow">
-      <div class="blabel" title="${d.label}">${d.label}</div>
-      <div class="bwrap"><div class="bfill ${cls}" style="width:${(d.val/max*100).toFixed(1)}%"></div></div>
-      <div class="bval">${typeof d.val==="number"&&d.val>999?fmt(d.val):d.val}${d.sfx||""}</div>
-    </div>`).join("");
-}
-function drawDonut(canvasId,legendId,data){
-  const cv=document.getElementById(canvasId);if(!cv)return;
-  const ctx=cv.getContext("2d");
-  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-6,inn=r*.55;
-  ctx.clearRect(0,0,W,H);
-  const tot=data.reduce((s,d)=>s+d.val,0);
-  let ang=-Math.PI/2;
-  data.forEach((d,i)=>{
-    const sl=(d.val/tot)*Math.PI*2;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
-    ctx.fillStyle=COLORS[i%COLORS.length];ctx.fill();ang+=sl;
-  });
-  ctx.beginPath();ctx.arc(cx,cy,inn,0,Math.PI*2);ctx.fillStyle="#ffffff";ctx.fill();
-  ctx.fillStyle="#1a2333";ctx.font="bold 16px IBM Plex Mono,monospace";ctx.textAlign="center";
-  ctx.fillText(tot,cx,cy+3);ctx.font="9px Noto Sans Thai,sans-serif";ctx.fillStyle="#64748b";ctx.fillText("คน",cx,cy+16);
-  if(legendId) document.getElementById(legendId).innerHTML=data.map((d,i)=>`
-    <div class="leg-item"><div class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></div>
-    <div class="leg-lbl">${d.label}</div><div class="leg-val">${d.val} (${((d.val/tot)*100).toFixed(0)}%)</div></div>`).join("");
-}
-function drawDonutPay(canvasId,legendId,data){
-  const cv=document.getElementById(canvasId);if(!cv)return;
-  const ctx=cv.getContext("2d");
-  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-6,inn=r*.55;
-  ctx.clearRect(0,0,W,H);
-  const tot=data.reduce((s,d)=>s+d.val,0);
-  let ang=-Math.PI/2;
-  data.forEach((d,i)=>{
-    const sl=(d.val/tot)*Math.PI*2;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();
-    ctx.fillStyle=COLORS[i%COLORS.length];ctx.fill();ang+=sl;
-  });
-  ctx.beginPath();ctx.arc(cx,cy,inn,0,Math.PI*2);ctx.fillStyle="#ffffff";ctx.fill();
-  ctx.fillStyle="#1a2333";ctx.font="bold 11px IBM Plex Mono,monospace";ctx.textAlign="center";
-  ctx.fillText(fmt(Math.round(tot/1000))+"K",cx,cy+3);
-  ctx.font="9px Noto Sans Thai,sans-serif";ctx.fillStyle="#64748b";ctx.fillText("฿/เดือน",cx,cy+16);
-  if(legendId) document.getElementById(legendId).innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;">`+
-    data.map((d,i)=>`<div class="leg-item"><div class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></div>
-    <div class="leg-lbl" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.label}">${d.label}</div>
-    <div class="leg-val">${((d.val/tot)*100).toFixed(1)}%</div></div>`).join("")+"</div>";
+const brandGroups = groupBy(EMPLOYEES, 'brand');
+const deptGroups  = groupBy(EMPLOYEES, 'dept');
+const levelGroups = groupBy(EMPLOYEES, 'level');
+
+// ═══════════════════════════════════════════════
+// HORIZONTAL BARS
+// ═══════════════════════════════════════════════
+function buildBars(id, data, color, isIncome) {
+  const el = document.getElementById(id); if (!el) return;
+  const max = Math.max(...data.map(d => d.val));
+  el.innerHTML = data.map(d => {
+    const pct = max > 0 ? (d.val / max * 100) : 0;
+    return isIncome
+      ? `<div class="ibar-row">
+          <div class="hbar-label" title="${d.label}">${d.label}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="ibar-val">฿${fmt(d.val)}</div>
+         </div>`
+      : `<div class="hbar-row">
+          <div class="hbar-label" title="${d.label}">${d.label}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="hbar-count">${d.val} คน</div>
+         </div>`;
+  }).join('');
 }
 
-// OVERVIEW — ใช้ total68/total69 (รายได้รวม) และ currentCC
-function renderOverview(){
-  const data=D();
-  const adj=data.filter(d=>d.adjusted);
-  const trans=data.filter(d=>d.transferred&&d.newCompany);
-  const tot68=data.reduce((s,d)=>s+d.total68,0);
-  const tot69=data.reduce((s,d)=>s+d.total69,0);
-  const totalInc=adj.reduce((s,d)=>s+(d.total69-d.total68),0);
-  const ccCount=countGroupCC(data);
+// Cost Center bars
+const ccData = Object.entries(brandGroups).map(([b, emps]) => ({ label: BRAND_FULL[b]||b, val: emps.length })).sort((a,b)=>b.val-a.val);
+buildBars('costCenterBars', ccData, '#2563eb', false);
 
-  document.getElementById("k-total").textContent=data.length;
-  document.getElementById("k-adj").textContent=adj.length;
-  document.getElementById("k-adj-pct").textContent=((adj.length/data.length)*100).toFixed(1)+"% ของพนักงานทั้งหมด";
-  document.getElementById("k-trans").textContent=trans.length;
-  document.getElementById("k-cc").textContent=ccCount;
-  document.getElementById("k-inc").textContent=fmt(totalInc);
-  document.getElementById("k-base68").textContent=fmt(tot68);
-  document.getElementById("k-base69").textContent=fmt(tot69);
-  const diff=tot69-tot68;
-  const bd=document.getElementById("k-base-diff");
-  bd.textContent=(diff>=0?"▲ +":"▼ ")+fmt(Math.abs(diff));
-  bd.className="badge "+(diff>=0?"b-up":"b-dn");
+// Dept bars
+const deptData = Object.entries(deptGroups).map(([d, emps]) => ({ label: d, val: emps.length })).sort((a,b)=>b.val-a.val);
+buildBars('deptBars', deptData, '#10b981', false);
 
-  // Charts use currentCC
-  const byCurCC=groupBy(data.map(d=>({...d,curCC:currentCC(d)})),"curCC");
-  renderBars("ov-cc",Object.entries(byCurCC).sort((a,b)=>b[1].length-a[1].length).map(([k,v])=>({label:k,val:v.length,sfx:" คน"})));
-  drawDonut("donutLevel","donutLegendLevel",Object.entries(groupBy(data,"level")).sort((a,b)=>b[1].length-a[1].length).map(([k,v])=>({label:k||"ไม่ระบุ",val:v.length})));
-  renderBars("ov-dept",Object.entries(groupBy(data,"dept")).sort((a,b)=>b[1].length-a[1].length).map(([k,v])=>({label:k,val:v.length,sfx:" คน"})),"green");
-  renderBars("ov-pay",Object.entries(byCurCC).map(([k,v])=>({label:k,val:Math.round(v.reduce((s,d)=>s+d.total69,0))})).sort((a,b)=>b.val-a.val),"amber");
+// Income bars
+const incomeData = Object.entries(brandGroups).map(([b, emps]) => ({ label: BRAND_FULL[b]||b, val: sumBy(emps,'totalIncome69') })).sort((a,b)=>b.val-a.val);
+buildBars('incomeBars', incomeData, '#f59e0b', true);
+
+// ═══════════════════════════════════════════════
+// DONUT — LEVEL
+// ═══════════════════════════════════════════════
+const LEVEL_COLORS = { 'Officer':'#2563eb','Leader and Supervisor':'#8b5cf6','Manager':'#10b981','Chief and Director':'#ef4444','Senior Officer':'#f59e0b','Consultant':'#ec4899' };
+const lOrder = ['Officer','Leader and Supervisor','Manager','Chief and Director','Senior Officer','Consultant'];
+const lLabels = lOrder.filter(l => levelGroups[l]);
+const lCounts = lLabels.map(l => levelGroups[l]?.length || 0);
+
+new Chart(document.getElementById('donutLevel'), {
+  type: 'doughnut',
+  data: { labels: lLabels, datasets: [{ data: lCounts, backgroundColor: lLabels.map(l=>LEVEL_COLORS[l]||'#6b7a99'), borderWidth:2, borderColor:'#fff' }] },
+  options: { cutout:'68%', plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed} คน` } } } }
+});
+
+document.getElementById('levelLegend').innerHTML = lLabels.map((l, i) => `
+  <div class="legend-row">
+    <div class="legend-dot" style="background:${LEVEL_COLORS[l]}"></div>
+    <div class="legend-label">${l}</div>
+    <div class="legend-val">${lCounts[i]} <span style="color:#8896b3;font-weight:400">(${Math.round(lCounts[i]/EMPLOYEES.length*100)}%)</span></div>
+  </div>`).join('');
+
+// ═══════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name==='headcount') initHC();
+  if (name==='payroll') initPayroll();
+  if (name==='distribution') initDist();
+  if (name==='mobility') initMobility();
 }
 
-// HEADCOUNT — currentCC dropdown & filter, ไม่มี column สถานะ, ไม่มี "ย้ายจาก"
-function renderHC(){
-  const data=D();
-  const q=(document.getElementById("hc-q")?.value||"").toLowerCase();
-  const ccF=document.getElementById("hc-cc")?.value||"";
-  const dF=document.getElementById("hc-dept")?.value||"";
-  const lF=document.getElementById("hc-level")?.value||"";
-
-  const ccSel=document.getElementById("hc-cc");
-  if(ccSel.options.length<=1){
-    [...new Set(data.map(d=>currentCC(d)))].sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.text=v;ccSel.add(o);});
+// ═══════════════════════════════════════════════
+// TAB: HEADCOUNT
+// ═══════════════════════════════════════════════
+let hcPage=1, hcFiltered=[...EMPLOYEES], hcReady=false;
+const HC_PG = 15;
+function initHC() {
+  if (!hcReady) {
+    hcReady = true;
+    const bf=document.getElementById('hcBrandF'), df=document.getElementById('hcDeptF'), lf=document.getElementById('hcLevelF');
+    [...new Set(EMPLOYEES.map(e=>e.brand))].sort().forEach(b=>bf.innerHTML+=`<option value="${b}">${b}</option>`);
+    [...new Set(EMPLOYEES.map(e=>e.dept))].sort().forEach(d=>df.innerHTML+=`<option value="${d}">${d}</option>`);
+    [...new Set(EMPLOYEES.map(e=>e.level))].sort().forEach(l=>lf.innerHTML+=`<option value="${l}">${l}</option>`);
+    document.getElementById('hcSearch').addEventListener('input', filterHC);
+    bf.addEventListener('change', filterHC);
+    df.addEventListener('change', filterHC);
+    lf.addEventListener('change', filterHC);
   }
-  const dSel=document.getElementById("hc-dept");
-  if(dSel.options.length<=1){
-    [...new Set(data.map(d=>d.dept))].filter(Boolean).sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.text=v;dSel.add(o);});
-  }
-  const lSel=document.getElementById("hc-level");
-  if(lSel.options.length<=1){
-    [...new Set(data.map(d=>d.level))].filter(Boolean).sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.text=v;lSel.add(o);});
-  }
-
-  const f=data.filter(d=>
-    (!q||d.name.toLowerCase().includes(q)||d.id.toLowerCase().includes(q)||d.position.toLowerCase().includes(q)||d.nickname.toLowerCase().includes(q))&&
-    (!ccF||currentCC(d)===ccF)&&(!dF||d.dept===dF)&&(!lF||d.level===lF)
-  );
-  document.getElementById("hc-cnt").textContent=f.length+" รายการ";
-  // ไม่มี column สถานะ, ไม่มี "ย้ายจาก" ใน CC column
-  document.getElementById("hc-tbody").innerHTML=f.map(d=>`
-    <tr>
-      <td><div class="emp-id">${d.id}</div></td>
-      <td><div class="emp-name">${d.name}</div><div class="emp-nick">${d.nickname}</div></td>
-      <td>${d.dept}</td>
-      <td style="max-width:180px;font-size:12px;">${d.position}</td>
-      <td><span class="lv-badge ${lvCls(d.level)}">${d.level||"—"}</span></td>
-      <td style="font-size:12px;">${currentCC(d)}</td>
-      <td><span class="num">${fmt(d.total69)}</span></td>
-    </tr>`).join("");
+  renderHC();
 }
-
-// SALARY ADJ — currentCC, click to expand salary detail
-function renderAJ(){
-  const data=D();
-  const adj=data.filter(d=>d.adjusted).map(d=>({
-    ...d, currentCompany:currentCC(d),
-    inc:d.total69-d.total68,
-    pct:d.total68>0?((d.total69-d.total68)/d.total68*100):0
-  }));
-  const tot69=data.reduce((s,d)=>s+d.total69,0);
-  const totalInc=adj.reduce((s,d)=>s+d.inc,0);
-
-  document.getElementById("aj-cnt").textContent=adj.length;
-  document.getElementById("aj-inc").textContent=fmt(totalInc);
-  document.getElementById("aj-pct").textContent=((totalInc/tot69)*100).toFixed(2)+"%";
-  document.getElementById("aj-avg").textContent=adj.length?fmt(totalInc/adj.length):"0";
-
-  renderBars("aj-cc",Object.entries(groupBy(adj,"currentCompany")).sort((a,b)=>b[1].length-a[1].length).map(([k,v])=>({label:k,val:v.length,sfx:" คน"})));
-  renderBars("aj-dept",Object.entries(groupBy(adj,"dept")).sort((a,b)=>b[1].length-a[1].length).map(([k,v])=>({label:k,val:v.length,sfx:" คน"})),"amber");
-
-  const ccF2=document.getElementById("aj-cc-f");
-  if(ccF2.options.length<=1){
-    [...new Set(adj.map(d=>d.currentCompany))].sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.text=v;ccF2.add(o);});
-  }
-  const dF2=document.getElementById("aj-dept-f");
-  if(dF2.options.length<=1){
-    [...new Set(adj.map(d=>d.dept))].filter(Boolean).sort().forEach(v=>{const o=document.createElement("option");o.value=v;o.text=v;dF2.add(o);});
-  }
-
-  const q=(document.getElementById("aj-q")?.value||"").toLowerCase();
-  const ccF=document.getElementById("aj-cc-f")?.value||"";
-  const dF=document.getElementById("aj-dept-f")?.value||"";
-  let filtered=adj.filter(d=>(!q||d.name.toLowerCase().includes(q)||d.id.toLowerCase().includes(q))&&(!ccF||d.currentCompany===ccF)&&(!dF||d.dept===dF));
-
-  const sc=ajSort.col, sd=ajSort.dir;
-  filtered.sort((a,b)=>{let va=a[sc],vb=b[sc];if(typeof va==="string"){va=va.toLowerCase();vb=vb.toLowerCase();}if(va<vb)return sd==="asc"?-1:1;if(va>vb)return sd==="asc"?1:-1;return 0;});
-
-  document.getElementById("aj-cnt2").textContent=filtered.length+" รายการ";
-  document.getElementById("aj-tbody").innerHTML=filtered.map((d,idx)=>{
-    const detailId=`sd_${idx}`;
-    const moved=d.transferred&&d.newCompany;
-    // สร้าง salary detail rows
-    const sdHTML=(d.salaryDetail&&d.salaryDetail.length>0)?
-      d.salaryDetail.map(s=>`
-        <div class="sd-row">
-          <div class="sd-label">${s.label}</div>
-          <div class="sd-v68">${fmt(s.v68)}</div>
-          <div class="sd-arrow">→</div>
-          <div class="sd-v69">${fmt(s.v69)}</div>
-          <div class="sd-diff">+${fmt(s.diff)}</div>
-        </div>`).join(""):
-      `<div style="font-size:11px;color:var(--muted);padding:4px 0;">ไม่มีรายละเอียดเพิ่มเติม</div>`;
+function filterHC() {
+  const q=document.getElementById('hcSearch').value.toLowerCase();
+  const b=document.getElementById('hcBrandF').value;
+  const d=document.getElementById('hcDeptF').value;
+  const l=document.getElementById('hcLevelF').value;
+  hcFiltered = EMPLOYEES.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.position.toLowerCase().includes(q))&&(!b||e.brand===b)&&(!d||e.dept===d)&&(!l||e.level===l));
+  hcPage=1; renderHC();
+}
+function lvlBadge(l) {
+  const m={'Officer':'lvl-officer','Leader and Supervisor':'lvl-leader','Manager':'lvl-manager','Chief and Director':'lvl-chief','Senior Officer':'lvl-senior','Consultant':'lvl-consultant'};
+  return `<span class="lvl-badge ${m[l]||'lvl-officer'}">${l}</span>`;
+}
+function renderHC() {
+  const total=hcFiltered.length, pages=Math.max(1,Math.ceil(total/HC_PG));
+  hcPage=Math.min(hcPage,pages);
+  const s=(hcPage-1)*HC_PG, slice=hcFiltered.slice(s,s+HC_PG);
+  document.getElementById('hcCount').textContent=total;
+  document.getElementById('hcPageInfo').textContent=`แสดง ${s+1}–${Math.min(s+HC_PG,total)} จาก ${total} รายการ`;
+  document.getElementById('hcTableBody').innerHTML = slice.map(e=>{
+    const diff=e.totalIncome69-e.totalIncome68;
     return `<tr>
-      <td class="emp-id">${d.id}</td>
-      <td>
-        <button class="name-btn" onclick="toggleDetail('${detailId}',this)">
-          <span class="expand-icon">▶</span>
-          <div><div class="emp-name">${d.name}</div><div class="emp-nick">(${d.nickname})</div></div>
-        </button>
-        <div class="salary-detail" id="${detailId}">
-          <div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:6px;letter-spacing:.5px;">📋 รายการที่ปรับ</div>
-          ${sdHTML}
-        </div>
-      </td>
-      <td style="font-size:12px;">${d.position}</td>
-      <td style="font-size:12px;">${d.currentCompany}</td>
-      <td class="num">${fmt(d.total68)}</td>
-      <td class="num">${fmt(d.total69)}</td>
-      <td class="num num-up">+${fmt(d.inc)}</td>
-      <td><span class="badge b-up">▲${d.pct.toFixed(1)}%</span></td>
+      <td style="color:#8896b3;font-size:11px">${e.id}</td>
+      <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
+      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brand}</td>
+      <td style="font-size:11.5px">${e.dept}</td>
+      <td style="font-size:11.5px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
+      <td>${lvlBadge(e.level)}</td>
+      <td style="text-align:right">฿${fmt(e.baseSalary69)}</td>
+      <td style="text-align:right;font-weight:600">฿${fmt(e.totalIncome69)}</td>
+      <td style="text-align:right;color:${diff>0?'#12a05c':diff<0?'#dc2626':'#8896b3'}">${diff>0?'+฿'+fmt(diff):diff<0?'-฿'+fmt(Math.abs(diff)):'—'}</td>
     </tr>`;
-  }).join("");
+  }).join('');
+  const pg=document.getElementById('hcPagination'); pg.innerHTML='';
+  if(pages<=1) return;
+  const add=(lbl,pg2,act)=>{ const b=document.createElement('button'); b.className='page-btn'+(act?' active':''); b.textContent=lbl; b.onclick=()=>{hcPage=pg2;renderHC();}; pg.appendChild(b); };
+  if(hcPage>1) add('←',hcPage-1,false);
+  for(let i=Math.max(1,hcPage-2);i<=Math.min(pages,hcPage+2);i++) add(i,i,i===hcPage);
+  if(hcPage<pages) add('→',hcPage+1,false);
 }
 
-function toggleDetail(id,btn){
-  const el=document.getElementById(id);
-  el.classList.toggle("show");
-  btn.classList.toggle("open");
+// ═══════════════════════════════════════════════
+// TAB: PAYROLL
+// ═══════════════════════════════════════════════
+function initPayroll() {
+  const adj=EMPLOYEES.filter(e=>e.totalIncome69>e.totalIncome68);
+  const totalDiff=adj.reduce((s,e)=>s+(e.totalIncome69-e.totalIncome68),0);
+  const avgDiff=adj.length?totalDiff/adj.length:0;
+  const avgPct=adj.reduce((s,e)=>s+(e.totalIncome68>0?(e.totalIncome69-e.totalIncome68)/e.totalIncome68*100:0),0)/(adj.length||1);
+  document.getElementById('adj_count').textContent=adj.length;
+  document.getElementById('adj_total').textContent='+฿'+fmt(totalDiff);
+  document.getElementById('adj_avg').textContent='฿'+fmt(avgDiff);
+  document.getElementById('adj_pct').textContent=avgPct.toFixed(1)+'%';
+  document.getElementById('adjTableBody').innerHTML=adj.sort((a,b)=>(b.totalIncome69-b.totalIncome68)-(a.totalIncome69-a.totalIncome68)).map(e=>{
+    const diff=e.totalIncome69-e.totalIncome68;
+    const pct=e.totalIncome68>0?(diff/e.totalIncome68*100).toFixed(1):'—';
+    return `<tr>
+      <td style="color:#8896b3;font-size:11px">${e.id}</td>
+      <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
+      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brand}</td>
+      <td style="font-size:11.5px">${e.position}</td>
+      <td style="text-align:right">฿${fmt(e.totalIncome68)}</td>
+      <td style="text-align:right;font-weight:600">฿${fmt(e.totalIncome69)}</td>
+      <td style="text-align:right;color:#12a05c;font-weight:700">+฿${fmt(diff)}</td>
+      <td style="text-align:right"><span class="stat-badge badge-green">+${pct}%</span></td>
+      <td style="font-size:11px;color:#d97706">${e.remark||'—'}</td>
+    </tr>`;
+  }).join('');
 }
 
-// PAYROLL — use total68/total69 and currentCC
-function renderPayroll(){
-  const data=D();
-  const byCurCC=groupBy(data.map(d=>({...d,curCC:currentCC(d)})),"curCC");
-  const rows=Object.entries(byCurCC).map(([k,v])=>({
-    cc:k, cnt:v.length,
-    b68:v.reduce((s,d)=>s+d.total68,0),
-    b69:v.reduce((s,d)=>s+d.total69,0)
-  })).sort((a,b)=>b.b69-a.b69);
+// ═══════════════════════════════════════════════
+// TAB: DISTRIBUTION
+// ═══════════════════════════════════════════════
+let distInit=false;
+function initDist() {
+  if(distInit) return; distInit=true;
+  const brands=Object.keys(brandGroups);
+  const BCOL=['#2563eb','#10b981','#8b5cf6','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];
+  const tFmt=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v;
 
-  const maxB=Math.max(...rows.map(r=>Math.max(r.b68,r.b69)),1);
-  document.getElementById("pay-cmp").innerHTML=rows.map(r=>{
-    const diff=r.b69-r.b68;
-    return `<div style="padding:12px 0;border-bottom:1px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div style="font-size:14px;font-weight:600;color:#1e293b;">${r.cc}</div>
-        <div style="font-size:12px;color:#64748b;background:#f1f5f9;border-radius:20px;padding:2px 10px;">${r.cnt} คน</div>
-      </div>
-      <div class="pay-bar-row" style="margin-bottom:5px;">
-        <div class="pay-sub-lbl" style="color:#3b82f6;">ปี 68</div>
-        <div class="pay-bwrap"><div class="pay-bfill68" style="width:${(r.b68/maxB*100).toFixed(1)}%;"></div></div>
-        <div class="pay-num" style="color:#3b82f6;">${fmt(r.b68)} ฿</div>
-      </div>
-      <div class="pay-bar-row">
-        <div class="pay-sub-lbl" style="color:#059669;">ปี 69</div>
-        <div class="pay-bwrap"><div class="pay-bfill69" style="width:${(r.b69/maxB*100).toFixed(1)}%;"></div></div>
-        <div class="pay-num" style="color:#059669;">${fmt(r.b69)} ฿</div>
-      </div>
-      ${diff!==0?`<div style="font-size:12px;margin-top:5px;font-weight:600;color:${diff>0?"#065f46":"#991b1b"};background:${diff>0?"#d1fae5":"#fee2e2"};display:inline-block;padding:2px 10px;border-radius:20px;">${diff>0?"▲":"▼"} ${diff>0?"+":""}${fmt(diff)} บาท/เดือน (${r.b68>0?(diff/r.b68*100).toFixed(2):0}%)</div>`:""}
-    </div>`;
-  }).join("");
+  new Chart(document.getElementById('distBarBrand'),{
+    type:'bar',
+    data:{labels:brands,datasets:[{data:brands.map(b=>sumBy(brandGroups[b],'totalIncome69')),backgroundColor:BCOL,borderRadius:5}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
+  });
 
-  drawDonutPay("donutPay","donutLegendPay",rows.map(r=>({label:r.cc,val:Math.round(r.b69)})));
-  drawDonut("donutHC","donutLegendHC",rows.map(r=>({label:r.cc,val:r.cnt})));
+  const depts=Object.keys(deptGroups).sort((a,b)=>sumBy(deptGroups[b],'totalIncome69')-sumBy(deptGroups[a],'totalIncome69'));
+  new Chart(document.getElementById('distBarDept'),{
+    type:'bar',indexAxis:'y',
+    data:{labels:depts,datasets:[{data:depts.map(d=>sumBy(deptGroups[d],'totalIncome69')),backgroundColor:'#10b981bb',borderRadius:4}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{callback:tFmt}},y:{ticks:{font:{size:10}}}},responsive:true}
+  });
 
-  const totB68=rows.reduce((s,r)=>s+r.b68,0);
-  const totB69=rows.reduce((s,r)=>s+r.b69,0);
-  document.getElementById("pay-tbody").innerHTML=[
-    ...rows.map(r=>{const d=r.b69-r.b68;const p=r.b68>0?(d/r.b68*100).toFixed(2):0;return`<tr>
-      <td style="font-size:12px;">${r.cc}</td>
-      <td class="num">${r.cnt}</td>
-      <td class="num">${fmt(r.b68)}</td>
-      <td class="num">${fmt(r.b69)}</td>
-      <td class="num ${d>0?"num-up":d<0?"num-dn":"num-ne"}">${d>0?"+":""}${fmt(d)}</td>
-      <td><span class="badge ${d>0?"b-up":d<0?"b-dn":"b-ne"}">${d>0?"▲":d<0?"▼":""}${p}%</span></td>
-      <td class="num">${r.cnt>0?fmt(r.b69/r.cnt):"—"}</td>
-    </tr>`;}),
-    `<tr style="background:rgba(0,212,255,.05);font-weight:600;border-top:2px solid var(--border);">
-      <td style="font-size:12px;">รวมทั้งหมด</td><td class="num">${data.length}</td>
-      <td class="num" style="color:#67e8f9;">${fmt(totB68)}</td>
-      <td class="num" style="color:var(--accent3);">${fmt(totB69)}</td>
-      <td class="num ${totB69-totB68>0?"num-up":""}">${totB69-totB68>0?"+":""}${fmt(totB69-totB68)}</td>
-      <td><span class="badge ${totB69>=totB68?"b-up":"b-dn"}">${totB69>=totB68?"▲":"▼"}${totB68>0?((totB69-totB68)/totB68*100).toFixed(2):0}%</span></td>
-      <td class="num">${data.length>0?fmt(totB69/data.length):"—"}</td>
-    </tr>`
-  ].join("");
+  new Chart(document.getElementById('distYoY'),{
+    type:'bar',
+    data:{labels:brands,datasets:[
+      {label:'ปี 68',data:brands.map(b=>sumBy(brandGroups[b],'totalIncome68')),backgroundColor:'#cbd5e1',borderRadius:4},
+      {label:'ปี 69',data:brands.map(b=>sumBy(brandGroups[b],'totalIncome69')),backgroundColor:'#2563ebbb',borderRadius:4}
+    ]},
+    options:{plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
+  });
+
+  new Chart(document.getElementById('distLevel'),{
+    type:'doughnut',
+    data:{labels:lLabels,datasets:[{data:lCounts,backgroundColor:lLabels.map(l=>LEVEL_COLORS[l]||'#6b7a99'),borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+  });
 }
 
-// MOBILITY
-function renderMobility(){
-  const data=D();
-  const trans=data.filter(d=>d.transferred&&d.newCompany);
-  const dest=new Set(trans.map(d=>d.newCompany));
-  const uploadedAt=revisions[curRev]?.uploadedAt||"17/03/2026 00:00";
-  document.getElementById("mb-total").textContent=trans.length;
-  document.getElementById("mb-pct").textContent=((trans.length/data.length)*100).toFixed(1)+"%";
-  document.getElementById("mb-dest").textContent=dest.size;
-  const byFrom={};trans.forEach(d=>{byFrom[d.oldCompany]=(byFrom[d.oldCompany]||0)+1;});
-  const byTo={};trans.forEach(d=>{byTo[d.newCompany]=(byTo[d.newCompany]||0)+1;});
-  renderBars("mb-from",Object.entries(byFrom).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k,val:v,sfx:" คน"})),"red");
-  renderBars("mb-to",Object.entries(byTo).sort((a,b)=>b[1]-a[1]).map(([k,v])=>({label:k,val:v,sfx:" คน"})),"green");
-  document.getElementById("mb-list").innerHTML=trans.map(d=>`
-    <div class="mob-card">
-      <div class="mob-info">
-        <div class="mob-name">${d.name}</div>
-        <div class="mob-nick">(${d.nickname})</div>
-        <div class="mob-pos">${d.dept} · ${d.position}</div>
-      </div>
-      <div class="mob-flow">
-        <div class="mob-from">📤 ${d.oldCompany}</div>
-        <div class="mob-arrow">→</div>
-        <div class="mob-to">📥 ${d.newCompany}</div>
-      </div>
-      <div class="mob-meta">
-        <div class="mob-salary">${fmt(d.total69)} ฿/เดือน</div>
-        <div class="mob-stamp">🕐 ${uploadedAt}</div>
-      </div>
-    </div>`).join("");
+// ═══════════════════════════════════════════════
+// TAB: INTERNAL MOBILITY
+// ═══════════════════════════════════════════════
+function initMobility() {
+  const moved=EMPLOYEES.filter(e=>e.brandNew&&e.brandNew!=='');
+  const uBrands=[...new Set(moved.flatMap(e=>[e.brand,e.brandNew].filter(Boolean)))];
+  document.getElementById('mob_transfer').textContent=moved.length;
+  document.getElementById('mob_brands').textContent=uBrands.length;
+  document.getElementById('mob_pct').textContent=Math.round(moved.length/EMPLOYEES.length*100)+'%';
+  document.getElementById('mobTableBody').innerHTML=moved.map(e=>`
+    <tr>
+      <td style="color:#8896b3;font-size:11px">${e.id}</td>
+      <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
+      <td style="font-size:11.5px">${e.position}</td>
+      <td style="font-size:11.5px;color:#8896b3">${e.brandOld||e.brand}</td>
+      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brandNew}</td>
+      <td><span style="background:#e8fff5;color:#059669;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:600">โยกย้าย</span></td>
+    </tr>`).join('');
 }
-
-function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
-function renderAll(){const a=document.querySelector(".tab-panel.active");if(a)renderTab(a.id.replace("tab-",""));}
-
-loadStorage();
-renderOverview();
 </script>
 </body>
 </html>

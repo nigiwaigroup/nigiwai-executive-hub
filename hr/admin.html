@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — HR Dashboard · Nigiwai Group</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy:#0a1628; --navy-mid:#0f2044; --navy-light:#1a3060; --gold:#c9a227; --gold-light:#e8c547; --text-muted:#8899bb; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Sarabun',sans-serif; background:var(--navy); color:#e8eef8; min-height:100vh; }
+  ::-webkit-scrollbar{width:5px;} ::-webkit-scrollbar-thumb{background:var(--gold);}
+  .gold-text { background:linear-gradient(135deg,var(--gold-light),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  
+  /* Login Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:100; }
+  .modal-box { background:linear-gradient(145deg,var(--navy-mid),var(--navy-light)); border:1px solid rgba(201,162,39,0.3); border-radius:20px; padding:40px; width:380px; max-width:90vw; }
+  
+  /* Input */
+  .admin-input { width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; color:#e2e8f0; font-family:'Sarabun',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
+  .admin-input:focus { border-color:var(--gold); }
+  .admin-input::placeholder { color:var(--text-muted); }
+  .admin-select { width:100%; background:var(--navy-mid); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; color:#e2e8f0; font-family:'Sarabun',sans-serif; font-size:0.9rem; outline:none; cursor:pointer; }
+  .admin-select:focus { border-color:var(--gold); }
+  
+  /* Buttons */
+  .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--navy); padding:10px 24px; border-radius:10px; font-weight:700; font-family:'Sarabun',sans-serif; cursor:pointer; border:none; transition:opacity 0.2s; font-size:0.9rem; }
+  .btn-gold:hover { opacity:0.9; }
+  .btn-outline { background:transparent; border:1px solid rgba(201,162,39,0.4); color:var(--gold-light); padding:8px 18px; border-radius:8px; cursor:pointer; font-family:'Sarabun',sans-serif; font-size:0.85rem; transition:all 0.2s; }
+  .btn-outline:hover { background:rgba(201,162,39,0.1); }
+  .btn-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:'Sarabun',sans-serif; font-size:0.8rem; transition:all 0.2s; }
+  .btn-danger:hover { background:rgba(239,68,68,0.25); }
+  .btn-edit { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:#93c5fd; padding:6px 14px; border-radius:8px; cursor:pointer; font-family:'Sarabun',sans-serif; font-size:0.8rem; transition:all 0.2s; }
+  .btn-edit:hover { background:rgba(59,130,246,0.25); }
+  
+  /* Card */
+  .admin-card { background:linear-gradient(145deg,var(--navy-mid),#0d1e3a); border:1px solid rgba(201,162,39,0.15); border-radius:16px; padding:24px; }
+  .section-title { font-size:0.95rem; font-weight:600; color:var(--gold-light); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .section-title::before { content:''; width:3px; height:18px; background:var(--gold); border-radius:2px; }
+  
+  /* Table */
+  .admin-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  .admin-table th { background:rgba(201,162,39,0.12); color:var(--gold-light); padding:10px 12px; text-align:left; font-size:0.75rem; letter-spacing:0.8px; text-transform:uppercase; border-bottom:1px solid rgba(201,162,39,0.2); }
+  .admin-table td { padding:9px 12px; border-bottom:1px solid rgba(255,255,255,0.05); color:#cbd5e1; }
+  .admin-table tr:hover td { background:rgba(201,162,39,0.04); }
+  
+  /* Toast */
+  .toast { position:fixed; bottom:24px; right:24px; background:linear-gradient(135deg,#0f2044,#1a3060); border:1px solid rgba(201,162,39,0.4); border-radius:12px; padding:14px 20px; font-size:0.85rem; z-index:999; transform:translateY(80px); transition:transform 0.3s; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+  .toast.show { transform:translateY(0); }
+  .toast.success { border-color:rgba(74,222,128,0.4); }
+  .toast.error { border-color:rgba(239,68,68,0.4); }
+  
+  /* Form Label */
+  .form-label { font-size:0.8rem; color:var(--text-muted); margin-bottom:4px; display:block; font-weight:500; }
+  
+  /* Status indicator */
+  .api-status { display:flex; align-items:center; gap:6px; font-size:0.78rem; }
+  .dot { width:7px; height:7px; border-radius:50%; }
+  .dot-green { background:#4ade80; animation:pulse 2s infinite; }
+  .dot-red { background:#f87171; }
+  .dot-yellow { background:#fbbf24; animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* Drawer for form */
+  .drawer { position:fixed; inset-y:0; right:0; width:480px; max-width:95vw; background:linear-gradient(180deg,var(--navy-mid),var(--navy-light)); border-left:1px solid rgba(201,162,39,0.2); z-index:90; transform:translateX(100%); transition:transform 0.3s ease; overflow-y:auto; padding:24px; }
+  .drawer.open { transform:translateX(0); }
+  .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:89; display:none; }
+  .drawer-overlay.open { display:block; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="width:60px;height:60px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--navy);margin:0 auto 12px;">NG</div>
+      <h2 class="gold-text" style="font-size:1.4rem;font-family:'Prompt',sans-serif;font-weight:700">Admin Login</h2>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">HR Dashboard · Nigiwai Group</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="form-label">Username</label>
+      <input type="text" id="loginUser" class="admin-input" placeholder="กรอก Username">
+    </div>
+    <div style="margin-bottom:24px">
+      <label class="form-label">Password</label>
+      <input type="password" id="loginPass" class="admin-input" placeholder="กรอก Password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-gold w-full" onclick="doLogin()" style="width:100%">🔐 เข้าสู่ระบบ</button>
+    <div id="loginErr" style="color:#f87171;font-size:0.8rem;text-align:center;margin-top:10px;display:none">❌ Username หรือ Password ไม่ถูกต้อง</div>
+    <div style="text-align:center;margin-top:16px">
+      <a href="index.html" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none">← กลับหน้า Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN ADMIN -->
+<div id="adminApp" style="display:none">
+
+  <!-- HEADER -->
+  <header style="background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-bottom:1px solid rgba(201,162,39,0.3);position:sticky;top:0;z-index:50;">
+    <div style="max-width:1280px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="index.html" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;padding:6px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;">← Dashboard</a>
+        <div>
+          <div style="font-family:'Prompt',sans-serif;font-weight:700;color:var(--gold-light)">⚙ Admin Panel</div>
+          <div style="font-size:0.72rem;color:var(--text-muted)">HR Data Management · Nigiwai Group</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="api-status" id="apiStatusBadge">
+          <div class="dot dot-yellow" id="apiDot"></div>
+          <span id="apiStatusText" style="color:var(--text-muted)">ยังไม่ได้ตั้งค่า API</span>
+        </div>
+        <button onclick="logout()" class="btn-outline">🚪 ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <div style="max-width:1280px;margin:0 auto;padding:24px 16px;">
+
+    <!-- GAS CONFIG CARD -->
+    <div class="admin-card" style="margin-bottom:20px;border-color:rgba(201,162,39,0.3)">
+      <div class="section-title">🔧 ตั้งค่าการเชื่อมต่อ Google Apps Script</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;">
+        <div>
+          <label class="form-label">Google Apps Script Deployment URL (doGet/doPost)</label>
+          <input type="text" id="gasUrl" class="admin-input" placeholder="https://script.google.com/macros/s/AKfy...../exec">
+        </div>
+        <div>
+          <label class="form-label">Google Sheet ID (สำหรับ Read CSV)</label>
+          <input type="text" id="sheetId" class="admin-input" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+        </div>
+        <button class="btn-gold" onclick="saveConfig()" style="white-space:nowrap">💾 บันทึกการตั้งค่า</button>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px">
+        📌 Deploy Google Apps Script จาก <code style="color:var(--gold-light)">code.gs</code> → Web App → Anyone → แล้วนำ URL มาใส่ที่นี่
+      </p>
+    </div>
+
+    <!-- STATS ROW -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div class="admin-card" style="padding:16px">
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">พนักงานทั้งหมด</div>
+        <div class="gold-text" style="font-size:1.8rem;font-family:'Prompt',sans-serif;font-weight:700" id="statTotal">—</div>
+      </div>
+      <div class="admin-card" style="padding:16px">
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">Cost Center</div>
+        <div style="font-size:1.8rem;font-family:'Prompt',sans-serif;font-weight:700;color:#93c5fd" id="statBrands">—</div>
+      </div>
+      <div class="admin-card" style="padding:16px">
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">ปรับเงินเดือนรอบล่าสุด</div>
+        <div style="font-size:1.8rem;font-family:'Prompt',sans-serif;font-weight:700;color:#4ade80" id="statAdjusted">—</div>
+      </div>
+      <div class="admin-card" style="padding:16px">
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">รายได้รวม/เดือน ปี 69</div>
+        <div style="font-size:1.8rem;font-family:'Prompt',sans-serif;font-weight:700;color:#c4b5fd" id="statIncome">—</div>
+      </div>
+    </div>
+
+    <!-- EMPLOYEE MANAGEMENT TABLE -->
+    <div class="admin-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0">👤 จัดการข้อมูลพนักงาน</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="adminSearch" class="admin-input" placeholder="🔍 ค้นหา..." style="width:180px">
+          <button class="btn-gold" onclick="openAddDrawer()">+ เพิ่มพนักงาน</button>
+          <button class="btn-outline" onclick="syncToSheet()">☁ Sync ขึ้น Sheet</button>
+        </div>
+      </div>
+      
+      <div style="overflow-x:auto;border-radius:10px;border:1px solid rgba(255,255,255,0.06)">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th>
+              <th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th>หมายเหตุ</th><th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted)" id="adminCount"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="formDrawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <h3 class="gold-text" style="font-size:1.1rem;font-family:'Prompt',sans-serif;" id="drawerTitle">เพิ่มพนักงานใหม่</h3>
+    <button onclick="closeDrawer()" style="background:rgba(255,255,255,0.07);border:none;color:#94a3b8;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;">✕</button>
+  </div>
+  
+  <div style="display:grid;gap:14px;">
+    <input type="hidden" id="editIndex">
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label class="form-label">รหัสพนักงาน *</label><input type="text" id="fId" class="admin-input" placeholder="660101"></div>
+      <div><label class="form-label">ชื่อเล่น</label><input type="text" id="fNickname" class="admin-input" placeholder="ชื่อเล่น"></div>
+    </div>
+    
+    <div><label class="form-label">ชื่อ-นามสกุล *</label><input type="text" id="fName" class="admin-input" placeholder="นาย/นางสาว ชื่อ นามสกุล"></div>
+    
+    <div><label class="form-label">Cost Center (บริษัท) *</label>
+      <select id="fBrand" class="admin-select">
+        <option value="">— เลือก Cost Center —</option>
+        <option>Nigiwai Group</option>
+        <option>Nigiwai Goods Wealth</option>
+        <option>Nigiwai Construction</option>
+        <option>NGWC HQ</option>
+        <option>NGWC Don Mueang</option>
+        <option>Kinosuke Group</option>
+      </select>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label class="form-label">แผนก *</label>
+        <select id="fDept" class="admin-select">
+          <option value="">— เลือกแผนก —</option>
+          <option>Operation</option><option>Executive</option><option>Marketing</option>
+          <option>Financial And Account</option><option>Sales</option><option>Warehouse & Logistics</option>
+          <option>Human Resource</option><option>Construction</option><option>Information Technology</option>
+        </select>
+      </div>
+      <div><label class="form-label">ระดับ *</label>
+        <select id="fLevel" class="admin-select">
+          <option value="">— เลือกระดับ —</option>
+          <option>Officer</option><option>Senior Officer</option><option>Leader and Supervisor</option>
+          <option>Manager</option><option>Chief and Director</option><option>Consultant</option>
+        </select>
+      </div>
+    </div>
+    
+    <div><label class="form-label">ตำแหน่ง *</label><input type="text" id="fPosition" class="admin-input" placeholder="ชื่อตำแหน่งงาน"></div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label class="form-label">ฐานเงินเดือน ปี 68</label><input type="number" id="fBase68" class="admin-input" placeholder="0"></div>
+      <div><label class="form-label">ฐานเงินเดือน ปี 69 *</label><input type="number" id="fBase69" class="admin-input" placeholder="0"></div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><label class="form-label">รายได้รวม ปี 68</label><input type="number" id="fTotal68" class="admin-input" placeholder="0"></div>
+      <div><label class="form-label">รายได้รวม ปี 69 *</label><input type="number" id="fTotal69" class="admin-input" placeholder="0"></div>
+    </div>
+    
+    <div><label class="form-label">หมายเหตุ</label><textarea id="fRemark" class="admin-input" rows="2" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div>
+    
+    <div style="display:flex;gap:10px;padding-top:8px;">
+      <button class="btn-gold" onclick="saveEmployee()" style="flex:1">💾 บันทึก</button>
+      <button class="btn-outline" onclick="closeDrawer()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// AUTH
+// ============================================================
+// 🔧 เปลี่ยน credentials ได้ที่นี่ (Production: ใช้ OAuth หรือ GAS auth)
+const CREDENTIALS = { admin: 'nigiwai2026', hr: 'hrpass2026' };
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (CREDENTIALS[u] && CREDENTIALS[u] === p) {
+    sessionStorage.setItem('admin_auth', '1');
+    sessionStorage.setItem('admin_user', u);
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    initAdmin();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    setTimeout(()=>document.getElementById('loginErr').style.display='none', 3000);
+  }
+}
+function logout() {
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+// Auto-check session
+if (sessionStorage.getItem('admin_auth') === '1') {
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+}
+
+// ============================================================
+// EMPLOYEE DATA
+// ============================================================
+let DB = JSON.parse(localStorage.getItem('hr_employees') || 'null');
+if (!DB) {
+  // Seed with embedded data
+  DB = [{"id":"660104","name":"นางสาวสาวิตรี สิงห์เหม้น","nickname":"ทราย","brand":"Kinosuke Group","dept":"Operation","position":"Core Team Supervisor- Level I","level":"Leader and Supervisor","baseSalary68":21000,"baseSalary69":21000,"totalIncome68":25000,"totalIncome69":25000,"remark":""},{"id":"670601","name":"นางสาวรัตติกาล สกุลอินทร์","nickname":"โบ","brand":"Kinosuke Group","dept":"Sales","position":"Tele Sale","level":"Officer","baseSalary68":19000,"baseSalary69":19000,"totalIncome68":19000,"totalIncome69":19000,"remark":""},{"id":"681001","name":"นางสาวพรวิไล มีชัย","nickname":"ออน","brand":"Kinosuke Group","dept":"Warehouse & Logistics","position":"Admin Purchasing","level":"Officer","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26"},{"id":"651003","name":"นางสาวกชชลจรรย์ สุทธิกิตติพงศ์","nickname":"เมย์","brand":"Nigiwai Group","dept":"Financial And Account","position":"Acc Supervisor","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":29300,"totalIncome69":30500,"remark":"ปรับ #01 03.26"},{"id":"650206","name":"นายกฤษฎา จันทร์ฝา","nickname":"ภูมิ","brand":"Nigiwai Group","dept":"Human Resource","position":"Human Resources Supervisor","level":"Leader and Supervisor","baseSalary68":18564,"baseSalary69":19000,"totalIncome68":20064,"totalIncome69":22000,"remark":"ปรับ #01 03.26"},{"id":"650104","name":"นางสาวช้องนาง หินขาว","nickname":"หนูนา","brand":"Nigiwai Group","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":18900,"baseSalary69":19000,"totalIncome68":20900,"totalIncome69":22000,"remark":"ปรับ #01 03.26"},{"id":"660409","name":"นางสาวพานทอง รุ่งอนันต์กุลสิริ","nickname":"ปิงปิง","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level I","level":"Senior Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":26813,"totalIncome69":28400,"remark":"ปรับ #01 03.26"},{"id":"651101","name":"นางสาวณัฐชานันท์ ธนังชูศิลป์","nickname":"ชามุก","brand":"Nigiwai Group","dept":"Sales","position":"Sales Manager (Acting)","level":"Manager","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":28000,"totalIncome69":28000,"remark":""},{"id":"631202","name":"นางสาวสาริศา กมลอรรฆ","nickname":"น้ำ","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level III","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":30500,"totalIncome69":30500,"remark":""},{"id":"651201","name":"นางสาวกนกพิชญ์ พิบูลย์","nickname":"ออ","brand":"Nigiwai Group","dept":"Financial And Account","position":"Financial & Account Manager","level":"Manager","baseSalary68":42000,"baseSalary69":42000,"totalIncome68":42000,"totalIncome69":42000,"remark":""},{"id":"640502","name":"นายณรุจ พลับศิริ","nickname":"โอ๊ต","brand":"Nigiwai Group","dept":"Marketing","position":"Senior Creative & Content Marketing","level":"Leader and Supervisor","baseSalary68":24980,"baseSalary69":24980,"totalIncome68":24980,"totalIncome69":24980,"remark":""},{"id":"650106","name":"นางสาวนัชชา ธนเกริกกวิน","nickname":"ป้อ","brand":"Nigiwai Group","dept":"Sales","position":"After Sales - Level III","level":"Senior Officer","baseSalary68":21800,"baseSalary69":21800,"totalIncome68":25640,"totalIncome69":25640,"remark":""},{"id":"640601","name":"นายไกรเจต สมพงษ์","nickname":"คุณเจต","brand":"Nigiwai Group","dept":"Executive","position":"CTO & COO","level":"Chief and Director","baseSalary68":50000,"baseSalary69":50000,"totalIncome68":75000,"totalIncome69":75000,"remark":""},{"id":"641103","name":"นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์","nickname":"ไบร์ท","brand":"Nigiwai Group","dept":"Operation","position":"Project Leader","level":"Consultant","baseSalary68":12000,"baseSalary69":12000,"totalIncome68":12000,"totalIncome69":12000,"remark":""},{"id":"681101","name":"นายภัทรพล เดือนฉาย","nickname":"ฟัด","brand":"Nigiwai Group","dept":"Human Resource","position":"Senior Recruite","level":"Leader and Supervisor","baseSalary68":27000,"baseSalary69":27000,"totalIncome68":27000,"totalIncome69":27000,"remark":""},{"id":"681002","name":"นางสาววิภาวี เรืองจรูญ","nickname":"บิว","brand":"Nigiwai Group","dept":"Human Resource","position":"Recruite Officer","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":16500,"remark":""},{"id":"610701","name":"นางสาวอรอริยา สุดสุข","nickname":"ออน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"ART Operation- Lv.III","level":"Leader and Supervisor","baseSalary68":28500,"baseSalary69":28500,"totalIncome68":35889,"totalIncome69":37000,"remark":"ปรับ #01 03.26"},{"id":"660504","name":"นางสาวภัรตรา เพ็ญภู่","nickname":"มะปราง","brand":"Nigiwai Goods Wealth","dept":"Sales","position":"After Sales - Level II","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":18000,"remark":"ปรับ #01 03.26"},{"id":"680901","name":"นายณัฐกิจ ต้นโต","nickname":"ที","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"พนักงานขนส่ง","level":"Officer","baseSalary68":13000,"baseSalary69":14000,"totalIncome68":13000,"totalIncome69":15000,"remark":"ปรับ #01 03.26"},{"id":"AS670308","name":"นางสาวมณีรัตน์ ธงทอง","nickname":"ผึ้ง","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Production Staff","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":13000,"totalIncome69":14000,"remark":"ปรับ #01 03.26"},{"id":"VV660302","name":"นางสาวศิริวรรณ กำรัตน์","nickname":"นิว","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef - Lv.II","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26"},{"id":"660201","name":"นางสาวธิติญา ปัญญายิ่ง","nickname":"อุ้ม","brand":"Nigiwai Goods Wealth","dept":"Marketing","position":"Graphic Designer - Lv III","level":"Officer","baseSalary68":23690,"baseSalary69":23690,"totalIncome68":23690,"totalIncome69":23690,"remark":""},{"id":"610601","name":"นายสุทธิพร ตั้งสกุลสันติ","nickname":"คุณใหม่","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"President & Group CEO","level":"Chief and Director","baseSalary68":180000,"baseSalary69":180000,"totalIncome68":180000,"totalIncome69":180000,"remark":""},{"id":"670401","name":"นายพงศธร โชติยะศิลป์","nickname":"แบงค์","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"Chief Financial Officer","level":"Manager","baseSalary68":65000,"baseSalary69":50000,"totalIncome68":65000,"totalIncome69":50000,"remark":""},{"id":"650208","name":"นายขวัญวิชัย ไกรงาม","nickname":"ชัย","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Head Chef - Level II","level":"Officer","baseSalary68":27038,"baseSalary69":27038,"totalIncome68":28038,"totalIncome69":28038,"remark":""},{"id":"640202","name":"นางสาวคณิตตา จำเริญพงษ์","nickname":"ฝน","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"ART Supply Chain - Level III","level":"Manager","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":33000,"totalIncome69":33000,"remark":""},{"id":"670202","name":"นางสาวกัลยรักษ์ ตระกูลอินทร์","nickname":"กุ้ง","brand":"Nigiwai Goods Wealth","dept":"Financial And Account","position":"Senior Accounting Officer","level":"Senior Officer","baseSalary68":24000,"baseSalary69":24000,"totalIncome68":24000,"totalIncome69":24000,"remark":""},{"id":"660801","name":"นางสาวฐิติกานต์ รักเมือง","nickname":"หยก","brand":"Nigiwai Construction","dept":"Marketing","position":"Graphic Designer - Lv I","level":"Officer","baseSalary68":15500,"baseSalary69":15500,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26"},{"id":"660804","name":"นายจิติวัฒน์ อุปวรรณะ","nickname":"นิว","brand":"Nigiwai Construction","dept":"Construction","position":"Senior Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":26000,"totalIncome68":26000,"totalIncome69":30000,"remark":"ปรับ #01 03.26"},{"id":"670201","name":"นายศักดิ์จรินทร์ ดวงฤทัย","nickname":"เคน","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Support","level":"Officer","baseSalary68":15000,"baseSalary69":16000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26"},{"id":"660401","name":"นายพิชญา บัวบรรจง","nickname":"พีพี","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Specialist","level":"Leader and Supervisor","baseSalary68":31500,"baseSalary69":31500,"totalIncome68":33705,"totalIncome69":33705,"remark":""},{"id":"610602","name":"นายวรันธร แดงใหญ่","nickname":"คุณเก้ง","brand":"Nigiwai Construction","dept":"Executive","position":"CEO","level":"Chief and Director","baseSalary68":120000,"baseSalary69":120000,"totalIncome68":120000,"totalIncome69":120000,"remark":""},{"id":"641105","name":"นายอรรถสิทธิ์ สุปัดคำ","nickname":"เก้","brand":"Nigiwai Construction","dept":"Construction","position":"Project Coordinator - Level I","level":"Leader and Supervisor","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":""},{"id":"671002","name":"นายนิรันดร์ ดวงสุวรรณ","nickname":"อาร์ท","brand":"Nigiwai Construction","dept":"Executive","position":"Construction Director","level":"Chief and Director","baseSalary68":100000,"baseSalary69":100000,"totalIncome68":100000,"totalIncome69":100000,"remark":""},{"id":"671101","name":"นางสาวนุชนารถ แตงอ่อน","nickname":"ถุงแป้ง","brand":"Nigiwai Construction","dept":"Construction","position":"Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":""},{"id":"650702","name":"นางสาวอรนิดา แพสถิตถาวร","nickname":"กุ๊ก","brand":"Nigiwai Construction","dept":"Human Resource","position":"House Keeper","level":"Officer","baseSalary68":12360,"baseSalary69":12360,"totalIncome68":12860,"totalIncome69":12860,"remark":""},{"id":"631204","name":"นายพงศธร อภัยนุกูล","nickname":"บลู","brand":"Nigiwai Construction","dept":"Marketing","position":"Video Production Supervisor","level":"Leader and Supervisor","baseSalary68":24150,"baseSalary69":24150,"totalIncome68":26150,"totalIncome69":26150,"remark":""},{"id":"999901","name":"นายสุวคนธ์ อินทร์ประคอง","nickname":"หมู","brand":"Nigiwai Construction","dept":"Marketing","position":"Digital Marketing Consultant","level":"Consultant","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":16000,"remark":""},{"id":"641001","name":"นายวีระพจน์ สังเกตุ","nickname":"พจน์","brand":"Nigiwai Construction","dept":"Warehouse & Logistics","position":"Driver & Technician","level":"Officer","baseSalary68":16223,"baseSalary69":16223,"totalIncome68":16223,"totalIncome69":16223,"remark":""},{"id":"630601","name":"นางสาวธนภรณ์ ผ่องประทุม","nickname":"เติ้ล","brand":"NGWC HQ","dept":"Marketing","position":"Art Supervisor","level":"Leader and Supervisor","baseSalary68":26383,"baseSalary69":26500,"totalIncome68":29674,"totalIncome69":30000,"remark":"ปรับ #01 03.26"},{"id":"650102","name":"นายวินัย หนองแพ","nickname":"บู๊","brand":"NGWC HQ","dept":"Operation","position":"Executive Chef - Lv.II","level":"Leader and Supervisor","baseSalary68":30000,"baseSalary69":30000,"totalIncome68":36378,"totalIncome69":37500,"remark":"ปรับ #01 03.26"},{"id":"650207","name":"นางสาวเสาวณี พันสุวรรณ์","nickname":"บี","brand":"NGWC HQ","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":17850,"baseSalary69":19000,"totalIncome68":19743,"totalIncome69":22000,"remark":"ปรับ #01 03.26"},{"id":"650903","name":"นายกันต์ศักย์ ปานมงคล","nickname":"อ้น","brand":"NGWC HQ","dept":"Operation","position":"Quality Control & Audit Manager","level":"Manager","baseSalary68":36050,"baseSalary69":36050,"totalIncome68":36050,"totalIncome69":36050,"remark":""},{"id":"660101","name":"นางสาวกรวรรณ สุวรรณพรรค","nickname":"หมวย","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Payable","level":"Officer","baseSalary68":22050,"baseSalary69":22050,"totalIncome68":22050,"totalIncome69":22050,"remark":""},{"id":"660503","name":"นายภูรินทร์ บุญวรรณ","nickname":"ก้อนเมฆ","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Receivable","level":"Officer","baseSalary68":18900,"baseSalary69":18900,"totalIncome68":18900,"totalIncome69":18900,"remark":""},{"id":"NBD690201","name":"นางสาววัชรินทร์ เกงขุนทด","nickname":"วา","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":""},{"id":"NBD690202","name":"นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา","nickname":"บอม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":""},{"id":"NBD690203","name":"นางสาวจิรักษา ภูฆัง","nickname":"แจม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":""},{"id":"NBD690204","name":"นางสาววัทนวิภา แซ่กั้ว","nickname":"ยุ้ย","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":""},{"id":"NBD690206","name":"นายธนวิทย์ เชาวนะ","nickname":"ไบร์ท","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":""},{"id":"NBD690207","name":"นายเริงชัย หมู่แก้ว","nickname":"ต้อม","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":18000,"baseSalary69":18000,"totalIncome68":19000,"totalIncome69":19000,"remark":""},{"id":"NBD690208","name":"นายพลชนะ พันลำภักดิ์","nickname":"เจมส์","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16000,"totalIncome69":16000,"remark":""},{"id":"NBD690209","name":"นายแม็ก ซอ เมี๊ยด","nickname":"วัน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":14000,"totalIncome69":14000,"remark":""}];
+  localStorage.setItem('hr_employees', JSON.stringify(DB));
+}
+
+// Config
+let GAS_URL = localStorage.getItem('gas_url') || '';
+let SHEET_ID = localStorage.getItem('sheet_id') || '';
+if (GAS_URL) document.getElementById('gasUrl').value = GAS_URL;
+if (SHEET_ID) document.getElementById('sheetId').value = SHEET_ID;
+
+function saveConfig() {
+  GAS_URL = document.getElementById('gasUrl').value.trim();
+  SHEET_ID = document.getElementById('sheetId').value.trim();
+  localStorage.setItem('gas_url', GAS_URL);
+  localStorage.setItem('sheet_id', SHEET_ID);
+  showToast('✅ บันทึกการตั้งค่าแล้ว', 'success');
+  updateApiStatus();
+}
+
+function updateApiStatus() {
+  const dot = document.getElementById('apiDot');
+  const txt = document.getElementById('apiStatusText');
+  if (GAS_URL) {
+    dot.className = 'dot dot-green';
+    txt.textContent = 'เชื่อมต่อ GAS แล้ว';
+    txt.style.color = '#4ade80';
+  } else {
+    dot.className = 'dot dot-yellow';
+    txt.textContent = 'ยังไม่ได้ตั้งค่า API';
+    txt.style.color = 'var(--text-muted)';
+  }
+}
+
+// ============================================================
+// INIT ADMIN
+// ============================================================
+function initAdmin() {
+  updateApiStatus();
+  renderStats();
+  renderAdminTable(DB);
+  document.getElementById('adminSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    const filtered = DB.filter(e => e.name.includes(q) || e.id.toLowerCase().includes(q) || e.position.toLowerCase().includes(q));
+    renderAdminTable(filtered);
+  });
+}
+if (sessionStorage.getItem('admin_auth') === '1') initAdmin();
+
+function renderStats() {
+  document.getElementById('statTotal').textContent = DB.length;
+  document.getElementById('statBrands').textContent = [...new Set(DB.map(e=>e.brand))].length;
+  document.getElementById('statAdjusted').textContent = DB.filter(e=>e.remark&&e.remark.includes('03.26')).length;
+  const total = DB.reduce((s,e)=>s+e.totalIncome69, 0);
+  document.getElementById('statIncome').textContent = (total/1000000).toFixed(2)+'M';
+}
+
+function renderAdminTable(data) {
+  document.getElementById('adminCount').textContent = `แสดง ${data.length} รายการ`;
+  const BRAND_COLORS = {'Nigiwai Group':'#c9a227','Nigiwai Goods Wealth':'#3b82f6','Nigiwai Construction':'#8b5cf6','NGWC HQ':'#10b981','NGWC Don Mueang':'#f59e0b','Kinosuke Group':'#ef4444'};
+  document.getElementById('adminTableBody').innerHTML = data.map((e,i) => {
+    const idx = DB.indexOf(e);
+    const c = BRAND_COLORS[e.brand]||'#6b7280';
+    return `<tr>
+      <td style="font-size:0.75rem;color:var(--text-muted)">${e.id}</td>
+      <td><div style="font-weight:500">${e.name}</div><div style="font-size:0.72rem;color:var(--text-muted)">${e.nickname}</div></td>
+      <td style="color:${c};font-size:0.78rem;font-weight:600">${e.brand}</td>
+      <td style="font-size:0.78rem">${e.dept}</td>
+      <td style="font-size:0.78rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
+      <td style="font-size:0.75rem">${e.level}</td>
+      <td style="text-align:right;color:#93c5fd">฿${e.baseSalary69.toLocaleString()}</td>
+      <td style="text-align:right;color:#c4b5fd;font-weight:600">฿${e.totalIncome69.toLocaleString()}</td>
+      <td style="font-size:0.72rem;color:${e.remark?'#fbbf24':'var(--text-muted)'};max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.remark}">${e.remark||'—'}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn-edit" onclick="openEditDrawer(${idx})">✏</button>
+          <button class="btn-danger" onclick="deleteEmp(${idx})">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// CRUD
+// ============================================================
+function openAddDrawer() {
+  document.getElementById('drawerTitle').textContent = '➕ เพิ่มพนักงานใหม่';
+  document.getElementById('editIndex').value = '';
+  ['fId','fName','fNickname','fPosition','fRemark'].forEach(id => document.getElementById(id).value = '');
+  ['fBrand','fDept','fLevel'].forEach(id => document.getElementById(id).value = '');
+  ['fBase68','fBase69','fTotal68','fTotal69'].forEach(id => document.getElementById(id).value = '');
+  openDrawer();
+}
+
+function openEditDrawer(idx) {
+  const e = DB[idx];
+  document.getElementById('drawerTitle').textContent = '✏ แก้ไขข้อมูลพนักงาน';
+  document.getElementById('editIndex').value = idx;
+  document.getElementById('fId').value = e.id;
+  document.getElementById('fName').value = e.name;
+  document.getElementById('fNickname').value = e.nickname||'';
+  document.getElementById('fBrand').value = e.brand;
+  document.getElementById('fDept').value = e.dept;
+  document.getElementById('fLevel').value = e.level;
+  document.getElementById('fPosition').value = e.position;
+  document.getElementById('fBase68').value = e.baseSalary68||0;
+  document.getElementById('fBase69').value = e.baseSalary69||0;
+  document.getElementById('fTotal68').value = e.totalIncome68||0;
+  document.getElementById('fTotal69').value = e.totalIncome69||0;
+  document.getElementById('fRemark').value = e.remark||'';
+  openDrawer();
+}
+
+function openDrawer() {
+  document.getElementById('formDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('formDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+
+function saveEmployee() {
+  const id = document.getElementById('fId').value.trim();
+  const name = document.getElementById('fName').value.trim();
+  const brand = document.getElementById('fBrand').value;
+  const dept = document.getElementById('fDept').value;
+  const level = document.getElementById('fLevel').value;
+  const position = document.getElementById('fPosition').value.trim();
+  const base69 = parseFloat(document.getElementById('fBase69').value)||0;
+  const total69 = parseFloat(document.getElementById('fTotal69').value)||0;
+  
+  if (!id || !name || !brand || !dept || !level || !position) {
+    showToast('⚠ กรุณากรอกข้อมูลที่จำเป็นให้ครบ', 'error'); return;
+  }
+  
+  const emp = {
+    id, name,
+    nickname: document.getElementById('fNickname').value.trim(),
+    brand, dept, level, position,
+    baseSalary68: parseFloat(document.getElementById('fBase68').value)||base69,
+    baseSalary69: base69,
+    totalIncome68: parseFloat(document.getElementById('fTotal68').value)||total69,
+    totalIncome69: total69,
+    remark: document.getElementById('fRemark').value.trim()
+  };
+  
+  const editIdx = document.getElementById('editIndex').value;
+  if (editIdx !== '') {
+    DB[parseInt(editIdx)] = emp;
+    showToast('✅ อัปเดตข้อมูลพนักงานแล้ว', 'success');
+  } else {
+    if (DB.find(e => e.id === id)) { showToast('⚠ รหัสพนักงานนี้มีอยู่แล้ว', 'error'); return; }
+    DB.push(emp);
+    showToast('✅ เพิ่มพนักงานใหม่แล้ว', 'success');
+  }
+  
+  saveDB();
+  closeDrawer();
+  renderStats();
+  renderAdminTable(DB);
+}
+
+function deleteEmp(idx) {
+  if (!confirm(`ยืนยันลบ "${DB[idx].name}"?`)) return;
+  DB.splice(idx, 1);
+  saveDB();
+  renderStats();
+  renderAdminTable(DB);
+  showToast('🗑 ลบพนักงานแล้ว', 'success');
+}
+
+function saveDB() {
+  localStorage.setItem('hr_employees', JSON.stringify(DB));
+}
+
+// ============================================================
+// SYNC TO GOOGLE SHEETS
+// ============================================================
+async function syncToSheet() {
+  if (!GAS_URL) { showToast('⚠ กรุณาตั้งค่า GAS URL ก่อน', 'error'); return; }
+  
+  document.getElementById('apiDot').className = 'dot dot-yellow';
+  document.getElementById('apiStatusText').textContent = 'กำลัง Sync...';
+  
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'sync', data: DB })
+    });
+    const result = await res.json();
+    if (result.status === 'ok') {
+      showToast('☁ Sync ข้อมูลขึ้น Google Sheets สำเร็จ!', 'success');
+      document.getElementById('apiDot').className = 'dot dot-green';
+      document.getElementById('apiStatusText').textContent = 'Synced ล่าสุด: ' + new Date().toLocaleTimeString('th-TH');
+    } else {
+      throw new Error(result.message || 'Sync failed');
+    }
+  } catch(e) {
+    showToast('❌ Sync ล้มเหลว: ' + e.message, 'error');
+    document.getElementById('apiDot').className = 'dot dot-red';
+    document.getElementById('apiStatusText').textContent = 'Sync ล้มเหลว';
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
