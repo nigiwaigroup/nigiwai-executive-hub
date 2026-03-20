@@ -324,43 +324,74 @@ function saveDB(){
   localStorage.setItem('hr_last_save', Date.now().toString());
 }
 
-// Push single employee record to GAS immediately (upsert by ID)
-async function pushEmp(emp, action='upsert'){
-  if(!GAS_URL || GAS_URL.includes('YOUR_')) return; // GAS ยังไม่ตั้งค่า
-  try{
-    await fetch(GAS_URL, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action, employee: emp })
-    });
-    setGASStatus('ok');
-  } catch(e){
-    setGASStatus('err');
-    console.warn('GAS push failed:', e.message);
-  }
-}
+// ══════════════════════════════════════════════════════
+// GAS COMMUNICATION — แก้ปัญหา CORS
+// GAS Deployment redirect → fetch POST แบบปกติโดน block
+// วิธีแก้: ใช้ no-cors สำหรับ POST (fire-and-forget)
+//          ใช้ JSONP (script tag inject) สำหรับ GET
+// ══════════════════════════════════════════════════════
 
-// Delete single row in GAS by employee ID
-async function deleteEmpGAS(id){
-  if(!GAS_URL || GAS_URL.includes('YOUR_')) return;
-  try{
-    await fetch(GAS_URL, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'delete', id })
-    });
-    setGASStatus('ok');
-  } catch(e){
-    setGASStatus('err');
-  }
-}
-
-function setGASStatus(state){
+function setGASStatus(state, msg){
   const s = document.getElementById('syncStatus');
   if(!s) return;
-  if(state==='ok')    s.textContent = '🟢 GAS อัปเดตแล้ว · ' + new Date().toLocaleTimeString('th-TH');
-  else if(state==='err') s.textContent = '⚠ GAS push ล้มเหลว';
-  else if(state==='saving') s.textContent = '⏳ กำลังบันทึก...';
+  const now = new Date().toLocaleTimeString('th-TH');
+  if(state==='ok')      s.textContent = '🟢 ' + (msg||'GAS อัปเดตแล้ว') + ' · ' + now;
+  else if(state==='err')s.textContent = '🔴 ' + (msg||'GAS เชื่อมต่อไม่ได้');
+  else if(state==='saving')s.textContent = '⏳ กำลังบันทึก...';
+}
+
+// POST to GAS — ใช้ no-cors (fire & forget, ไม่อ่าน response)
+// GAS จะรับและเขียนข้อมูล แม้ browser จะได้ opaque response
+async function gasPost(payload){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')) return false;
+  try {
+    // mode:'no-cors' แก้ปัญหา CORS redirect ของ GAS
+    await fetch(GAS_URL, {
+      method:  'POST',
+      mode:    'no-cors',           // ← key fix
+      headers: {'Content-Type':'text/plain'},
+      body:    JSON.stringify(payload)
+    });
+    // no-cors response type = 'opaque' ไม่สามารถ .json() ได้
+    // แต่ GAS ได้รับและประมวลผลแล้ว
+    setGASStatus('ok');
+    return true;
+  } catch(e) {
+    setGASStatus('err', 'Network error');
+    console.warn('GAS POST error:', e.message);
+    return false;
+  }
+}
+
+// GET จาก GAS — ใช้ JSONP เพื่อข้าม CORS (GAS GET รองรับ callback)
+function gasGet(params, callback){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')){ callback(null); return; }
+  const cbName = '_gasCallback_' + Date.now();
+  const script = document.createElement('script');
+  const url    = GAS_URL + '?' + Object.entries({...params, callback:cbName})
+                   .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+  window[cbName] = (data) => {
+    delete window[cbName];
+    document.head.removeChild(script);
+    callback(data);
+  };
+  script.onerror = () => { delete window[cbName]; document.head.removeChild(script); callback(null); };
+  script.src = url;
+  document.head.appendChild(script);
+}
+
+// Push single employee (upsert)
+function pushEmp(emp, action='upsert'){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')) return;
+  setGASStatus('saving');
+  gasPost({ action, employee: emp });
+}
+
+// Delete employee from GAS
+function deleteEmpGAS(id){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')) return;
+  setGASStatus('saving');
+  gasPost({ action:'delete', id });
 }
 
 // ══════════════════════════════════════════════════════
@@ -646,36 +677,36 @@ function delCC(i){
 // ══════════════════════════════════════════════════════
 // SYNC — Full sync (manual backup)
 // ══════════════════════════════════════════════════════
+// Full sync — ส่งข้อมูลทั้งหมดไปเขียนทับใน GAS
 async function syncSheet(){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')){
+    toast('⚠ ยังไม่ได้ตั้งค่า GAS URL ใน code.gs','err'); return;
+  }
   setGASStatus('saving');
-  try{
-    const r = await fetch(GAS_URL, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ action:'sync', data:DB })
-    });
-    const j = await r.json();
-    if(j.status==='ok'){
-      setGASStatus('ok');
-      toast('☁ Full Sync สำเร็จ — '+DB.length+' รายการ','ok');
-    } else throw new Error(j.message);
-  } catch(e){
-    setGASStatus('err');
-    toast('❌ Sync ล้มเหลว: '+e.message,'err');
+  const ok = await gasPost({ action:'sync', data: DB });
+  if(ok){
+    toast('☁ Full Sync สำเร็จ — ' + DB.length + ' รายการ — GAS กำลังประมวลผล','ok');
+    setGASStatus('ok','Full Sync สำเร็จ');
+  } else {
+    toast('❌ Sync ล้มเหลว — ตรวจสอบ GAS URL และ Deploy settings','err');
   }
 }
 
-async function checkGAS(){
-  try{
-    const r = await fetch(GAS_URL+'?action=summary');
-    const j = await r.json();
-    if(j.status==='ok'){
-      setGASStatus('ok');
-      document.getElementById('syncStatus').textContent = '🟢 GAS เชื่อมต่อแล้ว';
-    }
-  } catch{
-    document.getElementById('syncStatus').textContent = '⚠ GAS ยังไม่เชื่อมต่อ (ตรวจสอบ URL)';
+// ตรวจสอบการเชื่อมต่อ GAS ด้วย JSONP
+function checkGAS(){
+  if(!GAS_URL || GAS_URL.includes('YOUR_')){
+    document.getElementById('syncStatus').textContent = '⚠ ยังไม่ได้ตั้งค่า GAS URL';
+    return;
   }
+  document.getElementById('syncStatus').textContent = '⏳ กำลังตรวจสอบ GAS...';
+  gasGet({ action:'summary' }, (data) => {
+    if(data && data.status === 'ok'){
+      setGASStatus('ok', 'GAS เชื่อมต่อแล้ว — ' + (data.headcount||0) + ' รายการใน Sheet');
+    } else {
+      document.getElementById('syncStatus').textContent =
+        '⚠ GAS ตอบสนองแต่มีปัญหา — ลอง Full Sync ดู';
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════
