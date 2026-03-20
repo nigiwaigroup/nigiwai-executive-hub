@@ -345,40 +345,67 @@ function setGASStatus(state, msg){
 // GAS doGet จะ parse และเขียน Sheet ตาม payload.action
 function gasCall(payload, onSuccess, onError){
   if(!GAS_URL || GAS_URL.includes('YOUR_')){
-    if(onError) onError('GAS URL ยังไม่ได้ตั้งค่า');
-    return;
+    toast('⚠ ยังไม่ได้ตั้งค่า GAS URL ใน code','err');
+    if(onError) onError('no-url'); return;
   }
-  const cbName = '_gas_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  const script = document.createElement('script');
-  let   done   = false;
+
+  const cbName  = '_gas_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const script  = document.createElement('script');
+  let   done    = false;
+  let   timer   = null;
 
   const cleanup = () => {
     done = true;
+    clearTimeout(timer);
     delete window[cbName];
-    if(script.parentNode) script.parentNode.removeChild(script);
+    try{ if(script.parentNode) script.parentNode.removeChild(script); }catch(e){}
   };
 
+  // GAS callback — เรียกเมื่อ GAS ตอบกลับสำเร็จ
   window[cbName] = (res) => {
     cleanup();
-    if(res && res.status === 'ok'){ setGASStatus('ok'); if(onSuccess) onSuccess(res); }
-    else { setGASStatus('err', res && res.message); if(onError) onError(res); }
+    console.log('[GAS]', payload.action, res);
+    if(res && res.status === 'ok'){
+      setGASStatus('ok');
+      if(onSuccess) onSuccess(res);
+    } else {
+      const msg = (res && res.message) || 'Unknown error';
+      setGASStatus('err', msg);
+      toast('⚠ GAS Error: ' + msg, 'err');
+      if(onError) onError(res);
+    }
   };
 
-  // timeout 15 วินาที
-  const timer = setTimeout(() => {
-    if(!done){ cleanup(); setGASStatus('err','Timeout — GAS ไม่ตอบสนอง'); if(onError) onError('timeout'); }
-  }, 15000);
+  // Timeout 20 วินาที
+  timer = setTimeout(() => {
+    if(!done){
+      cleanup();
+      setGASStatus('err','GAS Timeout');
+      toast('⚠ GAS Timeout — ตรวจสอบ Deploy URL และ Who has access = Anyone','err');
+      if(onError) onError('timeout');
+    }
+  }, 20000);
 
+  // script.onerror — ถ้าโหลดไม่ได้ (URL ผิด หรือ network ขาด)
   script.onerror = () => {
-    clearTimeout(timer); cleanup();
+    cleanup();
     setGASStatus('err','Script load error');
-    if(onError) onError('script error');
+    toast('⚠ ไม่สามารถเชื่อมต่อ GAS ได้ — ตรวจสอบ URL','err');
+    if(onError) onError('load-error');
   };
 
-  // encode payload เป็น JSON แล้วส่งใน URL parameter
-  const dataParam = encodeURIComponent(JSON.stringify(payload));
-  script.src = GAS_URL + '?callback=' + cbName + '&data=' + dataParam;
-  document.head.appendChild(script);
+  // สร้าง URL: GAS_URL?callback=CBNAME&data=PAYLOAD_JSON
+  try{
+    const dataParam = encodeURIComponent(JSON.stringify(payload));
+    const url = GAS_URL + '?callback=' + encodeURIComponent(cbName) + '&data=' + dataParam;
+    console.log('[GAS] calling action:', payload.action, '| URL length:', url.length);
+    script.src = url;
+    document.head.appendChild(script);
+  } catch(e){
+    cleanup();
+    setGASStatus('err', e.message);
+    if(onError) onError(e.message);
+  }
 }
 
 // Push employee (upsert) → GAS เขียน/อัปเดต row นั้น
@@ -739,11 +766,20 @@ function checkGAS(){
     document.getElementById('syncStatus').textContent = '⚠ ยังไม่ได้ตั้งค่า GAS URL';
     return;
   }
-  document.getElementById('syncStatus').textContent = '⏳ กำลังตรวจสอบ...';
+  document.getElementById('syncStatus').textContent = '⏳ กำลังตรวจสอบ GAS...';
   gasCall(
     { action:'ping' },
-    (res) => setGASStatus('ok', 'GAS เชื่อมต่อแล้ว' + (res.headcount ? ' — '+res.headcount+' รายการ' : '')),
-    ()    => document.getElementById('syncStatus').textContent = '⚠ GAS ตอบสนองตัวเอง — ลอง Full Sync'
+    (res) => {
+      const hc = res.headcount || 0;
+      setGASStatus('ok', 'GAS พร้อมใช้งาน' + (hc ? ' — '+hc+' รายการใน Sheet' : ' (Sheet ว่าง)'));
+    },
+    (err) => {
+      if(err === 'timeout'){
+        document.getElementById('syncStatus').textContent = '🔴 GAS Timeout — ตรวจสอบ: 1) URL ถูกต้อง 2) Deploy → Who has access = Anyone 3) Re-deploy';
+      } else {
+        document.getElementById('syncStatus').textContent = '🔴 GAS Error: ' + err + ' — ลอง Deploy ใหม่';
+      }
+    }
   );
 }
 
@@ -755,6 +791,36 @@ function switchTab(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════
+// DEBUG
+// ══════════════════════════════════════════════════════
+function runDebug(){
+  const lines = [];
+  lines.push('=== Nigiwai HR Admin Debug ===');
+  lines.push('GAS URL: ' + (GAS_URL && !GAS_URL.includes('YOUR_') ? GAS_URL.substring(0,60)+'...' : '❌ ไม่ได้ตั้งค่า'));
+  lines.push('DB records: ' + DB.length);
+  lines.push('LocalStorage hr_db: ' + (localStorage.getItem('hr_db') ? 'มีข้อมูล (' + JSON.parse(localStorage.getItem('hr_db')).length + ' คน)' : 'ว่าง'));
+  lines.push('Last save: ' + (localStorage.getItem('hr_last_save') ? new Date(+localStorage.getItem('hr_last_save')).toLocaleString('th-TH') : 'ไม่มี'));
+  lines.push('');
+  lines.push('--- ทดสอบ GAS ping (ดู Console สำหรับผล) ---');
+  lines.push('เปิด DevTools (F12) → Console แล้วกด Test GAS');
+  lines.push('');
+  lines.push('--- Checklist ---');
+  lines.push('□ code.gs Deploy ใหม่แล้ว (New version)?');
+  lines.push('□ Who has access = Anyone (ไม่ใช่ Anyone with Google Account)?');
+  lines.push('□ URL ขึ้นต้น https://script.google.com/macros/s/');
+  lines.push('□ URL ลงท้าย /exec (ไม่ใช่ /dev)?');
+
+  alert(lines.join('
+'));
+
+  // Test call
+  console.log('[DEBUG] GAS_URL:', GAS_URL);
+  console.log('[DEBUG] DB.length:', DB.length);
+  console.log('[DEBUG] Testing ping...');
+  checkGAS();
 }
 
 // ══════════════════════════════════════════════════════
