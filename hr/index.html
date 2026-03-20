@@ -33,13 +33,12 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
 .section-card { background: #fff; border-radius: 10px; border: 1px solid #e8ecf2; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .section-title { font-size: 12.5px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 
-.hbar-row { display: grid; grid-template-columns: 220px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hbar-row { display: grid; grid-template-columns: 1fr 180px 52px; align-items: center; gap: 10px; margin-bottom: 8px; }
 .hbar-label { font-size: 11.5px; color: #3a4460; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hbar-track { background: #f0f2f8; border-radius: 3px; height: 20px; overflow: hidden; }
 .hbar-fill { height: 100%; border-radius: 3px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
 .hbar-count { font-size: 11.5px; font-weight: 600; color: #3a4460; text-align: right; }
-
-.ibar-row { display: grid; grid-template-columns: 220px 1fr 90px; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ibar-row { display: grid; grid-template-columns: 1fr 180px 100px; align-items: center; gap: 10px; margin-bottom: 8px; }
 .ibar-val { font-size: 11.5px; font-weight: 600; color: #1a1a2e; text-align: right; }
 
 .legend-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f2f5; }
@@ -67,9 +66,6 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
 
 .ctrl-input { border: 1px solid #dde1ea; border-radius: 7px; padding: 6px 11px; font-family: inherit; font-size: 12px; color: #2d3a50; outline: none; transition: border-color 0.2s; background: #fff; }
 .ctrl-input:focus { border-color: #2563eb; }
-
-.page-btn { border: 1px solid #dde1ea; background: #fff; padding: 5px 10px; border-radius: 6px; font-size: 11.5px; cursor: pointer; color: #3a4460; transition: all 0.15s; }
-.page-btn:hover, .page-btn.active { background: #2563eb; color: #fff; border-color: #2563eb; }
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 .fade-up { animation: fadeUp 0.35s ease forwards; }
@@ -102,59 +98,50 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
 
 <!-- ══ TAB: ภาพรวม ══════════════════════════════════════ -->
 <div id="tab-overview" class="tab-content active">
-  <div class="page-header">
-    <span style="font-size:18px">🏢</span>
-    <h1>ภาพรวมองค์กร</h1>
-  </div>
+  <div class="page-header"><span style="font-size:18px">🏢</span><h1>ภาพรวมองค์กร</h1></div>
   <div style="padding:16px 20px;">
-
-    <!-- KPI ROW 1 -->
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;">
       <div class="stat-card fade-up" style="border-top:3px solid #2563eb;">
         <div class="stat-label">👥 Headcount รวม</div>
-        <div class="stat-value" style="color:#2563eb">53</div>
+        <div class="stat-value" style="color:#2563eb" id="kpi-hc">53</div>
         <div class="stat-sub">Total H/C</div>
       </div>
       <div class="stat-card fade-up" style="border-top:3px solid #f59e0b;animation-delay:.05s">
         <div class="stat-label">📋 ปรับ #01/26</div>
-        <div class="stat-value" style="color:#f59e0b">16</div>
-        <div class="stat-sub">30.2% ของพนักงานทั้งหมด</div>
+        <div class="stat-value" style="color:#f59e0b" id="kpi-adj">16</div>
+        <div class="stat-sub" id="kpi-adj-pct">30.2% ของพนักงานทั้งหมด</div>
       </div>
       <div class="stat-card fade-up" style="border-top:3px solid #8b5cf6;animation-delay:.1s">
         <div class="stat-label">🔄 โยกย้าย</div>
-        <div class="stat-value" style="color:#8b5cf6">17</div>
+        <div class="stat-value" style="color:#8b5cf6" id="kpi-mob">17</div>
         <div class="stat-sub">Internal Mobility</div>
       </div>
       <div class="stat-card fade-up" style="border-top:3px solid #10b981;animation-delay:.15s">
         <div class="stat-label">🏗 Cost Centers</div>
-        <div class="stat-value" style="color:#10b981">8</div>
+        <div class="stat-value" style="color:#10b981" id="kpi-cc">8</div>
         <div class="stat-sub">กลุ่มบริษัท</div>
       </div>
       <div class="stat-card fade-up" style="border-top:3px solid #ec4899;animation-delay:.2s">
-        <div class="stat-label">💵 ขยพื้น</div>
-        <div class="stat-value" style="color:#ec4899;font-size:22px">23,139</div>
-        <div class="stat-sub">บาท/เดือน (รวมนับรับ)</div>
-      </div>
-    </div>
-
-    <!-- KPI ROW 2 — รายได้รวม -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-      <div class="stat-card fade-up" style="animation-delay:.05s">
-        <div class="stat-label">📆 รายได้รวม ปี 68</div>
-        <div style="font-size:26px;font-weight:800;color:#3b82f6;letter-spacing:-0.5px">1,610,045</div>
+        <div class="stat-label">💵 รายได้เฉลี่ย/คน</div>
+        <div class="stat-value" style="color:#ec4899;font-size:22px" id="kpi-avg">30.5K</div>
         <div class="stat-sub">บาท/เดือน</div>
       </div>
-      <div class="stat-card fade-up" style="animation-delay:.1s">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div class="stat-card fade-up">
+        <div class="stat-label">📆 รายได้รวม ปี 68</div>
+        <div style="font-size:26px;font-weight:800;color:#3b82f6;letter-spacing:-0.5px" id="kpi-inc68">1,610,045</div>
+        <div class="stat-sub">บาท/เดือน</div>
+      </div>
+      <div class="stat-card fade-up" style="animation-delay:.05s">
         <div class="stat-label">📆 รายได้รวม ปี 69</div>
-        <div style="font-size:26px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px">1,618,185</div>
+        <div style="font-size:26px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px" id="kpi-inc69">1,618,185</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
           <div class="stat-sub">บาท/เดือน</div>
-          <span class="stat-badge badge-green">▲ +8,139</span>
+          <span class="stat-badge badge-green" id="kpi-diff">▲ +8,139</span>
         </div>
       </div>
     </div>
-
-    <!-- MAIN GRID -->
     <div style="display:grid;grid-template-columns:1fr 380px;gap:14px;margin-bottom:14px;">
       <div class="section-card fade-up">
         <div class="section-title"><span style="color:#2563eb;margin-right:2px">▌</span> พนักงานตาม COST CENTER (ปัจจุบัน)</div>
@@ -166,7 +153,7 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
           <div style="position:relative;width:180px;height:180px;">
             <canvas id="donutLevel" width="180" height="180"></canvas>
             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;pointer-events:none;">
-              <div style="font-size:22px;font-weight:800;color:#1a1a2e">53</div>
+              <div style="font-size:22px;font-weight:800;color:#1a1a2e" id="donutCenter">53</div>
               <div style="font-size:10px;color:#8896b3;font-weight:500">คน</div>
             </div>
           </div>
@@ -174,8 +161,6 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
         </div>
       </div>
     </div>
-
-    <!-- BOTTOM GRID -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
       <div class="section-card fade-up">
         <div class="section-title"><span style="color:#10b981;margin-right:2px">▌</span> พนักงานตามแผนก</div>
@@ -186,7 +171,6 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
         <div id="incomeBars"></div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -201,25 +185,23 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
           <span style="background:#e8f0ff;color:#2563eb;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600" id="hcCount">53</span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" class="ctrl-input" id="hcSearch" placeholder="🔍 ค้นหา..." style="width:160px">
-          <select class="ctrl-input" id="hcBrandF"><option value="">— Cost Center —</option></select>
-          <select class="ctrl-input" id="hcDeptF"><option value="">— แผนก —</option></select>
-          <select class="ctrl-input" id="hcLevelF"><option value="">— ระดับ —</option></select>
+          <input type="text" class="ctrl-input" id="hcSearch" placeholder="🔍 ค้นหา..." style="width:160px" oninput="filterHC()">
+          <select class="ctrl-input" id="hcBrandF" onchange="filterHC()"><option value="">— Cost Center —</option></select>
+          <select class="ctrl-input" id="hcDeptF" onchange="filterHC()"><option value="">— แผนก —</option></select>
+          <select class="ctrl-input" id="hcLevelF" onchange="filterHC()"><option value="">— ระดับ —</option></select>
+          <button onclick="clearHC()" class="ctrl-input" style="cursor:pointer;padding:6px 10px">✕</button>
         </div>
       </div>
       <div style="overflow-x:auto;border-radius:8px;border:1px solid #e8ecf2;">
         <table class="data-table">
           <thead><tr>
-            <th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th>
-            <th style="text-align:right">ฐานเงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">เพิ่มขึ้น</th>
+            <th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th>
+            <th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">เพิ่มขึ้น</th>
           </tr></thead>
           <tbody id="hcTableBody"></tbody>
         </table>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-        <span style="font-size:11.5px;color:#8896b3" id="hcPageInfo"></span>
-        <div style="display:flex;gap:4px" id="hcPagination"></div>
-      </div>
+      <div style="margin-top:8px;font-size:11.5px;color:#8896b3" id="hcInfo"></div>
     </div>
   </div>
 </div>
@@ -287,177 +269,190 @@ body { font-family: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; backgroun
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════
-const EMPLOYEES = [{"id":"660104","name":"นางสาวสาวิตรี สิงห์เหม้น","nickname":"ทราย","brand":"Kinosuke Group","dept":"Operation","position":"Core Team Supervisor- Level I","level":"Leader and Supervisor","baseSalary68":21000,"baseSalary69":21000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (003 สนามบินภูเก็ต)"},{"id":"670601","name":"นางสาวรัตติกาล สกุลอินทร์","nickname":"โบ","brand":"Kinosuke Group","dept":"Sales","position":"Tele Sale","level":"Officer","baseSalary68":19000,"baseSalary69":19000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ คอนสตรัคชั่น (สำนักงานใหญ่)"},{"id":"681001","name":"นางสาวพรวิไล มีชัย","nickname":"ออน","brand":"Kinosuke Group","dept":"Warehouse & Logistics","position":"Admin Purchasing","level":"Officer","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)"},{"id":"651003","name":"นางสาวกชชลจรรย์ สุทธิกิตติพงศ์","nickname":"เมย์","brand":"Nigiwai Group","dept":"Financial And Account","position":"Acc Supervisor","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":29300,"totalIncome69":30500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650206","name":"นายกฤษฎา จันทร์ฝา","nickname":"ภูมิ","brand":"Nigiwai Group","dept":"Human Resource","position":"Human Resources Supervisor","level":"Leader and Supervisor","baseSalary68":18564,"baseSalary69":19000,"totalIncome68":20064,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650104","name":"นางสาวช้องนาง หินขาว","nickname":"หนูนา","brand":"Nigiwai Group","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":18900,"baseSalary69":19000,"totalIncome68":20900,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660409","name":"นางสาวพานทอง รุ่งอนันต์กุลสิริ","nickname":"ปิงปิง","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level I","level":"Senior Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":26813,"totalIncome69":28400,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (สำนักงานใหญ่)"},{"id":"651101","name":"นางสาวณัฐชานันท์ ธนังชูศิลป์","nickname":"ชามุก","brand":"Nigiwai Group","dept":"Sales","position":"Sales Manager (Acting)","level":"Manager","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":28000,"totalIncome69":28000,"remark":"","brandOld":"","brandNew":""},{"id":"631202","name":"นางสาวสาริศา กมลอรรฆ","nickname":"น้ำ","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level III","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":30500,"totalIncome69":30500,"remark":"","brandOld":"","brandNew":""},{"id":"651201","name":"นางสาวกนกพิชญ์ พิบูลย์","nickname":"ออ","brand":"Nigiwai Group","dept":"Financial And Account","position":"Financial & Account Manager","level":"Manager","baseSalary68":42000,"baseSalary69":42000,"totalIncome68":42000,"totalIncome69":42000,"remark":"","brandOld":"","brandNew":""},{"id":"640502","name":"นายณรุจ พลับศิริ","nickname":"โอ๊ต","brand":"Nigiwai Group","dept":"Marketing","position":"Senior Creative & Content Marketing","level":"Leader and Supervisor","baseSalary68":24980,"baseSalary69":24980,"totalIncome68":24980,"totalIncome69":24980,"remark":"","brandOld":"","brandNew":""},{"id":"650106","name":"นางสาวนัชชา ธนเกริกกวิน","nickname":"ป้อ","brand":"Nigiwai Group","dept":"Sales","position":"After Sales - Level III","level":"Senior Officer","baseSalary68":21800,"baseSalary69":21800,"totalIncome68":25640,"totalIncome69":25640,"remark":"","brandOld":"","brandNew":""},{"id":"640601","name":"นายไกรเจต สมพงษ์","nickname":"คุณเจต","brand":"Nigiwai Group","dept":"Executive","position":"CTO & COO","level":"Chief and Director","baseSalary68":50000,"baseSalary69":50000,"totalIncome68":75000,"totalIncome69":75000,"remark":"","brandOld":"","brandNew":""},{"id":"641103","name":"นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์","nickname":"ไบร์ท","brand":"Nigiwai Group","dept":"Operation","position":"Project Leader","level":"Consultant","baseSalary68":12000,"baseSalary69":12000,"totalIncome68":12000,"totalIncome69":12000,"remark":"","brandOld":"","brandNew":""},{"id":"681101","name":"นายภัทรพล เดือนฉาย","nickname":"ฟัด","brand":"Nigiwai Group","dept":"Human Resource","position":"Senior Recruite","level":"Leader and Supervisor","baseSalary68":27000,"baseSalary69":27000,"totalIncome68":27000,"totalIncome69":27000,"remark":"","brandOld":"","brandNew":""},{"id":"681002","name":"นางสาววิภาวี เรืองจรูญ","nickname":"บิว","brand":"Nigiwai Group","dept":"Human Resource","position":"Recruite Officer","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"610701","name":"นางสาวอรอริยา สุดสุข","nickname":"ออน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"ART Operation- Lv.III","level":"Leader and Supervisor","baseSalary68":28500,"baseSalary69":28500,"totalIncome68":35889,"totalIncome69":37000,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)"},{"id":"660504","name":"นางสาวภัรตรา เพ็ญภู่","nickname":"มะปราง","brand":"Nigiwai Goods Wealth","dept":"Sales","position":"After Sales - Level II","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":18000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"680901","name":"นายณัฐกิจ ต้นโต","nickname":"ที","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"พนักงานขนส่ง","level":"Officer","baseSalary68":13000,"baseSalary69":14000,"totalIncome68":13000,"totalIncome69":15000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"AS670308","name":"นางสาวมณีรัตน์ ธงทอง","nickname":"ผึ้ง","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Production Staff","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":13000,"totalIncome69":14000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"VV660302","name":"นางสาวศิริวรรณ กำรัตน์","nickname":"นิว","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef - Lv.II","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660201","name":"นางสาวธิติญา ปัญญายิ่ง","nickname":"อุ้ม","brand":"Nigiwai Goods Wealth","dept":"Marketing","position":"Graphic Designer - Lv III","level":"Officer","baseSalary68":23690,"baseSalary69":23690,"totalIncome68":23690,"totalIncome69":23690,"remark":"","brandOld":"","brandNew":""},{"id":"610601","name":"นายสุทธิพร ตั้งสกุลสันติ","nickname":"คุณใหม่","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"President & Group CEO","level":"Chief and Director","baseSalary68":180000,"baseSalary69":180000,"totalIncome68":180000,"totalIncome69":180000,"remark":"","brandOld":"","brandNew":""},{"id":"670401","name":"นายพงศธร โชติยะศิลป์","nickname":"แบงค์","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"Chief Financial Officer","level":"Manager","baseSalary68":65000,"baseSalary69":50000,"totalIncome68":65000,"totalIncome69":50000,"remark":"","brandOld":"","brandNew":""},{"id":"650208","name":"นายขวัญวิชัย ไกรงาม","nickname":"ชัย","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Head Chef - Level II","level":"Officer","baseSalary68":27038,"baseSalary69":27038,"totalIncome68":28038,"totalIncome69":28038,"remark":"","brandOld":"","brandNew":""},{"id":"640202","name":"นางสาวคณิตตา จำเริญพงษ์","nickname":"ฝน","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"ART Supply Chain - Level III","level":"Manager","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":33000,"totalIncome69":33000,"remark":"","brandOld":"","brandNew":""},{"id":"670202","name":"นางสาวกัลยรักษ์ ตระกูลอินทร์","nickname":"กุ้ง","brand":"Nigiwai Goods Wealth","dept":"Financial And Account","position":"Senior Accounting Officer","level":"Senior Officer","baseSalary68":24000,"baseSalary69":24000,"totalIncome68":24000,"totalIncome69":24000,"remark":"","brandOld":"","brandNew":""},{"id":"660801","name":"นางสาวฐิติกานต์ รักเมือง","nickname":"หยก","brand":"Nigiwai Construction","dept":"Marketing","position":"Graphic Designer - Lv I","level":"Officer","baseSalary68":15500,"baseSalary69":15500,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660804","name":"นายจิติวัฒน์ อุปวรรณะ","nickname":"นิว","brand":"Nigiwai Construction","dept":"Construction","position":"Senior Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":26000,"totalIncome68":26000,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"670201","name":"นายศักดิ์จรินทร์ ดวงฤทัย","nickname":"เคน","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Support","level":"Officer","baseSalary68":15000,"baseSalary69":16000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660401","name":"นายพิชญา บัวบรรจง","nickname":"พีพี","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Specialist","level":"Leader and Supervisor","baseSalary68":31500,"baseSalary69":31500,"totalIncome68":33705,"totalIncome69":33705,"remark":"","brandOld":"","brandNew":""},{"id":"610602","name":"นายวรันธร แดงใหญ่","nickname":"คุณเก้ง","brand":"Nigiwai Construction","dept":"Executive","position":"CEO","level":"Chief and Director","baseSalary68":120000,"baseSalary69":120000,"totalIncome68":120000,"totalIncome69":120000,"remark":"","brandOld":"","brandNew":""},{"id":"641105","name":"นายอรรถสิทธิ์ สุปัดคำ","nickname":"เก้","brand":"Nigiwai Construction","dept":"Construction","position":"Project Coordinator - Level I","level":"Leader and Supervisor","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"671002","name":"นายนิรันดร์ ดวงสุวรรณ","nickname":"อาร์ท","brand":"Nigiwai Construction","dept":"Executive","position":"Construction Director","level":"Chief and Director","baseSalary68":100000,"baseSalary69":100000,"totalIncome68":100000,"totalIncome69":100000,"remark":"","brandOld":"","brandNew":""},{"id":"671101","name":"นางสาวนุชนารถ แตงอ่อน","nickname":"ถุงแป้ง","brand":"Nigiwai Construction","dept":"Construction","position":"Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"650702","name":"นางสาวอรนิดา แพสถิตถาวร","nickname":"กุ๊ก","brand":"Nigiwai Construction","dept":"Human Resource","position":"House Keeper","level":"Officer","baseSalary68":12360,"baseSalary69":12360,"totalIncome68":12860,"totalIncome69":12860,"remark":"","brandOld":"","brandNew":""},{"id":"631204","name":"นายพงศธร อภัยนุกูล","nickname":"บลู","brand":"Nigiwai Construction","dept":"Marketing","position":"Video Production Supervisor","level":"Leader and Supervisor","baseSalary68":24150,"baseSalary69":24150,"totalIncome68":26150,"totalIncome69":26150,"remark":"","brandOld":"","brandNew":""},{"id":"999901","name":"นายสุวคนธ์ อินทร์ประคอง","nickname":"หมู","brand":"Nigiwai Construction","dept":"Marketing","position":"Digital Marketing Consultant","level":"Consultant","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"641001","name":"นายวีระพจน์ สังเกตุ","nickname":"พจน์","brand":"Nigiwai Construction","dept":"Warehouse & Logistics","position":"Driver & Technician","level":"Officer","baseSalary68":16223,"baseSalary69":16223,"totalIncome68":16223,"totalIncome69":16223,"remark":"","brandOld":"","brandNew":""},{"id":"630601","name":"นางสาวธนภรณ์ ผ่องประทุม","nickname":"เติ้ล","brand":"NGWC HQ","dept":"Marketing","position":"Art Supervisor","level":"Leader and Supervisor","baseSalary68":26383,"baseSalary69":26500,"totalIncome68":29674,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650102","name":"นายวินัย หนองแพ","nickname":"บู๊","brand":"NGWC HQ","dept":"Operation","position":"Executive Chef - Lv.II","level":"Leader and Supervisor","baseSalary68":30000,"baseSalary69":30000,"totalIncome68":36378,"totalIncome69":37500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650207","name":"นางสาวเสาวณี พันสุวรรณ์","nickname":"บี","brand":"NGWC HQ","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":17850,"baseSalary69":19000,"totalIncome68":19743,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650903","name":"นายกันต์ศักย์ ปานมงคล","nickname":"อ้น","brand":"NGWC HQ","dept":"Operation","position":"Quality Control & Audit Manager","level":"Manager","baseSalary68":36050,"baseSalary69":36050,"totalIncome68":36050,"totalIncome69":36050,"remark":"","brandOld":"","brandNew":""},{"id":"660101","name":"นางสาวกรวรรณ สุวรรณพรรค","nickname":"หมวย","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Payable","level":"Officer","baseSalary68":22050,"baseSalary69":22050,"totalIncome68":22050,"totalIncome69":22050,"remark":"","brandOld":"","brandNew":""},{"id":"660503","name":"นายภูรินทร์ บุญวรรณ","nickname":"ก้อนเมฆ","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Receivable","level":"Officer","baseSalary68":18900,"baseSalary69":18900,"totalIncome68":18900,"totalIncome69":18900,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690201","name":"นางสาววัชรินทร์ เกงขุนทด","nickname":"วา","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690202","name":"นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา","nickname":"บอม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690203","name":"นางสาวจิรักษา ภูฆัง","nickname":"แจม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690204","name":"นางสาววัทนวิภา แซ่กั้ว","nickname":"ยุ้ย","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690206","name":"นายธนวิทย์ เชาวนะ","nickname":"ไบร์ท","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690207","name":"นายเริงชัย หมู่แก้ว","nickname":"ต้อม","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":18000,"baseSalary69":18000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690208","name":"นายพลชนะ พันลำภักดิ์","nickname":"เจมส์","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690209","name":"นายแม็ก ซอ เมี๊ยด","nickname":"วัน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":14000,"totalIncome69":14000,"remark":"","brandOld":"","brandNew":""}];
+// ══════════════════════════════════════════════════════════
+// COST CENTER — sync กับ admin.html ผ่าน localStorage
+// ══════════════════════════════════════════════════════════
+const DEFAULT_CC = [
+  { key:'Nigiwai Goods Wealth',  full:'บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)',           color:'#3b82f6' },
+  { key:'Nigiwai Group',         full:'บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)',                   color:'#c9a227' },
+  { key:'Nigiwai Construction',  full:'บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)',            color:'#8b5cf6' },
+  { key:'NGWC HQ',               full:'บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)',                  color:'#10b981' },
+  { key:'NGWC Don Mueang',       full:'บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)',           color:'#f59e0b' },
+  { key:'Kinosuke Group',        full:'บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)',               color:'#ef4444' },
+  { key:'NGWC Phuket',           full:'บริษัท เอ็นจีดับบลิวซี จำกัด (003 สนามบินภูเก็ต)',            color:'#06b6d4' },
+  { key:'Phuket Ocean',          full:'บริษัท ภูเก็ตโอเชี่ยนกรุ๊ป จำกัด (The Oceanic Sportel)',       color:'#84cc16' },
+  { key:'Viang Viet',            full:'บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)',                 color:'#ec4899' },
+  { key:'Andamanda',             full:'บริษัท สุดสาครกรุ๊ป จำกัด (Andamanda)',                        color:'#f97316' },
+];
+// ใช้ข้อมูลจาก localStorage ที่ admin.html บันทึกไว้ (ถ้ามี)
+const CC_LIST = JSON.parse(localStorage.getItem('hr_cc') || 'null') || DEFAULT_CC;
+function ccFull(key)  { return (CC_LIST.find(c=>c.key===key)||{}).full  || key; }
+function ccColor(key) { return (CC_LIST.find(c=>c.key===key)||{}).color || '#6b7a99'; }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// EMPLOYEE DATA — ใช้จาก localStorage ถ้ามี (sync กับ admin)
+// ══════════════════════════════════════════════════════════
+const SEED = [{"id":"660104","name":"นางสาวสาวิตรี สิงห์เหม้น","nickname":"ทราย","brand":"Kinosuke Group","dept":"Operation","position":"Core Team Supervisor- Level I","level":"Leader and Supervisor","baseSalary68":21000,"baseSalary69":21000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (003 สนามบินภูเก็ต)"},{"id":"670601","name":"นางสาวรัตติกาล สกุลอินทร์","nickname":"โบ","brand":"Kinosuke Group","dept":"Sales","position":"Tele Sale","level":"Officer","baseSalary68":19000,"baseSalary69":19000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ คอนสตรัคชั่น (สำนักงานใหญ่)"},{"id":"681001","name":"นางสาวพรวิไล มีชัย","nickname":"ออน","brand":"Kinosuke Group","dept":"Warehouse & Logistics","position":"Admin Purchasing","level":"Officer","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"คินโนะสุเกะ กรุ๊ป (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)"},{"id":"651003","name":"นางสาวกชชลจรรย์ สุทธิกิตติพงศ์","nickname":"เมย์","brand":"Nigiwai Group","dept":"Financial And Account","position":"Acc Supervisor","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":29300,"totalIncome69":30500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650206","name":"นายกฤษฎา จันทร์ฝา","nickname":"ภูมิ","brand":"Nigiwai Group","dept":"Human Resource","position":"Human Resources Supervisor","level":"Leader and Supervisor","baseSalary68":18564,"baseSalary69":19000,"totalIncome68":20064,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650104","name":"นางสาวช้องนาง หินขาว","nickname":"หนูนา","brand":"Nigiwai Group","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":18900,"baseSalary69":19000,"totalIncome68":20900,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660409","name":"นางสาวพานทอง รุ่งอนันต์กุลสิริ","nickname":"ปิงปิง","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level I","level":"Senior Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":26813,"totalIncome69":28400,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)","brandNew":"เอ็นจีดับบลิวซี (สำนักงานใหญ่)"},{"id":"651101","name":"นางสาวณัฐชานันท์ ธนังชูศิลป์","nickname":"ชามุก","brand":"Nigiwai Group","dept":"Sales","position":"Sales Manager (Acting)","level":"Manager","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":28000,"totalIncome69":28000,"remark":"","brandOld":"","brandNew":""},{"id":"631202","name":"นางสาวสาริศา กมลอรรฆ","nickname":"น้ำ","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level III","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":30500,"totalIncome69":30500,"remark":"","brandOld":"","brandNew":""},{"id":"651201","name":"นางสาวกนกพิชญ์ พิบูลย์","nickname":"ออ","brand":"Nigiwai Group","dept":"Financial And Account","position":"Financial & Account Manager","level":"Manager","baseSalary68":42000,"baseSalary69":42000,"totalIncome68":42000,"totalIncome69":42000,"remark":"","brandOld":"","brandNew":""},{"id":"640502","name":"นายณรุจ พลับศิริ","nickname":"โอ๊ต","brand":"Nigiwai Group","dept":"Marketing","position":"Senior Creative & Content Marketing","level":"Leader and Supervisor","baseSalary68":24980,"baseSalary69":24980,"totalIncome68":24980,"totalIncome69":24980,"remark":"","brandOld":"","brandNew":""},{"id":"650106","name":"นางสาวนัชชา ธนเกริกกวิน","nickname":"ป้อ","brand":"Nigiwai Group","dept":"Sales","position":"After Sales - Level III","level":"Senior Officer","baseSalary68":21800,"baseSalary69":21800,"totalIncome68":25640,"totalIncome69":25640,"remark":"","brandOld":"","brandNew":""},{"id":"640601","name":"นายไกรเจต สมพงษ์","nickname":"คุณเจต","brand":"Nigiwai Group","dept":"Executive","position":"CTO & COO","level":"Chief and Director","baseSalary68":50000,"baseSalary69":50000,"totalIncome68":75000,"totalIncome69":75000,"remark":"","brandOld":"","brandNew":""},{"id":"641103","name":"นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์","nickname":"ไบร์ท","brand":"Nigiwai Group","dept":"Operation","position":"Project Leader","level":"Consultant","baseSalary68":12000,"baseSalary69":12000,"totalIncome68":12000,"totalIncome69":12000,"remark":"","brandOld":"","brandNew":""},{"id":"681101","name":"นายภัทรพล เดือนฉาย","nickname":"ฟัด","brand":"Nigiwai Group","dept":"Human Resource","position":"Senior Recruite","level":"Leader and Supervisor","baseSalary68":27000,"baseSalary69":27000,"totalIncome68":27000,"totalIncome69":27000,"remark":"","brandOld":"","brandNew":""},{"id":"681002","name":"นางสาววิภาวี เรืองจรูญ","nickname":"บิว","brand":"Nigiwai Group","dept":"Human Resource","position":"Recruite Officer","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"610701","name":"นางสาวอรอริยา สุดสุข","nickname":"ออน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"ART Operation- Lv.III","level":"Leader and Supervisor","baseSalary68":28500,"baseSalary69":28500,"totalIncome68":35889,"totalIncome69":37000,"remark":"ปรับ #01 03.26","brandOld":"นิกิวาอิ กู๊ดส์ เวลท์ (สำนักงานใหญ่)","brandNew":"นิกิวาอิ กรุ๊ป (สำนักงานใหญ่)"},{"id":"660504","name":"นางสาวภัรตรา เพ็ญภู่","nickname":"มะปราง","brand":"Nigiwai Goods Wealth","dept":"Sales","position":"After Sales - Level II","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":18000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"680901","name":"นายณัฐกิจ ต้นโต","nickname":"ที","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"พนักงานขนส่ง","level":"Officer","baseSalary68":13000,"baseSalary69":14000,"totalIncome68":13000,"totalIncome69":15000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"AS670308","name":"นางสาวมณีรัตน์ ธงทอง","nickname":"ผึ้ง","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Production Staff","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":13000,"totalIncome69":14000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"VV660302","name":"นางสาวศิริวรรณ กำรัตน์","nickname":"นิว","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef - Lv.II","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660201","name":"นางสาวธิติญา ปัญญายิ่ง","nickname":"อุ้ม","brand":"Nigiwai Goods Wealth","dept":"Marketing","position":"Graphic Designer - Lv III","level":"Officer","baseSalary68":23690,"baseSalary69":23690,"totalIncome68":23690,"totalIncome69":23690,"remark":"","brandOld":"","brandNew":""},{"id":"610601","name":"นายสุทธิพร ตั้งสกุลสันติ","nickname":"คุณใหม่","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"President & Group CEO","level":"Chief and Director","baseSalary68":180000,"baseSalary69":180000,"totalIncome68":180000,"totalIncome69":180000,"remark":"","brandOld":"","brandNew":""},{"id":"670401","name":"นายพงศธร โชติยะศิลป์","nickname":"แบงค์","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"Chief Financial Officer","level":"Manager","baseSalary68":65000,"baseSalary69":50000,"totalIncome68":65000,"totalIncome69":50000,"remark":"","brandOld":"","brandNew":""},{"id":"650208","name":"นายขวัญวิชัย ไกรงาม","nickname":"ชัย","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Head Chef - Level II","level":"Officer","baseSalary68":27038,"baseSalary69":27038,"totalIncome68":28038,"totalIncome69":28038,"remark":"","brandOld":"","brandNew":""},{"id":"640202","name":"นางสาวคณิตตา จำเริญพงษ์","nickname":"ฝน","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"ART Supply Chain - Level III","level":"Manager","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":33000,"totalIncome69":33000,"remark":"","brandOld":"","brandNew":""},{"id":"670202","name":"นางสาวกัลยรักษ์ ตระกูลอินทร์","nickname":"กุ้ง","brand":"Nigiwai Goods Wealth","dept":"Financial And Account","position":"Senior Accounting Officer","level":"Senior Officer","baseSalary68":24000,"baseSalary69":24000,"totalIncome68":24000,"totalIncome69":24000,"remark":"","brandOld":"","brandNew":""},{"id":"660801","name":"นางสาวฐิติกานต์ รักเมือง","nickname":"หยก","brand":"Nigiwai Construction","dept":"Marketing","position":"Graphic Designer - Lv I","level":"Officer","baseSalary68":15500,"baseSalary69":15500,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660804","name":"นายจิติวัฒน์ อุปวรรณะ","nickname":"นิว","brand":"Nigiwai Construction","dept":"Construction","position":"Senior Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":26000,"totalIncome68":26000,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"670201","name":"นายศักดิ์จรินทร์ ดวงฤทัย","nickname":"เคน","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Support","level":"Officer","baseSalary68":15000,"baseSalary69":16000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"660401","name":"นายพิชญา บัวบรรจง","nickname":"พีพี","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Specialist","level":"Leader and Supervisor","baseSalary68":31500,"baseSalary69":31500,"totalIncome68":33705,"totalIncome69":33705,"remark":"","brandOld":"","brandNew":""},{"id":"610602","name":"นายวรันธร แดงใหญ่","nickname":"คุณเก้ง","brand":"Nigiwai Construction","dept":"Executive","position":"CEO","level":"Chief and Director","baseSalary68":120000,"baseSalary69":120000,"totalIncome68":120000,"totalIncome69":120000,"remark":"","brandOld":"","brandNew":""},{"id":"641105","name":"นายอรรถสิทธิ์ สุปัดคำ","nickname":"เก้","brand":"Nigiwai Construction","dept":"Construction","position":"Project Coordinator - Level I","level":"Leader and Supervisor","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"671002","name":"นายนิรันดร์ ดวงสุวรรณ","nickname":"อาร์ท","brand":"Nigiwai Construction","dept":"Executive","position":"Construction Director","level":"Chief and Director","baseSalary68":100000,"baseSalary69":100000,"totalIncome68":100000,"totalIncome69":100000,"remark":"","brandOld":"","brandNew":""},{"id":"671101","name":"นางสาวนุชนารถ แตงอ่อน","nickname":"ถุงแป้ง","brand":"Nigiwai Construction","dept":"Construction","position":"Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":""},{"id":"650702","name":"นางสาวอรนิดา แพสถิตถาวร","nickname":"กุ๊ก","brand":"Nigiwai Construction","dept":"Human Resource","position":"House Keeper","level":"Officer","baseSalary68":12360,"baseSalary69":12360,"totalIncome68":12860,"totalIncome69":12860,"remark":"","brandOld":"","brandNew":""},{"id":"631204","name":"นายพงศธร อภัยนุกูล","nickname":"บลู","brand":"Nigiwai Construction","dept":"Marketing","position":"Video Production Supervisor","level":"Leader and Supervisor","baseSalary68":24150,"baseSalary69":24150,"totalIncome68":26150,"totalIncome69":26150,"remark":"","brandOld":"","brandNew":""},{"id":"999901","name":"นายสุวคนธ์ อินทร์ประคอง","nickname":"หมู","brand":"Nigiwai Construction","dept":"Marketing","position":"Digital Marketing Consultant","level":"Consultant","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"641001","name":"นายวีระพจน์ สังเกตุ","nickname":"พจน์","brand":"Nigiwai Construction","dept":"Warehouse & Logistics","position":"Driver & Technician","level":"Officer","baseSalary68":16223,"baseSalary69":16223,"totalIncome68":16223,"totalIncome69":16223,"remark":"","brandOld":"","brandNew":""},{"id":"630601","name":"นางสาวธนภรณ์ ผ่องประทุม","nickname":"เติ้ล","brand":"NGWC HQ","dept":"Marketing","position":"Art Supervisor","level":"Leader and Supervisor","baseSalary68":26383,"baseSalary69":26500,"totalIncome68":29674,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650102","name":"นายวินัย หนองแพ","nickname":"บู๊","brand":"NGWC HQ","dept":"Operation","position":"Executive Chef - Lv.II","level":"Leader and Supervisor","baseSalary68":30000,"baseSalary69":30000,"totalIncome68":36378,"totalIncome69":37500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650207","name":"นางสาวเสาวณี พันสุวรรณ์","nickname":"บี","brand":"NGWC HQ","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":17850,"baseSalary69":19000,"totalIncome68":19743,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":""},{"id":"650903","name":"นายกันต์ศักย์ ปานมงคล","nickname":"อ้น","brand":"NGWC HQ","dept":"Operation","position":"Quality Control & Audit Manager","level":"Manager","baseSalary68":36050,"baseSalary69":36050,"totalIncome68":36050,"totalIncome69":36050,"remark":"","brandOld":"","brandNew":""},{"id":"660101","name":"นางสาวกรวรรณ สุวรรณพรรค","nickname":"หมวย","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Payable","level":"Officer","baseSalary68":22050,"baseSalary69":22050,"totalIncome68":22050,"totalIncome69":22050,"remark":"","brandOld":"","brandNew":""},{"id":"660503","name":"นายภูรินทร์ บุญวรรณ","nickname":"ก้อนเมฆ","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Receivable","level":"Officer","baseSalary68":18900,"baseSalary69":18900,"totalIncome68":18900,"totalIncome69":18900,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690201","name":"นางสาววัชรินทร์ เกงขุนทด","nickname":"วา","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690202","name":"นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา","nickname":"บอม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690203","name":"นางสาวจิรักษา ภูฆัง","nickname":"แจม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690204","name":"นางสาววัทนวิภา แซ่กั้ว","nickname":"ยุ้ย","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690206","name":"นายธนวิทย์ เชาวนะ","nickname":"ไบร์ท","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690207","name":"นายเริงชัย หมู่แก้ว","nickname":"ต้อม","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":18000,"baseSalary69":18000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690208","name":"นายพลชนะ พันลำภักดิ์","nickname":"เจมส์","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":""},{"id":"NBD690209","name":"นายแม็ก ซอ เมี๊ยด","nickname":"วัน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":14000,"totalIncome69":14000,"remark":"","brandOld":"","brandNew":""}];
+
+// อ่านจาก localStorage ก่อน (ถ้า admin แก้ไขแล้ว) ไม่งั้นใช้ SEED
+const EMPLOYEES = JSON.parse(localStorage.getItem('hr_db') || 'null') || SEED;
+
+// ══════════════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════
-const BRAND_FULL = {
-  'Nigiwai Goods Wealth': 'บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)',
-  'Nigiwai Group':        'บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)',
-  'Nigiwai Construction': 'บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่...)',
-  'NGWC HQ':              'บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)',
-  'NGWC Don Mueang':      'บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง...)',
-  'Kinosuke Group':       'บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)',
-};
-function groupBy(arr, key) { return arr.reduce((a, i) => { const k = i[key]||'Unknown'; if (!a[k]) a[k]=[]; a[k].push(i); return a; }, {}); }
-function sumBy(arr, key) { return arr.reduce((s, i) => s + (i[key]||0), 0); }
-function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+// ══════════════════════════════════════════════════════════
+function groupBy(arr,key){ return arr.reduce((a,i)=>{const k=i[key]||'?';if(!a[k])a[k]=[];a[k].push(i);return a;},{}); }
+function sumBy(arr,key){ return arr.reduce((s,i)=>s+(i[key]||0),0); }
+function fmt(n){ return Math.round(n).toLocaleString('th-TH'); }
 
-const brandGroups = groupBy(EMPLOYEES, 'brand');
-const deptGroups  = groupBy(EMPLOYEES, 'dept');
-const levelGroups = groupBy(EMPLOYEES, 'level');
+const brandGroups = groupBy(EMPLOYEES,'brand');
+const deptGroups  = groupBy(EMPLOYEES,'dept');
+const levelGroups = groupBy(EMPLOYEES,'level');
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// KPI CARDS
+// ══════════════════════════════════════════════════════════
+const adj = EMPLOYEES.filter(e=>e.totalIncome69>e.totalIncome68);
+const inc68 = sumBy(EMPLOYEES,'totalIncome68');
+const inc69 = sumBy(EMPLOYEES,'totalIncome69');
+document.getElementById('kpi-hc').textContent    = EMPLOYEES.length;
+document.getElementById('kpi-adj').textContent   = adj.length;
+document.getElementById('kpi-adj-pct').textContent = (adj.length/EMPLOYEES.length*100).toFixed(1)+'% ของพนักงานทั้งหมด';
+document.getElementById('kpi-cc').textContent    = [...new Set(EMPLOYEES.map(e=>e.brand))].length;
+document.getElementById('kpi-avg').textContent   = (inc69/EMPLOYEES.length/1000).toFixed(1)+'K';
+document.getElementById('kpi-inc68').textContent = fmt(inc68);
+document.getElementById('kpi-inc69').textContent = fmt(inc69);
+const diff69 = inc69-inc68;
+document.getElementById('kpi-diff').textContent  = (diff69>=0?'▲ +':'▼ ')+fmt(Math.abs(diff69));
+document.getElementById('donutCenter').textContent = EMPLOYEES.length;
+
+// ══════════════════════════════════════════════════════════
 // HORIZONTAL BARS
-// ═══════════════════════════════════════════════
-function buildBars(id, data, color, isIncome) {
-  const el = document.getElementById(id); if (!el) return;
-  const max = Math.max(...data.map(d => d.val));
-  el.innerHTML = data.map(d => {
-    const pct = max > 0 ? (d.val / max * 100) : 0;
+// ══════════════════════════════════════════════════════════
+function buildBars(id, data, colorFn, isIncome){
+  const el=document.getElementById(id); if(!el) return;
+  const max=Math.max(...data.map(d=>d.val));
+  el.innerHTML = data.map(d=>{
+    const pct=max>0?(d.val/max*100):0;
+    const c=colorFn(d);
     return isIncome
-      ? `<div class="ibar-row">
-          <div class="hbar-label" title="${d.label}">${d.label}</div>
-          <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${color}"></div></div>
-          <div class="ibar-val">฿${fmt(d.val)}</div>
-         </div>`
-      : `<div class="hbar-row">
-          <div class="hbar-label" title="${d.label}">${d.label}</div>
-          <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${color}"></div></div>
-          <div class="hbar-count">${d.val} คน</div>
-         </div>`;
+      ? `<div class="ibar-row"><div class="hbar-label" title="${d.label}">${d.label}</div><div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${c}"></div></div><div class="ibar-val">฿${fmt(d.val)}</div></div>`
+      : `<div class="hbar-row"><div class="hbar-label" title="${d.label}">${d.label}</div><div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${c}"></div></div><div class="hbar-count">${d.val} คน</div></div>`;
   }).join('');
 }
 
-// Cost Center bars
-const ccData = Object.entries(brandGroups).map(([b, emps]) => ({ label: BRAND_FULL[b]||b, val: emps.length })).sort((a,b)=>b.val-a.val);
-buildBars('costCenterBars', ccData, '#2563eb', false);
+// Cost Center bars — ชื่อเต็ม
+const ccData = Object.entries(brandGroups).map(([b,emps])=>({label:ccFull(b),val:emps.length,key:b})).sort((a,b)=>b.val-a.val);
+buildBars('costCenterBars', ccData, d=>ccColor(d.key), false);
 
-// Dept bars
-const deptData = Object.entries(deptGroups).map(([d, emps]) => ({ label: d, val: emps.length })).sort((a,b)=>b.val-a.val);
-buildBars('deptBars', deptData, '#10b981', false);
+const deptData = Object.entries(deptGroups).map(([d,emps])=>({label:d,val:emps.length})).sort((a,b)=>b.val-a.val);
+buildBars('deptBars', deptData, ()=>'#10b981', false);
 
-// Income bars
-const incomeData = Object.entries(brandGroups).map(([b, emps]) => ({ label: BRAND_FULL[b]||b, val: sumBy(emps,'totalIncome69') })).sort((a,b)=>b.val-a.val);
-buildBars('incomeBars', incomeData, '#f59e0b', true);
+const incData = Object.entries(brandGroups).map(([b,emps])=>({label:ccFull(b),val:sumBy(emps,'totalIncome69'),key:b})).sort((a,b)=>b.val-a.val);
+buildBars('incomeBars', incData, d=>ccColor(d.key), true);
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // DONUT — LEVEL
-// ═══════════════════════════════════════════════
-const LEVEL_COLORS = { 'Officer':'#2563eb','Leader and Supervisor':'#8b5cf6','Manager':'#10b981','Chief and Director':'#ef4444','Senior Officer':'#f59e0b','Consultant':'#ec4899' };
+// ══════════════════════════════════════════════════════════
+const LEVEL_COLORS = {'Officer':'#2563eb','Leader and Supervisor':'#8b5cf6','Manager':'#10b981','Chief and Director':'#ef4444','Senior Officer':'#f59e0b','Consultant':'#ec4899'};
 const lOrder = ['Officer','Leader and Supervisor','Manager','Chief and Director','Senior Officer','Consultant'];
-const lLabels = lOrder.filter(l => levelGroups[l]);
-const lCounts = lLabels.map(l => levelGroups[l]?.length || 0);
+const lLabels = lOrder.filter(l=>levelGroups[l]);
+const lCounts = lLabels.map(l=>levelGroups[l]?.length||0);
 
-new Chart(document.getElementById('donutLevel'), {
-  type: 'doughnut',
-  data: { labels: lLabels, datasets: [{ data: lCounts, backgroundColor: lLabels.map(l=>LEVEL_COLORS[l]||'#6b7a99'), borderWidth:2, borderColor:'#fff' }] },
-  options: { cutout:'68%', plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed} คน` } } } }
+new Chart(document.getElementById('donutLevel'),{
+  type:'doughnut',
+  data:{labels:lLabels,datasets:[{data:lCounts,backgroundColor:lLabels.map(l=>LEVEL_COLORS[l]||'#6b7a99'),borderWidth:2,borderColor:'#fff'}]},
+  options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} คน`}}}}
 });
 
-document.getElementById('levelLegend').innerHTML = lLabels.map((l, i) => `
+document.getElementById('levelLegend').innerHTML = lLabels.map((l,i)=>`
   <div class="legend-row">
     <div class="legend-dot" style="background:${LEVEL_COLORS[l]}"></div>
     <div class="legend-label">${l}</div>
     <div class="legend-val">${lCounts[i]} <span style="color:#8896b3;font-weight:400">(${Math.round(lCounts[i]/EMPLOYEES.length*100)}%)</span></div>
   </div>`).join('');
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // TAB SWITCHING
-// ═══════════════════════════════════════════════
-function switchTab(name, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+// ══════════════════════════════════════════════════════════
+function switchTab(name,el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
   el.classList.add('active');
-  if (name==='headcount') initHC();
-  if (name==='payroll') initPayroll();
-  if (name==='distribution') initDist();
-  if (name==='mobility') initMobility();
+  if(name==='headcount') initHC();
+  if(name==='payroll') initPayroll();
+  if(name==='distribution') initDist();
+  if(name==='mobility') initMobility();
 }
 
-// ═══════════════════════════════════════════════
-// TAB: HEADCOUNT
-// ═══════════════════════════════════════════════
-let hcPage=1, hcFiltered=[...EMPLOYEES], hcReady=false;
-const HC_PG = 15;
-function initHC() {
-  if (!hcReady) {
-    hcReady = true;
-    const bf=document.getElementById('hcBrandF'), df=document.getElementById('hcDeptF'), lf=document.getElementById('hcLevelF');
-    [...new Set(EMPLOYEES.map(e=>e.brand))].sort().forEach(b=>bf.innerHTML+=`<option value="${b}">${b}</option>`);
+// ══════════════════════════════════════════════════════════
+// TAB: HEADCOUNT — แสดงทั้งหมด ไม่ Split
+// ══════════════════════════════════════════════════════════
+let hcFiltered=[...EMPLOYEES], hcReady=false;
+function initHC(){
+  if(!hcReady){
+    hcReady=true;
+    const bf=document.getElementById('hcBrandF'),df=document.getElementById('hcDeptF'),lf=document.getElementById('hcLevelF');
+    // ใช้ชื่อเต็มใน dropdown
+    [...new Set(EMPLOYEES.map(e=>e.brand))].sort().forEach(b=>bf.innerHTML+=`<option value="${b}">${ccFull(b)}</option>`);
     [...new Set(EMPLOYEES.map(e=>e.dept))].sort().forEach(d=>df.innerHTML+=`<option value="${d}">${d}</option>`);
     [...new Set(EMPLOYEES.map(e=>e.level))].sort().forEach(l=>lf.innerHTML+=`<option value="${l}">${l}</option>`);
-    document.getElementById('hcSearch').addEventListener('input', filterHC);
-    bf.addEventListener('change', filterHC);
-    df.addEventListener('change', filterHC);
-    lf.addEventListener('change', filterHC);
   }
   renderHC();
 }
-function filterHC() {
+function filterHC(){
   const q=document.getElementById('hcSearch').value.toLowerCase();
   const b=document.getElementById('hcBrandF').value;
   const d=document.getElementById('hcDeptF').value;
   const l=document.getElementById('hcLevelF').value;
-  hcFiltered = EMPLOYEES.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.position.toLowerCase().includes(q))&&(!b||e.brand===b)&&(!d||e.dept===d)&&(!l||e.level===l));
-  hcPage=1; renderHC();
+  hcFiltered=EMPLOYEES.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.position.toLowerCase().includes(q)||e.nickname.toLowerCase().includes(q))&&(!b||e.brand===b)&&(!d||e.dept===d)&&(!l||e.level===l));
+  renderHC();
 }
-function lvlBadge(l) {
+function clearHC(){ document.getElementById('hcSearch').value=''; document.getElementById('hcBrandF').value=''; document.getElementById('hcDeptF').value=''; document.getElementById('hcLevelF').value=''; filterHC(); }
+
+function lvlBadge(l){
   const m={'Officer':'lvl-officer','Leader and Supervisor':'lvl-leader','Manager':'lvl-manager','Chief and Director':'lvl-chief','Senior Officer':'lvl-senior','Consultant':'lvl-consultant'};
   return `<span class="lvl-badge ${m[l]||'lvl-officer'}">${l}</span>`;
 }
-function renderHC() {
-  const total=hcFiltered.length, pages=Math.max(1,Math.ceil(total/HC_PG));
-  hcPage=Math.min(hcPage,pages);
-  const s=(hcPage-1)*HC_PG, slice=hcFiltered.slice(s,s+HC_PG);
-  document.getElementById('hcCount').textContent=total;
-  document.getElementById('hcPageInfo').textContent=`แสดง ${s+1}–${Math.min(s+HC_PG,total)} จาก ${total} รายการ`;
-  document.getElementById('hcTableBody').innerHTML = slice.map(e=>{
+function renderHC(){
+  document.getElementById('hcCount').textContent=hcFiltered.length;
+  document.getElementById('hcInfo').textContent=`แสดงทั้งหมด ${hcFiltered.length} รายการ`;
+  document.getElementById('hcTableBody').innerHTML=hcFiltered.map((e,i)=>{
     const diff=e.totalIncome69-e.totalIncome68;
     return `<tr>
+      <td style="color:#8896b3">${i+1}</td>
       <td style="color:#8896b3;font-size:11px">${e.id}</td>
       <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
-      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brand}</td>
+      <td style="font-size:11px;color:${ccColor(e.brand)};font-weight:600" title="${ccFull(e.brand)}">${ccFull(e.brand)}</td>
       <td style="font-size:11.5px">${e.dept}</td>
       <td style="font-size:11.5px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
       <td>${lvlBadge(e.level)}</td>
       <td style="text-align:right">฿${fmt(e.baseSalary69)}</td>
       <td style="text-align:right;font-weight:600">฿${fmt(e.totalIncome69)}</td>
-      <td style="text-align:right;color:${diff>0?'#12a05c':diff<0?'#dc2626':'#8896b3'}">${diff>0?'+฿'+fmt(diff):diff<0?'-฿'+fmt(Math.abs(diff)):'—'}</td>
+      <td style="text-align:right;font-size:11.5px;color:${diff>0?'#12a05c':diff<0?'#dc2626':'#8896b3'}">${diff>0?'+฿'+fmt(diff):diff<0?'-฿'+fmt(Math.abs(diff)):'—'}</td>
     </tr>`;
   }).join('');
-  const pg=document.getElementById('hcPagination'); pg.innerHTML='';
-  if(pages<=1) return;
-  const add=(lbl,pg2,act)=>{ const b=document.createElement('button'); b.className='page-btn'+(act?' active':''); b.textContent=lbl; b.onclick=()=>{hcPage=pg2;renderHC();}; pg.appendChild(b); };
-  if(hcPage>1) add('←',hcPage-1,false);
-  for(let i=Math.max(1,hcPage-2);i<=Math.min(pages,hcPage+2);i++) add(i,i,i===hcPage);
-  if(hcPage<pages) add('→',hcPage+1,false);
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // TAB: PAYROLL
-// ═══════════════════════════════════════════════
-function initPayroll() {
-  const adj=EMPLOYEES.filter(e=>e.totalIncome69>e.totalIncome68);
-  const totalDiff=adj.reduce((s,e)=>s+(e.totalIncome69-e.totalIncome68),0);
-  const avgDiff=adj.length?totalDiff/adj.length:0;
-  const avgPct=adj.reduce((s,e)=>s+(e.totalIncome68>0?(e.totalIncome69-e.totalIncome68)/e.totalIncome68*100:0),0)/(adj.length||1);
-  document.getElementById('adj_count').textContent=adj.length;
+// ══════════════════════════════════════════════════════════
+function initPayroll(){
+  const adjusted=EMPLOYEES.filter(e=>e.totalIncome69>e.totalIncome68);
+  const totalDiff=adjusted.reduce((s,e)=>s+(e.totalIncome69-e.totalIncome68),0);
+  const avgDiff=adjusted.length?totalDiff/adjusted.length:0;
+  const avgPct=adjusted.reduce((s,e)=>s+(e.totalIncome68>0?(e.totalIncome69-e.totalIncome68)/e.totalIncome68*100:0),0)/(adjusted.length||1);
+  document.getElementById('adj_count').textContent=adjusted.length;
   document.getElementById('adj_total').textContent='+฿'+fmt(totalDiff);
   document.getElementById('adj_avg').textContent='฿'+fmt(avgDiff);
   document.getElementById('adj_pct').textContent=avgPct.toFixed(1)+'%';
-  document.getElementById('adjTableBody').innerHTML=adj.sort((a,b)=>(b.totalIncome69-b.totalIncome68)-(a.totalIncome69-a.totalIncome68)).map(e=>{
+  document.getElementById('adjTableBody').innerHTML=adjusted.sort((a,b)=>(b.totalIncome69-b.totalIncome68)-(a.totalIncome69-a.totalIncome68)).map(e=>{
     const diff=e.totalIncome69-e.totalIncome68;
     const pct=e.totalIncome68>0?(diff/e.totalIncome68*100).toFixed(1):'—';
     return `<tr>
       <td style="color:#8896b3;font-size:11px">${e.id}</td>
       <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
-      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brand}</td>
+      <td style="font-size:11px;color:${ccColor(e.brand)};font-weight:600">${ccFull(e.brand)}</td>
       <td style="font-size:11.5px">${e.position}</td>
       <td style="text-align:right">฿${fmt(e.totalIncome68)}</td>
       <td style="text-align:right;font-weight:600">฿${fmt(e.totalIncome69)}</td>
@@ -468,20 +463,21 @@ function initPayroll() {
   }).join('');
 }
 
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // TAB: DISTRIBUTION
-// ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 let distInit=false;
-function initDist() {
+function initDist(){
   if(distInit) return; distInit=true;
   const brands=Object.keys(brandGroups);
-  const BCOL=['#2563eb','#10b981','#8b5cf6','#f59e0b','#ef4444','#ec4899','#06b6d4','#84cc16'];
   const tFmt=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v;
+  // ใช้ชื่อย่อสำหรับ chart label เพื่อไม่ให้ยาวเกิน
+  const brandShort=brands.map(b=>b.replace('Nigiwai ','').replace('NGWC ','NGWC-'));
 
   new Chart(document.getElementById('distBarBrand'),{
     type:'bar',
-    data:{labels:brands,datasets:[{data:brands.map(b=>sumBy(brandGroups[b],'totalIncome69')),backgroundColor:BCOL,borderRadius:5}]},
-    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
+    data:{labels:brandShort,datasets:[{data:brands.map(b=>sumBy(brandGroups[b],'totalIncome69')),backgroundColor:brands.map(b=>ccColor(b)),borderRadius:5}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{title:([t])=>ccFull(brands[t.dataIndex])}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
   });
 
   const depts=Object.keys(deptGroups).sort((a,b)=>sumBy(deptGroups[b],'totalIncome69')-sumBy(deptGroups[a],'totalIncome69'));
@@ -493,11 +489,11 @@ function initDist() {
 
   new Chart(document.getElementById('distYoY'),{
     type:'bar',
-    data:{labels:brands,datasets:[
+    data:{labels:brandShort,datasets:[
       {label:'ปี 68',data:brands.map(b=>sumBy(brandGroups[b],'totalIncome68')),backgroundColor:'#cbd5e1',borderRadius:4},
       {label:'ปี 69',data:brands.map(b=>sumBy(brandGroups[b],'totalIncome69')),backgroundColor:'#2563ebbb',borderRadius:4}
     ]},
-    options:{plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
+    options:{plugins:{legend:{labels:{font:{size:11}}},tooltip:{callbacks:{title:([t])=>ccFull(brands[t.dataIndex])}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9}}}},responsive:true}
   });
 
   new Chart(document.getElementById('distLevel'),{
@@ -507,22 +503,22 @@ function initDist() {
   });
 }
 
-// ═══════════════════════════════════════════════
-// TAB: INTERNAL MOBILITY
-// ═══════════════════════════════════════════════
-function initMobility() {
+// ══════════════════════════════════════════════════════════
+// TAB: MOBILITY
+// ══════════════════════════════════════════════════════════
+function initMobility(){
   const moved=EMPLOYEES.filter(e=>e.brandNew&&e.brandNew!=='');
-  const uBrands=[...new Set(moved.flatMap(e=>[e.brand,e.brandNew].filter(Boolean)))];
+  const uB=[...new Set(moved.flatMap(e=>[e.brand,e.brandNew].filter(Boolean)))];
   document.getElementById('mob_transfer').textContent=moved.length;
-  document.getElementById('mob_brands').textContent=uBrands.length;
+  document.getElementById('mob_brands').textContent=uB.length;
   document.getElementById('mob_pct').textContent=Math.round(moved.length/EMPLOYEES.length*100)+'%';
   document.getElementById('mobTableBody').innerHTML=moved.map(e=>`
     <tr>
       <td style="color:#8896b3;font-size:11px">${e.id}</td>
       <td><div style="font-weight:500">${e.name}</div><div style="font-size:10.5px;color:#8896b3">${e.nickname}</div></td>
       <td style="font-size:11.5px">${e.position}</td>
-      <td style="font-size:11.5px;color:#8896b3">${e.brandOld||e.brand}</td>
-      <td style="font-size:11.5px;color:#2563eb;font-weight:500">${e.brandNew}</td>
+      <td style="font-size:11px;color:#8896b3">${e.brandOld||ccFull(e.brand)}</td>
+      <td style="font-size:11px;color:#2563eb;font-weight:600">${e.brandNew}</td>
       <td><span style="background:#e8fff5;color:#059669;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:600">โยกย้าย</span></td>
     </tr>`).join('');
 }
