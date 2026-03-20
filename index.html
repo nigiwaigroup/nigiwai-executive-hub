@@ -1,290 +1,351 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nigiwai Group | Executive Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nigiwai Executive Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{
-  --navy:#0B1426;--nl:#0F1B33;--nm:#132040;
-  --gold:#C8A456;--gl:#E8CA7A;--gd:rgba(200,164,86,0.12);
-  --wh:#F8F6F1;--tx:#E8E4DC;--td:#8B8B99;
-  --gr:#3DD68C;--rd:#F06060;--or:#F0A040;--bl:#5B8DEF;--pu:#A07DE8;--pk:#FF6B9D;--cy:#45D9BF;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans Thai',sans-serif;background:var(--navy);color:var(--tx);overflow-x:hidden;min-height:100vh;display:flex;}
+  /* ── Variables ───────────────────────────── */
+  :root {
+    --navy:  #0D1B2A;
+    --navy2: #1E3A5F;
+    --gold:  #C9A84C;
+    --gold2: #E8C97A;
+    --black: #080C10;
+    --text:  #E8E2D5;
+    --muted: #8A8070;
+  }
 
-/* ═══ SIDEBAR ═══ */
-.sb{width:272px;min-height:100vh;background:linear-gradient(180deg,#080E1A 0%,#0C1628 100%);border-right:1px solid rgba(200,164,86,0.08);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:50;flex-shrink:0;}
-.sb-brand{padding:28px 24px;border-bottom:1px solid rgba(200,164,86,0.08);}
-.sb-brand-row{display:flex;align-items:center;gap:12px;}
-.sb-logo{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#D4AF37);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--navy);font-size:18px;font-weight:900;box-shadow:0 4px 20px rgba(200,164,86,0.2);}
-.sb-brand h1{font-size:18px;font-weight:800;color:var(--gold);letter-spacing:1px;}
-.sb-brand span{font-size:9px;color:var(--td);letter-spacing:2px;text-transform:uppercase;}
-.sb-nav{flex:1;padding:20px 12px;overflow-y:auto;}
-.sb-section{padding:6px 12px;font-size:9px;color:var(--td);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-top:16px;margin-bottom:6px;}
-.sb-link{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;color:var(--td);text-decoration:none;font-size:13px;font-weight:500;transition:all .2s;position:relative;margin-bottom:2px;}
-.sb-link:hover{background:rgba(200,164,86,0.06);color:var(--tx);}
-.sb-link.active{background:var(--gd);color:var(--gold);}
-.sb-link.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--gold);border-radius:0 3px 3px 0;}
-.sb-link i{width:20px;text-align:center;font-size:14px;}
-.sb-footer{padding:16px 20px;border-top:1px solid rgba(200,164,86,0.08);text-align:center;}
-.sb-footer-box{background:rgba(200,164,86,0.04);border:1px solid rgba(200,164,86,0.1);border-radius:10px;padding:12px;}
-.sb-footer-box p:first-child{font-size:9px;color:var(--gold);letter-spacing:2px;font-weight:700;text-transform:uppercase;}
-.sb-footer-box p:last-child{font-size:10px;color:var(--td);margin-top:2px;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ═══ MAIN ═══ */
-.main{flex:1;padding:40px 48px;position:relative;overflow:hidden;}
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: var(--black);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* Ambient bg */
-.main::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(200,164,86,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
-.main::after{content:'';position:fixed;bottom:-300px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(91,141,239,0.03) 0%,transparent 70%);pointer-events:none;z-index:0;}
-.main>*{position:relative;z-index:1;}
+  /* ── Background ──────────────────────────── */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse 80% 50% at 50% -10%,
+      rgba(30,58,95,.45) 0%, transparent 70%);
+  }
 
-/* Header */
-.hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:48px;flex-wrap:wrap;}
-.hdr-left h2{font-size:32px;font-weight:900;color:var(--wh);margin-bottom:8px;}
-.hdr-left p{font-size:14px;color:var(--td);line-height:1.8;max-width:580px;}
-.hdr-date{display:flex;align-items:center;gap:12px;background:var(--nm);border:1px solid rgba(200,164,86,0.1);padding:12px 20px;border-radius:14px;}
-.hdr-date-icon{width:44px;height:44px;background:var(--gd);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:18px;}
-.hdr-date-text .dt-label{font-size:9px;color:var(--td);letter-spacing:2px;text-transform:uppercase;font-weight:700;}
-.hdr-date-text .dt-val{font-size:14px;font-weight:700;color:var(--wh);margin-top:2px;}
+  /* ── Header ─────────────────────────────── */
+  header {
+    position: relative; z-index: 10;
+    border-bottom: 1px solid rgba(201,168,76,.15);
+    background: linear-gradient(180deg, rgba(8,12,16,.95) 0%, rgba(13,27,42,.8) 100%);
+    backdrop-filter: blur(12px);
+  }
+  .logo-text {
+    font-family: 'Cinzel', serif;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: .12em;
+  }
+  .gold-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
 
-/* ═══ MODULE CARDS ═══ */
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:60px;}
+  /* ── Card ────────────────────────────────── */
+  .module-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg,
+      rgba(13,27,42,.9) 0%,
+      rgba(8,12,16,.95) 100%);
+    border: 1px solid rgba(201,168,76,.12);
+    border-radius: 12px;
+    transition: transform .35s cubic-bezier(.23,1,.32,1),
+                border-color .35s ease,
+                box-shadow .35s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg,
+      rgba(201,168,76,.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  .module-card:hover { transform: translateY(-6px) scale(1.01); }
+  .module-card:hover::before { opacity: 1; }
+  .module-card:hover { border-color: rgba(201,168,76,.35); }
 
-.card{
-  background:linear-gradient(145deg,var(--nm),rgba(19,32,64,0.6));
-  border:1px solid rgba(200,164,86,0.06);
-  border-radius:20px;padding:32px;
-  text-decoration:none;color:var(--tx);
-  position:relative;overflow:hidden;
-  transition:all .35s cubic-bezier(.4,0,.2,1);
-  cursor:pointer;display:flex;flex-direction:column;
-}
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--accent),transparent);
-  opacity:0;transition:opacity .3s;
-}
-.card::after{
-  content:'';position:absolute;top:-80px;right:-80px;width:200px;height:200px;
-  border-radius:50%;
-  background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
-  opacity:0;transition:opacity .4s,transform .4s;
-  transform:scale(0.8);
-}
-.card:hover{
-  transform:translateY(-6px);
-  border-color:rgba(200,164,86,0.15);
-  box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 40px var(--accent-glow);
-}
-.card:hover::before{opacity:1;}
-.card:hover::after{opacity:1;transform:scale(1);}
-.card:hover .card-icon{transform:scale(1.1) rotate(-5deg);box-shadow:0 8px 24px var(--accent-glow);}
-.card:hover .card-arrow{transform:translateX(6px);opacity:1;}
+  .card-glow {
+    position: absolute; top: -40px; right: -40px;
+    width: 120px; height: 120px; border-radius: 50%;
+    opacity: .15;
+    filter: blur(40px);
+    transition: opacity .35s ease;
+  }
+  .module-card:hover .card-glow { opacity: .35; }
 
-.card-icon{
-  width:56px;height:56px;border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;margin-bottom:20px;
-  transition:all .35s cubic-bezier(.4,0,.2,1);
-  position:relative;z-index:1;
-}
-.card-title{font-size:20px;font-weight:800;color:var(--wh);margin-bottom:8px;position:relative;z-index:1;}
-.card-desc{font-size:12px;color:var(--td);line-height:1.7;flex:1;position:relative;z-index:1;margin-bottom:20px;}
-.card-footer{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
-.card-tag{font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
-.card-arrow{font-size:14px;transition:all .3s;opacity:0.4;}
+  .icon-wrap {
+    width: 52px; height: 52px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    border: 1px solid rgba(255,255,255,.08);
+    flex-shrink: 0;
+  }
 
-/* Floating particles on cards */
-.card .particle{position:absolute;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .6s;}
-.card:hover .particle{opacity:1;animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-12px) scale(1.2);}}
+  /* ── Shimmer Skeleton ────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg,
+      rgba(255,255,255,.04) 0%,
+      rgba(255,255,255,.09) 50%,
+      rgba(255,255,255,.04) 100%);
+    background-size: 600px 100%;
+    animation: shimmer 1.6s infinite;
+    border-radius: 8px;
+  }
 
-/* ═══ FOOTER ═══ */
-.ft{border-top:1px solid rgba(200,164,86,0.06);padding-top:24px;text-align:center;margin-top:40px;}
-.ft p:first-child{font-size:10px;color:var(--td);letter-spacing:2px;text-transform:uppercase;}
-.ft p:last-child{font-size:9px;color:rgba(139,139,153,0.5);margin-top:4px;}
+  /* ── Stagger animation ───────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-appear {
+    opacity: 0;
+    animation: fadeUp .55s cubic-bezier(.23,1,.32,1) forwards;
+  }
 
-/* ═══ ENTRANCE ANIMATIONS ═══ */
-@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-.anim-up{animation:slideUp .6s ease forwards;opacity:0;}
-.anim-d1{animation-delay:.1s;}.anim-d2{animation-delay:.2s;}.anim-d3{animation-delay:.3s;}
-.anim-d4{animation-delay:.4s;}.anim-d5{animation-delay:.5s;}.anim-d6{animation-delay:.6s;}
-.anim-d7{animation-delay:.7s;}.anim-d8{animation-delay:.8s;}
+  /* ── Scrollbar ───────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--navy2); border-radius: 3px; }
 
-/* ═══ RESPONSIVE ═══ */
-@media(max-width:1024px){.main{padding:24px;}.cards{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}}
-@media(max-width:768px){
-  .sb{display:none;}.main{padding:20px;}
-  .hdr{flex-direction:column;}.hdr h2{font-size:24px;}
-  .cards{grid-template-columns:1fr;gap:14px;}
-  .card{padding:24px;}
-}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(200,164,86,0.15);border-radius:3px;}
+  /* ── Toast ───────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--navy2);
+    border: 1px solid rgba(201,168,76,.3);
+    color: var(--text); padding: 12px 20px; border-radius: 8px;
+    font-size: .875rem; opacity: 0; transform: translateY(8px);
+    transition: all .3s ease; pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sb">
-  <div class="sb-brand">
-    <div class="sb-brand-row">
-      <div class="sb-logo"><i class="fa-solid fa-shield-halved"></i></div>
-      <div><h1>Nigiwai Group</h1><span>Management Portal</span></div>
-    </div>
-  </div>
-  <nav class="sb-nav">
-    <div class="sb-section">Main Modules</div>
-    <a href="index.html" class="sb-link active"><i class="fa-solid fa-gauge-high" style="color:var(--bl)"></i> Dashboard Hub</a>
+<!-- Backgrounds -->
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
 
-    <div class="sb-section">Data Analysis</div>
-    <a href="https://nigiwaigroup.github.io/nigiben/index.html" class="sb-link"><i class="fa-solid fa-bag-shopping" style="color:var(--gr)"></i> NIGIBEN</a>
-    <a href="branch.html" class="sb-link"><i class="fa-solid fa-store" style="color:var(--pk)"></i> ภาพรวมสาขา</a>
-
-    <div class="sb-section">Departments</div>
-    <a href="acc/index.html" class="sb-link"><i class="fa-solid fa-wallet" style="color:var(--or)"></i> Accounting & Finance</a>
-    <a href="hr/index.html" class="sb-link"><i class="fa-solid fa-user-gear" style="color:var(--pu)"></i> Human Resources</a>
-    <a href="leave-dashboard/index.html" class="sb-link"><i class="fa-solid fa-plane-departure" style="color:var(--rd)"></i> Leave Management</a>
-
-    <div class="sb-section">Company Info</div>
-    <a href="company.html" class="sb-link"><i class="fa-solid fa-sitemap" style="color:var(--gold)"></i> Corporate Structure</a>
-    <a href="as2.html" class="sb-link"><i class="fa-solid fa-user-tie" style="color:var(--bl)"></i> Admin JD</a>
-    <a href="angpao.html" class="sb-link"><i class="fa-solid fa-envelope-open-text" style="color:var(--rd)"></i> Angpao 69 Summary</a>
-  </nav>
-  <div class="sb-footer">
-    <div class="sb-footer-box">
-      <p>Executive Access</p>
-      <p>Internal Data Hub</p>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-
-  <header class="hdr anim-up anim-d1">
-    <div class="hdr-left">
-      <h2>Executive Hub</h2>
-      <p>ศูนย์รวมระบบสารสนเทศระดับบริหาร Nigiwai Group — เลือกเข้าถึงโมดูลการบริหารจัดการและรายงานวิเคราะห์ผ่านเมนูด้านล่าง</p>
-    </div>
-    <div class="hdr-date">
-      <div class="hdr-date-icon"><i class="fa-solid fa-calendar-day"></i></div>
-      <div class="hdr-date-text">
-        <div class="dt-label">ประจำวันที่</div>
-        <div class="dt-val" id="currentDate">--</div>
+<!-- ── HEADER ──────────────────────────────────────── -->
+<header class="sticky top-0">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <!-- Logo -->
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+           style="background:linear-gradient(135deg,#1E3A5F,#0D1B2A);border:1px solid rgba(201,168,76,.3)">
+        <i class="fa-solid fa-wave-square text-sm" style="color:var(--gold)"></i>
+      </div>
+      <div>
+        <div class="logo-text text-xl font-bold tracking-widest">NIGIWAI</div>
+        <div class="text-xs tracking-[.25em] uppercase" style="color:var(--muted)">Executive Portal</div>
       </div>
     </div>
-  </header>
 
-  <div class="cards">
-
-    <!-- Accounting -->
-    <a href="acc/index.html" class="card anim-up anim-d2" style="--accent:#3DD68C;--accent-glow:rgba(61,214,140,0.08);">
-      <div class="particle" style="width:6px;height:6px;background:rgba(61,214,140,0.3);top:20%;right:15%;animation-delay:0s;"></div>
-      <div class="particle" style="width:4px;height:4px;background:rgba(61,214,140,0.2);top:60%;right:25%;animation-delay:1s;"></div>
-      <div class="card-icon" style="background:rgba(61,214,140,0.1);color:var(--gr);"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-      <div class="card-title">Accounting & Finance</div>
-      <div class="card-desc">ระบบพยากรณ์รายได้และค่าใช้จ่าย ตรวจสอบกระแสเงินสดและงบประมาณภาพรวมของกลุ่มบริษัท</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--gr);">เข้าสู่ระบบ</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--gr);"></i></div>
-    </a>
-
-    <!-- NIGIBEN -->
-    <a href="https://nigiwaigroup.github.io/nigiben/index.html" class="card anim-up anim-d3" style="--accent:#3DD68C;--accent-glow:rgba(61,214,140,0.08);">
-      <div class="particle" style="width:5px;height:5px;background:rgba(61,214,140,0.3);top:25%;right:20%;animation-delay:.3s;"></div>
-      <div class="particle" style="width:3px;height:3px;background:rgba(61,214,140,0.2);top:55%;right:10%;animation-delay:1.5s;"></div>
-      <div class="card-icon" style="background:rgba(61,214,140,0.1);color:var(--gr);"><i class="fa-solid fa-bag-shopping"></i></div>
-      <div class="card-title">NIGIBEN</div>
-      <div class="card-desc">ระบบบริหารจัดการ Nigiben Grab & Go — ข้อมูลสาขา ยอดขาย และรายงานวิเคราะห์ประจำวันสำหรับสนามบินและจุดขาย</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--gr);">เปิดระบบ NIGIBEN</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--gr);"></i></div>
-    </a>
-
-    <!-- Branch Overview -->
-    <a href="branch.html" class="card anim-up anim-d4" style="--accent:#FF6B9D;--accent-glow:rgba(255,107,157,0.08);">
-      <div class="particle" style="width:6px;height:6px;background:rgba(255,107,157,0.3);top:15%;right:12%;animation-delay:.6s;"></div>
-      <div class="particle" style="width:4px;height:4px;background:rgba(255,107,157,0.2);top:50%;right:30%;animation-delay:2s;"></div>
-      <div class="card-icon" style="background:rgba(255,107,157,0.1);color:var(--pk);"><i class="fa-solid fa-store"></i></div>
-      <div class="card-title">ภาพรวมสาขา</div>
-      <div class="card-desc">ข้อมูลทำเลที่ตั้ง สถานะการดำเนินงาน และข้อมูลพื้นฐานของสาขาทั้งหมดในเครือ Nigiwai Group</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--pk);">ดูข้อมูลสาขา</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--pk);"></i></div>
-    </a>
-
-    <!-- HR -->
-    <a href="hr/index.html" class="card anim-up anim-d5" style="--accent:#A07DE8;--accent-glow:rgba(160,125,232,0.08);">
-      <div class="particle" style="width:5px;height:5px;background:rgba(160,125,232,0.3);top:20%;right:18%;animation-delay:.2s;"></div>
-      <div class="particle" style="width:3px;height:3px;background:rgba(160,125,232,0.2);top:65%;right:22%;animation-delay:1.2s;"></div>
-      <div class="card-icon" style="background:rgba(160,125,232,0.1);color:var(--pu);"><i class="fa-solid fa-users-viewfinder"></i></div>
-      <div class="card-title">HR Management</div>
-      <div class="card-desc">การจัดการต้นทุนบุคลากร (Salary & Cost Center) และฐานข้อมูลพนักงานเพื่อเพิ่มประสิทธิภาพการจัดการกำลังคน</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--pu);">จัดการบุคลากร</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--pu);"></i></div>
-    </a>
-
-    <!-- Leave -->
-    <a href="leave-dashboard/index.html" class="card anim-up anim-d6" style="--accent:#F06060;--accent-glow:rgba(240,96,96,0.08);">
-      <div class="particle" style="width:5px;height:5px;background:rgba(240,96,96,0.25);top:18%;right:14%;animation-delay:.5s;"></div>
-      <div class="particle" style="width:3px;height:3px;background:rgba(240,96,96,0.2);top:58%;right:28%;animation-delay:1.8s;"></div>
-      <div class="card-icon" style="background:rgba(240,96,96,0.1);color:var(--rd);"><i class="fa-solid fa-user-clock"></i></div>
-      <div class="card-title">Leave Tracking</div>
-      <div class="card-desc">รายงานสรุปสถิติการลางาน เพื่อประเมินผลสัมฤทธิ์และระเบียบวินัยของบุคลากรรายสาขา</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--rd);">ดูสถิติการลา</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--rd);"></i></div>
-    </a>
-
-    <!-- Corporate Structure -->
-    <a href="company.html" class="card anim-up anim-d7" style="--accent:#C8A456;--accent-glow:rgba(200,164,86,0.08);">
-      <div class="particle" style="width:6px;height:6px;background:rgba(200,164,86,0.3);top:22%;right:16%;animation-delay:.4s;"></div>
-      <div class="particle" style="width:4px;height:4px;background:rgba(200,164,86,0.2);top:55%;right:20%;animation-delay:1.4s;"></div>
-      <div class="card-icon" style="background:var(--gd);color:var(--gold);"><i class="fa-solid fa-building-columns"></i></div>
-      <div class="card-title">Corporate Structure</div>
-      <div class="card-desc">โครงสร้างองค์กร ทุนจดทะเบียน รายชื่อกรรมการ และสถานะทางกฎหมายของนิติบุคคลในเครือทั้งหมด</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--gold);">ตรวจสอบโครงสร้าง</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--gold);"></i></div>
-    </a>
-
-    <!-- Admin JD -->
-    <a href="as2.html" class="card anim-up anim-d7" style="--accent:#5B8DEF;--accent-glow:rgba(91,141,239,0.08);">
-      <div class="particle" style="width:5px;height:5px;background:rgba(91,141,239,0.3);top:20%;right:15%;animation-delay:.7s;"></div>
-      <div class="card-icon" style="background:rgba(91,141,239,0.1);color:var(--bl);"><i class="fa-solid fa-user-tie"></i></div>
-      <div class="card-title">Admin JD</div>
-      <div class="card-desc">Job Description และขอบเขตอำนาจหน้าที่ของตำแหน่งบริหารและฝ่ายสนับสนุนส่วนกลาง</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--bl);">เปิดเอกสาร</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--bl);"></i></div>
-    </a>
-
-    <!-- Angpao -->
-    <a href="angpao.html" class="card anim-up anim-d8" style="--accent:#F06060;--accent-glow:rgba(240,96,96,0.06);">
-      <div class="particle" style="width:5px;height:5px;background:rgba(240,96,96,0.25);top:25%;right:18%;animation-delay:.9s;"></div>
-      <div class="particle" style="width:3px;height:3px;background:rgba(240,96,96,0.15);top:60%;right:12%;animation-delay:2.2s;"></div>
-      <div class="card-icon" style="background:rgba(240,96,96,0.1);color:var(--rd);"><i class="fa-solid fa-coins"></i></div>
-      <div class="card-title">Angpao 69 Summary</div>
-      <div class="card-desc">สรุปแคมเปญอั่งเปา ประเมินความสำเร็จของโปรโมชั่นและรายได้จากการจัดกิจกรรมพิเศษประจำปี</div>
-      <div class="card-footer"><span class="card-tag" style="color:var(--rd);">ดูผลกิจกรรม</span><i class="fa-solid fa-arrow-right card-arrow" style="color:var(--rd);"></i></div>
-    </a>
-
+    <!-- Right actions -->
+    <div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
+           style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);color:var(--gold)">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+        Live
+      </div>
+      <a href="admin.html"
+         class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+         style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold)"
+         onmouseover="this.style.background='rgba(201,168,76,.2)'"
+         onmouseout="this.style.background='rgba(201,168,76,.1)'">
+        <i class="fa-solid fa-shield-halved mr-1.5"></i>Admin
+      </a>
+    </div>
   </div>
+  <div class="gold-line"></div>
+</header>
 
-  <footer class="ft anim-up anim-d8">
-    <p>© 2026 Nigiwai Group Internal Dashboard Hub</p>
-    <p>เอกสารภายในและระบบสารสนเทศเพื่อผู้บริหารเท่านั้น</p>
-  </footer>
+<!-- ── HERO ────────────────────────────────────────── -->
+<section class="relative z-10 text-center py-16 px-6">
+  <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs mb-6"
+       style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);color:var(--gold)">
+    <i class="fa-solid fa-building-columns"></i>
+    <span style="font-family:'Cinzel',serif;letter-spacing:.15em">Nigiwai Group</span>
+  </div>
+  <h1 class="logo-text text-4xl md:text-6xl font-bold mb-4" style="font-family:'Cinzel',serif">
+    Executive Portal
+  </h1>
+  <p class="text-sm md:text-base max-w-xl mx-auto leading-relaxed" style="color:var(--muted)">
+    ศูนย์กลางข้อมูลและระบบบริหารงานของ Nigiwai Group<br class="hidden sm:block"/>
+    เข้าถึงทุก Dashboard ได้จากที่เดียว
+  </p>
+</section>
 
+<!-- ── MODULE GRID ──────────────────────────────────── -->
+<main class="relative z-10 max-w-7xl mx-auto px-6 pb-20">
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <!-- Skeleton placeholders -->
+    <div id="skeletons" class="contents">
+      <script>
+        document.write([...Array(8)].map(() => `
+          <div class="module-card p-5" style="cursor:default">
+            <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+            <div class="skeleton h-4 w-3/4 mb-2"></div>
+            <div class="skeleton h-3 w-full mb-1"></div>
+            <div class="skeleton h-3 w-5/6"></div>
+          </div>`).join(''));
+      </script>
+    </div>
+  </div>
+  <div id="empty" class="hidden text-center py-20" style="color:var(--muted)">
+    <i class="fa-regular fa-folder-open text-4xl mb-4 block"></i>
+    <p>ยังไม่มีโมดูลในระบบ<br/>
+      <a href="admin.html" style="color:var(--gold)">→ ไปที่หน้า Admin</a> เพื่อเพิ่มโมดูล
+    </p>
+  </div>
 </main>
 
-<script>
-document.getElementById('currentDate').textContent = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+<!-- ── FOOTER ───────────────────────────────────────── -->
+<footer class="relative z-10 text-center pb-8 text-xs" style="color:var(--muted)">
+  <div class="gold-line mb-6"></div>
+  © <span id="yr"></span> Nigiwai Group — All rights reserved
+</footer>
 
-// Tilt effect on cards
-document.querySelectorAll('.card').forEach(function(card){
-  card.addEventListener('mousemove',function(e){
-    var rect=card.getBoundingClientRect();
-    var x=(e.clientX-rect.left)/rect.width-.5;
-    var y=(e.clientY-rect.top)/rect.height-.5;
-    card.style.transform='translateY(-6px) perspective(600px) rotateY('+x*6+'deg) rotateX('+(-y*6)+'deg)';
-  });
-  card.addEventListener('mouseleave',function(){
-    card.style.transform='';
-  });
-});
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ─────────────────────────────────────────────────── -->
+<script>
+  // ╔══════════════════════════════════════╗
+  // ║   ⚙️  CONFIGURATION — แก้ตรงนี้     ║
+  // ╚══════════════════════════════════════╝
+  const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+  // ───────────────────────────────────────
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function toast(msg, ok = true) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = ok ? 'rgba(201,168,76,.3)' : 'rgba(239,68,68,.4)';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function hexToRgb(hex) {
+    const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '201,168,76';
+  }
+
+  function renderCards(modules) {
+    const grid = document.getElementById('grid');
+    document.getElementById('skeletons').remove();
+
+    if (!modules.length) {
+      document.getElementById('empty').classList.remove('hidden');
+      return;
+    }
+
+    modules.forEach((m, i) => {
+      const rgb = hexToRgb(m.color || '#C9A84C');
+      const card = document.createElement('a');
+      card.href = m.url || '#';
+      if (m.url && m.url !== '#') card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.className = 'module-card card-appear p-5';
+      card.style.animationDelay = `${i * 70}ms`;
+      card.style.boxShadow = `0 0 0 0 rgba(${rgb},.0)`;
+      card.innerHTML = `
+        <div class="card-glow" style="background:rgba(${rgb},1)"></div>
+        <div class="flex items-start gap-4 mb-4">
+          <div class="icon-wrap" style="background:rgba(${rgb},.12);color:rgba(${rgb},1)">
+            <i class="fa-solid ${m.icon || 'fa-link'}"></i>
+          </div>
+          <div class="flex-1 min-w-0 pt-1">
+            <div class="font-semibold text-base leading-snug" style="color:#E8E2D5">${m.title}</div>
+          </div>
+        </div>
+        <p class="text-sm leading-relaxed mb-4" style="color:var(--muted)">${m.description || ''}</p>
+        <div class="flex items-center gap-1.5 text-xs font-medium" style="color:rgba(${rgb},1)">
+          เข้าสู่ระบบ <i class="fa-solid fa-arrow-right text-xs"></i>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 opacity-0 transition-opacity duration-300"
+             style="background:linear-gradient(90deg,transparent,rgba(${rgb},.6),transparent)"
+             data-underline></div>`;
+      card.addEventListener('mouseenter', () => {
+        card.querySelector('[data-underline]').style.opacity = '1';
+        card.style.boxShadow = `0 8px 40px rgba(${rgb},.15), 0 2px 8px rgba(0,0,0,.4)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.querySelector('[data-underline]').style.opacity = '0';
+        card.style.boxShadow = '0 0 0 0 transparent';
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadModules() {
+    try {
+      const { data, error } = await sb
+        .from('dashboard_modules')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      renderCards(data || []);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('skeletons').remove();
+      document.getElementById('empty').classList.remove('hidden');
+      toast('ไม่สามารถโหลดข้อมูลได้: ' + err.message, false);
+    }
+  }
+
+  loadModules();
+
+  // Real-time updates
+  sb.channel('modules')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'dashboard_modules' },
+      () => {
+        document.getElementById('grid').innerHTML = '';
+        loadModules();
+        toast('ข้อมูลอัปเดตแล้ว');
+      })
+    .subscribe();
 </script>
 </body>
 </html>
