@@ -281,17 +281,43 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
     <div id="cc-yoy-blocks"></div>
   </div>
 
-  <!-- Dept summary per CC -->
+  <!-- Employee Table by CC -->
   <div class="card">
     <div class="card-title green">👥 รายชื่อพนักงานแยกตาม Cost Center</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-      <input type="text" class="ctrl" id="ccEmpQ" placeholder="🔍 ค้นหาชื่อ..." style="width:160px" oninput="filterCCEmp()">
-      <select class="ctrl" id="ccEmpDept" onchange="filterCCEmp()"><option value="">— ทุกแผนก —</option></select>
+
+    <!-- Filters row -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+      <input type="text" class="ctrl" id="ccEmpQ"
+        placeholder="🔍 ค้นหาชื่อ / รหัส / ตำแหน่ง..."
+        style="width:210px" oninput="filterCCEmp()">
+      <select class="ctrl" id="ccEmpCC"    onchange="filterCCEmp()"><option value="">— ทุก Cost Center —</option></select>
+      <select class="ctrl" id="ccEmpDept"  onchange="filterCCEmp()"><option value="">— ทุกแผนก —</option></select>
       <select class="ctrl" id="ccEmpLevel" onchange="filterCCEmp()"><option value="">— ทุกระดับ —</option></select>
-      <button onclick="expandAllCC()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11.5px;">펼 ขยายทั้งหมด</button>
-      <button onclick="collapseAllCC()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11.5px;">▲ ย่อทั้งหมด</button>
+      <button onclick="clearCCEmpFilter()"
+        style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:7px 12px;cursor:pointer;font-size:12px;color:var(--muted);">
+        ✕ ล้าง
+      </button>
+      <span style="margin-left:auto;font-size:11.5px;color:var(--muted);" id="ccEmpInfo"></span>
     </div>
-    <div id="cc-emp-blocks"></div>
+
+    <!-- Table -->
+    <div class="tbl-wrap">
+      <table class="tbl" id="ccEmpTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>รหัส</th>
+            <th>ชื่อ-นามสกุล</th>
+            <th>Cost Center</th>
+            <th>แผนก</th>
+            <th>ตำแหน่ง</th>
+            <th>ระดับ</th>
+            <th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="ccEmpBody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 </div>
@@ -500,36 +526,101 @@ function renderHC(){
 // MOBILITY — rebuild ทุกครั้ง
 // ══════════════════════════════════════════════════════════
 function buildMobility(){
-  const EMP=getEMP();
-  const moved=EMP.filter(e=>e.brandNew&&e.brandNew!=='');
-  const allCC=[...new Set(moved.flatMap(e=>[e.brandOld,e.brandNew].filter(Boolean)))];
+  const EMP = getEMP();
 
-  document.getElementById('mob-kpis').innerHTML=`
-    <div class="kpi-card purple"><div class="kpi-label">โอนย้ายทั้งหมด</div><div class="kpi-val purple">${moved.length}</div><div class="kpi-sub">รายการ</div></div>
-    <div class="kpi-card blue"><div class="kpi-label">% จาก Headcount</div><div class="kpi-val blue">${EMP.length>0?(moved.length/EMP.length*100).toFixed(1):0}%</div><div class="kpi-sub">ของพนักงานทั้งหมด</div></div>
-    <div class="kpi-card green"><div class="kpi-label">บริษัทอ้างอิง</div><div class="kpi-val green">${allCC.length}</div><div class="kpi-sub">Cost Centers</div></div>
-  `;
+  // ─── Logic หลัก ───────────────────────────────────────────────────────────
+  // แต่ละคนมี "current" = brandNew ถ้ามี, ไม่งั้นใช้ brand (จาก "บริษัทเดิม")
+  // "moved" = คนที่มี brandNew (มีประวัติย้าย)
+  const moved = EMP.filter(e => e.brandNew && e.brandNew !== '');
 
-  const outMap={}, inMap={};
-  moved.forEach(e=>{ if(e.brandOld)outMap[e.brandOld]=(outMap[e.brandOld]||0)+1; });
-  moved.forEach(e=>{ if(e.brandNew)inMap[e.brandNew]=(inMap[e.brandNew]||0)+1; });
+  // Count out: บริษัทที่คนออกไป = brandOld (หรือ brand ถ้าไม่มี brandOld)
+  const outMap = {}, inMap = {};
+  moved.forEach(e => {
+    const from = e.brandOld || ccFull(e.brand);
+    outMap[from] = (outMap[from] || 0) + 1;
+    inMap[e.brandNew] = (inMap[e.brandNew] || 0) + 1;
+  });
+  const allCC = [...new Set(moved.flatMap(e => [e.brandOld||ccFull(e.brand), e.brandNew].filter(Boolean)))];
 
-  buildHBars('mob-out-bars',Object.entries(outMap).map(([b,v])=>({label:b,val:v,color:'#e74c3c'})).sort((a,b)=>b.val-a.val),false);
-  buildHBars('mob-in-bars', Object.entries(inMap).map(([b,v])=>({label:b,val:v,color:'#27ae60'})).sort((a,b)=>b.val-a.val),false);
+  // KPI
+  document.getElementById('mob-kpis').innerHTML = `
+    <div class="kpi-card purple">
+      <div class="kpi-label">โอนย้ายทั้งหมด</div>
+      <div class="kpi-val purple">${moved.length}</div>
+      <div class="kpi-sub">รายการ</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">% จาก Headcount</div>
+      <div class="kpi-val blue">${EMP.length > 0 ? (moved.length/EMP.length*100).toFixed(1) : 0}%</div>
+      <div class="kpi-sub">ของพนักงานทั้งหมด</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">บริษัทที่เกี่ยวข้อง</div>
+      <div class="kpi-val green">${allCC.length}</div>
+      <div class="kpi-sub">Cost Centers</div>
+    </div>`;
 
-  document.getElementById('mob-cards').innerHTML = moved.length===0
-    ? '<div style="text-align:center;color:var(--muted);padding:24px;">ไม่มีข้อมูลการโยกย้าย</div>'
-    : moved.map(e=>`
+  // Flow bars
+  buildHBars('mob-out-bars',
+    Object.entries(outMap).map(([b,v])=>({label:b, val:v, color:'#e74c3c'})).sort((a,b)=>b.val-a.val),
+    false);
+  buildHBars('mob-in-bars',
+    Object.entries(inMap).map(([b,v])=>({label:b, val:v, color:'#27ae60'})).sort((a,b)=>b.val-a.val),
+    false);
+
+  // ─── Detail Cards ─────────────────────────────────────────────────────────
+  if (moved.length === 0) {
+    document.getElementById('mob-cards').innerHTML =
+      '<div style="text-align:center;color:var(--muted);padding:32px;">ไม่มีข้อมูลการโยกย้าย</div>';
+    return;
+  }
+
+  document.getElementById('mob-cards').innerHTML = moved.map(e => {
+    // ดึงชื่อบริษัทปัจจุบัน (หลังย้าย) = brandNew
+    const currentBrand = e.brandNew;
+    // ดึงชื่อบริษัทเดิม = brandOld ถ้ามี, ไม่งั้นใช้ ccFull(brand)
+    const fromBrand    = e.brandOld || ccFull(e.brand);
+
+    // History: ถ้ามี moveHistory (array) ให้แสดงด้วย
+    const history = Array.isArray(e.moveHistory) ? e.moveHistory : [];
+
+    const historyHtml = history.length > 0
+      ? `<div style="margin-top:8px;padding:8px 10px;background:#f8f8f8;border-radius:6px;border-left:2px solid #ddd;">
+           <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">📋 ประวัติการย้าย</div>
+           ${history.map((h,i) => `
+             <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;font-size:10.5px;">
+               <span style="color:var(--muted);min-width:14px;">${i+1}.</span>
+               <span style="background:#fff0f0;color:#7b241c;border:1px solid #f5c6c6;padding:1px 6px;border-radius:4px;">${h.from}</span>
+               <span style="color:#bbb;font-size:12px;">→</span>
+               <span style="background:#f0fff4;color:#1a5e33;border:1px solid #a9dfbf;padding:1px 6px;border-radius:4px;">${h.to}</span>
+               ${h.date ? `<span style="color:var(--muted);margin-left:3px;">🕐 ${h.date}</span>` : ''}
+             </div>`).join('')}
+         </div>`
+      : '';
+
+    return `
     <div class="mob-card">
-      <div class="mob-name">${e.name} <span style="font-weight:400;font-size:11.5px;color:#aaa">(${e.nickname})</span></div>
-      <div class="mob-meta">${e.id} · ${e.dept} · ${e.position}</div>
-      <div class="mob-flow">
-        <div class="mob-from">🏢 ${e.brandOld||ccFull(e.brand)}</div>
-        <div class="mob-arr">→</div>
-        <div class="mob-to">🏢 ${e.brandNew}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div>
+          <div class="mob-name">${e.name}
+            <span style="font-weight:400;font-size:11.5px;color:#aaa">(${e.nickname})</span>
+          </div>
+          <div class="mob-meta">${e.id} · ${e.dept} · ${e.position}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;background:#f3ebff;color:#7c3aed;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">${e.level}</span>
       </div>
-      ${e.moveDate?`<div class="mob-date">🕐 ${e.moveDate}</div>`:''}
-    </div>`).join('');
+
+      <!-- Flow: บริษัทเดิม → บริษัทปัจจุบัน -->
+      <div class="mob-flow">
+        <div class="mob-from">🏢 ${fromBrand}</div>
+        <div class="mob-arr">→</div>
+        <div class="mob-to">🏢 ${currentBrand}</div>
+      </div>
+
+      ${e.moveDate ? `<div class="mob-date">🕐 ${e.moveDate}</div>` : ''}
+      ${historyHtml}
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -655,7 +746,7 @@ function updateSyncLabel(){
 // ══════════════════════════════════════════════════════════
 // COST CENTER SUMMARY + EMPLOYEE LIST
 // ══════════════════════════════════════════════════════════
-let ccEmpFilter = { q:'', dept:'', level:'' };
+let ccEmpFilter = { q:'', cc:'', dept:'', level:'' };
 let ccExpanded  = {};  // { brandKey: true/false }
 
 function buildCostCenter(){
@@ -710,118 +801,118 @@ function buildCostCenter(){
     </div>`;
   }).join('');
 
-  // Dept + Level filter dropdowns
-  const df = document.getElementById('ccEmpDept');
-  const lf = document.getElementById('ccEmpLevel');
-  const prevD = df.value, prevL = lf.value;
-  df.innerHTML = '<option value="">— ทุกแผนก —</option>';
-  lf.innerHTML = '<option value="">— ทุกระดับ —</option>';
-  [...new Set(EMP.map(e=>e.dept))].sort().forEach(d=>df.innerHTML+=`<option value="${d}" ${prevD===d?'selected':''}>${d}</option>`);
-  [...new Set(EMP.map(e=>e.level))].sort().forEach(l=>lf.innerHTML+=`<option value="${l}" ${prevL===l?'selected':''}>${l}</option>`);
+  // Populate all filter dropdowns (preserve current selection)
+  const ccf = document.getElementById('ccEmpCC');
+  const df  = document.getElementById('ccEmpDept');
+  const lf  = document.getElementById('ccEmpLevel');
+  const prevCC = ccf.value, prevD = df.value, prevL = lf.value;
 
-  renderCCEmpBlocks(EMP, brands, brandGrp);
+  ccf.innerHTML = '<option value="">— ทุก Cost Center —</option>';
+  df.innerHTML  = '<option value="">— ทุกแผนก —</option>';
+  lf.innerHTML  = '<option value="">— ทุกระดับ —</option>';
+
+  brands.forEach(b =>
+    ccf.innerHTML += `<option value="${b}" ${prevCC===b?'selected':''}>${ccFull(b)}</option>`
+  );
+  [...new Set(EMP.map(e=>e.dept))].sort().forEach(d =>
+    df.innerHTML += `<option value="${d}" ${prevD===d?'selected':''}>${d}</option>`
+  );
+  [...new Set(EMP.map(e=>e.level))].sort().forEach(l =>
+    lf.innerHTML += `<option value="${l}" ${prevL===l?'selected':''}>${l}</option>`
+  );
+
+  // Render employee table
+  renderCCEmpTable();
 }
 
 function filterCCEmp(){
   ccEmpFilter.q     = document.getElementById('ccEmpQ').value.toLowerCase();
+  ccEmpFilter.cc    = document.getElementById('ccEmpCC').value;
   ccEmpFilter.dept  = document.getElementById('ccEmpDept').value;
   ccEmpFilter.level = document.getElementById('ccEmpLevel').value;
+  renderCCEmpTable();
+}
+
+function clearCCEmpFilter(){
+  document.getElementById('ccEmpQ').value='';
+  document.getElementById('ccEmpCC').value='';
+  document.getElementById('ccEmpDept').value='';
+  document.getElementById('ccEmpLevel').value='';
+  ccEmpFilter = {q:'',cc:'',dept:'',level:''};
+  renderCCEmpTable();
+}
+
+function renderCCEmpTable(){
   const EMP = getEMP();
-  const brandGrp = grp(EMP,'brand');
-  const brands = Object.keys(brandGrp).sort((a,b)=>brandGrp[b].length-brandGrp[a].length);
-  renderCCEmpBlocks(EMP, brands, brandGrp);
-}
-
-function renderCCEmpBlocks(EMP, brands, brandGrp){
-  const LVL_CHIP = {
-    'Officer':'background:#eaf0ff;color:#2563eb',
+  const LVL_STYLE = {
+    'Officer':              'background:#eaf0ff;color:#2563eb',
     'Leader and Supervisor':'background:#f3ebff;color:#7c3aed',
-    'Manager':'background:#fff8e6;color:#d97706',
-    'Chief and Director':'background:#ffebeb;color:#c0392b',
-    'Senior Officer':'background:#eafaf1;color:#27ae60',
-    'Consultant':'background:#fef9e6;color:#b45309'
-  };
-  const DEPT_COLORS = {
-    'Operation':'#2980b9','Executive':'#c0392b','Marketing':'#8e44ad',
-    'Financial And Account':'#27ae60','Sales':'#d35400','Warehouse & Logistics':'#16a085',
-    'Human Resource':'#e91e63','Construction':'#795548','Information Technology':'#607d8b'
+    'Manager':              'background:#fff8e6;color:#d97706',
+    'Chief and Director':   'background:#ffebeb;color:#c0392b',
+    'Senior Officer':       'background:#eafaf1;color:#27ae60',
+    'Consultant':           'background:#fef9e6;color:#b45309'
   };
 
-  document.getElementById('cc-emp-blocks').innerHTML = brands.map(b=>{
-    const allEmps = brandGrp[b] || [];
-    const filtered = allEmps.filter(e=>{
-      const q = ccEmpFilter.q;
-      const matchQ  = !q || e.name.toLowerCase().includes(q) || e.nickname.toLowerCase().includes(q) || e.id.toLowerCase().includes(q) || e.position.toLowerCase().includes(q);
-      const matchD  = !ccEmpFilter.dept  || e.dept===ccEmpFilter.dept;
-      const matchL  = !ccEmpFilter.level || e.level===ccEmpFilter.level;
-      return matchQ && matchD && matchL;
+  // Filter
+  const rows = EMP.filter(e=>{
+    const q = ccEmpFilter.q;
+    return (
+      (!q || e.name.toLowerCase().includes(q) || e.nickname.toLowerCase().includes(q)
+          || e.id.toLowerCase().includes(q)   || e.position.toLowerCase().includes(q)) &&
+      (!ccEmpFilter.cc    || e.brand === ccEmpFilter.cc) &&
+      (!ccEmpFilter.dept  || e.dept  === ccEmpFilter.dept) &&
+      (!ccEmpFilter.level || e.level === ccEmpFilter.level)
+    );
+  });
+
+  // Group by brand (keep sort order: most staff first)
+  const brandGrp = grp(rows,'brand');
+  const brands = Object.keys(brandGrp).sort((a,b)=>brandGrp[b].length - brandGrp[a].length);
+
+  document.getElementById('ccEmpInfo').textContent =
+    'แสดง ' + rows.length + ' คน จาก ' + EMP.length + ' คน';
+
+  // Build table rows — grouped with brand header rows
+  let html = '';
+  let rowNum = 0;
+
+  if(rows.length === 0){
+    html = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">ไม่พบข้อมูลตามเงื่อนไขที่เลือก</td></tr>';
+  } else {
+    brands.forEach(b=>{
+      const emps = brandGrp[b];
+      const bcolor = ccColor(b);
+      // Brand header row
+      html += `<tr>
+        <td colspan="8" style="background:${bcolor}12;border-top:2px solid ${bcolor}33;border-bottom:1px solid ${bcolor}22;padding:9px 12px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="width:10px;height:10px;border-radius:50%;background:${bcolor};display:inline-block;flex-shrink:0;"></span>
+            <span style="font-size:12.5px;font-weight:700;color:${bcolor}">${ccFull(b)}</span>
+            <span style="font-size:11px;font-weight:700;color:var(--muted);background:#fff;border:1px solid ${bcolor}44;padding:1px 8px;border-radius:10px;">${emps.length} คน</span>
+          </div>
+        </td>
+      </tr>`;
+      // Employee rows
+      emps.forEach(e=>{
+        rowNum++;
+        html += `<tr>
+          <td style="color:#bbb;font-size:11px">${rowNum}</td>
+          <td style="color:#bbb;font-size:10.5px;white-space:nowrap">${e.id}</td>
+          <td>
+            <div style="font-weight:600;font-size:12px">${e.name}</div>
+            <div style="font-size:10.5px;color:#aaa">${e.nickname}</div>
+          </td>
+          <td style="font-size:11px;color:${bcolor};font-weight:600;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${ccFull(e.brand)}">${ccFull(e.brand)}</td>
+          <td style="font-size:11.5px;white-space:nowrap">${e.dept}</td>
+          <td style="font-size:11.5px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
+          <td><span style="display:inline-block;padding:2px 8px;border-radius:9px;font-size:10.5px;font-weight:700;${LVL_STYLE[e.level]||'background:#eee;color:#666'}">${e.level}</span></td>
+          <td style="font-size:11px;color:${e.remark?'#d97706':'#ccc'};max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.remark}">${e.remark||'—'}</td>
+        </tr>`;
+      });
     });
-    if(filtered.length===0 && (ccEmpFilter.q||ccEmpFilter.dept||ccEmpFilter.level)) return '';
+  }
 
-    const isOpen = ccExpanded[b] !== false; // default open
-    const bcolor = ccColor(b);
-
-    // dept breakdown
-    const deptBrk = {};
-    allEmps.forEach(e=>{ deptBrk[e.dept]=(deptBrk[e.dept]||0)+1; });
-    const deptChips = Object.entries(deptBrk).sort((a,b)=>b[1]-a[1])
-      .map(([d,n])=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:${DEPT_COLORS[d]||'#888'}22;color:${DEPT_COLORS[d]||'#888'};border:1px solid ${DEPT_COLORS[d]||'#888'}44;">${d} ${n}</span>`).join(' ');
-
-    const empCards = filtered.map(e=>`
-      <div class="cc-emp-chip">
-        <div class="cc-emp-name">${e.name} <span style="color:#bbb;font-weight:400">(${e.nickname})</span></div>
-        <div class="cc-emp-meta">${e.dept} · ${e.position}</div>
-        <span class="cc-emp-level" style="${LVL_CHIP[e.level]||'background:#eee;color:#666'}">${e.level}</span>
-      </div>`).join('');
-
-    return `
-    <div class="cc-summary-block" id="ccblock-${b.replace(/\s/g,'_')}">
-      <div class="cc-summary-header">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div style="width:10px;height:10px;border-radius:50%;background:${bcolor};flex-shrink:0;"></div>
-          <div class="cc-summary-name">${ccFull(b)}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span class="cc-headcount">${allEmps.length} คน</span>
-          <button class="cc-toggle" onclick="toggleCC('${b.replace(/'/g,"\'")}', this)">
-            ${isOpen?'▲ ย่อ':'▼ ขยาย'}
-          </button>
-        </div>
-      </div>
-
-      <!-- dept breakdown pills -->
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">${deptChips}</div>
-
-      <!-- employee grid (collapsible) -->
-      <div id="ccgrid-${b.replace(/\s/g,'_')}" style="${isOpen?'':'display:none'}">
-        ${filtered.length===0
-          ? '<div style="color:var(--muted);font-size:12px;padding:8px 0;">ไม่พบพนักงานตามเงื่อนไขที่เลือก</div>'
-          : `<div class="cc-emp-grid">${empCards}</div>`}
-        <div style="margin-top:8px;font-size:11px;color:var(--muted);">
-          แสดง ${filtered.length} จาก ${allEmps.length} คน
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleCC(brand, btn){
-  const key = brand.replace(/\s/g,'_');
-  const grid = document.getElementById('ccgrid-'+key);
-  if(!grid) return;
-  const isOpen = grid.style.display !== 'none';
-  grid.style.display = isOpen ? 'none' : 'block';
-  btn.textContent = isOpen ? '▼ ขยาย' : '▲ ย่อ';
-  ccExpanded[brand] = !isOpen;
-}
-
-function expandAllCC(){
-  document.querySelectorAll('[id^="ccgrid-"]').forEach(g=>g.style.display='block');
-  document.querySelectorAll('[id^="ccblock-"] .cc-toggle').forEach(b=>b.textContent='▲ ย่อ');
-}
-function collapseAllCC(){
-  document.querySelectorAll('[id^="ccgrid-"]').forEach(g=>g.style.display='none');
-  document.querySelectorAll('[id^="ccblock-"] .cc-toggle').forEach(b=>b.textContent='▼ ขยาย');
+  document.getElementById('ccEmpBody').innerHTML = html;
 }
 
 // ══════════════════════════════════════════════════════════
