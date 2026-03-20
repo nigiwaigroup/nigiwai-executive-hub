@@ -101,6 +101,22 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .toast.err{border-left:3px solid var(--red);}
 
 @media(max-width:768px){.stat-grid{grid-template-columns:1fr 1fr;}.page{padding:12px;}.card{padding:14px;}.nav-tab{padding:0 10px;}}
+
+.menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:box-shadow .15s;}
+.menu-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.menu-item.hidden{opacity:.45;}
+.menu-drag{cursor:grab;color:#bbb;font-size:16px;padding:0 4px;user-select:none;}
+.menu-drag:active{cursor:grabbing;}
+.menu-icon-box{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;background:#f5f5f5;flex-shrink:0;}
+.menu-label{flex:1;font-size:13px;font-weight:600;}
+.menu-label-edit{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;width:100%;outline:none;}
+.menu-label-edit:focus{border-color:var(--red);}
+.toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-sw-track{position:absolute;inset:0;background:#ddd;border-radius:10px;transition:background .2s;cursor:pointer;}
+.toggle-sw input:checked + .toggle-sw-track{background:#27ae60;}
+.toggle-sw-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
+.toggle-sw input:checked ~ .toggle-sw-thumb{transform:translateX(16px);}
 </style>
 </head>
 <body>
@@ -135,6 +151,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
       <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
       <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
+      <a class="nav-tab" href="#" onclick="switchTab('menus',this);return false">⚙ จัดการเมนู</a>
       <div class="spacer"></div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:8px 0">
         <span id="syncStatus" style="font-size:10.5px;color:rgba(255,255,255,.45);max-width:220px">—</span>
@@ -249,6 +266,50 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div id="ccList"></div>
     </div>
+  </div>
+  </div>
+
+
+  <!-- TAB: MENU MANAGER -->
+  <div id="tab-menus" class="tab-pane">
+  <div class="page" style="padding-top:0">
+
+    <div class="card">
+      <div class="card-title" style="color:#2980b9">⚙ จัดการเมนู Dashboard (index.html)</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">ลาก เพื่อเรียงลำดับ · Toggle เพื่อซ่อน/แสดง · คลิก ✏ เพื่อแก้ชื่อ · กด <strong>บันทึก</strong> เพื่อ apply</div>
+      <div id="menuList"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="saveMenuConfig()" class="btn btn-red">💾 บันทึกการตั้งค่าเมนู</button>
+        <button onclick="resetMenuConfig()" class="btn btn-outline">↺ รีเซ็ตค่าเริ่มต้น</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:10px">
+        หมายเหตุ: การตั้งค่านี้จะบันทึกใน localStorage — เมื่อ index.html โหลด จะอ่านค่านี้มาแสดงเมนูและลำดับให้ถูกต้อง
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title gold">🎨 ตั้งค่าหน้า Dashboard</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ชื่อองค์กร (แสดงใน topbar)</label>
+          <input type="text" class="inp" id="cfgOrgName" style="width:100%;padding:7px 11px" placeholder="Nigiwai Group">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ปีที่แสดง (เช่น 2026)</label>
+          <input type="text" class="inp" id="cfgYear" style="width:100%;padding:7px 11px" placeholder="2026">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Admin Password (สำหรับล็อกหน้าเงินเดือน)</label>
+          <input type="text" class="inp" id="cfgPayrollPass" style="width:100%;padding:7px 11px" placeholder="nigiwai2026">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">รอบปรับเงินเดือน (label)</label>
+          <input type="text" class="inp" id="cfgPayrollRound" style="width:100%;padding:7px 11px" placeholder="ปรับ #01 03.26">
+        </div>
+      </div>
+      <button onclick="saveDashboardConfig()" class="btn btn-gold" style="margin-top:12px">💾 บันทึกการตั้งค่า Dashboard</button>
+    </div>
+
   </div>
   </div>
 
@@ -820,6 +881,155 @@ function switchTab(name, el) {
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   document.getElementById('tab-' + name).classList.add('active');
   el.classList.add('active');
+  if (name === 'menus') {
+    renderMenuList();
+    loadDashboardConfig();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MENU MANAGER
+// ═══════════════════════════════════════════════════════════════
+var DEFAULT_MENUS = [
+  { id:'overview',     icon:'🏢', label:'ภาพรวม',               visible:true  },
+  { id:'headcount',    icon:'👥', label:'Headcount',             visible:true  },
+  { id:'costcenter',   icon:'📋', label:'งบฯ ตาม Cost Center',  visible:true  },
+  { id:'mobility',     icon:'🔄', label:'Internal Mobility',     visible:true  },
+  { id:'distribution', icon:'📊', label:'Payroll Distribution',  visible:true  },
+  { id:'payroll',      icon:'💰', label:'ปรับเงินเดือน #01/26', visible:true  }
+];
+
+function getMenuConfig() {
+  return JSON.parse(localStorage.getItem('hr_menu_config') || 'null') || JSON.parse(JSON.stringify(DEFAULT_MENUS));
+}
+function saveMenuLS(menus) {
+  localStorage.setItem('hr_menu_config', JSON.stringify(menus));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+}
+
+function renderMenuList() {
+  var menus = getMenuConfig();
+  var wrap  = document.getElementById('menuList');
+  wrap.innerHTML = '';
+  menus.forEach(function(m, i) {
+    var item = document.createElement('div');
+    item.className = 'menu-item' + (m.visible ? '' : ' hidden');
+    item.id = 'mi-' + m.id;
+    item.setAttribute('draggable','true');
+    item.ondragstart = function(e){ dragStart(e,i); };
+    item.ondragover  = function(e){ dragOver(e); };
+    item.ondrop      = function(e){ dragDrop(e,i); };
+
+    var drag = document.createElement('span');
+    drag.className = 'menu-drag'; drag.title = 'ลากเพื่อเรียงลำดับ'; drag.textContent = '⋮⋮';
+
+    var iconBox = document.createElement('div');
+    iconBox.className = 'menu-icon-box'; iconBox.textContent = m.icon || '';
+
+    var labelWrap = document.createElement('div');
+    labelWrap.style.flex = '1';
+    var inp = document.createElement('input');
+    inp.className = 'menu-label-edit';
+    inp.id = 'mlabel-' + m.id;
+    inp.value = m.label || '';
+    inp.placeholder = 'ชื่อเมนู';
+    labelWrap.appendChild(inp);
+
+    var ctrlWrap = document.createElement('div');
+    ctrlWrap.style.cssText = 'display:flex;align-items:center;gap:8px';
+
+    var visLabel = document.createElement('span');
+    visLabel.style.cssText = 'font-size:11px;color:var(--muted)';
+    visLabel.textContent = m.visible ? 'แสดง' : 'ซ่อน';
+
+    var sw = document.createElement('label');
+    sw.className = 'toggle-sw';
+    var swInp = document.createElement('input');
+    swInp.type = 'checkbox';
+    swInp.checked = !!m.visible;
+    var menuId = m.id;
+    swInp.onchange = (function(id, lbl){ return function(){ toggleMenu(id, this.checked, lbl); }; })(menuId, visLabel);
+    var swTrack = document.createElement('div'); swTrack.className = 'toggle-sw-track';
+    var swThumb = document.createElement('div'); swThumb.className = 'toggle-sw-thumb';
+    sw.appendChild(swInp); sw.appendChild(swTrack); sw.appendChild(swThumb);
+
+    ctrlWrap.appendChild(visLabel);
+    ctrlWrap.appendChild(sw);
+
+    item.appendChild(drag);
+    item.appendChild(iconBox);
+    item.appendChild(labelWrap);
+    item.appendChild(ctrlWrap);
+    wrap.appendChild(item);
+  });
+}
+
+function toggleMenu(id, visible, labelEl) {
+  var menus = getMenuConfig();
+  var m = menus.find(function(x) { return x.id === id; });
+  if (m) {
+    m.visible = visible;
+    if(labelEl) labelEl.textContent = visible ? 'แสดง' : 'ซ่อน';
+    var item = document.getElementById('mi-' + id);
+    if(item) item.className = 'menu-item' + (visible ? '' : ' hidden');
+    saveMenuLS(menus);
+  }
+}
+// Drag & Drop reorder
+var dragIdx = null;
+function dragStart(e, idx) {
+  dragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dragDrop(e, toIdx) {
+  e.preventDefault();
+  if (dragIdx === null || dragIdx === toIdx) return;
+  var menus = getMenuConfig();
+  var moved = menus.splice(dragIdx, 1)[0];
+  menus.splice(toIdx, 0, moved);
+  saveMenuLS(menus);
+  dragIdx = null;
+  renderMenuList();
+  toast('↕ เรียงลำดับเมนูใหม่แล้ว', 'ok');
+}
+
+function saveMenuConfig() {
+  var menus = getMenuConfig();
+  // อ่านชื่อที่แก้ไขจาก input
+  menus.forEach(function(m) {
+    var inp = document.getElementById('mlabel-' + m.id);
+    if (inp) m.label = inp.value.trim() || m.label;
+  });
+  saveMenuLS(menus);
+  toast('✅ บันทึกการตั้งค่าเมนูแล้ว — Reload index.html เพื่อดูผล', 'ok');
+}
+
+function resetMenuConfig() {
+  if (!confirm('รีเซ็ตเมนูกลับค่าเริ่มต้น?')) return;
+  localStorage.removeItem('hr_menu_config');
+  renderMenuList();
+  toast('↺ รีเซ็ตเมนูแล้ว', 'ok');
+}
+
+function saveDashboardConfig() {
+  var cfg = {
+    orgName:      document.getElementById('cfgOrgName').value.trim(),
+    year:         document.getElementById('cfgYear').value.trim(),
+    payrollPass:  document.getElementById('cfgPayrollPass').value.trim(),
+    payrollRound: document.getElementById('cfgPayrollRound').value.trim()
+  };
+  localStorage.setItem('hr_dashboard_config', JSON.stringify(cfg));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+  toast('✅ บันทึกการตั้งค่า Dashboard แล้ว', 'ok');
+}
+
+function loadDashboardConfig() {
+  var cfg = JSON.parse(localStorage.getItem('hr_dashboard_config') || '{}');
+  if (cfg.orgName)     document.getElementById('cfgOrgName').value = cfg.orgName;
+  if (cfg.year)        document.getElementById('cfgYear').value = cfg.year;
+  if (cfg.payrollPass) document.getElementById('cfgPayrollPass').value = cfg.payrollPass;
+  if (cfg.payrollRound)document.getElementById('cfgPayrollRound').value = cfg.payrollRound;
 }
 
 // ═══════════════════════════════════════════════════════════════
