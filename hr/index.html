@@ -188,12 +188,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
       <div class="logo-c">NG</div>
       <div><div class="logo-t">Nigiwai Group</div><div class="logo-s">HR Dashboard 2026</div></div>
     </div>
-    <a class="nav-tab active"  href="#" onclick="gotoTab('overview',this);return false;">🏢 ภาพรวม</a>
-    <a class="nav-tab"         href="#" onclick="gotoTab('headcount',this);return false;">👥 Headcount</a>
-    <a class="nav-tab"         href="#" onclick="gotoTab('costcenter',this);return false;">📋 งบฯ ตาม Cost Center</a>
-    <a class="nav-tab"         href="#" onclick="gotoTab('mobility',this);return false;">🔄 Internal Mobility</a>
-    <a class="nav-tab"         href="#" onclick="gotoTab('distribution',this);return false;">📊 Payroll Distribution</a>
-    <a class="nav-tab"         href="#" onclick="gotoTab('payroll',this);return false;">💰 ปรับเงินเดือน #01/26</a>
+    <div id="dynTabs" style="display:flex;align-items:center;"></div>
     <div class="spacer"></div>
     <a href="admin.html" class="admin-btn">⚙ Admin</a>
   </div>
@@ -327,13 +322,21 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
 <div id="tab-distribution" class="tab-content">
 <div class="page fi">
   <div class="page-title"><div class="icon-box">📊</div><h1>Payroll Distribution — การกระจายเงินเดือน</h1></div>
-  <div class="g2">
-    <div class="card"><div class="card-title">รายได้รวม ปี 69 แยกตาม Cost Center</div><canvas id="distCC" height="220"></canvas></div>
-    <div class="card"><div class="card-title green">รายได้รวม ปี 69 แยกตามแผนก</div><canvas id="distDept" height="220"></canvas></div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">รายได้รวม ปี 69 แยกตาม Cost Center</div>
+    <canvas id="distCC"></canvas>
   </div>
-  <div class="g2">
-    <div class="card"><div class="card-title gold">เปรียบเทียบ ปี 68 vs 69</div><canvas id="distYoY" height="240"></canvas></div>
-    <div class="card"><div class="card-title purple" style="--c:#8e44ad">การกระจายตามระดับตำแหน่ง</div><canvas id="distLevel" height="240"></canvas></div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title green">รายได้รวม ปี 69 แยกตามแผนก</div>
+    <canvas id="distDept"></canvas>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title gold">เปรียบเทียบรายได้รวม ปี 68 vs ปี 69 แยกตาม Cost Center</div>
+    <canvas id="distYoY"></canvas>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title" style="color:#8e44ad">การกระจายตามระดับตำแหน่ง</div>
+    <div style="display:flex;justify-content:center"><canvas id="distLevel" style="max-width:480px"></canvas></div>
   </div>
 </div>
 </div>
@@ -629,39 +632,132 @@ function buildMobility(){
 function buildDist(){
   const EMP=getEMP();
   const brandGrp=grp(EMP,'brand'), deptGrp=grp(EMP,'dept'), levelGrp=grp(EMP,'level');
-  const brands=Object.keys(brandGrp);
-  const bLabels=brands.map(b=>shortCC(ccFull(b)));
+
+  // เรียงตาม income สูง-ต่ำ
+  const brands=Object.keys(brandGrp).sort((a,b)=>sum(brandGrp[b],'totalIncome69')-sum(brandGrp[a],'totalIncome69'));
+  const bFull=brands.map(b=>ccFull(b));   // ชื่อเต็ม
   const bColors=brands.map(b=>ccColor(b));
-  const tFmt=v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v;
+  const tFmt=v=>v>=1e6?(v/1e6).toFixed(2)+' M':v>=1e3?(v/1e3).toFixed(0)+' K':v;
   Chart.defaults.font.family='Sarabun';
 
+  // ── Chart 1: รายได้ ปี 69 ตาม Cost Center (แนวนอน) ────────────────────────
   makeChart('distCC',{
     type:'bar',
-    data:{labels:bLabels,datasets:[{data:brands.map(b=>sum(brandGrp[b],'totalIncome69')),backgroundColor:bColors,borderRadius:5}]},
-    options:{plugins:{legend:{display:false},tooltip:{callbacks:{title:([t])=>ccFull(brands[t.dataIndex])}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9},maxRotation:30}}},responsive:true}
+    indexAxis:'y',
+    data:{
+      labels:bFull,
+      datasets:[{
+        label:'รายได้รวม ปี 69',
+        data:brands.map(b=>sum(brandGrp[b],'totalIncome69')),
+        backgroundColor:bColors,
+        borderRadius:4,
+        barThickness:22
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.x.toLocaleString('th-TH')}}
+      },
+      scales:{
+        x:{ticks:{callback:tFmt},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:11}}}
+      }
+    }
   });
 
+  // ── Chart 2: รายได้ ปี 69 ตามแผนก (แนวนอน) ────────────────────────────────
   const depts=Object.keys(deptGrp).sort((a,b)=>sum(deptGrp[b],'totalIncome69')-sum(deptGrp[a],'totalIncome69'));
   makeChart('distDept',{
-    type:'bar',indexAxis:'y',
-    data:{labels:depts,datasets:[{data:depts.map(d=>sum(deptGrp[d],'totalIncome69')),backgroundColor:'#27ae60bb',borderRadius:4}]},
-    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{callback:tFmt}},y:{ticks:{font:{size:10}}}},responsive:true}
+    type:'bar',
+    indexAxis:'y',
+    data:{
+      labels:depts,
+      datasets:[{
+        label:'รายได้รวม ปี 69',
+        data:depts.map(d=>sum(deptGrp[d],'totalIncome69')),
+        backgroundColor:'#27ae60cc',
+        borderRadius:4,
+        barThickness:22
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.x.toLocaleString('th-TH')}}
+      },
+      scales:{
+        x:{ticks:{callback:tFmt},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:11}}}
+      }
+    }
   });
 
+  // ── Chart 3: เปรียบเทียบ ปี 68 vs 69 ตาม Cost Center (แนวนอน) ────────────
   makeChart('distYoY',{
     type:'bar',
-    data:{labels:bLabels,datasets:[
-      {label:'ปี 68',data:brands.map(b=>sum(brandGrp[b],'totalIncome68')),backgroundColor:'#ddd',borderRadius:4},
-      {label:'ปี 69',data:brands.map(b=>sum(brandGrp[b],'totalIncome69')),backgroundColor:bColors.map(c=>c+'cc'),borderRadius:4}
-    ]},
-    options:{plugins:{legend:{labels:{font:{size:11}}},tooltip:{callbacks:{title:([t])=>ccFull(brands[t.dataIndex])}}},scales:{y:{ticks:{callback:tFmt}},x:{ticks:{font:{size:9},maxRotation:30}}},responsive:true}
+    indexAxis:'y',
+    data:{
+      labels:bFull,
+      datasets:[
+        {
+          label:'ปี 68',
+          data:brands.map(b=>sum(brandGrp[b],'totalIncome68')),
+          backgroundColor:'rgba(180,180,180,0.6)',
+          borderRadius:3,
+          barThickness:14
+        },
+        {
+          label:'ปี 69',
+          data:brands.map(b=>sum(brandGrp[b],'totalIncome69')),
+          backgroundColor:bColors.map(c=>c+'dd'),
+          borderRadius:3,
+          barThickness:14
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{
+          display:true,
+          position:'top',
+          labels:{font:{size:12},usePointStyle:true,boxWidth:10}
+        },
+        tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.x.toLocaleString('th-TH')}}
+      },
+      scales:{
+        x:{ticks:{callback:tFmt},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{ticks:{font:{size:11}}}
+      }
+    }
   });
 
+  // ── Chart 4: Donut ตามระดับตำแหน่ง ─────────────────────────────────────────
   const ll=LVL_O.filter(l=>levelGrp[l]);
   makeChart('distLevel',{
     type:'doughnut',
-    data:{labels:ll,datasets:[{data:ll.map(l=>levelGrp[l]?.length||0),backgroundColor:ll.map(l=>LVL_C[l]||'#888'),borderWidth:2,borderColor:'#fff'}]},
-    options:{cutout:'55%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}
+    data:{
+      labels:ll,
+      datasets:[{
+        data:ll.map(l=>levelGrp[l]?.length||0),
+        backgroundColor:ll.map(l=>LVL_C[l]||'#888'),
+        borderWidth:2,
+        borderColor:'#fff'
+      }]
+    },
+    options:{
+      cutout:'55%',
+      plugins:{
+        legend:{
+          position:'right',
+          labels:{font:{size:12},boxWidth:14,padding:14}
+        },
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} คน`}}
+      }
+    }
   });
 }
 
@@ -920,16 +1016,69 @@ function renderCCEmpTable(){
 // (ใช้ได้เมื่อเปิด 2 tab ในเบราว์เซอร์เดียวกัน)
 // ══════════════════════════════════════════════════════════
 window.addEventListener('storage', e=>{
-  if(e.key==='hr_db'||e.key==='hr_cc'){
-    renderTab(currentTab);
-  }
+  if(e.key==='hr_db'||e.key==='hr_cc') renderTab(currentTab);
+  if(e.key==='hr_menu_config') buildTabs();
 });
+
+// ══════════════════════════════════════════════════════════
+// MENU CONFIG — อ่านจาก localStorage ที่ Admin ตั้งค่าไว้
+// ══════════════════════════════════════════════════════════
+var ALL_TABS = [
+  {id:'overview',     icon:'🏢', label:'ภาพรวม'},
+  {id:'headcount',    icon:'👥', label:'Headcount'},
+  {id:'costcenter',   icon:'📋', label:'งบฯ ตาม Cost Center'},
+  {id:'mobility',     icon:'🔄', label:'Internal Mobility'},
+  {id:'distribution', icon:'📊', label:'Payroll Distribution'},
+  {id:'payroll',      icon:'💰', label:'ปรับเงินเดือน #01/26'}
+];
+
+function getMenuCfg(){
+  var saved = JSON.parse(localStorage.getItem('hr_menu_config')||'null');
+  if(saved) return saved;
+  return ALL_TABS.map(function(t){ return {id:t.id,icon:t.icon,label:t.label,visible:true}; });
+}
+
+function buildTabs(){
+  var cfg  = getMenuCfg();
+  var wrap = document.getElementById('dynTabs');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  var firstId = null;
+  cfg.forEach(function(m){
+    if(!m.visible) return;
+    if(!firstId) firstId = m.id;
+    var def  = ALL_TABS.find(function(t){ return t.id===m.id; })||{};
+    var icon = m.icon||def.icon||'';
+    var a    = document.createElement('a');
+    a.className  = 'nav-tab';
+    a.href       = '#';
+    a.innerHTML  = icon + ' ' + (m.label||def.label||m.id);
+    a.setAttribute('data-tab', m.id);
+    a.onclick    = (function(id,el){ return function(){ gotoTab(id,el); return false; }; })(m.id, a);
+    wrap.appendChild(a);
+  });
+  // activate current tab or first
+  var toShow = currentTab;
+  var tabEl  = document.getElementById('tab-'+toShow);
+  if(!tabEl || !cfg.find(function(m){ return m.id===toShow && m.visible; })){
+    toShow = firstId || 'overview';
+  }
+  document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var showEl = document.getElementById('tab-'+toShow);
+  if(showEl) showEl.classList.add('active');
+  var navEl = wrap.querySelector('[data-tab="'+toShow+'"]');
+  if(navEl) navEl.classList.add('active');
+  renderTab(toShow);
+}
 
 // ══════════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════════
-buildOverview();
+buildTabs();
 updateSyncLabel();
+
+
 </script>
 </body>
 </html>
