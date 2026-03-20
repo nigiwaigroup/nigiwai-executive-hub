@@ -126,11 +126,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;">
         <div>
           <label class="form-label">Google Apps Script Deployment URL (doGet/doPost)</label>
-          <input type="text" id="gasUrl" class="admin-input" placeholder="https://script.google.com/macros/s/AKfycbykbwFqK5rGp2pggwKA1C8EI8Nj344XO52_jnKIaHeqrhX3YVbOm4dxE_posirHORv9/exec">
+          <input type="text" id="gasUrl" class="admin-input" placeholder="https://script.google.com/macros/s/AKfy...../exec">
         </div>
         <div>
           <label class="form-label">Google Sheet ID (สำหรับ Read CSV)</label>
-          <input type="text" id="sheetId" class="admin-input" placeholder="1KRUohNe-7BiRH_LXDE8HTRTtTdUt-aPkJ3U54zKoL_0">
+          <input type="text" id="sheetId" class="admin-input" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
         </div>
         <button class="btn-gold" onclick="saveConfig()" style="white-space:nowrap">💾 บันทึกการตั้งค่า</button>
       </div>
@@ -355,8 +355,9 @@ function renderStats() {
 function renderAdminTable(data) {
   document.getElementById('adminCount').textContent = `แสดง ${data.length} รายการ`;
   const BRAND_COLORS = {'Nigiwai Group':'#c9a227','Nigiwai Goods Wealth':'#3b82f6','Nigiwai Construction':'#8b5cf6','NGWC HQ':'#10b981','NGWC Don Mueang':'#f59e0b','Kinosuke Group':'#ef4444'};
-  document.getElementById('adminTableBody').innerHTML = data.map((e,i) => {
-    const idx = DB.indexOf(e);
+  document.getElementById('adminTableBody').innerHTML = data.map((e) => {
+    // ใช้ findIndex จาก ID เพื่อให้ได้ index ที่แน่นอนเสมอ
+    const idx = DB.findIndex(d => d.id === e.id);
     const c = BRAND_COLORS[e.brand]||'#6b7280';
     return `<tr>
       <td style="font-size:0.75rem;color:var(--text-muted)">${e.id}</td>
