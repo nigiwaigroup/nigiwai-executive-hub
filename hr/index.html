@@ -152,6 +152,31 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
 }
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi .3s ease forwards;}
+
+/* COST CENTER SUMMARY */
+.cc-summary-block{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;}
+.cc-summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.cc-summary-name{font-size:13px;font-weight:700;color:var(--text);}
+.cc-headcount{font-size:12px;font-weight:700;color:var(--muted);background:#f5f5f5;padding:3px 10px;border-radius:10px;}
+.cc-yoy-row{display:grid;grid-template-columns:40px 1fr 90px;align-items:center;gap:10px;margin-bottom:6px;}
+.cc-yoy-label{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding:2px 5px;border-radius:4px;}
+.cc-yoy-label.yr68{background:#e8f4ff;color:#2980b9;}
+.cc-yoy-label.yr69{background:#e8fff4;color:#27ae60;}
+.cc-yoy-track{background:#f0f0f0;border-radius:4px;height:22px;overflow:hidden;position:relative;}
+.cc-yoy-fill{height:100%;border-radius:4px;transition:width .7s ease;}
+.cc-yoy-val{font-size:11.5px;font-weight:700;text-align:right;}
+.cc-yoy-val.c68{color:#2980b9;}
+.cc-yoy-val.c69{color:#27ae60;}
+.cc-diff-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:8px;}
+.cc-diff-up{background:#eafaf1;color:#1e8449;border:1px solid #a9dfbf;}
+.cc-diff-dn{background:#ffebeb;color:#922b21;border:1px solid #f5c6c6;}
+.cc-emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #f5f5f5;}
+.cc-emp-chip{background:#f8f8f8;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:11.5px;}
+.cc-emp-name{font-weight:600;color:var(--text);margin-bottom:2px;}
+.cc-emp-meta{font-size:10.5px;color:var(--muted);}
+.cc-emp-level{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-top:3px;}
+.cc-toggle{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--muted);transition:all .15s;}
+.cc-toggle:hover{border-color:var(--red);color:var(--red);}
 </style>
 </head>
 <body>
@@ -165,6 +190,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
     </div>
     <a class="nav-tab active"  href="#" onclick="gotoTab('overview',this);return false;">🏢 ภาพรวม</a>
     <a class="nav-tab"         href="#" onclick="gotoTab('headcount',this);return false;">👥 Headcount</a>
+    <a class="nav-tab"         href="#" onclick="gotoTab('costcenter',this);return false;">📋 งบฯ ตาม Cost Center</a>
     <a class="nav-tab"         href="#" onclick="gotoTab('mobility',this);return false;">🔄 Internal Mobility</a>
     <a class="nav-tab"         href="#" onclick="gotoTab('distribution',this);return false;">📊 Payroll Distribution</a>
     <a class="nav-tab"         href="#" onclick="gotoTab('payroll',this);return false;">💰 ปรับเงินเดือน #01/26</a>
@@ -240,6 +266,36 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);fon
   <div class="card"><div class="card-title">รายละเอียดการโอนย้าย</div><div id="mob-cards"></div></div>
 </div>
 </div>
+
+<!-- ══ งบประมาณรวมตาม Cost Center ══ -->
+<div id="tab-costcenter" class="tab-content">
+<div class="page fi">
+  <div class="page-title"><div class="icon-box">📋</div><h1>งบประมาณรวมตาม Cost Center</h1></div>
+
+  <!-- KPI Summary -->
+  <div class="kpi-grid" id="cc-kpis" style="margin-bottom:14px;"></div>
+
+  <!-- YoY Section -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title blue">🔵 เปรียบเทียบ รายได้รวม ปี 68 VS ปี 69 แยก COST CENTER (ปัจจุบัน)</div>
+    <div id="cc-yoy-blocks"></div>
+  </div>
+
+  <!-- Dept summary per CC -->
+  <div class="card">
+    <div class="card-title green">👥 รายชื่อพนักงานแยกตาม Cost Center</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <input type="text" class="ctrl" id="ccEmpQ" placeholder="🔍 ค้นหาชื่อ..." style="width:160px" oninput="filterCCEmp()">
+      <select class="ctrl" id="ccEmpDept" onchange="filterCCEmp()"><option value="">— ทุกแผนก —</option></select>
+      <select class="ctrl" id="ccEmpLevel" onchange="filterCCEmp()"><option value="">— ทุกระดับ —</option></select>
+      <button onclick="expandAllCC()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11.5px;">펼 ขยายทั้งหมด</button>
+      <button onclick="collapseAllCC()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11.5px;">▲ ย่อทั้งหมด</button>
+    </div>
+    <div id="cc-emp-blocks"></div>
+  </div>
+</div>
+</div>
+
 
 <!-- ══ Payroll Distribution ══ -->
 <div id="tab-distribution" class="tab-content">
@@ -583,6 +639,7 @@ function renderTab(name){
   if(name==='headcount')   { hcReady=false; buildHeadcount(); } // reset filter dropdowns เมื่อ tab กลับมา
   if(name==='mobility')    buildMobility();
   if(name==='distribution')buildDist();
+  if(name==='costcenter')  buildCostCenter();
   // payroll rendered on pin unlock
   updateSyncLabel();
 }
@@ -592,6 +649,179 @@ function updateSyncLabel(){
   document.getElementById('syncLbl').textContent = t
     ? 'อัปเดตล่าสุด: '+new Date(parseInt(t)).toLocaleString('th-TH')
     : 'ข้อมูลสด จาก Local Storage';
+}
+
+
+// ══════════════════════════════════════════════════════════
+// COST CENTER SUMMARY + EMPLOYEE LIST
+// ══════════════════════════════════════════════════════════
+let ccEmpFilter = { q:'', dept:'', level:'' };
+let ccExpanded  = {};  // { brandKey: true/false }
+
+function buildCostCenter(){
+  const EMP = getEMP();
+  const brandGrp = grp(EMP,'brand');
+  const brands = Object.keys(brandGrp).sort((a,b)=>{
+    return grp(EMP,'brand')[b].length - grp(EMP,'brand')[a].length;
+  });
+
+  // KPI
+  const inc68tot = sum(EMP,'totalIncome68'), inc69tot = sum(EMP,'totalIncome69');
+  const adj = EMP.filter(e=>e.totalIncome69>e.totalIncome68);
+  document.getElementById('cc-kpis').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Headcount รวม</div><div class="kpi-val red">${EMP.length} คน</div><div class="kpi-sub">ทุก Cost Center</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">Cost Center ทั้งหมด</div><div class="kpi-val blue">${brands.length}</div><div class="kpi-sub">กลุ่มบริษัท</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">รายได้รวม ปี 68</div><div class="kpi-val gold" style="font-size:18px">฿${fmt(inc68tot)}</div><div class="kpi-sub">บาท/เดือน</div></div>
+    <div class="kpi-card green"><div class="kpi-label">รายได้รวม ปี 69</div><div class="kpi-val green" style="font-size:18px">฿${fmt(inc69tot)}</div><div class="kpi-sub">บาท/เดือน</div></div>
+    <div class="kpi-card ${inc69tot>=inc68tot?'green':''}"><div class="kpi-label">Δ ปี 68→69</div><div class="kpi-val ${inc69tot>=inc68tot?'green':'red'}" style="font-size:18px">${inc69tot>=inc68tot?'+':''} ฿${fmt(Math.abs(inc69tot-inc68tot))}</div><div class="kpi-sub">(${inc68tot>0?((inc69tot-inc68tot)/inc68tot*100).toFixed(2):0}%)</div></div>
+  `;
+
+  // YoY Blocks
+  const allMax = Math.max(...brands.map(b=>Math.max(sum(brandGrp[b],'totalIncome68'),sum(brandGrp[b],'totalIncome69'))));
+  document.getElementById('cc-yoy-blocks').innerHTML = brands.map(b=>{
+    const emps = brandGrp[b];
+    const i68  = sum(emps,'totalIncome68');
+    const i69  = sum(emps,'totalIncome69');
+    const diff = i69 - i68;
+    const pct  = i68>0 ? (diff/i68*100).toFixed(2) : 0;
+    const p68  = allMax>0?(i68/allMax*100).toFixed(1):0;
+    const p69  = allMax>0?(i69/allMax*100).toFixed(1):0;
+    const up   = diff >= 0;
+    const bcolor = ccColor(b);
+    return `
+    <div style="padding:14px 0;border-bottom:1px solid #f0f0f0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${ccFull(b)}</div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);background:#f5f5f5;padding:3px 10px;border-radius:10px;">${emps.length} คน</div>
+      </div>
+      <div class="cc-yoy-row">
+        <div class="cc-yoy-label yr68">ปี 68</div>
+        <div class="cc-yoy-track"><div class="cc-yoy-fill" style="width:${p68}%;background:#2980b9cc;"></div></div>
+        <div class="cc-yoy-val c68">฿${fmt(i68)}</div>
+      </div>
+      <div class="cc-yoy-row">
+        <div class="cc-yoy-label yr69">ปี 69</div>
+        <div class="cc-yoy-track"><div class="cc-yoy-fill" style="width:${p69}%;background:${bcolor}cc;"></div></div>
+        <div class="cc-yoy-val c69">฿${fmt(i69)}</div>
+      </div>
+      <span class="cc-diff-badge ${up?'cc-diff-up':'cc-diff-dn'}">
+        ${up?'▲':'▼'} ${up?'+':''}฿${fmt(Math.abs(diff))} บาท/เดือน (${up?'+':''}${pct}%)
+      </span>
+    </div>`;
+  }).join('');
+
+  // Dept + Level filter dropdowns
+  const df = document.getElementById('ccEmpDept');
+  const lf = document.getElementById('ccEmpLevel');
+  const prevD = df.value, prevL = lf.value;
+  df.innerHTML = '<option value="">— ทุกแผนก —</option>';
+  lf.innerHTML = '<option value="">— ทุกระดับ —</option>';
+  [...new Set(EMP.map(e=>e.dept))].sort().forEach(d=>df.innerHTML+=`<option value="${d}" ${prevD===d?'selected':''}>${d}</option>`);
+  [...new Set(EMP.map(e=>e.level))].sort().forEach(l=>lf.innerHTML+=`<option value="${l}" ${prevL===l?'selected':''}>${l}</option>`);
+
+  renderCCEmpBlocks(EMP, brands, brandGrp);
+}
+
+function filterCCEmp(){
+  ccEmpFilter.q     = document.getElementById('ccEmpQ').value.toLowerCase();
+  ccEmpFilter.dept  = document.getElementById('ccEmpDept').value;
+  ccEmpFilter.level = document.getElementById('ccEmpLevel').value;
+  const EMP = getEMP();
+  const brandGrp = grp(EMP,'brand');
+  const brands = Object.keys(brandGrp).sort((a,b)=>brandGrp[b].length-brandGrp[a].length);
+  renderCCEmpBlocks(EMP, brands, brandGrp);
+}
+
+function renderCCEmpBlocks(EMP, brands, brandGrp){
+  const LVL_CHIP = {
+    'Officer':'background:#eaf0ff;color:#2563eb',
+    'Leader and Supervisor':'background:#f3ebff;color:#7c3aed',
+    'Manager':'background:#fff8e6;color:#d97706',
+    'Chief and Director':'background:#ffebeb;color:#c0392b',
+    'Senior Officer':'background:#eafaf1;color:#27ae60',
+    'Consultant':'background:#fef9e6;color:#b45309'
+  };
+  const DEPT_COLORS = {
+    'Operation':'#2980b9','Executive':'#c0392b','Marketing':'#8e44ad',
+    'Financial And Account':'#27ae60','Sales':'#d35400','Warehouse & Logistics':'#16a085',
+    'Human Resource':'#e91e63','Construction':'#795548','Information Technology':'#607d8b'
+  };
+
+  document.getElementById('cc-emp-blocks').innerHTML = brands.map(b=>{
+    const allEmps = brandGrp[b] || [];
+    const filtered = allEmps.filter(e=>{
+      const q = ccEmpFilter.q;
+      const matchQ  = !q || e.name.toLowerCase().includes(q) || e.nickname.toLowerCase().includes(q) || e.id.toLowerCase().includes(q) || e.position.toLowerCase().includes(q);
+      const matchD  = !ccEmpFilter.dept  || e.dept===ccEmpFilter.dept;
+      const matchL  = !ccEmpFilter.level || e.level===ccEmpFilter.level;
+      return matchQ && matchD && matchL;
+    });
+    if(filtered.length===0 && (ccEmpFilter.q||ccEmpFilter.dept||ccEmpFilter.level)) return '';
+
+    const isOpen = ccExpanded[b] !== false; // default open
+    const bcolor = ccColor(b);
+
+    // dept breakdown
+    const deptBrk = {};
+    allEmps.forEach(e=>{ deptBrk[e.dept]=(deptBrk[e.dept]||0)+1; });
+    const deptChips = Object.entries(deptBrk).sort((a,b)=>b[1]-a[1])
+      .map(([d,n])=>`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:${DEPT_COLORS[d]||'#888'}22;color:${DEPT_COLORS[d]||'#888'};border:1px solid ${DEPT_COLORS[d]||'#888'}44;">${d} ${n}</span>`).join(' ');
+
+    const empCards = filtered.map(e=>`
+      <div class="cc-emp-chip">
+        <div class="cc-emp-name">${e.name} <span style="color:#bbb;font-weight:400">(${e.nickname})</span></div>
+        <div class="cc-emp-meta">${e.dept} · ${e.position}</div>
+        <span class="cc-emp-level" style="${LVL_CHIP[e.level]||'background:#eee;color:#666'}">${e.level}</span>
+      </div>`).join('');
+
+    return `
+    <div class="cc-summary-block" id="ccblock-${b.replace(/\s/g,'_')}">
+      <div class="cc-summary-header">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${bcolor};flex-shrink:0;"></div>
+          <div class="cc-summary-name">${ccFull(b)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="cc-headcount">${allEmps.length} คน</span>
+          <button class="cc-toggle" onclick="toggleCC('${b.replace(/'/g,"\'")}', this)">
+            ${isOpen?'▲ ย่อ':'▼ ขยาย'}
+          </button>
+        </div>
+      </div>
+
+      <!-- dept breakdown pills -->
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">${deptChips}</div>
+
+      <!-- employee grid (collapsible) -->
+      <div id="ccgrid-${b.replace(/\s/g,'_')}" style="${isOpen?'':'display:none'}">
+        ${filtered.length===0
+          ? '<div style="color:var(--muted);font-size:12px;padding:8px 0;">ไม่พบพนักงานตามเงื่อนไขที่เลือก</div>'
+          : `<div class="cc-emp-grid">${empCards}</div>`}
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+          แสดง ${filtered.length} จาก ${allEmps.length} คน
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCC(brand, btn){
+  const key = brand.replace(/\s/g,'_');
+  const grid = document.getElementById('ccgrid-'+key);
+  if(!grid) return;
+  const isOpen = grid.style.display !== 'none';
+  grid.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '▼ ขยาย' : '▲ ย่อ';
+  ccExpanded[brand] = !isOpen;
+}
+
+function expandAllCC(){
+  document.querySelectorAll('[id^="ccgrid-"]').forEach(g=>g.style.display='block');
+  document.querySelectorAll('[id^="ccblock-"] .cc-toggle').forEach(b=>b.textContent='▲ ย่อ');
+}
+function collapseAllCC(){
+  document.querySelectorAll('[id^="ccgrid-"]').forEach(g=>g.style.display='none');
+  document.querySelectorAll('[id^="ccblock-"] .cc-toggle').forEach(b=>b.textContent='▼ ขยาย');
 }
 
 // ══════════════════════════════════════════════════════════
