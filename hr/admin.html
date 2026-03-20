@@ -117,6 +117,19 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .toggle-sw input:checked + .toggle-sw-track{background:#27ae60;}
 .toggle-sw-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
 .toggle-sw input:checked ~ .toggle-sw-thumb{transform:translateX(16px);}
+/* ─── Sortable column headers ─── */
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap;}
+th.sortable:hover{background:rgba(192,146,39,.13);}
+th.sortable.sort-asc,th.sortable.sort-desc{background:rgba(192,146,39,.18);color:var(--gold);}
+.sort-ico{font-size:10px;opacity:.45;margin-left:2px;}
+th.sortable.sort-asc .sort-ico,th.sortable.sort-desc .sort-ico{opacity:1;}
+/* ─── Mobility employee search dropdown ─── */
+#mobEmpDrop .mob-opt{padding:8px 12px;cursor:pointer;font-size:12.5px;border-bottom:1px solid #f3f0e8;transition:background .12s;}
+#mobEmpDrop .mob-opt:last-child{border-bottom:none;}
+#mobEmpDrop .mob-opt:hover,#mobEmpDrop .mob-opt.active{background:#fdf6e3;}
+#mobEmpDrop .mob-opt .mob-opt-name{font-weight:600;color:#1a1a2e;}
+#mobEmpDrop .mob-opt .mob-opt-sub{font-size:10.5px;color:#aaa;margin-top:1px;}
+#mobEmpDrop .mob-opt .mob-opt-cc{font-size:10.5px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -185,7 +198,20 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">Δ</th><th>หมายเหตุ</th><th style="text-align:center">จัดการ</th></tr></thead>
+          <thead id="empThead"><tr>
+  <th>#</th>
+  <th class="sortable" onclick="sortEmp('id')" id="sth-id">รหัส <span class="sort-ico" id="si-id">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('name')" id="sth-name">ชื่อ-นามสกุล <span class="sort-ico" id="si-name">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('brand')" id="sth-brand">Cost Center <span class="sort-ico" id="si-brand">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('dept')" id="sth-dept">แผนก <span class="sort-ico" id="si-dept">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('position')" id="sth-position">ตำแหน่ง <span class="sort-ico" id="si-position">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('level')" id="sth-level">ระดับ <span class="sort-ico" id="si-level">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('baseSalary69')" id="sth-baseSalary69" style="text-align:right">เงินเดือน 69 <span class="sort-ico" id="si-baseSalary69">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('totalIncome69')" id="sth-totalIncome69" style="text-align:right">รายได้รวม 69 <span class="sort-ico" id="si-totalIncome69">⇅</span></th>
+  <th class="sortable" onclick="sortEmp('_diff')" id="sth-_diff" style="text-align:right">Δ <span class="sort-ico" id="si-_diff">⇅</span></th>
+  <th>หมายเหตุ</th>
+  <th style="text-align:center">จัดการ</th>
+</tr></thead>
           <tbody id="empBody"></tbody>
         </table>
       </div>
@@ -204,7 +230,11 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
           <div>
             <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">เลือกพนักงาน</label>
-            <select class="sel" id="mobEmpSel" style="width:100%" onchange="onSelectMobEmp()"><option value="">— เลือกพนักงาน —</option></select>
+            <div style="position:relative" id="mobEmpBox">
+              <input type="text" class="inp" id="mobEmpSearch" placeholder="🔍 พิมพ์ชื่อ / รหัส / ตำแหน่ง..." style="width:100%;padding:7px 11px" autocomplete="off" oninput="onMobEmpSearch()" onfocus="onMobEmpSearch()" onblur="setTimeout(hideMobDrop,180)">
+              <input type="hidden" id="mobEmpSel">
+              <div id="mobEmpDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--gold);border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.13);z-index:999;max-height:220px;overflow-y:auto;margin-top:2px"></div>
+            </div>
           </div>
           <div id="mobEmpInfo" style="font-size:12px;color:var(--muted);padding-top:20px"></div>
         </div>
@@ -228,9 +258,17 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div class="card-title" style="margin-bottom:0">รายการโยกย้าย</div>
-        <span style="background:#eaf0ff;color:#2563eb;padding:1px 7px;border-radius:8px;font-size:11px;font-weight:700" id="mobListCnt">0</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="card-title" style="margin-bottom:0">รายการโยกย้าย</div>
+          <span style="background:#eaf0ff;color:#2563eb;padding:1px 7px;border-radius:8px;font-size:11px;font-weight:700" id="mobListCnt">0</span>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+          <input type="text" class="inp" id="mobQ" placeholder="🔍 ค้นหาชื่อ / รหัส..." style="width:190px;padding:6px 11px" oninput="filterMobList()">
+          <select class="sel" id="mobFilterCC" style="padding:6px 11px" onchange="filterMobList()"><option value="">— ทุก Cost Center —</option></select>
+          <button onclick="clearMobFilter()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px">✕</button>
+          <span style="font-size:11px;color:var(--muted)" id="mobFilterInfo"></span>
+        </div>
       </div>
       <div class="tbl-wrap">
         <table class="tbl">
@@ -322,6 +360,15 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 // ═══════════════════════════════════════════════════════════════
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbz46puAbDjey8h_Xh8EjKNAaePmfc1ABWTFBWDxjAZxs33rAfrzXa0M36cRlcsErN-L/exec';
 var USERS   = { admin: 'nigiwai2026', hr: 'hrpass2026' };
+
+
+function clearMobFilter() {
+  var q  = document.getElementById('mobQ');
+  var cc = document.getElementById('mobFilterCC');
+  if(q)  q.value  = '';
+  if(cc) cc.value = '';
+  renderMobility();
+}
 
 // ═══════════════════════════════════════════════════════════════
 // COST CENTER
@@ -561,13 +608,11 @@ function init() {
   DB.forEach(function(e) { if (depts.indexOf(e.dept) === -1) depts.push(e.dept); });
   depts.sort().forEach(function(d) { df.innerHTML += '<option value="' + d + '">' + d + '</option>'; });
 
-  var sorted = DB.slice().sort(function(a, b) { return a.name.localeCompare(b.name, 'th'); });
-  sorted.forEach(function(e) {
-    es.innerHTML += '<option value="' + e.id + '">' + e.name + ' (' + e.id + ')</option>';
-  });
+  // mobEmpSel is now a hidden input driven by mobEmpSearch dropdown — no pre-population needed
 
   CC.forEach(function(c) { ts.innerHTML += '<option value="' + c.full + '">' + c.full + '</option>'; });
 
+  _mobAllEmps = null;
   renderStats();
   empF = DB.slice();
   renderEmp();
@@ -712,6 +757,92 @@ function delEmp(id) {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// MOBILITY — searchable employee picker
+// ═══════════════════════════════════════════════════════════════
+var _mobAllEmps = null;
+function getMobEmps() {
+  if (!_mobAllEmps) {
+    _mobAllEmps = DB.slice().sort(function(a,b){ return a.name.localeCompare(b.name,'th'); });
+  }
+  return _mobAllEmps;
+}
+function onMobEmpSearch() {
+  var q = (document.getElementById('mobEmpSearch').value||'').toLowerCase().trim();
+  var drop = document.getElementById('mobEmpDrop');
+  var pool = getMobEmps();
+  var results = q
+    ? pool.filter(function(e){
+        return e.name.toLowerCase().indexOf(q)!==-1
+          || e.id.toLowerCase().indexOf(q)!==-1
+          || (e.position||'').toLowerCase().indexOf(q)!==-1
+          || (e.nickname||'').toLowerCase().indexOf(q)!==-1;
+      }).slice(0,30)
+    : pool.slice(0,20);
+  if (results.length===0) {
+    drop.innerHTML='<div style="padding:10px 12px;font-size:12px;color:#aaa">ไม่พบพนักงาน</div>';
+    drop.style.display='block'; return;
+  }
+  drop.innerHTML = '';
+  results.forEach(function(e){
+    var cc = ccFull(e.brand);
+    var ccCol = ccColor(e.brand)||'#888';
+    var div = document.createElement('div');
+    div.className = 'mob-opt';
+    div.innerHTML =
+      '<div class="mob-opt-name">'+e.name+(e.nickname?' <span style="color:#aaa;font-weight:400">('+e.nickname+')</span>':'')+'</div>'+
+      '<div class="mob-opt-sub">'+e.id+' · '+e.position+'</div>'+
+      '<div class="mob-opt-cc" style="color:'+ccCol+'">'+cc+'</div>';
+    div.dataset.id   = e.id;
+    div.dataset.name = e.name;
+    div.addEventListener('mousedown', function(){ selectMobEmp(this.dataset.id, this.dataset.name); });
+    drop.appendChild(div);
+  });
+  drop.style.display='block';
+}
+function selectMobEmp(id, name) {
+  document.getElementById('mobEmpSearch').value = name;
+  document.getElementById('mobEmpSel').value = id;
+  document.getElementById('mobEmpDrop').style.display='none';
+  onSelectMobEmp();
+}
+function hideMobDrop() {
+  var drop = document.getElementById('mobEmpDrop');
+  if (drop) drop.style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HEADCOUNT — sortable columns
+// ═══════════════════════════════════════════════════════════════
+var _empSortCol = null, _empSortDir = 1;
+function sortEmp(col) {
+  if (_empSortCol === col) {
+    _empSortDir *= -1;
+  } else {
+    _empSortCol = col;
+    _empSortDir = 1;
+  }
+  // Update header classes
+  document.querySelectorAll('#empThead th.sortable').forEach(function(th){
+    th.classList.remove('sort-asc','sort-desc');
+  });
+  var th = document.getElementById('sth-'+col);
+  if (th) th.classList.add(_empSortDir===1?'sort-asc':'sort-desc');
+  // Update arrow icons
+  document.querySelectorAll('#empThead .sort-ico').forEach(function(el){ el.textContent='⇅'; });
+  var ico = document.getElementById('si-'+col);
+  if (ico) ico.textContent = _empSortDir===1 ? '↑' : '↓';
+  // Sort empF
+  empF.sort(function(a,b){
+    var av = col==='_diff' ? (a.totalIncome69-a.totalIncome68) : a[col];
+    var bv = col==='_diff' ? (b.totalIncome69-b.totalIncome68) : b[col];
+    if (typeof av==='number'&&typeof bv==='number') return (av-bv)*_empSortDir;
+    return String(av||'').localeCompare(String(bv||''),'th')*_empSortDir;
+  });
+  editId = null;
+  renderEmp();
+}
+
 function onSelectMobEmp() {
   var id = document.getElementById('mobEmpSel').value;
   var e  = DB.find(function(d) { return d.id === id; });
@@ -751,6 +882,8 @@ function saveMobility() {
 
 function clearMobForm() {
   document.getElementById('mobEmpSel').value = '';
+  document.getElementById('mobEmpSearch').value = '';
+  _mobAllEmps = null;
   document.getElementById('mobEmpInfo').textContent = '';
   document.getElementById('mobFrom').value = '';
   document.getElementById('mobTo').value = '';
@@ -775,29 +908,58 @@ function delMobility(id) {
 function renderMobility() {
   var moved = DB.filter(function(e) { return e.brandNew && e.brandNew !== ''; });
   document.getElementById('mobListCnt').textContent = moved.length;
-  if (moved.length === 0) {
-    document.getElementById('mobBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px">ยังไม่มีข้อมูลการโยกย้าย</td></tr>';
+  var ccSel = document.getElementById('mobFilterCC');
+  if (ccSel) {
+    var prev = ccSel.value;
+    var dests = [];
+    moved.forEach(function(e){ if(e.brandNew && dests.indexOf(e.brandNew)===-1) dests.push(e.brandNew); });
+    ccSel.innerHTML = '<option value="">— ทุก Cost Center —</option>';
+    dests.sort().forEach(function(d){
+      ccSel.innerHTML += '<option value="' + d + '"' + (prev===d?' selected':'') + '>' + d + '</option>';
+    });
+  }
+  filterMobList(moved);
+}
+
+function filterMobList(movedInput) {
+  var moved = movedInput || DB.filter(function(e) { return e.brandNew && e.brandNew !== ''; });
+  var qEl  = document.getElementById('mobQ');
+  var ccEl = document.getElementById('mobFilterCC');
+  var q    = qEl  ? qEl.value.toLowerCase()  : '';
+  var ccF  = ccEl ? ccEl.value               : '';
+  var filtered = moved.filter(function(e) {
+    var matchQ  = !q || e.name.toLowerCase().indexOf(q)!==-1
+                     || e.id.toLowerCase().indexOf(q)!==-1
+                     || (e.nickname||'').toLowerCase().indexOf(q)!==-1
+                     || (e.position||'').toLowerCase().indexOf(q)!==-1;
+    var matchCC = !ccF || e.brandNew===ccF;
+    return matchQ && matchCC;
+  });
+  var info = document.getElementById('mobFilterInfo');
+  if (info) info.textContent = (q||ccF) ? filtered.length + ' / ' + moved.length + ' รายการ' : '';
+  if (filtered.length === 0) {
+    document.getElementById('mobBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px">' + (q||ccF ? 'ไม่พบข้อมูลตามเงื่อนไข' : 'ยังไม่มีข้อมูลการโยกย้าย') + '</td></tr>';
     return;
   }
   var rows = '';
-  moved.forEach(function(e) {
+  filtered.forEach(function(e) {
     var fromBrand = e.brandOld || ccFull(e.brand);
     var hist = Array.isArray(e.moveHistory) ? e.moveHistory : [];
     var histCell = hist.length > 0
       ? '<span style="font-size:10px;font-weight:700;background:#f3ebff;color:#7c3aed;padding:1px 7px;border-radius:8px;cursor:pointer" title="' +
-        hist.map(function(h,i){ return (i+1)+'. '+h.from+' → '+h.to+(h.date?' ('+h.date+')':''); }).join(' | ') +
-        '">📋 ' + hist.length + ' ครั้ง</span>'
-      : '—';
+        hist.map(function(h,j){ return (j+1)+'. '+h.from+' to '+h.to+(h.date?' ('+h.date+')':''); }).join(' | ') +
+        '">hist ' + hist.length + '</span>'
+      : '-';
     rows += '<tr>' +
       '<td style="font-size:10.5px;color:#bbb">' + e.id + '</td>' +
       '<td><div style="font-weight:600">' + e.name + '</div><div style="font-size:10.5px;color:#aaa">' + e.nickname + '</div></td>' +
       '<td style="font-size:11px;color:#666">' + e.dept + '<br><span style="color:#aaa;font-size:10.5px">' + e.position + '</span></td>' +
       '<td style="font-size:11px;color:var(--red-dark)">' + fromBrand + '</td>' +
-      '<td style="text-align:center;font-size:18px;color:#bbb">→</td>' +
+      '<td style="text-align:center;font-size:20px;color:#bbb">&#8594;</td>' +
       '<td style="font-size:11.5px;color:#27ae60;font-weight:600">' + e.brandNew + '</td>' +
       '<td>' + histCell + '</td>' +
-      '<td style="font-size:11px;color:#aaa;white-space:nowrap">' + (e.moveDate||'—') + '</td>' +
-      '<td style="text-align:center"><button class="btn-del btn-sm" onclick="delMobility(\'' + e.id + '\')">🗑</button></td>' +
+      '<td style="font-size:11px;color:#aaa;white-space:nowrap">' + (e.moveDate||'-') + '</td>' +
+      '<td style="text-align:center"><button class="btn-del btn-sm" onclick="delMobility(\'' + e.id + '\')" style="cursor:pointer">🗑</button></td>' +
       '</tr>';
   });
   document.getElementById('mobBody').innerHTML = rows;
