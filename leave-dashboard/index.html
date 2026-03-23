@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
@@ -34,7 +34,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             background-color: var(--nw-black);
             color: var(--nw-white);
             min-height: 100vh;
@@ -59,7 +59,7 @@
         }
         .top-bar-left { display: flex; align-items: center; gap: 12px; }
         .top-bar-logo {
-            font-family: 'Noto Serif JP', serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--nw-gold);
@@ -100,7 +100,7 @@
             background: linear-gradient(90deg, var(--nw-red) 0%, var(--nw-gold) 50%, var(--nw-red) 100%);
         }
         .header-brand {
-            font-family: 'Noto Serif JP', serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: 4px;
@@ -119,7 +119,7 @@
             opacity: 0.5;
         }
         .header h1 {
-            font-family: 'Noto Serif JP', serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             color: var(--nw-white);
             font-size: 1.75rem;
             margin-bottom: 0.5rem;
@@ -143,7 +143,7 @@
             border: 1px solid var(--nw-gold);
             padding: 10px 28px;
             border-radius: 2px;
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -203,7 +203,7 @@
             font-weight: 500;
         }
         .stat-content .number {
-            font-family: 'Noto Serif JP', serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 2rem;
             font-weight: 700;
             color: var(--nw-white);
@@ -242,7 +242,7 @@
         }
 
         .card h2 {
-            font-family: 'Noto Serif JP', serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.95rem;
             color: var(--nw-white);
             margin-bottom: 1.5rem;
@@ -257,7 +257,7 @@
         .card h2 .section-tag {
             margin-left: auto;
             font-size: 0.65rem;
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             color: var(--nw-white-dim);
             letter-spacing: 1.5px;
             text-transform: uppercase;
@@ -291,7 +291,7 @@
             border-radius: 2px;
             color: var(--nw-white);
             background-color: var(--nw-dark);
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.9rem;
             transition: border-color 0.2s;
             appearance: none;
@@ -308,7 +308,7 @@
             border: 1px solid var(--nw-border-dim);
             border-radius: 2px;
             cursor: pointer;
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.88rem;
             transition: all 0.2s;
             letter-spacing: 0.5px;
@@ -377,7 +377,7 @@
             margin-bottom: 1.25rem;
             background: var(--nw-dark);
             color: var(--nw-white);
-            font-family: 'Sarabun', sans-serif;
+            font-family: 'Noto Sans Thai', sans-serif;
             font-size: 0.9rem;
             transition: border-color 0.2s;
         }
@@ -849,8 +849,8 @@
             const xKey = horizontal ? 'y' : 'x';
             const yKey = horizontal ? 'x' : 'y';
             return {
-                [xKey]: { grid: { display: false }, ticks: { color: NW.tick, font: { family: 'Sarabun' } } },
-                [yKey]: { beginAtZero: true, grid: { color: NW.grid }, ticks: { color: NW.tick, font: { family: 'Sarabun' } }, border: { color: 'transparent' } }
+                [xKey]: { grid: { display: false }, ticks: { color: NW.tick, font: { family: 'Noto Sans Thai' } } },
+                [yKey]: { beginAtZero: true, grid: { color: NW.grid }, ticks: { color: NW.tick, font: { family: 'Noto Sans Thai' } }, border: { color: 'transparent' } }
             };
         }
 
@@ -863,12 +863,12 @@
                     borderWidth: 1,
                     titleColor: NW.gold,
                     bodyColor: NW.white,
-                    titleFont: { family: 'Noto Serif JP' }
+                    titleFont: { family: 'Noto Sans Thai' }
                 },
                 datalabels: {
                     anchor: 'end', align: 'top',
                     formatter: Math.round,
-                    font: { weight: '700', family: 'Sarabun', size: 11 },
+                    font: { weight: '700', family: 'Noto Sans Thai', size: 11 },
                     color: NW.gold
                 }
             };
@@ -897,7 +897,7 @@
                             anchor: horizontal ? 'end' : 'end',
                             align: horizontal ? 'end' : 'top',
                             formatter: Math.round,
-                            font: { weight: '700', family: 'Sarabun', size: 11 },
+                            font: { weight: '700', family: 'Noto Sans Thai', size: 11 },
                             color: NW.goldLt
                         }
                     },
