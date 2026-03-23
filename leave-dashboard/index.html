@@ -3,81 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard การลาพนักงาน 2026 (ตรวจสอบสิทธิ์)</title>
+    <title>Dashboard การลาพนักงาน 2026 | Nigiwai Group</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
         :root {
-            /* Corporate Professional Palette */
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --bg-color: #f8f9fa;
-            --card-shadow: 0 2px 4px rgba(0,0,0,0.08);
-            --header-gradient: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            /* Nigiwai Corporate Identity: Red - Black - White - Gold */
+            --nw-black:       #0d0d0d;
+            --nw-charcoal:    #1a1a1a;
+            --nw-dark:        #252525;
+            --nw-panel:       #1e1e1e;
+            --nw-red:         #c0392b;
+            --nw-red-bright:  #e74c3c;
+            --nw-red-muted:   rgba(192, 57, 43, 0.15);
+            --nw-gold:        #c9a84c;
+            --nw-gold-light:  #e8c96a;
+            --nw-gold-muted:  rgba(201, 168, 76, 0.15);
+            --nw-white:       #f5f0eb;
+            --nw-white-dim:   #b0a89a;
+            --nw-border:      rgba(201, 168, 76, 0.2);
+            --nw-border-dim:  rgba(255,255,255,0.06);
+            --nw-shadow:      0 4px 24px rgba(0,0,0,0.5);
+            --nw-shadow-gold: 0 2px 16px rgba(201, 168, 76, 0.15);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: var(--bg-color);
-            color: #333;
+            background-color: var(--nw-black);
+            color: var(--nw-white);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image: 
+                radial-gradient(ellipse at 0% 0%, rgba(192,57,43,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(201,168,76,0.05) 0%, transparent 50%);
         }
 
-        .header-bg {
-            background: var(--header-gradient);
-            height: 220px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: -1;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        /* ═══════════════════════════════════════
+           HEADER
+        ═══════════════════════════════════════ */
+        .top-bar {
+            background: var(--nw-charcoal);
+            border-bottom: 1px solid var(--nw-border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 48px;
         }
+        .top-bar-left { display: flex; align-items: center; gap: 12px; }
+        .top-bar-logo {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--nw-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .top-bar-divider { width: 1px; height: 20px; background: var(--nw-border); }
+        .top-bar-title { font-size: 0.78rem; color: var(--nw-white-dim); letter-spacing: 0.5px; }
+        .top-bar-right { font-size: 0.75rem; color: var(--nw-white-dim); }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 28px 24px;
             width: 100%;
             flex: 1;
         }
 
-        /* Header Section */
+        /* ═══════════════════════════════════════
+           HEADER CARD
+        ═══════════════════════════════════════ */
         .header {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
+            background: var(--nw-panel);
+            border: 1px solid var(--nw-border);
+            padding: 2.5rem 2rem;
+            border-radius: 4px;
             margin-bottom: 2rem;
             text-align: center;
-            margin-top: 40px;
-            border-top: 5px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--nw-shadow);
         }
-
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--nw-red) 0%, var(--nw-gold) 50%, var(--nw-red) 100%);
+        }
+        .header-brand {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--nw-gold);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .header-brand::before, .header-brand::after {
+            content: '';
+            width: 40px; height: 1px;
+            background: var(--nw-gold);
+            opacity: 0.5;
+        }
         .header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem;
+            font-family: 'Noto Serif JP', serif;
+            color: var(--nw-white);
+            font-size: 1.75rem;
             margin-bottom: 0.5rem;
-            font-weight: 700;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
+        .header h1 span { color: var(--nw-gold); }
+        .header p { color: var(--nw-white-dim); font-size: 0.9rem; }
 
-        .header p { color: #7f8c8d; font-size: 0.95rem; }
-
-        /* Buttons */
         .upload-area {
-            margin-top: 1.5rem;
+            margin-top: 1.75rem;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -85,164 +138,328 @@
         }
 
         .upload-btn {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 6px;
-            font-weight: 500;
+            background: transparent;
+            color: var(--nw-gold);
+            border: 1px solid var(--nw-gold);
+            padding: 10px 28px;
+            border-radius: 2px;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        .upload-btn:hover {
+            background: var(--nw-gold);
+            color: var(--nw-black);
+            box-shadow: 0 0 20px rgba(201,168,76,0.3);
         }
 
-        .upload-btn:hover { background: #2980b9; transform: translateY(-1px); }
+        #uploadStatus { font-size: 0.88em; min-height: 20px; margin-top: 5px; }
+        .status-success { color: var(--nw-gold); font-weight: 600; }
+        .status-error { color: var(--nw-red-bright); font-weight: 600; }
 
-        #uploadStatus { font-size: 0.9em; min-height: 20px; margin-top: 5px; }
-        .status-success { color: var(--success-color); font-weight: 600; }
-        .status-error { color: var(--danger-color); font-weight: 600; }
-
-        /* Stats Cards */
+        /* ═══════════════════════════════════════
+           STATS CARDS
+        ═══════════════════════════════════════ */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
         }
 
         .stat-card {
-            background: white;
+            background: var(--nw-panel);
             padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--card-shadow);
-            border-bottom: 3px solid transparent;
+            border-radius: 4px;
+            border: 1px solid var(--nw-border-dim);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: border-color 0.3s, transform 0.2s;
+            box-shadow: var(--nw-shadow);
+            position: relative;
+            overflow: hidden;
         }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--nw-border); }
         
-        .stat-content h3 { color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .stat-content .number { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); }
+        .stat-content h3 {
+            color: var(--nw-white-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        .stat-content .number {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--nw-white);
+            line-height: 1;
+        }
         
         .stat-icon {
-            width: 50px; height: 50px;
-            border-radius: 50%;
+            width: 48px; height: 48px;
+            border-radius: 2px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
 
-        .stat-card.purple { border-bottom-color: #9b59b6; }
-        .stat-card.purple .stat-icon { background: #f4ecf7; color: #9b59b6; }
-        
-        .stat-card.blue { border-bottom-color: #3498db; }
-        .stat-card.blue .stat-icon { background: #ebf5fb; color: #3498db; }
-        
-        .stat-card.green { border-bottom-color: #27ae60; }
-        .stat-card.green .stat-icon { background: #e9f7ef; color: #27ae60; }
-        
-        .stat-card.orange { border-bottom-color: #e67e22; }
-        .stat-card.orange .stat-icon { background: #fdf2e9; color: #e67e22; }
+        .stat-card.red::after { background: var(--nw-red); }
+        .stat-card.red .stat-icon { background: var(--nw-red-muted); color: var(--nw-red-bright); }
 
-        /* Cards & Layout */
+        .stat-card.gold::after { background: var(--nw-gold); }
+        .stat-card.gold .stat-icon { background: var(--nw-gold-muted); color: var(--nw-gold); }
+
+        .stat-card.white::after { background: rgba(245,240,235,0.3); }
+        .stat-card.white .stat-icon { background: rgba(245,240,235,0.06); color: var(--nw-white); }
+
+        .stat-card.red2::after { background: #8b0000; }
+        .stat-card.red2 .stat-icon { background: rgba(139,0,0,0.2); color: #cc4444; }
+
+        /* ═══════════════════════════════════════
+           CARDS
+        ═══════════════════════════════════════ */
         .card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
+            background: var(--nw-panel);
+            padding: 1.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--nw-border-dim);
+            margin-bottom: 1.75rem;
+            box-shadow: var(--nw-shadow);
         }
 
         .card h2 {
-            font-size: 1.1rem;
-            color: var(--secondary-color);
+            font-family: 'Noto Serif JP', serif;
+            font-size: 0.95rem;
+            color: var(--nw-white);
             margin-bottom: 1.5rem;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--nw-border-dim);
             display: flex;
             align-items: center;
             gap: 10px;
+            letter-spacing: 0.5px;
         }
-        .card h2 i { color: var(--accent-color); }
+        .card h2 i { color: var(--nw-gold); font-size: 0.9rem; }
+        .card h2 .section-tag {
+            margin-left: auto;
+            font-size: 0.65rem;
+            font-family: 'Sarabun', sans-serif;
+            color: var(--nw-white-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid var(--nw-border);
+            padding: 2px 8px;
+            border-radius: 1px;
+        }
 
-        /* Filter Section */
+        /* ═══════════════════════════════════════
+           FILTERS
+        ═══════════════════════════════════════ */
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
             align-items: end;
         }
-        .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.4rem; font-weight: 600; }
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--nw-gold);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
         .form-select {
-            width: 100%; padding: 8px 12px;
-            border: 1px solid #ddd; border-radius: 4px;
-            color: #444; font-family: 'Sarabun';
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--nw-border-dim);
+            border-radius: 2px;
+            color: var(--nw-white);
+            background-color: var(--nw-dark);
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+            appearance: none;
+            cursor: pointer;
         }
+        .form-select:focus { outline: none; border-color: var(--nw-gold); }
+        .form-select option { background: var(--nw-dark); color: var(--nw-white); }
+        
         .reset-btn {
-            width: 100%; padding: 8px;
-            background: #95a5a6; color: white;
-            border: none; border-radius: 4px; cursor: pointer;
+            width: 100%;
+            padding: 9px;
+            background: transparent;
+            color: var(--nw-white-dim);
+            border: 1px solid var(--nw-border-dim);
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.88rem;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
         }
-        .reset-btn:hover { background: #7f8c8d; }
+        .reset-btn:hover { border-color: var(--nw-red); color: var(--nw-red-bright); }
 
-        /* Tables */
+        /* ═══════════════════════════════════════
+           TABLES
+        ═══════════════════════════════════════ */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th {
-            background: #f1f2f6; color: #2c3e50;
-            font-weight: 600; padding: 12px;
-            text-align: left; font-size: 0.9rem;
-            border-bottom: 2px solid #dfe6e9;
+            background: rgba(201,168,76,0.08);
+            color: var(--nw-gold);
+            font-weight: 600;
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--nw-border);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 0.95rem; }
-        tr:hover { background-color: #f8f9fa; }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--nw-border-dim);
+            vertical-align: middle;
+            font-size: 0.9rem;
+            color: var(--nw-white);
+        }
+        tr:hover td { background-color: rgba(255,255,255,0.025); }
+        tr:last-child td { border-bottom: none; }
 
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .badge-primary { background: #d6eaf8; color: #2980b9; }
-        .badge-success { background: #d5f5e3; color: #27ae60; }
-        .badge-danger { background: #fadbd8; color: #c0392b; }
+        .badge {
+            padding: 3px 10px;
+            border-radius: 1px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: inline-block;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .badge-primary { background: rgba(201,168,76,0.15); color: var(--nw-gold); border: 1px solid rgba(201,168,76,0.3); }
+        .badge-success { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.25); }
+        .badge-danger  { background: var(--nw-red-muted); color: var(--nw-red-bright); border: 1px solid rgba(192,57,43,0.35); }
 
-        /* --- Blinking Effect Class --- */
-        .blink-alert { 
-            animation: blink 1.5s infinite; 
-            color: #c0392b; /* Dark Red */
+        /* Blink Alert */
+        .blink-alert {
+            animation: blink 1.8s infinite;
+            color: var(--nw-red-bright);
             font-weight: 700;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
-        @keyframes blink { 
-            0% { opacity: 1; } 
-            50% { opacity: 0.4; } 
-            100% { opacity: 1; } 
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.35; }
         }
 
+        /* Search */
         .search-box input {
-            width: 100%; padding: 10px; border: 1px solid #ddd;
-            border-radius: 4px; margin-bottom: 1rem;
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--nw-border-dim);
+            border-radius: 2px;
+            margin-bottom: 1.25rem;
+            background: var(--nw-dark);
+            color: var(--nw-white);
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        .search-box input::placeholder { color: var(--nw-white-dim); }
+        .search-box input:focus { outline: none; border-color: var(--nw-gold); }
+
+        /* Quota Bar */
+        .quota-bar-bg {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            height: 5px;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .quota-bar-fill { height: 100%; border-radius: 2px; }
+
+        /* Charts */
+        .chart-container-large { position: relative; height: 380px; width: 100%; }
+
+        /* ═══════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════ */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--nw-white-dim);
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-top: 1px solid var(--nw-border-dim);
+            margin-top: auto;
+        }
+        .footer span { color: var(--nw-gold); }
+
+        /* ═══════════════════════════════════════
+           DECORATIVE LINES
+        ═══════════════════════════════════════ */
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--nw-gold);
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            margin: 0.5rem 0;
+        }
+        .ornament::before, .ornament::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--nw-gold) 50%, transparent);
+            opacity: 0.3;
         }
 
-        .quota-bar-bg { width: 100%; background: #eee; height: 6px; border-radius: 3px; margin-top: 5px; overflow: hidden; }
-        .quota-bar-fill { height: 100%; border-radius: 3px; }
-
-        .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; margin-top: auto; }
-
-        .chart-container-large { position: relative; height: 400px; width: 100%; }
-        
         @media (max-width: 768px) {
-            .header h1 { font-size: 1.5rem; }
+            .top-bar { display: none; }
+            .header h1 { font-size: 1.4rem; }
             .stat-card { flex-direction: column; text-align: center; gap: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="header-bg"></div>
+
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <span class="top-bar-logo">Nigiwai Group</span>
+            <div class="top-bar-divider"></div>
+            <span class="top-bar-title">HR Analytics Dashboard</span>
+        </div>
+        <div class="top-bar-right" id="liveTime"></div>
+    </div>
+
     <div class="container">
         
+        <!-- HEADER -->
         <div class="header">
-            <h1><i class="fas fa-chart-line"></i> Dashboard การลาพนักงาน</h1>
+            <div class="header-brand">Nigiwai Group</div>
+            <h1>Dashboard <span>การลาพนักงาน</span></h1>
+            <div class="ornament">◆ HR ANALYTICS 2026 ◆</div>
             <p id="dateRange">กรุณาอัพโหลดไฟล์ข้อมูล (.xlsx) เพื่อเริ่มใช้งาน</p>
             
             <div class="upload-area">
@@ -254,8 +471,9 @@
             </div>
         </div>
 
+        <!-- FILTERS -->
         <div class="card">
-            <h2><i class="fas fa-filter"></i> ตัวกรองข้อมูล</h2>
+            <h2><i class="fas fa-sliders-h"></i> ตัวกรองข้อมูล <span class="section-tag">Filter</span></h2>
             <div class="filter-grid">
                 <div class="form-group">
                     <label>เดือน</label>
@@ -271,72 +489,67 @@
                 </div>
                 <div class="form-group">
                     <label>&nbsp;</label>
-                    <button id="resetFilter" class="reset-btn"><i class="fas fa-sync-alt"></i> รีเซ็ต</button>
+                    <button id="resetFilter" class="reset-btn"><i class="fas fa-sync-alt"></i>&nbsp; รีเซ็ตตัวกรอง</button>
                 </div>
             </div>
         </div>
 
+        <!-- STATS -->
         <div class="stats-grid">
-            <div class="stat-card purple">
+            <div class="stat-card red">
                 <div class="stat-content">
                     <h3>จำนวนครั้งทั้งหมด</h3>
-                    <div class="number" id="totalLeaves">-</div>
+                    <div class="number" id="totalLeaves">—</div>
                 </div>
                 <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
             </div>
-            <div class="stat-card blue">
+            <div class="stat-card gold">
                 <div class="stat-content">
                     <h3>รวมวันลา (วัน)</h3>
-                    <div class="number" id="totalDays">-</div>
+                    <div class="number" id="totalDays">—</div>
                 </div>
                 <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
             </div>
-            <div class="stat-card green">
+            <div class="stat-card white">
                 <div class="stat-content">
                     <h3>จำนวนแผนก</h3>
-                    <div class="number" id="totalDepts">-</div>
+                    <div class="number" id="totalDepts">—</div>
                 </div>
                 <div class="stat-icon"><i class="fas fa-building"></i></div>
             </div>
-            <div class="stat-card orange">
+            <div class="stat-card red2">
                 <div class="stat-content">
                     <h3>พนักงานที่ลา</h3>
-                    <div class="number" id="totalEmployees">-</div>
+                    <div class="number" id="totalEmployees">—</div>
                 </div>
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
             </div>
         </div>
 
+        <!-- CHARTS -->
         <div class="card">
-            <h2><i class="fas fa-calendar-alt"></i> สถิติการลาแยกตามเดือน (Monthly Trend)</h2>
-            <div class="chart-container-large">
-                <canvas id="monthChart"></canvas>
-            </div>
+            <h2><i class="fas fa-chart-line"></i> สถิติการลาแยกตามเดือน <span class="section-tag">Monthly Trend</span></h2>
+            <div class="chart-container-large"><canvas id="monthChart"></canvas></div>
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-chart-bar"></i> สัดส่วนการลาแยกตามแผนก</h2>
-            <div class="chart-container-large">
-                <canvas id="deptChart"></canvas>
-            </div>
+            <h2><i class="fas fa-chart-bar"></i> สัดส่วนการลาแยกตามแผนก <span class="section-tag">By Department</span></h2>
+            <div class="chart-container-large"><canvas id="deptChart"></canvas></div>
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-chart-pie"></i> สัดส่วนประเภทการลา</h2>
-            <div class="chart-container-large">
-                <canvas id="leaveTypeChart"></canvas>
-            </div>
+            <h2><i class="fas fa-chart-pie"></i> สัดส่วนประเภทการลา <span class="section-tag">Leave Type</span></h2>
+            <div class="chart-container-large"><canvas id="leaveTypeChart"></canvas></div>
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-chart-area"></i> สถิติการลาแต่ละแผนก (ภาพรวม)</h2>
-            <div class="chart-container-large">
-                <canvas id="deptBarChart"></canvas>
-            </div>
+            <h2><i class="fas fa-chart-area"></i> สถิติการลาแต่ละแผนก (ภาพรวม) <span class="section-tag">Overview</span></h2>
+            <div class="chart-container-large"><canvas id="deptBarChart"></canvas></div>
         </div>
 
+        <!-- TABLES -->
         <div class="card">
-            <h2><i class="fas fa-trophy"></i> Top 10 พนักงานที่ลามากที่สุด</h2>
+            <h2><i class="fas fa-trophy"></i> Top 10 พนักงานที่ลามากที่สุด <span class="section-tag">Ranking</span></h2>
             <div class="table-responsive">
                 <table id="topEmployeesTable">
                     <thead>
@@ -354,7 +567,7 @@
         </div>
             
         <div class="card">
-            <h2><i class="fas fa-table"></i> สรุปภาพรวมรายแผนก</h2>
+            <h2><i class="fas fa-table"></i> สรุปภาพรวมรายแผนก <span class="section-tag">Dept Summary</span></h2>
             <div class="table-responsive">
                 <table id="deptSummaryTable">
                     <thead>
@@ -371,9 +584,9 @@
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-address-book"></i> รายละเอียดการใช้สิทธิ์รายบุคคล</h2>
+            <h2><i class="fas fa-address-book"></i> รายละเอียดการใช้สิทธิ์รายบุคคล <span class="section-tag">Individual</span></h2>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อพนักงาน หรือ แผนก...">
+                <input type="text" id="searchInput" placeholder="🔍  ค้นหาชื่อพนักงาน หรือ แผนก...">
             </div>
             <div class="table-responsive">
                 <table id="employeeDetailTable">
@@ -393,30 +606,58 @@
     </div>
 
     <div class="footer">
-        Leave Dashboard © 2026 | Professional HR Data Analytics
+        <span>Nigiwai Group</span> &nbsp;·&nbsp; HR Leave Dashboard &nbsp;·&nbsp; © 2026
     </div>
 
     <script>
-        // --- Configuration & State ---
-        Chart.register(ChartDataLabels); 
-        
+        // ─── Live Clock ─────────────────────────────────────────
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2,'0');
+            const m = String(now.getMinutes()).padStart(2,'0');
+            const s = String(now.getSeconds()).padStart(2,'0');
+            const el = document.getElementById('liveTime');
+            if(el) el.textContent = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ─── Nigiwai Chart Palette ───────────────────────────────
+        const NW = {
+            red:      '#c0392b',
+            redBr:    '#e74c3c',
+            gold:     '#c9a84c',
+            goldLt:   '#e8c96a',
+            white:    '#f5f0eb',
+            whiteDim: '#b0a89a',
+            dark:     '#252525',
+            grid:     'rgba(255,255,255,0.05)',
+            tick:     '#b0a89a',
+        };
+
+        // Multi-color palette for bar charts (red → gold gradient tones)
+        const MULTI_COLORS = [
+            '#c0392b','#c9a84c','#8b0000','#e8c96a','#a93226',
+            '#d4ac0d','#cb4335','#b7950b','#e74c3c','#f1c40f'
+        ];
+
+        Chart.register(ChartDataLabels);
+
         let charts = {};
         let originalData = { raw_data: [] };
         let processedState = {};
         let currentFilters = { month: '', dept: '', leaveType: '' };
         
-        const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+        const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
-        // --- Core Logic ---
+        // ─── Logic ───────────────────────────────────────────────
         function calculateTenure(empId) {
             if (!empId) return 0;
-            const idStr = String(empId).replace(/\D/g, ''); 
+            const idStr = String(empId).replace(/\D/g,'');
             if (idStr.length < 2) return 0;
-            const startYearCode = parseInt(idStr.substring(0, 2));
+            const startYearCode = parseInt(idStr.substring(0,2));
             if (isNaN(startYearCode)) return 0;
-            const startYearBE = 2500 + startYearCode;
-            const currentYearBE = 2569; 
-            return Math.max(0, currentYearBE - startYearBE);
+            return Math.max(0, 2569 - (2500 + startYearCode));
         }
 
         function getQuota(leaveType, tenure) {
@@ -433,14 +674,12 @@
             return null;
         }
 
-        // --- File Processing ---
+        // ─── File Processing ─────────────────────────────────────
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
             const statusDiv = document.getElementById('uploadStatus');
-            statusDiv.innerHTML = '<span style="color:#3498db"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล...</span>';
-
+            statusDiv.innerHTML = '<span style="color:var(--nw-gold)"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล...</span>';
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
@@ -448,10 +687,8 @@
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
                     processUploadedData(jsonData);
-                    
-                    statusDiv.innerHTML = '<span class="status-success"><i class="fas fa-check-circle"></i> อัพเดทข้อมูลสำเร็จ!</span>';
+                    statusDiv.innerHTML = '<span class="status-success"><i class="fas fa-check-circle"></i> อัพเดทข้อมูลสำเร็จ</span>';
                     setTimeout(() => statusDiv.innerHTML = '', 3000);
                 } catch (error) {
                     console.error(error);
@@ -464,46 +701,37 @@
         function formatDate(val) {
             if (!val) return null;
             if (val instanceof Date) return val;
-            if (typeof val === 'number') {
-                return new Date(Math.round((val - 25569) * 86400 * 1000));
-            }
+            if (typeof val === 'number') return new Date(Math.round((val - 25569) * 86400 * 1000));
             return new Date(val);
         }
 
         function processUploadedData(jsonData) {
             let headerRowIndex = -1;
-            for(let i=0; i < Math.min(jsonData.length, 20); i++) {
+            for (let i=0; i < Math.min(jsonData.length, 20); i++) {
                 const row = jsonData[i];
-                if (row && row.includes('No') && row.includes('รหัส')) {
-                    headerRowIndex = i;
-                    break;
-                }
+                if (row && row.includes('No') && row.includes('รหัส')) { headerRowIndex = i; break; }
             }
             if (headerRowIndex === -1) headerRowIndex = 2;
 
             const rawRows = jsonData.slice(headerRowIndex + 1);
-            
-            const processedData = rawRows
-                .filter(row => row && row[2]) 
-                .map(row => {
-                    const startDate = formatDate(row[7]);
-                    return {
-                        'No': row[0], 'รหัส': row[1], 'ชื่อ': row[2], 'สาขา': row[3], 'แผนก': row[4],
-                        'ตำแหน่ง': row[5], 'ประเภท': row[6], 'ลาตั้งแต่': startDate,
-                        'ลา_วัน': parseFloat(row[11]) || 0,
-                        'เหตุผล': row[12],
-                        'monthKey': startDate ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2,'0')}` : null
-                    };
-                });
+            const processedData = rawRows.filter(row => row && row[2]).map(row => {
+                const startDate = formatDate(row[7]);
+                return {
+                    'No': row[0], 'รหัส': row[1], 'ชื่อ': row[2], 'สาขา': row[3], 'แผนก': row[4],
+                    'ตำแหน่ง': row[5], 'ประเภท': row[6], 'ลาตั้งแต่': startDate,
+                    'ลา_วัน': parseFloat(row[11]) || 0, 'เหตุผล': row[12],
+                    'monthKey': startDate ? `${startDate.getFullYear()}-${String(startDate.getMonth()+1).padStart(2,'0')}` : null
+                };
+            });
 
             originalData.raw_data = processedData;
-            
+
             if (processedData.length > 0) {
                 const dates = processedData.map(d => d['ลาตั้งแต่']).filter(d => d && !isNaN(d)).sort((a,b) => a-b);
                 if (dates.length > 0) {
                     const f = dates[0], l = dates[dates.length-1];
-                    document.getElementById('dateRange').textContent = 
-                        `ข้อมูลตั้งแต่ ${f.getDate()} ${thaiMonths[f.getMonth()]} ${f.getFullYear()+543} - ${l.getDate()} ${thaiMonths[l.getMonth()]} ${l.getFullYear()+543}`;
+                    document.getElementById('dateRange').textContent =
+                        `ข้อมูลตั้งแต่ ${f.getDate()} ${thaiMonths[f.getMonth()]} ${f.getFullYear()+543} — ${l.getDate()} ${thaiMonths[l.getMonth()]} ${l.getFullYear()+543}`;
                 }
             }
 
@@ -511,7 +739,7 @@
             applyFilters();
         }
 
-        // --- Filtering ---
+        // ─── Filters ─────────────────────────────────────────────
         function initializeFilters() {
             const monthSet = new Set(), deptSet = new Set(), typeSet = new Set();
             originalData.raw_data.forEach(d => {
@@ -519,7 +747,6 @@
                 if (d['แผนก']) deptSet.add(d['แผนก']);
                 if (d['ประเภท']) typeSet.add(d['ประเภท']);
             });
-
             populateSelect('monthFilter', Array.from(monthSet).sort(), (v) => {
                 const [y, m] = v.split('-');
                 return `${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
@@ -538,18 +765,18 @@
                 opt.textContent = labelFn ? labelFn(item) : item;
                 sel.appendChild(opt);
             });
-            if(items.includes(currentVal)) sel.value = currentVal;
+            if (items.includes(currentVal)) sel.value = currentVal;
         }
 
         function applyFilters() {
-            currentFilters.month = document.getElementById('monthFilter').value;
-            currentFilters.dept = document.getElementById('deptFilter').value;
+            currentFilters.month     = document.getElementById('monthFilter').value;
+            currentFilters.dept      = document.getElementById('deptFilter').value;
             currentFilters.leaveType = document.getElementById('leaveTypeFilter').value;
 
             const filtered = originalData.raw_data.filter(d => {
-                if (currentFilters.month && d.monthKey !== currentFilters.month) return false;
-                if (currentFilters.dept && d['แผนก'] !== currentFilters.dept) return false;
-                if (currentFilters.leaveType && d['ประเภท'] !== currentFilters.leaveType) return false;
+                if (currentFilters.month     && d.monthKey    !== currentFilters.month)     return false;
+                if (currentFilters.dept      && d['แผนก']    !== currentFilters.dept)      return false;
+                if (currentFilters.leaveType && d['ประเภท']  !== currentFilters.leaveType) return false;
                 return true;
             });
 
@@ -557,8 +784,8 @@
             updateUI();
         }
 
-        document.getElementById('monthFilter').onchange = applyFilters;
-        document.getElementById('deptFilter').onchange = applyFilters;
+        document.getElementById('monthFilter').onchange     = applyFilters;
+        document.getElementById('deptFilter').onchange      = applyFilters;
         document.getElementById('leaveTypeFilter').onchange = applyFilters;
         document.getElementById('resetFilter').onclick = () => {
             document.getElementById('monthFilter').value = '';
@@ -567,13 +794,12 @@
             applyFilters();
         };
 
-        // --- Calculation ---
+        // ─── Stats Calculation ───────────────────────────────────
         function calculateStats(data) {
             const stats = {
                 totalLeaves: data.length,
-                totalDays: data.reduce((s, i) => s + (i['ลา_วัน']||0), 0),
-                depts: {}, types: {}, employees: {}, empDetails: {},
-                months: {} // New: Monthly Stats
+                totalDays: data.reduce((s,i) => s+(i['ลา_วัน']||0), 0),
+                depts: {}, types: {}, employees: {}, empDetails: {}, months: {}
             };
 
             data.forEach(row => {
@@ -589,20 +815,18 @@
 
                 const name = row['ชื่อ'], id = row['รหัส'];
                 const key = `${name}|${dept}|${id}`;
-                
                 if (!stats.employees[name]) stats.employees[name] = { count: 0, days: 0, dept: dept };
                 stats.employees[name].count++;
                 stats.employees[name].days += row['ลา_วัน'];
 
-                if (!stats.empDetails[key]) stats.empDetails[key] = { name: name, id: id, dept: dept, types: {}, totalDays: 0 };
+                if (!stats.empDetails[key]) stats.empDetails[key] = { name, id, dept, types: {}, totalDays: 0 };
                 const detail = stats.empDetails[key];
                 if (!detail.types[type]) detail.types[type] = { days: 0 };
                 detail.types[type].days += row['ลา_วัน'];
                 detail.totalDays += row['ลา_วัน'];
 
-                // Monthly Stats
                 const mKey = row.monthKey || 'Unknown';
-                if(!stats.months[mKey]) stats.months[mKey] = { count: 0, days: 0 };
+                if (!stats.months[mKey]) stats.months[mKey] = { count: 0, days: 0 };
                 stats.months[mKey].count++;
                 stats.months[mKey].days += row['ลา_วัน'];
             });
@@ -610,149 +834,148 @@
             processedState = stats;
         }
 
-        // --- UI Updates ---
+        // ─── UI Update ───────────────────────────────────────────
         function updateUI() {
-            document.getElementById('totalLeaves').textContent = processedState.totalLeaves.toLocaleString();
-            document.getElementById('totalDays').textContent = processedState.totalDays.toFixed(2);
-            document.getElementById('totalDepts').textContent = Object.keys(processedState.depts).length;
+            document.getElementById('totalLeaves').textContent    = processedState.totalLeaves.toLocaleString();
+            document.getElementById('totalDays').textContent      = processedState.totalDays.toFixed(2);
+            document.getElementById('totalDepts').textContent     = Object.keys(processedState.depts).length;
             document.getElementById('totalEmployees').textContent = Object.keys(processedState.employees).length;
-
             updateCharts();
             updateTables();
         }
 
-        // --- Charts Configuration (All Bar Charts) ---
-        function createBarChartConfig(labels, data, labelName, color) {
+        // ─── Common Chart Options ────────────────────────────────
+        function baseScales(horizontal = false) {
+            const xKey = horizontal ? 'y' : 'x';
+            const yKey = horizontal ? 'x' : 'y';
             return {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: labelName,
-                        data: data,
-                        backgroundColor: color,
-                        borderRadius: 4,
-                        maxBarThickness: 50
-                    }]
+                [xKey]: { grid: { display: false }, ticks: { color: NW.tick, font: { family: 'Sarabun' } } },
+                [yKey]: { beginAtZero: true, grid: { color: NW.grid }, ticks: { color: NW.tick, font: { family: 'Sarabun' } }, border: { color: 'transparent' } }
+            };
+        }
+
+        function basePlugins(label) {
+            return {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: NW.dark,
+                    borderColor: NW.gold,
+                    borderWidth: 1,
+                    titleColor: NW.gold,
+                    bodyColor: NW.white,
+                    titleFont: { family: 'Noto Serif JP' }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: Math.round,
-                            font: { weight: 'bold' },
-                            color: '#666'
-                        }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
-                        x: { grid: { display: false } }
-                    }
+                datalabels: {
+                    anchor: 'end', align: 'top',
+                    formatter: Math.round,
+                    font: { weight: '700', family: 'Sarabun', size: 11 },
+                    color: NW.gold
                 }
             };
         }
 
+        function makeBarChart(canvasId, labels, data, colors, horizontal = false) {
+            const ctx = document.getElementById(canvasId);
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: Array.isArray(colors) ? colors : colors,
+                        borderRadius: 3,
+                        maxBarThickness: 52
+                    }]
+                },
+                options: {
+                    indexAxis: horizontal ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...basePlugins(),
+                        datalabels: {
+                            anchor: horizontal ? 'end' : 'end',
+                            align: horizontal ? 'end' : 'top',
+                            formatter: Math.round,
+                            font: { weight: '700', family: 'Sarabun', size: 11 },
+                            color: NW.goldLt
+                        }
+                    },
+                    scales: baseScales(horizontal)
+                }
+            });
+        }
+
+        // ─── Update Charts ───────────────────────────────────────
         function updateCharts() {
             const deptData = Object.entries(processedState.depts).map(([k,v]) => ({ label: k, val: v.count })).sort((a,b) => b.val - a.val);
             const typeData = Object.entries(processedState.types).map(([k,v]) => ({ label: k, val: v.count })).sort((a,b) => b.val - a.val);
-            
-            // Monthly Data Sorting & Formatting
-            const monthKeys = Object.keys(processedState.months).sort();
+
+            const monthKeys   = Object.keys(processedState.months).sort();
             const monthLabels = monthKeys.map(k => {
-                if(k === 'Unknown') return 'ไม่ระบุ';
+                if (k === 'Unknown') return 'ไม่ระบุ';
                 const [y, m] = k.split('-');
                 return `${thaiMonths[parseInt(m)-1]} ${parseInt(y)+543}`;
             });
             const monthCounts = monthKeys.map(k => processedState.months[k].count);
 
-            // 1. Month Chart (NEW)
-            if (charts.month) charts.month.destroy();
-            charts.month = new Chart(document.getElementById('monthChart'), 
-                createBarChartConfig(monthLabels, monthCounts, 'จำนวนครั้ง', '#1abc9c')
-            );
-
-            // 2. Dept Chart
-            if (charts.dept) charts.dept.destroy();
-            charts.dept = new Chart(document.getElementById('deptChart'), 
-                createBarChartConfig(deptData.map(d=>d.label), deptData.map(d=>d.val), 'จำนวนครั้ง', '#3498db')
-            );
-
-            // 3. Type Chart
-            if (charts.type) charts.type.destroy();
-            charts.type = new Chart(document.getElementById('leaveTypeChart'), 
-                createBarChartConfig(typeData.map(d=>d.label), typeData.map(d=>d.val), 'จำนวนครั้ง', '#9b59b6')
-            );
-
-            // 4. Dept Summary Chart (Horizontal)
-            if (charts.bar) charts.bar.destroy();
-            charts.bar = new Chart(document.getElementById('deptBarChart'), {
-                type: 'bar',
-                data: {
-                    labels: deptData.map(d=>d.label),
-                    datasets: [{
-                        label: 'จำนวนครั้ง',
-                        data: deptData.map(d=>d.val),
-                        backgroundColor: '#2ecc71',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', // Horizontal Bar
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            color: '#444',
-                            font: { weight: 'bold' }
-                        }
-                    },
-                    scales: { x: { beginAtZero: true } }
-                }
+            // Gradient-like colors for monthly
+            const monthColors = monthCounts.map((_,i) => {
+                const t = i / Math.max(monthCounts.length-1, 1);
+                // interpolate red → gold
+                const r = Math.round(192 + (201-192)*t);
+                const g = Math.round(57  + (168-57)*t);
+                const b = Math.round(43  + (76-43)*t);
+                return `rgb(${r},${g},${b})`;
             });
+
+            if (charts.month) charts.month.destroy();
+            charts.month = makeBarChart('monthChart', monthLabels, monthCounts, monthColors);
+
+            if (charts.dept) charts.dept.destroy();
+            charts.dept = makeBarChart('deptChart', deptData.map(d=>d.label), deptData.map(d=>d.val),
+                deptData.map((_,i) => MULTI_COLORS[i % MULTI_COLORS.length]));
+
+            if (charts.type) charts.type.destroy();
+            charts.type = makeBarChart('leaveTypeChart', typeData.map(d=>d.label), typeData.map(d=>d.val),
+                typeData.map((_,i) => [NW.red, NW.gold, '#8b0000', NW.goldLt][i % 4]));
+
+            if (charts.bar) charts.bar.destroy();
+            charts.bar = makeBarChart('deptBarChart', deptData.map(d=>d.label), deptData.map(d=>d.val),
+                deptData.map((_,i) => i % 2 === 0 ? NW.red : NW.gold), true);
         }
 
+        // ─── Update Tables ───────────────────────────────────────
         function updateTables() {
-            // Top Employees
             const topEmps = Object.entries(processedState.employees)
                 .map(([k,v]) => ({ name: k, ...v }))
                 .sort((a,b) => b.count - a.count)
                 .slice(0, 10);
-            
+
             document.querySelector('#topEmployeesTable tbody').innerHTML = topEmps.map((emp, i) => {
                 const isTop3 = i < 3;
                 const badgeClass = isTop3 ? 'badge-danger' : 'badge-primary';
-                const nameContent = isTop3 
-                    ? `<span class="blink-alert"><i class="fas fa-exclamation-triangle"></i> ${emp.name}</span>` 
+                const nameContent = isTop3
+                    ? `<span class="blink-alert"><i class="fas fa-exclamation-triangle"></i> ${emp.name}</span>`
                     : `<span style="font-weight:600">${emp.name}</span>`;
-
                 return `
                 <tr>
                     <td><span class="badge ${badgeClass}">${i+1}</span></td>
                     <td>${nameContent}</td>
-                    <td>${emp.dept}</td>
-                    <td>${emp.count}</td>
+                    <td style="color:var(--nw-white-dim)">${emp.dept}</td>
+                    <td style="color:var(--nw-gold);font-weight:700">${emp.count}</td>
                     <td>${emp.days.toFixed(2)}</td>
-                </tr>
-                `;
+                </tr>`;
             }).join('');
 
-            // Dept Summary
             const deptSum = Object.entries(processedState.depts).map(([k,v]) => ({ dept: k, ...v })).sort((a,b) => b.count - a.count);
             document.querySelector('#deptSummaryTable tbody').innerHTML = deptSum.map(d => `
                 <tr>
-                    <td style="font-weight:600">${d.dept}</td>
+                    <td style="font-weight:600;color:var(--nw-gold)">${d.dept}</td>
                     <td>${d.count}</td>
                     <td>${d.days.toFixed(2)}</td>
                     <td>${(d.days/d.count).toFixed(2)}</td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
 
             renderDetailTable();
         }
@@ -765,7 +988,7 @@
 
             const tbody = document.querySelector('#employeeDetailTable tbody');
             if (details.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">ไม่พบข้อมูล</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--nw-white-dim)">ไม่พบข้อมูล</td></tr>';
                 return;
             }
 
@@ -773,34 +996,32 @@
                 const tenure = calculateTenure(emp.id);
                 const leaveBars = Object.entries(emp.types).map(([type, stats]) => {
                     const quota = getQuota(type, tenure);
-                    let width = 0, color = '#3498db', text = `ใช้ ${stats.days.toFixed(2)} วัน`;
-
+                    let width = 0, color = NW.gold, text = `ใช้ ${stats.days.toFixed(2)} วัน`;
                     if (quota) {
                         const pct = (stats.days / quota) * 100;
                         width = Math.min(pct, 100);
-                        if (pct >= 100) color = '#e74c3c';
+                        if (pct >= 100) color = NW.redBr;
                         else if (pct >= 80) color = '#f39c12';
                         else color = '#27ae60';
                         text += ` / สิทธิ์ ${quota}`;
                     }
                     return `
-                        <div style="margin-bottom: 5px;">
-                            <div style="display:flex; justify-content:space-between; font-size:0.8em;">
-                                <span>${type}</span> <span style="color:#777">${text}</span>
+                        <div style="margin-bottom:6px;">
+                            <div style="display:flex;justify-content:space-between;font-size:0.78em;margin-bottom:3px;">
+                                <span style="color:var(--nw-white)">${type}</span>
+                                <span style="color:var(--nw-white-dim)">${text}</span>
                             </div>
-                            ${quota ? `<div class="quota-bar-bg"><div class="quota-bar-fill" style="width:${width}%; background:${color}"></div></div>` : ''}
-                        </div>
-                    `;
+                            ${quota ? `<div class="quota-bar-bg"><div class="quota-bar-fill" style="width:${width}%;background:${color}"></div></div>` : ''}
+                        </div>`;
                 }).join('');
 
                 return `
                     <tr>
-                        <td style="font-weight:600">${emp.name}</td>
-                        <td>${emp.dept}</td>
-                        <td style="min-width: 250px;">${leaveBars}</td>
+                        <td style="font-weight:700">${emp.name}</td>
+                        <td style="color:var(--nw-white-dim)">${emp.dept}</td>
+                        <td style="min-width:260px">${leaveBars}</td>
                         <td style="text-align:center"><span class="badge badge-primary">${emp.totalDays.toFixed(2)}</span></td>
-                    </tr>
-                `;
+                    </tr>`;
             }).join('');
         }
 
