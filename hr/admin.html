@@ -204,7 +204,12 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
           <div>
             <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">เลือกพนักงาน</label>
+            <input type="text" class="inp" id="mobEmpSearch"
+              placeholder="🔍 พิมพ์ชื่อ / รหัส / ชื่อเล่น..."
+              style="width:100%;padding:7px 11px;margin-bottom:6px"
+              oninput="searchMobEmp(this.value)">
             <select class="sel" id="mobEmpSel" style="width:100%" onchange="onSelectMobEmp()"><option value="">— เลือกพนักงาน —</option></select>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:3px" id="mobEmpSearchInfo"></div>
           </div>
           <div id="mobEmpInfo" style="font-size:12px;color:var(--muted);padding-top:20px"></div>
         </div>
@@ -578,10 +583,9 @@ function init() {
   DB.forEach(function(e) { if (depts.indexOf(e.dept) === -1) depts.push(e.dept); });
   depts.sort().forEach(function(d) { df.innerHTML += '<option value="' + d + '">' + d + '</option>'; });
 
-  var sorted = DB.slice().sort(function(a, b) { return a.name.localeCompare(b.name, 'th'); });
-  sorted.forEach(function(e) {
-    es.innerHTML += '<option value="' + e.id + '">' + e.name + ' (' + e.id + ')</option>';
-  });
+  // searchMobEmp('') จะ populate mobEmpSel เองโดยไม่ต้อง loop ที่นี่
+  // (ต้อง call หลังจาก DOM พร้อม)
+  searchMobEmp('');
 
   CC.forEach(function(c) { ts.innerHTML += '<option value="' + c.full + '">' + c.full + '</option>'; });
 
@@ -729,11 +733,51 @@ function delEmp(id) {
 // ═══════════════════════════════════════════════════════════════
 // MOBILITY
 // ═══════════════════════════════════════════════════════════════
+// ค้นหาพนักงานใน dropdown เลือก
+function searchMobEmp(q) {
+  var sel = document.getElementById('mobEmpSel');
+  var info = document.getElementById('mobEmpSearchInfo');
+  q = q.toLowerCase().trim();
+
+  // rebuild options จาก DB ตาม query
+  sel.innerHTML = '<option value="">— เลือกพนักงาน —</option>';
+  var matched = DB.filter(function(e) {
+    if (!q) return true;
+    return (e.name||'').toLowerCase().indexOf(q) !== -1
+        || (e.id||'').toLowerCase().indexOf(q) !== -1
+        || (e.nickname||'').toLowerCase().indexOf(q) !== -1
+        || (e.dept||'').toLowerCase().indexOf(q) !== -1;
+  });
+  matched.sort(function(a,b){ return a.name.localeCompare(b.name,'th'); });
+  matched.forEach(function(e) {
+    sel.innerHTML += '<option value="' + e.id + '">'
+      + e.name + ' (' + e.nickname + ') — ' + ccFull(e.brand)
+      + '</option>';
+  });
+
+  if (info) {
+    info.textContent = q
+      ? 'พบ ' + matched.length + ' คน จาก ' + DB.length + ' คน'
+      : '';
+  }
+
+  // clear info panel when search changes
+  document.getElementById('mobEmpInfo').textContent = '';
+  document.getElementById('mobFrom').value = '';
+}
+
 function onSelectMobEmp() {
   var id = document.getElementById('mobEmpSel').value;
   var e  = DB.find(function(d) { return d.id === id; });
-  if (!e) { document.getElementById('mobEmpInfo').textContent = ''; document.getElementById('mobFrom').value = ''; return; }
-  document.getElementById('mobEmpInfo').innerHTML = '<span style="font-weight:600">' + e.name + '</span><br><span style="font-size:10.5px;color:#888">' + e.dept + ' · ' + e.position + '</span>';
+  if (!e) {
+    document.getElementById('mobEmpInfo').textContent = '';
+    document.getElementById('mobFrom').value = '';
+    return;
+  }
+  document.getElementById('mobEmpInfo').innerHTML =
+    '<span style="font-weight:600">' + e.name + '</span>'
+    + '<br><span style="font-size:10.5px;color:#888">' + e.dept + ' · ' + e.position + '</span>'
+    + '<br><span style="font-size:10.5px;color:' + ccColor(e.brand) + ';font-weight:600">' + ccFull(e.brand) + '</span>';
   document.getElementById('mobFrom').value = e.brandNew || ccFull(e.brand);
 }
 
@@ -767,10 +811,16 @@ function saveMobility() {
 }
 
 function clearMobForm() {
-  document.getElementById('mobEmpSel').value = '';
+  var searchEl = document.getElementById('mobEmpSearch');
+  var infoEl   = document.getElementById('mobEmpSearchInfo');
+  if (searchEl) searchEl.value = '';
+  if (infoEl)   infoEl.textContent = '';
+  // rebuild full list after clearing search
+  searchMobEmp('');
+  document.getElementById('mobEmpSel').value   = '';
   document.getElementById('mobEmpInfo').textContent = '';
-  document.getElementById('mobFrom').value = '';
-  document.getElementById('mobTo').value = '';
+  document.getElementById('mobFrom').value     = '';
+  document.getElementById('mobTo').value       = '';
 }
 
 function delMobility(id) {
