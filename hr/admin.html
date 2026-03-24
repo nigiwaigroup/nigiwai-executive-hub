@@ -10,7 +10,1148 @@
 <title>Admin — Nigiwai Group HR</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{--red:#c0392b;--red-dark:#922b21;--gold:#c9a227;--b<!-- admin.html v3.1 — 2026-03-20 10:00 -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Nigiwai Group HR</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
 :root{--red:#c0392b;--red-dark:#922b21;--gold:#c9a227;--black:#1a1a1a;--bg:#f2f3f5;--white:#fff;--border:#e0e0e0;--muted:#888;--text:#1a1a1a;--shadow:0 2px 10px rgba(0,0,0,0.08);--r:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
+
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--black),#2d2d2d);}
+.login-box{background:#fff;border-radius:16px;padding:36px;width:360px;max-width:94vw;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.login-logo{width:54px;height:54px;background:linear-gradient(135deg,var(--red),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;margin:0 auto 12px;}
+
+.topbar{background:var(--black);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.topbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 16px;overflow-x:auto;gap:0;}
+.t-logo{display:flex;align-items:center;gap:8px;padding:10px 14px 10px 0;border-right:1px solid rgba(255,255,255,.12);margin-right:8px;flex-shrink:0;}
+.t-logo-c{width:30px;height:30px;background:linear-gradient(135deg,var(--red),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
+.t-logo-t{font-family:'Prompt',sans-serif;font-weight:700;font-size:12px;color:#fff;}
+.t-logo-s{font-size:10px;color:rgba(255,255,255,.4);margin-top:-2px;}
+.nav-tab{display:flex;align-items:center;gap:5px;padding:0 14px;height:46px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;text-decoration:none;flex-shrink:0;}
+.nav-tab:hover{color:#fff;background:rgba(255,255,255,.06);}
+.nav-tab.active{color:#fff;border-bottom-color:var(--red);}
+.spacer{flex:1;min-width:4px;}
+.back-btn{color:rgba(255,255,255,.6);font-size:11.5px;text-decoration:none;padding:5px 11px;border:1px solid rgba(255,255,255,.15);border-radius:6px;flex-shrink:0;}
+.back-btn:hover{color:#fff;}
+.logout-btn{color:var(--red);font-size:11.5px;padding:5px 11px;border:1px solid rgba(192,57,43,.4);border-radius:6px;cursor:pointer;background:transparent;font-family:'Sarabun',sans-serif;flex-shrink:0;}
+.hdr-btn{font-size:10.5px;padding:4px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:6px;cursor:pointer;font-family:'Sarabun',sans-serif;white-space:nowrap;}
+
+.page{max-width:1200px;margin:0 auto;padding:18px 16px;}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:16px;}
+.stat-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;box-shadow:var(--shadow);border-left:3px solid var(--red);}
+.stat-card.gold{border-left-color:var(--gold);}
+.stat-card.green{border-left-color:#27ae60;}
+.stat-card.blue{border-left-color:#2980b9;}
+.stat-card.purple{border-left-color:#8e44ad;}
+.stat-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.stat-val{font-family:'Prompt',sans-serif;font-size:22px;font-weight:800;line-height:1;}
+
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:12px;}
+.card-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.card-title::before{content:'';width:3px;height:15px;background:var(--red);border-radius:2px;flex-shrink:0;}
+.card-title.gold::before{background:var(--gold);}
+.card-title.green::before{background:#27ae60;}
+.card-title.blue::before{background:#2980b9;}
+
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{background:#f8f8f8;color:var(--muted);padding:9px 11px;text-align:left;font-weight:700;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl td{padding:8px 11px;border-bottom:1px solid #f5f5f5;color:var(--text);vertical-align:middle;}
+.tbl tr:hover td{background:#fafafa;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl .edit-row td{background:#fffbeb;}
+
+.ei{background:#fff;border:1px solid #ddd;border-radius:5px;padding:4px 8px;font-family:'Sarabun',sans-serif;font-size:12px;width:100%;outline:none;}
+.ei:focus{border-color:var(--red);}
+.es{background:#fff;border:1px solid #ddd;border-radius:5px;padding:4px 8px;font-family:'Sarabun',sans-serif;font-size:12px;width:100%;outline:none;cursor:pointer;}
+
+.lb{display:inline-block;padding:2px 7px;border-radius:9px;font-size:10.5px;font-weight:700;}
+.lb-off{background:#eaf0ff;color:#2563eb;}
+.lb-ldr{background:#f3ebff;color:#7c3aed;}
+.lb-mgr{background:#fff8e6;color:#d97706;}
+.lb-chf{background:#ffebeb;color:var(--red);}
+.lb-snr{background:#eafaf1;color:#27ae60;}
+.lb-con{background:#fef9e6;color:#b45309;}
+
+.inp{border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-family:'Sarabun',sans-serif;font-size:12.5px;color:var(--text);outline:none;background:#fff;transition:border-color .2s;}
+.inp:focus{border-color:var(--red);}
+.sel{border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-family:'Sarabun',sans-serif;font-size:12.5px;color:var(--text);outline:none;background:#fff;cursor:pointer;}
+
+.btn{border:none;border-radius:7px;padding:8px 16px;font-family:'Sarabun',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
+.btn-red{background:var(--red);color:#fff;}.btn-red:hover{background:var(--red-dark);}
+.btn-gold{background:var(--gold);color:var(--black);}.btn-gold:hover{opacity:.88;}
+.btn-green{background:#27ae60;color:#fff;}.btn-green:hover{background:#1e8449;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}.btn-outline:hover{background:#f5f5f5;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-edit{background:#eaf0ff;border:none;color:#2563eb;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;}
+.btn-edit:hover{background:#dce8ff;}
+.btn-del{background:#ffebeb;border:none;color:var(--red);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;}
+.btn-del:hover{background:#ffd5d5;}
+.btn-save{background:#eafaf1;border:none;color:#27ae60;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;}
+.btn-cancel{background:#f5f5f5;border:none;color:#666;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;}
+
+.mob-form{background:#f8f8f8;border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;}
+.cc-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.cc-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.cc-form{background:#fff9e6;border:1px solid var(--gold);border-radius:8px;padding:14px;margin-bottom:12px;display:none;}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--black);color:#fff;border-radius:10px;padding:12px 18px;font-size:12.5px;z-index:999;transform:translateY(60px);transition:transform .3s;box-shadow:var(--shadow);max-width:360px;}
+.toast.show{transform:translateY(0);}
+.toast.ok{border-left:3px solid #27ae60;}
+.toast.err{border-left:3px solid var(--red);}
+
+@media(max-width:768px){.stat-grid{grid-template-columns:1fr 1fr;}.page{padding:12px;}.card{padding:14px;}.nav-tab{padding:0 10px;}}
+
+.menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;transition:box-shadow .15s;}
+.menu-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.menu-item.hidden{opacity:.45;}
+.menu-drag{cursor:grab;color:#bbb;font-size:16px;padding:0 4px;user-select:none;}
+.menu-drag:active{cursor:grabbing;}
+.menu-icon-box{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;background:#f5f5f5;flex-shrink:0;}
+.menu-label{flex:1;font-size:13px;font-weight:600;}
+.menu-label-edit{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;width:100%;outline:none;}
+.menu-label-edit:focus{border-color:var(--red);}
+.toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-sw-track{position:absolute;inset:0;background:#ddd;border-radius:10px;transition:background .2s;cursor:pointer;}
+.toggle-sw input:checked + .toggle-sw-track{background:#27ae60;}
+.toggle-sw-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
+.toggle-sw input:checked ~ .toggle-sw-thumb{transform:translateX(16px);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">NG</div>
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-family:'Prompt',sans-serif;font-size:18px;font-weight:700">Admin Login</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">HR Dashboard · Nigiwai Group</div>
+      </div>
+      <div style="margin-bottom:12px"><label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">Username</label><input type="text" id="lu" class="inp" style="width:100%" placeholder="Username" autocomplete="username"></div>
+      <div style="margin-bottom:18px"><label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">Password</label><input type="password" id="lp" class="inp" style="width:100%" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password"></div>
+      <button onclick="doLogin()" class="btn btn-red" style="width:100%;padding:11px">🔐 เข้าสู่ระบบ</button>
+      <div id="lErr" style="color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none">❌ Username หรือ Password ไม่ถูกต้อง</div>
+      <div style="text-align:center;margin-top:14px"><a href="index.html" style="font-size:12px;color:var(--muted);text-decoration:none">← กลับหน้า Dashboard</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="adminApp" style="display:none">
+
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <div class="t-logo">
+        <div class="t-logo-c">NG</div>
+        <div><div class="t-logo-t">Nigiwai Group</div><div class="t-logo-s">Admin Panel</div></div>
+      </div>
+      <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
+      <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
+      <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
+      <a class="nav-tab" href="#" onclick="switchTab('menus',this);return false">⚙ จัดการเมนู</a>
+      <div class="spacer"></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:8px 0">
+        <span id="syncStatus" style="font-size:10.5px;color:rgba(255,255,255,.45);max-width:220px">—</span>
+        <button onclick="checkGAS()" class="hdr-btn">🔍 Test GAS</button>
+        <button onclick="syncSheet()" class="hdr-btn" style="border-color:rgba(201,162,39,.4);color:#f0c040">☁ Full Sync</button>
+        <a href="index.html" class="back-btn">← Dashboard</a>
+        <button onclick="doLogout()" class="logout-btn">🚪 ออก</button>
+      </div>
+    </div>
+  </nav>
+
+  <div style="max-width:1200px;margin:0 auto;padding:16px 16px 0">
+    <div class="stat-grid" id="statsRow"></div>
+  </div>
+
+  <!-- TAB: EMPLOYEE -->
+  <div id="tab-emp" class="tab-pane active">
+  <div class="page" style="padding-top:0">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="card-title" style="margin-bottom:0">รายชื่อพนักงาน</div>
+          <span style="background:#ffebeb;color:var(--red);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700" id="empCnt">—</span>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <input type="text" class="inp" id="empQ" placeholder="🔍 ค้นหา..." style="width:150px;padding:7px 11px" oninput="filterEmp()">
+          <select class="sel" id="empBrand" style="padding:7px 11px" onchange="filterEmp()"><option value="">— Cost Center —</option></select>
+          <select class="sel" id="empDept" style="padding:7px 11px" onchange="filterEmp()"><option value="">— แผนก —</option></select>
+          <button onclick="clearEmp()" class="btn btn-outline btn-sm">✕</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">Δ</th><th>หมายเหตุ</th><th style="text-align:center">จัดการ</th></tr></thead>
+          <tbody id="empBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)" id="empInfo"></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- TAB: MOBILITY -->
+  <div id="tab-mobility" class="tab-pane">
+  <div class="page" style="padding-top:0">
+    <div class="card">
+      <div class="card-title blue">🔄 จัดการการโยกย้ายพนักงาน</div>
+      <div class="mob-form">
+        <div style="font-size:12.5px;font-weight:700;color:var(--black);margin-bottom:12px">➕ บันทึกการโยกย้ายใหม่</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">เลือกพนักงาน</label>
+            <input type="text" class="inp" id="mobEmpSearch"
+              placeholder="🔍 พิมพ์ชื่อ / รหัส / ชื่อเล่น..."
+              style="width:100%;padding:7px 11px;margin-bottom:6px"
+              oninput="searchMobEmp(this.value)">
+            <select class="sel" id="mobEmpSel" style="width:100%" onchange="onSelectMobEmp()"><option value="">— เลือกพนักงาน —</option></select>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:3px" id="mobEmpSearchInfo"></div>
+          </div>
+          <div id="mobEmpInfo" style="font-size:12px;color:var(--muted);padding-top:20px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 140px;gap:10px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">จาก Cost Center (เดิม)</label>
+            <input type="text" class="inp" id="mobFrom" style="width:100%;padding:7px 11px" placeholder="ชื่อบริษัทเดิม" readonly>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ไปยัง Cost Center (ใหม่)</label>
+            <select class="sel" id="mobTo" style="width:100%"><option value="">— เลือก Cost Center ปลายทาง —</option></select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">วันที่ย้าย</label>
+            <input type="text" class="inp" id="mobDate" style="width:100%;padding:7px 11px" placeholder="DD/MM/YYYY" value="17/03/2026">
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button onclick="saveMobility()" class="btn btn-green">✓ บันทึกการโยกย้าย</button>
+          <button onclick="clearMobForm()" class="btn btn-outline">✕ ล้าง</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="card-title" style="margin-bottom:0">รายการโยกย้าย</div>
+          <span style="background:#eaf0ff;color:#2563eb;padding:1px 7px;border-radius:8px;font-size:11px;font-weight:700" id="mobListCnt">0</span>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+          <input type="text" class="inp" id="mobQ" placeholder="🔍 ค้นหาชื่อ / รหัส..." style="width:190px;padding:6px 11px" oninput="filterMobList()">
+          <select class="sel" id="mobFilterCC" style="padding:6px 11px" onchange="filterMobList()"><option value="">— ทุก Cost Center —</option></select>
+          <button onclick="clearMobFilter()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px">✕</button>
+          <span style="font-size:11px;color:var(--muted)" id="mobFilterInfo"></span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก / ตำแหน่ง</th><th>จาก</th><th></th><th>ไปยัง</th><th>ประวัติ</th><th>วันที่</th><th style="text-align:center">ลบ</th></tr></thead>
+          <tbody id="mobBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- TAB: COST CENTER -->
+  <div id="tab-cc" class="tab-pane">
+  <div class="page" style="padding-top:0">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title gold" style="margin-bottom:0">🏢 จัดการ Cost Center</div>
+        <button onclick="openAddCC()" class="btn btn-gold btn-sm">+ เพิ่ม</button>
+      </div>
+      <div class="cc-form" id="ccForm">
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:10px" id="ccFormTitle">เพิ่ม Cost Center</div>
+        <div style="display:grid;grid-template-columns:150px 1fr 120px auto;gap:10px;align-items:end">
+          <div><label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">รหัสย่อ (Key)</label><input type="text" class="inp" id="ccKey" style="padding:7px 10px" placeholder="Nigiwai Group"></div>
+          <div><label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ชื่อเต็ม *</label><input type="text" class="inp" id="ccFull" style="width:100%;padding:7px 10px" placeholder="บริษัท นิกิวาอิ กรุ๊ป จำกัด"></div>
+          <div><label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">สี</label>
+            <div style="display:flex;gap:5px;align-items:center">
+              <input type="color" id="ccColor" value="#c0392b" style="width:34px;height:34px;border:none;border-radius:5px;cursor:pointer">
+              <input type="text" class="inp" id="ccColorTxt" value="#c0392b" style="padding:7px 8px;width:80px" oninput="syncColorTxt()">
+            </div>
+          </div>
+          <div style="display:flex;gap:6px"><button onclick="saveCCForm()" class="btn btn-gold btn-sm" style="padding:7px 14px">💾</button><button onclick="closeCCForm()" class="btn btn-outline btn-sm" style="padding:7px 10px">✕</button></div>
+        </div>
+      </div>
+      <div id="ccList"></div>
+    </div>
+  </div>
+  </div>
+
+
+  <!-- TAB: MENU MANAGER -->
+  <div id="tab-menus" class="tab-pane">
+  <div class="page" style="padding-top:0">
+
+    <div class="card">
+      <div class="card-title" style="color:#2980b9">⚙ จัดการเมนู Dashboard (index.html)</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">ลาก เพื่อเรียงลำดับ · Toggle เพื่อซ่อน/แสดง · คลิก ✏ เพื่อแก้ชื่อ · กด <strong>บันทึก</strong> เพื่อ apply</div>
+      <div id="menuList"></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="saveMenuConfig()" class="btn btn-red">💾 บันทึกการตั้งค่าเมนู</button>
+        <button onclick="resetMenuConfig()" class="btn btn-outline">↺ รีเซ็ตค่าเริ่มต้น</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:10px">
+        หมายเหตุ: การตั้งค่านี้จะบันทึกใน localStorage — เมื่อ index.html โหลด จะอ่านค่านี้มาแสดงเมนูและลำดับให้ถูกต้อง
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title gold">🎨 ตั้งค่าหน้า Dashboard</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ชื่อองค์กร (แสดงใน topbar)</label>
+          <input type="text" class="inp" id="cfgOrgName" style="width:100%;padding:7px 11px" placeholder="Nigiwai Group">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">ปีที่แสดง (เช่น 2026)</label>
+          <input type="text" class="inp" id="cfgYear" style="width:100%;padding:7px 11px" placeholder="2026">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Admin Password (สำหรับล็อกหน้าเงินเดือน)</label>
+          <input type="text" class="inp" id="cfgPayrollPass" style="width:100%;padding:7px 11px" placeholder="nigiwai2026">
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">รอบปรับเงินเดือน (label)</label>
+          <input type="text" class="inp" id="cfgPayrollRound" style="width:100%;padding:7px 11px" placeholder="ปรับ #01 03.26">
+        </div>
+      </div>
+      <button onclick="saveDashboardConfig()" class="btn btn-gold" style="margin-top:12px">💾 บันทึกการตั้งค่า Dashboard</button>
+    </div>
+
+  </div>
+  </div>
+
+</div><!-- end adminApp -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG — HARDCODED
+// ═══════════════════════════════════════════════════════════════
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbz46puAbDjey8h_Xh8EjKNAaePmfc1ABWTFBWDxjAZxs33rAfrzXa0M36cRlcsErN-L/exec';
+var USERS   = { admin: 'nigiwai2026', hr: 'hrpass2026' };
+
+
+function clearMobFilter() {
+  var q  = document.getElementById('mobQ');
+  var cc = document.getElementById('mobFilterCC');
+  if(q)  q.value  = '';
+  if(cc) cc.value = '';
+  renderMobility();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COST CENTER
+// ═══════════════════════════════════════════════════════════════
+var DEFAULT_CC = [
+  { key:'Nigiwai Goods Wealth',  full:'บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)',          color:'#2980b9' },
+  { key:'Nigiwai Group',         full:'บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)',                  color:'#c0392b' },
+  { key:'Nigiwai Construction',  full:'บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)',           color:'#8e44ad' },
+  { key:'NGWC HQ',               full:'บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)',                 color:'#27ae60' },
+  { key:'NGWC Don Mueang',       full:'บริษัท เอ็นจีดับบลิวซี จำกัด (002 สนามบินดอนเมือง)',          color:'#d35400' },
+  { key:'NGWC Phuket',           full:'บริษัท เอ็นจีดับบลิวซี จำกัด (003 สนามบินภูเก็ต)',           color:'#16a085' },
+  { key:'Kinosuke Group',        full:'บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)',              color:'#c0392b' },
+  { key:'Phuket Ocean',          full:'บริษัท ภูเก็ตโอเชี่ยนกรุ๊ป จำกัด (The Oceanic Sportel)',      color:'#1abc9c' },
+  { key:'Viang Viet',            full:'บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)',                color:'#e91e63' },
+  { key:'Andamanda',             full:'บริษัท สุดสาครกรุ๊ป จำกัด (Andamanda)',                       color:'#f39c12' }
+];
+var CC = JSON.parse(localStorage.getItem('hr_cc') || 'null') || JSON.parse(JSON.stringify(DEFAULT_CC));
+function saveCC() { localStorage.setItem('hr_cc', JSON.stringify(CC)); }
+function ccFull(k)  { var f = CC.find(function(c){ return c.key===k; }); return f ? f.full : k; }
+function ccColor(k) { var f = CC.find(function(c){ return c.key===k; }); return f ? f.color : '#888'; }
+
+// ═══════════════════════════════════════════════════════════════
+// EMPLOYEE DATA
+// ═══════════════════════════════════════════════════════════════
+var SEED = [{"id":"660104","name":"นางสาวสาวิตรี สิงห์เหม้น","nickname":"ทราย","brand":"Kinosuke Group","dept":"Operation","position":"Core Team Supervisor- Level I","level":"Leader and Supervisor","baseSalary68":21000,"baseSalary69":21000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","brandNew":"บริษัท เอ็นจีดับบลิวซี จำกัด (003 สนามบินภูเก็ต)","moveDate":"17/03/2026","moveHistory":[{"from":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","to":"บริษัท เอ็นจีดับบลิวซี จำกัด (003 สนามบินภูเก็ต)","date":"17/03/2026"}]},{"id":"670601","name":"นางสาวรัตติกาล สกุลอินทร์","nickname":"โบ","brand":"Kinosuke Group","dept":"Sales","position":"Tele Sale","level":"Officer","baseSalary68":19000,"baseSalary69":19000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","brandNew":"บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)","moveDate":"17/03/2026","moveHistory":[{"from":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","to":"บริษัท นิกิวาอิ คอนสตรัคชั่น จำกัด (สำนักงานใหญ่)","date":"17/03/2026"}]},{"id":"681001","name":"นางสาวพรวิไล มีชัย","nickname":"ออน","brand":"Kinosuke Group","dept":"Warehouse & Logistics","position":"Admin Purchasing","level":"Officer","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","brandNew":"บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)","moveDate":"17/03/2026","moveHistory":[{"from":"บริษัท คินโนะสุเกะ กรุ๊ป จำกัด (สำนักงานใหญ่)","to":"บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)","date":"17/03/2026"}]},{"id":"651003","name":"นางสาวกชชลจรรย์ สุทธิกิตติพงศ์","nickname":"เมย์","brand":"Nigiwai Group","dept":"Financial And Account","position":"Acc Supervisor","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":29300,"totalIncome69":30500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650206","name":"นายกฤษฎา จันทร์ฝา","nickname":"ภูมิ","brand":"Nigiwai Group","dept":"Human Resource","position":"Human Resources Supervisor","level":"Leader and Supervisor","baseSalary68":18564,"baseSalary69":19000,"totalIncome68":20064,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650104","name":"นางสาวช้องนาง หินขาว","nickname":"หนูนา","brand":"Nigiwai Group","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":18900,"baseSalary69":19000,"totalIncome68":20900,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660409","name":"นางสาวพานทอง รุ่งอนันต์กุลสิริ","nickname":"ปิงปิง","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level I","level":"Senior Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":26813,"totalIncome69":28400,"remark":"ปรับ #01 03.26","brandOld":"บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)","brandNew":"บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)","moveDate":"17/03/2026","moveHistory":[{"from":"บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)","to":"บริษัท เอ็นจีดับบลิวซี จำกัด (สำนักงานใหญ่)","date":"17/03/2026"}]},{"id":"651101","name":"นางสาวณัฐชานันท์ ธนังชูศิลป์","nickname":"ชามุก","brand":"Nigiwai Group","dept":"Sales","position":"Sales Manager (Acting)","level":"Manager","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":28000,"totalIncome69":28000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"631202","name":"นางสาวสาริศา กมลอรรฆ","nickname":"น้ำ","brand":"Nigiwai Group","dept":"Executive","position":"Executive Assistant - Level III","level":"Leader and Supervisor","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":30500,"totalIncome69":30500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"651201","name":"นางสาวกนกพิชญ์ พิบูลย์","nickname":"ออ","brand":"Nigiwai Group","dept":"Financial And Account","position":"Financial & Account Manager","level":"Manager","baseSalary68":42000,"baseSalary69":42000,"totalIncome68":42000,"totalIncome69":42000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"640502","name":"นายณรุจ พลับศิริ","nickname":"โอ๊ต","brand":"Nigiwai Group","dept":"Marketing","position":"Senior Creative & Content Marketing","level":"Leader and Supervisor","baseSalary68":24980,"baseSalary69":24980,"totalIncome68":24980,"totalIncome69":24980,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650106","name":"นางสาวนัชชา ธนเกริกกวิน","nickname":"ป้อ","brand":"Nigiwai Group","dept":"Sales","position":"After Sales - Level III","level":"Senior Officer","baseSalary68":21800,"baseSalary69":21800,"totalIncome68":25640,"totalIncome69":25640,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"640601","name":"นายไกรเจต สมพงษ์","nickname":"คุณเจต","brand":"Nigiwai Group","dept":"Executive","position":"CTO & COO","level":"Chief and Director","baseSalary68":50000,"baseSalary69":50000,"totalIncome68":75000,"totalIncome69":75000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"641103","name":"นายญัตติพงศ์ พันธุ์ลิขิตอาภรณ์","nickname":"ไบร์ท","brand":"Nigiwai Group","dept":"Operation","position":"Project Leader","level":"Consultant","baseSalary68":12000,"baseSalary69":12000,"totalIncome68":12000,"totalIncome69":12000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"681101","name":"นายภัทรพล เดือนฉาย","nickname":"ฟัด","brand":"Nigiwai Group","dept":"Human Resource","position":"Senior Recruite","level":"Leader and Supervisor","baseSalary68":27000,"baseSalary69":27000,"totalIncome68":27000,"totalIncome69":27000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"681002","name":"นางสาววิภาวี เรืองจรูญ","nickname":"บิว","brand":"Nigiwai Group","dept":"Human Resource","position":"Recruite Officer","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"610701","name":"นางสาวอรอริยา สุดสุข","nickname":"ออน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"ART Operation- Lv.III","level":"Leader and Supervisor","baseSalary68":28500,"baseSalary69":28500,"totalIncome68":35889,"totalIncome69":37000,"remark":"ปรับ #01 03.26","brandOld":"บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)","brandNew":"บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)","moveDate":"17/03/2026","moveHistory":[{"from":"บริษัท นิกิวาอิ กู้ดส์ เวลท์ จำกัด (สำนักงานใหญ่)","to":"บริษัท นิกิวาอิ กรุ๊ป จำกัด (สำนักงานใหญ่)","date":"17/03/2026"}]},{"id":"660504","name":"นางสาวภัรตรา เพ็ญภู่","nickname":"มะปราง","brand":"Nigiwai Goods Wealth","dept":"Sales","position":"After Sales - Level II","level":"Officer","baseSalary68":16500,"baseSalary69":16500,"totalIncome68":16500,"totalIncome69":18000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"680901","name":"นายณัฐกิจ ต้นโต","nickname":"ที","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"พนักงานขนส่ง","level":"Officer","baseSalary68":13000,"baseSalary69":14000,"totalIncome68":13000,"totalIncome69":15000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"AS670308","name":"นางสาวมณีรัตน์ ธงทอง","nickname":"ผึ้ง","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Production Staff","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":13000,"totalIncome69":14000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"VV660302","name":"นางสาวศิริวรรณ กำรัตน์","nickname":"นิว","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef - Lv.II","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660201","name":"นางสาวธิติญา ปัญญายิ่ง","nickname":"อุ้ม","brand":"Nigiwai Goods Wealth","dept":"Marketing","position":"Graphic Designer - Lv III","level":"Officer","baseSalary68":23690,"baseSalary69":23690,"totalIncome68":23690,"totalIncome69":23690,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"610601","name":"นายสุทธิพร ตั้งสกุลสันติ","nickname":"คุณใหม่","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"President & Group CEO","level":"Chief and Director","baseSalary68":180000,"baseSalary69":180000,"totalIncome68":180000,"totalIncome69":180000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"670401","name":"นายพงศธร โชติยะศิลป์","nickname":"แบงค์","brand":"Nigiwai Goods Wealth","dept":"Executive","position":"Chief Financial Officer","level":"Manager","baseSalary68":65000,"baseSalary69":50000,"totalIncome68":65000,"totalIncome69":50000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650208","name":"นายขวัญวิชัย ไกรงาม","nickname":"ชัย","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Head Chef - Level II","level":"Officer","baseSalary68":27038,"baseSalary69":27038,"totalIncome68":28038,"totalIncome69":28038,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"640202","name":"นางสาวคณิตตา จำเริญพงษ์","nickname":"ฝน","brand":"Nigiwai Goods Wealth","dept":"Warehouse & Logistics","position":"ART Supply Chain - Level III","level":"Manager","baseSalary68":26000,"baseSalary69":26000,"totalIncome68":33000,"totalIncome69":33000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"670202","name":"นางสาวกัลยรักษ์ ตระกูลอินทร์","nickname":"กุ้ง","brand":"Nigiwai Goods Wealth","dept":"Financial And Account","position":"Senior Accounting Officer","level":"Senior Officer","baseSalary68":24000,"baseSalary69":24000,"totalIncome68":24000,"totalIncome69":24000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660801","name":"นางสาวฐิติกานต์ รักเมือง","nickname":"หยก","brand":"Nigiwai Construction","dept":"Marketing","position":"Graphic Designer - Lv I","level":"Officer","baseSalary68":15500,"baseSalary69":15500,"totalIncome68":16000,"totalIncome69":17000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660804","name":"นายจิติวัฒน์ อุปวรรณะ","nickname":"นิว","brand":"Nigiwai Construction","dept":"Construction","position":"Senior Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":26000,"totalIncome68":26000,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"670201","name":"นายศักดิ์จรินทร์ ดวงฤทัย","nickname":"เคน","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Support","level":"Officer","baseSalary68":15000,"baseSalary69":16000,"totalIncome68":15000,"totalIncome69":16000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660401","name":"นายพิชญา บัวบรรจง","nickname":"พีพี","brand":"Nigiwai Construction","dept":"Information Technology","position":"IT Specialist","level":"Leader and Supervisor","baseSalary68":31500,"baseSalary69":31500,"totalIncome68":33705,"totalIncome69":33705,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"610602","name":"นายวรันธร แดงใหญ่","nickname":"คุณเก้ง","brand":"Nigiwai Construction","dept":"Executive","position":"CEO","level":"Chief and Director","baseSalary68":120000,"baseSalary69":120000,"totalIncome68":120000,"totalIncome69":120000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"641105","name":"นายอรรถสิทธิ์ สุปัดคำ","nickname":"เก้","brand":"Nigiwai Construction","dept":"Construction","position":"Project Coordinator - Level I","level":"Leader and Supervisor","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"671002","name":"นายนิรันดร์ ดวงสุวรรณ","nickname":"อาร์ท","brand":"Nigiwai Construction","dept":"Executive","position":"Construction Director","level":"Chief and Director","baseSalary68":100000,"baseSalary69":100000,"totalIncome68":100000,"totalIncome69":100000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"671101","name":"นางสาวนุชนารถ แตงอ่อน","nickname":"ถุงแป้ง","brand":"Nigiwai Construction","dept":"Construction","position":"Interior Designer","level":"Officer","baseSalary68":25000,"baseSalary69":25000,"totalIncome68":25000,"totalIncome69":25000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650702","name":"นางสาวอรนิดา แพสถิตถาวร","nickname":"กุ๊ก","brand":"Nigiwai Construction","dept":"Human Resource","position":"House Keeper","level":"Officer","baseSalary68":12360,"baseSalary69":12360,"totalIncome68":12860,"totalIncome69":12860,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"631204","name":"นายพงศธร อภัยนุกูล","nickname":"บลู","brand":"Nigiwai Construction","dept":"Marketing","position":"Video Production Supervisor","level":"Leader and Supervisor","baseSalary68":24150,"baseSalary69":24150,"totalIncome68":26150,"totalIncome69":26150,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"999901","name":"นายสุวคนธ์ อินทร์ประคอง","nickname":"หมู","brand":"Nigiwai Construction","dept":"Marketing","position":"Digital Marketing Consultant","level":"Consultant","baseSalary68":16000,"baseSalary69":16000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"641001","name":"นายวีระพจน์ สังเกตุ","nickname":"พจน์","brand":"Nigiwai Construction","dept":"Warehouse & Logistics","position":"Driver & Technician","level":"Officer","baseSalary68":16223,"baseSalary69":16223,"totalIncome68":16223,"totalIncome69":16223,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"630601","name":"นางสาวธนภรณ์ ผ่องประทุม","nickname":"เติ้ล","brand":"NGWC HQ","dept":"Marketing","position":"Art Supervisor","level":"Leader and Supervisor","baseSalary68":26383,"baseSalary69":26500,"totalIncome68":29674,"totalIncome69":30000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650102","name":"นายวินัย หนองแพ","nickname":"บู๊","brand":"NGWC HQ","dept":"Operation","position":"Executive Chef - Lv.II","level":"Leader and Supervisor","baseSalary68":30000,"baseSalary69":30000,"totalIncome68":36378,"totalIncome69":37500,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650207","name":"นางสาวเสาวณี พันสุวรรณ์","nickname":"บี","brand":"NGWC HQ","dept":"Operation","position":"Core Team - Level II","level":"Officer","baseSalary68":17850,"baseSalary69":19000,"totalIncome68":19743,"totalIncome69":22000,"remark":"ปรับ #01 03.26","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"650903","name":"นายกันต์ศักย์ ปานมงคล","nickname":"อ้น","brand":"NGWC HQ","dept":"Operation","position":"Quality Control & Audit Manager","level":"Manager","baseSalary68":36050,"baseSalary69":36050,"totalIncome68":36050,"totalIncome69":36050,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660101","name":"นางสาวกรวรรณ สุวรรณพรรค","nickname":"หมวย","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Payable","level":"Officer","baseSalary68":22050,"baseSalary69":22050,"totalIncome68":22050,"totalIncome69":22050,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"660503","name":"นายภูรินทร์ บุญวรรณ","nickname":"ก้อนเมฆ","brand":"NGWC HQ","dept":"Financial And Account","position":"Accounts Receivable","level":"Officer","baseSalary68":18900,"baseSalary69":18900,"totalIncome68":18900,"totalIncome69":18900,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690201","name":"นางสาววัชรินทร์ เกงขุนทด","nickname":"วา","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690202","name":"นายณรงค์ศักดิ์ รุ่งโรจน์กาญจนา","nickname":"บอม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690203","name":"นางสาวจิรักษา ภูฆัง","nickname":"แจม","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690204","name":"นางสาววัทนวิภา แซ่กั้ว","nickname":"ยุ้ย","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16500,"totalIncome69":16500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690206","name":"นายธนวิทย์ เชาวนะ","nickname":"ไบร์ท","brand":"NGWC Don Mueang","dept":"Operation","position":"Cashier & Service","level":"Officer","baseSalary68":14000,"baseSalary69":14000,"totalIncome68":15500,"totalIncome69":15500,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690207","name":"นายเริงชัย หมู่แก้ว","nickname":"ต้อม","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":18000,"baseSalary69":18000,"totalIncome68":19000,"totalIncome69":19000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690208","name":"นายพลชนะ พันลำภักดิ์","nickname":"เจมส์","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":15000,"baseSalary69":15000,"totalIncome68":16000,"totalIncome69":16000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]},{"id":"NBD690209","name":"นายแม็ก ซอ เมี๊ยด","nickname":"วัน","brand":"Nigiwai Goods Wealth","dept":"Operation","position":"Chef","level":"Officer","baseSalary68":13000,"baseSalary69":13000,"totalIncome68":14000,"totalIncome69":14000,"remark":"","brandOld":"","brandNew":"","moveDate":"","moveHistory":[]}];
+
+var DB = JSON.parse(localStorage.getItem('hr_db') || 'null') || JSON.parse(JSON.stringify(SEED));
+function saveDB() {
+  localStorage.setItem('hr_db', JSON.stringify(DB));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAS COMMUNICATION — JSONP via script tag injection
+// วิธีเดียวที่ทำงานได้กับ GAS Web App จาก browser
+// ═══════════════════════════════════════════════════════════════
+function setStatus(msg, color) {
+  var el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = color || 'rgba(255,255,255,.45)';
+}
+
+function gasCall(payload, onOK, onFail) {
+  if (!GAS_URL || GAS_URL.indexOf('YOUR_') !== -1) {
+    toast('⚠ ยังไม่ได้ตั้งค่า GAS URL', 'err');
+    if (onFail) onFail('no-url');
+    return;
+  }
+
+  var cbName = '_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  var el     = document.createElement('script');
+  var done   = false;
+  var timer  = null;
+
+  function cleanup() {
+    done = true;
+    clearTimeout(timer);
+    delete window[cbName];
+    if (el.parentNode) el.parentNode.removeChild(el);
+  }
+
+  window[cbName] = function(res) {
+    cleanup();
+    console.log('[GAS response]', payload.action, res);
+    if (res && res.status === 'ok') {
+      setStatus('🟢 Sheet อัปเดตแล้ว · ' + new Date().toLocaleTimeString('th-TH'), '#4ade80');
+      if (onOK) onOK(res);
+    } else {
+      var msg = (res && res.message) ? res.message : 'GAS Error';
+      setStatus('🔴 ' + msg, '#f87171');
+      if (onFail) onFail(msg);
+    }
+  };
+
+  timer = setTimeout(function() {
+    if (!done) {
+      cleanup();
+      setStatus('🔴 GAS Timeout — ตรวจสอบ Deploy Settings', '#f87171');
+      toast('⚠ GAS Timeout — ตรวจสอบ: Who has access = Anyone และ URL ลงท้าย /exec', 'err');
+      if (onFail) onFail('timeout');
+    }
+  }, 20000);
+
+  el.onerror = function() {
+    cleanup();
+    setStatus('🔴 ไม่สามารถเชื่อมต่อ GAS', '#f87171');
+    toast('⚠ ไม่สามารถโหลด GAS Script — ตรวจสอบ URL', 'err');
+    if (onFail) onFail('load-error');
+  };
+
+  try {
+    var data = encodeURIComponent(JSON.stringify(payload));
+    var url  = GAS_URL + '?callback=' + encodeURIComponent(cbName) + '&data=' + data;
+    console.log('[GAS call] action:', payload.action, '| url length:', url.length);
+    el.src = url;
+    document.head.appendChild(el);
+  } catch(e) {
+    cleanup();
+    toast('⚠ GAS encode error: ' + e.message, 'err');
+    if (onFail) onFail(e.message);
+  }
+}
+
+function pushEmp(emp) {
+  setStatus('⏳ กำลังบันทึก...', 'rgba(255,255,255,.45)');
+  gasCall({ action: 'upsert', employee: emp },
+    function() { console.log('upserted:', emp.id); },
+    function(e) { console.warn('upsert fail:', e); }
+  );
+}
+
+function deleteEmpGAS(id) {
+  setStatus('⏳ กำลังลบ...', 'rgba(255,255,255,.45)');
+  gasCall({ action: 'delete', id: id },
+    function() { console.log('deleted:', id); },
+    function(e) { console.warn('delete fail:', e); }
+  );
+}
+
+// Guard ป้องกัน sync ซ้อนกัน
+var _syncInProgress = false;
+
+function syncSheet() {
+  if (_syncInProgress) {
+    toast('⚠ กำลัง Sync อยู่ กรุณารอ...', 'err');
+    return;
+  }
+
+  var CHUNK  = 3;        // ส่งทีละ 3 คน (~5,400 chars/request)
+  var total  = DB.length;
+  var offset = 0;
+  var ok     = 0;
+  var fail   = 0;
+  _syncInProgress = true;
+
+  setStatus('⏳ Full Sync 0/' + total + '...', 'rgba(255,255,255,.45)');
+  toast('⏳ กำลัง Sync ' + total + ' รายการ...', 'ok');
+
+  // เริ่มด้วย sync (ล้าง+เขียน chunk แรก) แล้วต่อด้วย append
+  sendNext();
+
+  function sendNext() {
+    if (offset >= total) {
+      _syncInProgress = false;
+      // บันทึก timestamp หลัง sync เสร็จ (trigger storage event ครั้งเดียว)
+      localStorage.setItem('hr_last_save', Date.now().toString());
+      if (fail === 0) {
+        setStatus('🟢 Full Sync สำเร็จ — ' + ok + ' รายการ', '#4ade80');
+        toast('☁ Full Sync สำเร็จ — ' + ok + '/' + total + ' รายการ', 'ok');
+      } else {
+        setStatus('⚠ Sync เสร็จ — สำเร็จ ' + ok + ' / ล้มเหลว ' + fail, '#fbbf24');
+        toast('⚠ Sync เสร็จ — ล้มเหลว ' + fail + ' chunk', 'err');
+      }
+      return;
+    }
+
+    var slice   = DB.slice(offset, offset + CHUNK);
+    var action  = (offset === 0) ? 'sync' : 'append';
+    var current = offset;
+
+    setStatus('⏳ Sync ' + current + '-' + Math.min(current+CHUNK, total) + '/' + total + '...', 'rgba(255,255,255,.45)');
+
+    gasCall(
+      { action: action, data: slice },
+      function() {
+        ok     += slice.length;
+        offset += CHUNK;
+        // ใช้ setTimeout 0 เพื่อให้ browser มีเวลา paint ระหว่าง chunk
+        setTimeout(sendNext, 0);
+      },
+      function(e) {
+        console.warn('[Sync] chunk ' + current + ' failed:', e, '— skipping');
+        fail++;
+        offset += CHUNK;
+        setTimeout(sendNext, 0);
+      }
+    );
+  }
+}
+
+function checkGAS() {
+  setStatus('⏳ กำลังตรวจสอบ...', 'rgba(255,255,255,.45)');
+  gasCall({ action: 'ping' },
+    function(res) {
+      var hc = res.headcount || 0;
+      setStatus('🟢 GAS พร้อม' + (hc ? ' — ' + hc + ' รายการใน Sheet' : ' (Sheet ว่าง กด Full Sync)'), '#4ade80');
+    },
+    function(e) {
+      if (e === 'timeout') {
+        setStatus('🔴 Timeout — ตรวจสอบ Deploy URL และ Who has access = Anyone', '#f87171');
+      }
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+function doLogin() {
+  var u = document.getElementById('lu').value.trim();
+  var p = document.getElementById('lp').value;
+  if (USERS[u] && USERS[u] === p) {
+    sessionStorage.setItem('auth', '1');
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    init();
+  } else {
+    var e = document.getElementById('lErr');
+    e.style.display = 'block';
+    setTimeout(function() { e.style.display = 'none'; }, 3000);
+  }
+}
+function doLogout() { sessionStorage.removeItem('auth'); location.reload(); }
+if (sessionStorage.getItem('auth') === '1') {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+var empF = [], editId = null;
+function init() {
+  var bf = document.getElementById('empBrand');
+  var df = document.getElementById('empDept');
+  var es = document.getElementById('mobEmpSel');
+  var ts = document.getElementById('mobTo');
+
+  var brands = [];
+  DB.forEach(function(e) { if (brands.indexOf(e.brand) === -1) brands.push(e.brand); });
+  brands.sort().forEach(function(b) {
+    bf.innerHTML += '<option value="' + b + '">' + ccFull(b) + '</option>';
+  });
+
+  var depts = [];
+  DB.forEach(function(e) { if (depts.indexOf(e.dept) === -1) depts.push(e.dept); });
+  depts.sort().forEach(function(d) { df.innerHTML += '<option value="' + d + '">' + d + '</option>'; });
+
+  // searchMobEmp('') จะ populate mobEmpSel เองโดยไม่ต้อง loop ที่นี่
+  // (ต้อง call หลังจาก DOM พร้อม)
+  searchMobEmp('');
+
+  CC.forEach(function(c) { ts.innerHTML += '<option value="' + c.full + '">' + c.full + '</option>'; });
+
+  renderStats();
+  empF = DB.slice();
+  renderEmp();
+  renderMobility();
+  renderCCList();
+  checkGAS();
+}
+if (sessionStorage.getItem('auth') === '1') init();
+
+// ═══════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════
+function renderStats() {
+  var adj   = DB.filter(function(e) { return e.totalIncome69 > e.totalIncome68; });
+  var moved = DB.filter(function(e) { return e.brandNew && e.brandNew !== ''; });
+  var inc   = DB.reduce(function(s, e) { return s + e.totalIncome69; }, 0);
+  var bset  = {};
+  DB.forEach(function(e) { bset[e.brand] = 1; });
+  document.getElementById('statsRow').innerHTML =
+    '<div class="stat-card"><div class="stat-label">พนักงานทั้งหมด</div><div class="stat-val" style="color:var(--red)">' + DB.length + '</div></div>' +
+    '<div class="stat-card gold"><div class="stat-label">Cost Center</div><div class="stat-val" style="color:var(--gold)">' + Object.keys(bset).length + '</div></div>' +
+    '<div class="stat-card green"><div class="stat-label">ปรับเงินเดือน</div><div class="stat-val" style="color:#27ae60">' + adj.length + ' คน</div></div>' +
+    '<div class="stat-card blue"><div class="stat-label">Internal Mobility</div><div class="stat-val" style="color:#2980b9">' + moved.length + ' คน</div></div>' +
+    '<div class="stat-card purple"><div class="stat-label">รายได้รวม/เดือน</div><div class="stat-val" style="color:#8e44ad;font-size:18px">' + (inc/1e6).toFixed(2) + 'M</div></div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EMPLOYEE TABLE — inline edit
+// ═══════════════════════════════════════════════════════════════
+var LEVELS = ['Officer','Senior Officer','Leader and Supervisor','Manager','Chief and Director','Consultant'];
+var DEPTS  = ['Operation','Executive','Marketing','Financial And Account','Sales','Warehouse & Logistics','Human Resource','Construction','Information Technology'];
+function fmt(n) { return Math.round(n).toLocaleString('th-TH'); }
+function lvlB(l) {
+  var map = {'Officer':'lb-off','Leader and Supervisor':'lb-ldr','Manager':'lb-mgr','Chief and Director':'lb-chf','Senior Officer':'lb-snr','Consultant':'lb-con'};
+  return '<span class="lb ' + (map[l]||'lb-off') + '">' + l + '</span>';
+}
+
+function filterEmp() {
+  var q = document.getElementById('empQ').value.toLowerCase();
+  var b = document.getElementById('empBrand').value;
+  var d = document.getElementById('empDept').value;
+  empF = DB.filter(function(e) {
+    return (!q || e.name.toLowerCase().indexOf(q) !== -1 || e.id.toLowerCase().indexOf(q) !== -1 || e.position.toLowerCase().indexOf(q) !== -1) &&
+           (!b || e.brand === b) && (!d || e.dept === d);
+  });
+  editId = null; renderEmp();
+}
+function clearEmp() {
+  document.getElementById('empQ').value = '';
+  document.getElementById('empBrand').value = '';
+  document.getElementById('empDept').value = '';
+  empF = DB.slice(); editId = null; renderEmp();
+}
+
+function renderEmp() {
+  document.getElementById('empCnt').textContent = empF.length;
+  document.getElementById('empInfo').textContent = 'แสดงทั้งหมด ' + empF.length + ' รายการ';
+  var rows = '';
+  for (var i = 0; i < empF.length; i++) {
+    var e = empF[i];
+    if (editId === e.id) { rows += buildEditRow(e, i); continue; }
+    var diff = e.totalIncome69 - e.totalIncome68;
+    var dc   = diff > 0 ? '#27ae60' : diff < 0 ? 'var(--red)' : '#bbb';
+    var ds   = diff > 0 ? '+฿'+fmt(diff) : diff < 0 ? '-฿'+fmt(Math.abs(diff)) : '—';
+    rows += '<tr id="row-' + e.id + '">' +
+      '<td style="color:#bbb">' + (i+1) + '</td>' +
+      '<td style="color:#bbb;font-size:10.5px">' + e.id + '</td>' +
+      '<td><div style="font-weight:600">' + e.name + '</div><div style="font-size:10.5px;color:#aaa">' + e.nickname + '</div></td>' +
+      '<td style="font-size:11px;color:' + ccColor(e.brand) + ';font-weight:600" title="' + ccFull(e.brand) + '">' + ccFull(e.brand) + '</td>' +
+      '<td style="font-size:11.5px">' + e.dept + '</td>' +
+      '<td style="font-size:11.5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + e.position + '">' + e.position + '</td>' +
+      '<td>' + lvlB(e.level) + '</td>' +
+      '<td style="text-align:right">฿' + fmt(e.baseSalary69) + '</td>' +
+      '<td style="text-align:right;font-weight:700">฿' + fmt(e.totalIncome69) + '</td>' +
+      '<td style="text-align:right;font-size:11.5px;color:' + dc + '">' + ds + '</td>' +
+      '<td style="font-size:11px;color:' + (e.remark ? '#d97706' : '#bbb') + ';max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + e.remark + '">' + (e.remark||'—') + '</td>' +
+      '<td style="text-align:center;white-space:nowrap"><button class="btn-edit" onclick="startEdit(\'' + e.id + '\')">✏</button> <button class="btn-del" onclick="delEmp(\'' + e.id + '\')">🗑</button></td>' +
+      '</tr>';
+  }
+  document.getElementById('empBody').innerHTML = rows;
+}
+
+function buildEditRow(e, i) {
+  var ccOpts = CC.map(function(c) { return '<option value="' + c.key + '"' + (c.key===e.brand?' selected':'') + '>' + c.full + '</option>'; }).join('');
+  var lvOpts = LEVELS.map(function(l) { return '<option' + (l===e.level?' selected':'') + '>' + l + '</option>'; }).join('');
+  var dOpts  = DEPTS.map(function(d)  { return '<option' + (d===e.dept?' selected':'')  + '>' + d + '</option>'; }).join('');
+  return '<tr class="edit-row" id="row-' + e.id + '">' +
+    '<td style="color:#bbb">' + (i+1) + '</td>' +
+    '<td style="color:#bbb;font-size:10.5px">' + e.id + '</td>' +
+    '<td><input class="ei" id="ei-name" value="' + e.name + '" style="min-width:140px"><br><input class="ei" id="ei-nick" value="' + (e.nickname||'') + '" style="margin-top:3px;width:70px" placeholder="ชื่อเล่น"></td>' +
+    '<td><select class="es" id="ei-brand">' + ccOpts + '</select></td>' +
+    '<td><select class="es" id="ei-dept">' + dOpts + '</select></td>' +
+    '<td><input class="ei" id="ei-pos" value="' + e.position + '" style="min-width:120px"></td>' +
+    '<td><select class="es" id="ei-level">' + lvOpts + '</select></td>' +
+    '<td><input class="ei" id="ei-b69" type="number" value="' + e.baseSalary69 + '" style="width:85px;text-align:right"></td>' +
+    '<td><input class="ei" id="ei-i69" type="number" value="' + e.totalIncome69 + '" style="width:85px;text-align:right"></td>' +
+    '<td><input class="ei" id="ei-i68" type="number" value="' + e.totalIncome68 + '" style="width:75px;text-align:right"></td>' +
+    '<td><input class="ei" id="ei-rem" value="' + (e.remark||'') + '" style="min-width:80px"></td>' +
+    '<td style="text-align:center;white-space:nowrap"><button class="btn-save" onclick="saveEdit(\'' + e.id + '\')">✓</button> <button class="btn-cancel" onclick="cancelEdit()">✕</button></td>' +
+    '</tr>';
+}
+
+function startEdit(id) { editId = id; renderEmp(); var r = document.getElementById('row-'+id); if (r) r.scrollIntoView({behavior:'smooth',block:'center'}); }
+function cancelEdit() { editId = null; renderEmp(); }
+function saveEdit(id) {
+  var idx = DB.findIndex(function(e) { return e.id === id; });
+  if (idx === -1) return;
+  var name  = document.getElementById('ei-name').value.trim();
+  var brand = document.getElementById('ei-brand').value;
+  if (!name || !brand) { toast('⚠ กรอกข้อมูลให้ครบ', 'err'); return; }
+  DB[idx] = Object.assign({}, DB[idx], {
+    name:        name,
+    nickname:    document.getElementById('ei-nick').value.trim(),
+    brand:       brand,
+    dept:        document.getElementById('ei-dept').value,
+    level:       document.getElementById('ei-level').value,
+    position:    document.getElementById('ei-pos').value.trim(),
+    baseSalary69: parseFloat(document.getElementById('ei-b69').value) || 0,
+    totalIncome69:parseFloat(document.getElementById('ei-i69').value) || 0,
+    totalIncome68:parseFloat(document.getElementById('ei-i68').value) || DB[idx].totalIncome68,
+    remark:      document.getElementById('ei-rem').value.trim()
+  });
+  saveDB();
+  pushEmp(DB[idx]);
+  editId = null;
+  renderStats();
+  filterEmp();
+  toast('✅ บันทึก ' + name + ' — กำลังอัปเดต Sheet...', 'ok');
+}
+function delEmp(id) {
+  var e = DB.find(function(d) { return d.id === id; });
+  if (!e || !confirm('ยืนยันลบ "' + e.name + '"?')) return;
+  DB = DB.filter(function(d) { return d.id !== id; });
+  saveDB();
+  deleteEmpGAS(id);
+  if (editId === id) editId = null;
+  renderStats();
+  filterEmp();
+  toast('🗑 ลบ ' + e.name + ' — กำลังอัปเดต Sheet...', 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOBILITY
+// ═══════════════════════════════════════════════════════════════
+// ค้นหาพนักงานใน dropdown เลือก
+function searchMobEmp(q) {
+  var sel = document.getElementById('mobEmpSel');
+  var info = document.getElementById('mobEmpSearchInfo');
+  q = q.toLowerCase().trim();
+
+  // rebuild options จาก DB ตาม query
+  sel.innerHTML = '<option value="">— เลือกพนักงาน —</option>';
+  var matched = DB.filter(function(e) {
+    if (!q) return true;
+    return (e.name||'').toLowerCase().indexOf(q) !== -1
+        || (e.id||'').toLowerCase().indexOf(q) !== -1
+        || (e.nickname||'').toLowerCase().indexOf(q) !== -1
+        || (e.dept||'').toLowerCase().indexOf(q) !== -1;
+  });
+  matched.sort(function(a,b){ return a.name.localeCompare(b.name,'th'); });
+  matched.forEach(function(e) {
+    sel.innerHTML += '<option value="' + e.id + '">'
+      + e.name + ' (' + e.nickname + ') — ' + ccFull(e.brand)
+      + '</option>';
+  });
+
+  if (info) {
+    info.textContent = q
+      ? 'พบ ' + matched.length + ' คน จาก ' + DB.length + ' คน'
+      : '';
+  }
+
+  // clear info panel when search changes
+  document.getElementById('mobEmpInfo').textContent = '';
+  document.getElementById('mobFrom').value = '';
+}
+
+function onSelectMobEmp() {
+  var id = document.getElementById('mobEmpSel').value;
+  var e  = DB.find(function(d) { return d.id === id; });
+  if (!e) {
+    document.getElementById('mobEmpInfo').textContent = '';
+    document.getElementById('mobFrom').value = '';
+    return;
+  }
+  document.getElementById('mobEmpInfo').innerHTML =
+    '<span style="font-weight:600">' + e.name + '</span>'
+    + '<br><span style="font-size:10.5px;color:#888">' + e.dept + ' · ' + e.position + '</span>'
+    + '<br><span style="font-size:10.5px;color:' + ccColor(e.brand) + ';font-weight:600">' + ccFull(e.brand) + '</span>';
+  document.getElementById('mobFrom').value = e.brandNew || ccFull(e.brand);
+}
+
+function saveMobility() {
+  var id       = document.getElementById('mobEmpSel').value;
+  var brandNew = document.getElementById('mobTo').value;
+  var date     = document.getElementById('mobDate').value.trim();
+  if (!id || !brandNew) { toast('⚠ เลือกพนักงานและ Cost Center ปลายทาง', 'err'); return; }
+  var idx = DB.findIndex(function(e) { return e.id === id; });
+  if (idx === -1) return;
+
+  var fromBrand = DB[idx].brandNew || DB[idx].brandOld || ccFull(DB[idx].brand);
+  if (!Array.isArray(DB[idx].moveHistory)) DB[idx].moveHistory = [];
+  DB[idx].moveHistory.push({ from: fromBrand, to: brandNew, date: date });
+
+  if (!DB[idx].brandOld) DB[idx].brandOld = ccFull(DB[idx].brand);
+  DB[idx].brandNew  = brandNew;
+  DB[idx].moveDate  = date;
+
+  // อัปเดต brand key ให้ตรงกับ CC ใหม่ — สำคัญ!
+  var newCC = CC.find(function(c) { return c.full === brandNew; });
+  if (newCC) DB[idx].brand = newCC.key;
+
+  saveDB();
+  pushEmp(DB[idx]);
+  clearMobForm();
+  renderStats();
+  renderMobility();
+  filterEmp();
+  toast('✅ บันทึกการโยกย้าย ' + DB[idx].name + ' — กำลังอัปเดต Sheet...', 'ok');
+}
+
+function clearMobForm() {
+  var searchEl = document.getElementById('mobEmpSearch');
+  var infoEl   = document.getElementById('mobEmpSearchInfo');
+  if (searchEl) searchEl.value = '';
+  if (infoEl)   infoEl.textContent = '';
+  // rebuild full list after clearing search
+  searchMobEmp('');
+  document.getElementById('mobEmpSel').value   = '';
+  document.getElementById('mobEmpInfo').textContent = '';
+  document.getElementById('mobFrom').value     = '';
+  document.getElementById('mobTo').value       = '';
+}
+
+function delMobility(id) {
+  if (!confirm('ยืนยันยกเลิกการโยกย้าย? (ประวัติทั้งหมดจะถูกลบ)')) return;
+  var idx = DB.findIndex(function(e) { return e.id === id; });
+  if (idx === -1) return;
+  DB[idx].brandOld    = '';
+  DB[idx].brandNew    = '';
+  DB[idx].moveDate    = '';
+  DB[idx].moveHistory = [];
+  saveDB();
+  pushEmp(DB[idx]);
+  renderStats();
+  renderMobility();
+  filterEmp();
+  toast('🗑 ยกเลิกการโยกย้ายแล้ว', 'ok');
+}
+
+function renderMobility() {
+  var moved = DB.filter(function(e) { return e.brandNew && e.brandNew !== ''; });
+  document.getElementById('mobListCnt').textContent = moved.length;
+  var ccSel = document.getElementById('mobFilterCC');
+  if (ccSel) {
+    var prev = ccSel.value;
+    var dests = [];
+    moved.forEach(function(e){ if(e.brandNew && dests.indexOf(e.brandNew)===-1) dests.push(e.brandNew); });
+    ccSel.innerHTML = '<option value="">— ทุก Cost Center —</option>';
+    dests.sort().forEach(function(d){
+      ccSel.innerHTML += '<option value="' + d + '"' + (prev===d?' selected':'') + '>' + d + '</option>';
+    });
+  }
+  filterMobList(moved);
+}
+
+function filterMobList(movedInput) {
+  var moved = movedInput || DB.filter(function(e) { return e.brandNew && e.brandNew !== ""; });
+  var qEl  = document.getElementById("mobQ");
+  var ccEl = document.getElementById("mobFilterCC");
+  var q    = qEl  ? qEl.value.toLowerCase()  : "";
+  var ccF  = ccEl ? ccEl.value               : "";
+  var filtered = moved.filter(function(e) {
+    var n   = (e.name||"").toLowerCase();
+    var id  = (e.id||"").toLowerCase();
+    var nk  = (e.nickname||"").toLowerCase();
+    var pos = (e.position||"").toLowerCase();
+    var matchQ  = !q || n.indexOf(q)!==-1 || id.indexOf(q)!==-1 || nk.indexOf(q)!==-1 || pos.indexOf(q)!==-1;
+    var matchCC = !ccF || e.brandNew===ccF;
+    return matchQ && matchCC;
+  });
+  var info = document.getElementById("mobFilterInfo");
+  if (info) info.textContent = (q||ccF) ? filtered.length + " / " + moved.length + " รายการ" : "";
+  var tbody = document.getElementById("mobBody");
+  if (filtered.length === 0) {
+    tbody.innerHTML = "<tr><td colspan=\"9\" style=\"text-align:center;color:#aaa;padding:20px\">" + (q||ccF ? "ไม่พบข้อมูลตามเงื่อนไข" : "ยังไม่มีข้อมูลการโยกย้าย") + "</td></tr>";
+    return;
+  }
+  tbody.innerHTML = "";
+  filtered.forEach(function(e) {
+    var fromBrand = e.brandOld || ccFull(e.brand);
+    var hist = Array.isArray(e.moveHistory) ? e.moveHistory : [];
+    var histTip = hist.map(function(h,j){ return (j+1)+". "+h.from+" → "+h.to+(h.date?" ("+h.date+")":""); }).join(" | ");
+    var tr = document.createElement("tr");
+    tr.innerHTML = 
+      "<td style=\"font-size:10.5px;color:#bbb\">" + e.id + "</td>" +
+      "<td><div style=\"font-weight:600\">" + e.name + "</div><div style=\"font-size:10.5px;color:#aaa\">" + (e.nickname||"") + "</div></td>" +
+      "<td style=\"font-size:11px;color:#666\">" + (e.dept||"") + "<br><span style=\"color:#aaa;font-size:10.5px\">" + (e.position||"") + "</span></td>" +
+      "<td style=\"font-size:11px;color:var(--red-dark)\">" + fromBrand + "</td>" +
+      "<td style=\"text-align:center;font-size:18px;color:#bbb\">→</td>" +
+      "<td style=\"font-size:11.5px;color:#27ae60;font-weight:600\">" + e.brandNew + "</td>" +
+      (hist.length > 0
+        ? "<td><span style=\"font-size:10px;font-weight:700;background:#f3ebff;color:#7c3aed;padding:1px 7px;border-radius:8px;\" title=\"" + histTip.replace(/"/g,"'") + "\">📋 " + hist.length + " ครั้ง</span></td>"
+        : "<td style=\"color:#bbb\">—</td>") +
+      "<td style=\"font-size:11px;color:#aaa;white-space:nowrap\">" + (e.moveDate||"—") + "</td>" +
+      "<td style=\"text-align:center\"><button class=\"btn-del btn-sm\" onclick=\"delMobility('" + e.id + "')\">🗑</button></td>";
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COST CENTER
+// ═══════════════════════════════════════════════════════════════
+var ccEditKey = null;
+function renderCCList() {
+  var counts = {};
+  DB.forEach(function(e) { counts[e.brand] = (counts[e.brand]||0) + 1; });
+  var html = '';
+  CC.forEach(function(c, i) {
+    html += '<div class="cc-row">' +
+      '<div class="cc-dot" style="background:' + c.color + '"></div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + c.full + '</div><div style="font-size:11px;color:var(--muted)">Key: ' + c.key + '</div></div>' +
+      '<span style="font-size:12px;font-weight:700;color:#27ae60;background:#eafaf1;padding:2px 8px;border-radius:10px">' + (counts[c.key]||0) + ' คน</span>' +
+      '<button class="btn-edit" onclick="openEditCC(' + i + ')">✏</button>' +
+      '<button class="btn-del" onclick="delCC(' + i + ')">🗑</button>' +
+      '</div>';
+  });
+  document.getElementById('ccList').innerHTML = html;
+}
+function openAddCC() {
+  ccEditKey = null;
+  document.getElementById('ccFormTitle').textContent = '➕ เพิ่ม Cost Center ใหม่';
+  document.getElementById('ccKey').value = '';
+  document.getElementById('ccFull').value = '';
+  document.getElementById('ccColor').value = '#c0392b';
+  document.getElementById('ccColorTxt').value = '#c0392b';
+  document.getElementById('ccKey').removeAttribute('readonly');
+  document.getElementById('ccForm').style.display = 'block';
+}
+function openEditCC(i) {
+  var c = CC[i]; ccEditKey = c.key;
+  document.getElementById('ccFormTitle').textContent = '✏ แก้ไข: ' + c.full;
+  document.getElementById('ccKey').value = c.key;
+  document.getElementById('ccKey').setAttribute('readonly', 'true');
+  document.getElementById('ccFull').value = c.full;
+  document.getElementById('ccColor').value = c.color || '#c0392b';
+  document.getElementById('ccColorTxt').value = c.color || '#c0392b';
+  document.getElementById('ccForm').style.display = 'block';
+}
+function closeCCForm() { document.getElementById('ccForm').style.display = 'none'; ccEditKey = null; }
+function syncColorTxt() { var v = document.getElementById('ccColorTxt').value; if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById('ccColor').value = v; }
+document.addEventListener('DOMContentLoaded', function() {
+  var cp = document.getElementById('ccColor');
+  if (cp) cp.addEventListener('input', function() { document.getElementById('ccColorTxt').value = this.value; });
+});
+function saveCCForm() {
+  var key   = document.getElementById('ccKey').value.trim();
+  var full  = document.getElementById('ccFull').value.trim();
+  var color = document.getElementById('ccColorTxt').value || document.getElementById('ccColor').value;
+  if (!key || !full) { toast('⚠ กรอก Key และชื่อเต็มให้ครบ', 'err'); return; }
+  if (ccEditKey) {
+    var i = CC.findIndex(function(c) { return c.key === ccEditKey; });
+    if (i > -1) CC[i] = { key: ccEditKey, full: full, color: color };
+    toast('✅ อัปเดต CC แล้ว', 'ok');
+  } else {
+    if (CC.find(function(c) { return c.key === key; })) { toast('⚠ Key นี้มีอยู่แล้ว', 'err'); return; }
+    CC.push({ key: key, full: full, color: color });
+    toast('✅ เพิ่ม CC แล้ว', 'ok');
+  }
+  saveCC(); closeCCForm(); renderCCList();
+}
+function delCC(i) {
+  var c = CC[i];
+  var cnt = DB.filter(function(e) { return e.brand === c.key; }).length;
+  var msg = cnt > 0 ? 'มีพนักงาน ' + cnt + ' คน ยืนยันลบ?' : 'ลบ "' + c.full + '"?';
+  if (!confirm(msg)) return;
+  CC.splice(i, 1); saveCC(); renderCCList();
+  toast('🗑 ลบ CC แล้ว', 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════════════════════════
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'menus') {
+    renderMenuList();
+    loadDashboardConfig();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MENU MANAGER
+// ═══════════════════════════════════════════════════════════════
+var DEFAULT_MENUS = [
+  { id:'overview',     icon:'🏢', label:'ภาพรวม',               visible:true  },
+  { id:'headcount',    icon:'👥', label:'Headcount',             visible:true  },
+  { id:'costcenter',   icon:'📋', label:'งบฯ ตาม Cost Center',  visible:true  },
+  { id:'mobility',     icon:'🔄', label:'Internal Mobility',     visible:true  },
+  { id:'distribution', icon:'📊', label:'Payroll Distribution',  visible:true  },
+  { id:'payroll',      icon:'💰', label:'ปรับเงินเดือน #01/26', visible:true  }
+];
+
+function getMenuConfig() {
+  return JSON.parse(localStorage.getItem('hr_menu_config') || 'null') || JSON.parse(JSON.stringify(DEFAULT_MENUS));
+}
+function saveMenuLS(menus) {
+  localStorage.setItem('hr_menu_config', JSON.stringify(menus));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+}
+
+function renderMenuList() {
+  var menus = getMenuConfig();
+  var wrap  = document.getElementById('menuList');
+  wrap.innerHTML = '';
+  menus.forEach(function(m, i) {
+    var item = document.createElement('div');
+    item.className = 'menu-item' + (m.visible ? '' : ' hidden');
+    item.id = 'mi-' + m.id;
+    item.setAttribute('draggable','true');
+    item.ondragstart = function(e){ dragStart(e,i); };
+    item.ondragover  = function(e){ dragOver(e); };
+    item.ondrop      = function(e){ dragDrop(e,i); };
+
+    var drag = document.createElement('span');
+    drag.className = 'menu-drag'; drag.title = 'ลากเพื่อเรียงลำดับ'; drag.textContent = '⋮⋮';
+
+    var iconBox = document.createElement('div');
+    iconBox.className = 'menu-icon-box'; iconBox.textContent = m.icon || '';
+
+    var labelWrap = document.createElement('div');
+    labelWrap.style.flex = '1';
+    var inp = document.createElement('input');
+    inp.className = 'menu-label-edit';
+    inp.id = 'mlabel-' + m.id;
+    inp.value = m.label || '';
+    inp.placeholder = 'ชื่อเมนู';
+    labelWrap.appendChild(inp);
+
+    var ctrlWrap = document.createElement('div');
+    ctrlWrap.style.cssText = 'display:flex;align-items:center;gap:8px';
+
+    var visLabel = document.createElement('span');
+    visLabel.style.cssText = 'font-size:11px;color:var(--muted)';
+    visLabel.textContent = m.visible ? 'แสดง' : 'ซ่อน';
+
+    var sw = document.createElement('label');
+    sw.className = 'toggle-sw';
+    var swInp = document.createElement('input');
+    swInp.type = 'checkbox';
+    swInp.checked = !!m.visible;
+    var menuId = m.id;
+    swInp.onchange = (function(id, lbl){ return function(){ toggleMenu(id, this.checked, lbl); }; })(menuId, visLabel);
+    var swTrack = document.createElement('div'); swTrack.className = 'toggle-sw-track';
+    var swThumb = document.createElement('div'); swThumb.className = 'toggle-sw-thumb';
+    sw.appendChild(swInp); sw.appendChild(swTrack); sw.appendChild(swThumb);
+
+    ctrlWrap.appendChild(visLabel);
+    ctrlWrap.appendChild(sw);
+
+    item.appendChild(drag);
+    item.appendChild(iconBox);
+    item.appendChild(labelWrap);
+    item.appendChild(ctrlWrap);
+    wrap.appendChild(item);
+  });
+}
+
+function toggleMenu(id, visible, labelEl) {
+  var menus = getMenuConfig();
+  var m = menus.find(function(x) { return x.id === id; });
+  if (m) {
+    m.visible = visible;
+    if(labelEl) labelEl.textContent = visible ? 'แสดง' : 'ซ่อน';
+    var item = document.getElementById('mi-' + id);
+    if(item) item.className = 'menu-item' + (visible ? '' : ' hidden');
+    saveMenuLS(menus);
+  }
+}
+// Drag & Drop reorder
+var dragIdx = null;
+function dragStart(e, idx) {
+  dragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dragDrop(e, toIdx) {
+  e.preventDefault();
+  if (dragIdx === null || dragIdx === toIdx) return;
+  var menus = getMenuConfig();
+  var moved = menus.splice(dragIdx, 1)[0];
+  menus.splice(toIdx, 0, moved);
+  saveMenuLS(menus);
+  dragIdx = null;
+  renderMenuList();
+  toast('↕ เรียงลำดับเมนูใหม่แล้ว', 'ok');
+}
+
+function saveMenuConfig() {
+  var menus = getMenuConfig();
+  // อ่านชื่อที่แก้ไขจาก input
+  menus.forEach(function(m) {
+    var inp = document.getElementById('mlabel-' + m.id);
+    if (inp) m.label = inp.value.trim() || m.label;
+  });
+  saveMenuLS(menus);
+  toast('✅ บันทึกการตั้งค่าเมนูแล้ว — Reload index.html เพื่อดูผล', 'ok');
+}
+
+function resetMenuConfig() {
+  if (!confirm('รีเซ็ตเมนูกลับค่าเริ่มต้น?')) return;
+  localStorage.removeItem('hr_menu_config');
+  renderMenuList();
+  toast('↺ รีเซ็ตเมนูแล้ว', 'ok');
+}
+
+function saveDashboardConfig() {
+  var cfg = {
+    orgName:      document.getElementById('cfgOrgName').value.trim(),
+    year:         document.getElementById('cfgYear').value.trim(),
+    payrollPass:  document.getElementById('cfgPayrollPass').value.trim(),
+    payrollRound: document.getElementById('cfgPayrollRound').value.trim()
+  };
+  localStorage.setItem('hr_dashboard_config', JSON.stringify(cfg));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+  toast('✅ บันทึกการตั้งค่า Dashboard แล้ว', 'ok');
+}
+
+function loadDashboardConfig() {
+  var cfg = JSON.parse(localStorage.getItem('hr_dashboard_config') || '{}');
+  if (cfg.orgName)     document.getElementById('cfgOrgName').value = cfg.orgName;
+  if (cfg.year)        document.getElementById('cfgYear').value = cfg.year;
+  if (cfg.payrollPass) document.getElementById('cfgPayrollPass').value = cfg.payrollPass;
+  if (cfg.payrollRound)document.getElementById('cfgPayrollRound').value = cfg.payrollRound;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type||'ok') + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>lack:#1a1a1a;--bg:#f2f3f5;--white:#fff;--border:#e0e0e0;--muted:#888;--text:#1a1a1a;--shadow:0 2px 10px rgba(0,0,0,0.08);--r:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
