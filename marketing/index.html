@@ -382,6 +382,31 @@ select option{background:#fff;color:#1a1a2e}
 .sw-lbl{font-size:.8rem;color:#888;font-weight:500}
 
 /* ══════════════════════════════════
+   USER PAGE TABS
+══════════════════════════════════ */
+.user-tabs{
+  display:flex;gap:8px;margin-bottom:22px;
+  border-bottom:2px solid #e8e8e8;padding-bottom:0;
+}
+.user-tab{
+  padding:10px 20px;font-size:.85rem;font-weight:600;
+  cursor:pointer;border:none;background:transparent;
+  font-family:var(--font);color:#999;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:all .2s;display:flex;align-items:center;gap:8px;
+}
+.user-tab:hover{color:#4158d0}
+.user-tab.active{color:#4158d0;border-bottom-color:#4158d0}
+.user-tab .tab-count{
+  font-size:.68rem;font-weight:700;padding:2px 8px;
+  border-radius:999px;line-height:1.4;
+}
+.user-tab.active .tab-count{background:#4158d0;color:#fff}
+.user-tab:not(.active) .tab-count{background:#f0f0f0;color:#999}
+.user-tab.tab-pending.active{color:#d97706;border-bottom-color:#d97706}
+.user-tab.tab-pending.active .tab-count{background:#d97706;color:#fff}
+
+/* ══════════════════════════════════
    TOAST
 ══════════════════════════════════ */
 .toast{position:fixed;top:20px;right:20px;z-index:500;padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;opacity:0;transform:translateY(-12px);transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:8px}
@@ -455,6 +480,18 @@ select option{background:#fff;color:#1a1a2e}
 <!-- USER PAGE -->
 <div class="page active" id="page-user">
   <div class="page-wrap">
+    <!-- Tabs -->
+    <div class="user-tabs">
+      <button class="user-tab active" data-tab="active" onclick="switchUserTab(this)">
+        🟢 กำลังใช้งาน
+        <span class="tab-count" id="tab-count-active">–</span>
+      </button>
+      <button class="user-tab tab-pending" data-tab="pending" onclick="switchUserTab(this)">
+        ⏳ รออนุมัติ
+        <span class="tab-count" id="tab-count-pending">–</span>
+      </button>
+    </div>
+
     <input class="search-bar" type="text" id="user-search"
       placeholder="ค้นหาโปรโมชั่น..." oninput="filterCards()"/>
     <div id="promo-list">
@@ -603,7 +640,7 @@ function requireLogin(){
 /* ══════════════════════════════
    STATE
 ══════════════════════════════ */
-let promos=[],filterMode='all'
+let promos=[],filterMode='all',userTab='active'
 
 /* Gradient cycle */
 const GRADS=['linear-gradient(135deg,#4158d0,#5468e7)',
@@ -653,17 +690,37 @@ function tagTextColor(i){
 }
 
 /* ══════════════════════════════
+   USER — TAB SWITCH
+══════════════════════════════ */
+function switchUserTab(btn){
+  document.querySelectorAll('.user-tab').forEach(t=>t.classList.remove('active'))
+  btn.classList.add('active')
+  userTab=btn.dataset.tab
+  document.getElementById('user-search').value=''
+  renderCards()
+}
+
+/* ══════════════════════════════
    USER — RENDER CARDS
 ══════════════════════════════ */
 function renderCards(){
-  const active=promos.filter(p=>p.status)
+  // Update tab counts
+  const activePromos=promos.filter(p=>p.status)
+  const pendingPromos=promos.filter(p=>p.review_status==='รออนุมัติ')
+  document.getElementById('tab-count-active').textContent=activePromos.length
+  document.getElementById('tab-count-pending').textContent=pendingPromos.length
+
+  // Filter by current tab
+  const list = userTab==='pending' ? pendingPromos : activePromos
   const el=document.getElementById('promo-list')
-  if(!active.length){
-    el.innerHTML='<div class="empty-state"><span class="ei">🍱</span><p>ยังไม่มีโปรโมชั่นที่เปิดใช้งาน</p></div>'
+
+  if(!list.length){
+    const msg=userTab==='pending'?'ยังไม่มีโปรโมชั่นที่รออนุมัติ':'ยังไม่มีโปรโมชั่นที่เปิดใช้งาน'
+    el.innerHTML=`<div class="empty-state"><span class="ei">🍱</span><p>${msg}</p></div>`
     return
   }
 
-  el.innerHTML=active.map((p,i)=>{
+  el.innerHTML=list.map((p,i)=>{
     const grad=getGrad(i)
     const tagClr=getTagColor(i)
     const proNum=`PRO ${i+1}`
@@ -734,6 +791,11 @@ function renderCards(){
     }
 
     // Header always uses gradient
+    // Show pending badge when in pending tab
+    const pendingBadge = userTab==='pending'
+      ? `<span style="background:rgba(255,255,255,0.2);color:#fff;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.4);">⏳ รออนุมัติ</span>`
+      : ''
+
     return `
     <div class="promo-card" data-title="${(p.title||'').toLowerCase()}" data-desc="${(p.description||'').toLowerCase()}">
       <div class="card-header" style="background:${grad}">
@@ -741,6 +803,7 @@ function renderCards(){
           <div class="card-tags">
             <span class="tag-pro">${proNum}</span>
             <span class="tag-type" style="color:${i%2===0?'#4158d0':'#c850c0'}">${targetLabel}</span>
+            ${pendingBadge}
           </div>
           <div class="card-title">${p.title}</div>
         </div>
