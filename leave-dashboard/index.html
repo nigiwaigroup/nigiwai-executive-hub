@@ -1,700 +1,1152 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Leave Dashboard 2026 | Nigiwai Group</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Leave Report 2026 | Nigiwai Group</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F2F5; --surface:#FFFFFF; --surface-2:#F7F8FA;
+  --surface-dk:#0D1117; --surface-dk2:#1C2431;
+  --border:#E4E7EC; --border-2:#CDD2DA;
+  --on-light-h:#101828; --on-light-b:#344054; --on-light-m:#667085; --on-light-x:#98A2B3;
+  --on-dark-h:#F2F4F7; --on-dark-m:#8899AA;
+  --corp-red:#C0392B; --corp-red-dk:#922B21; --corp-red-lt:#FDEDEC;
+  --corp-gold:#B7860B; --corp-gold-lt:#FEF9EC;
+  --sem-green:#027A48; --sem-green-lt:#ECFDF3; --sem-green-fill:#12B76A;
+  --sem-amber:#B54708; --sem-amber-lt:#FFFAEB; --sem-amber-fill:#F79009;
+  --sem-red:#B42318;   --sem-red-lt:#FEF3F2;   --sem-red-fill:#F04438;
+  --sem-blue:#175CD3;  --sem-blue-lt:#EFF8FF;  --sem-blue-fill:#2E90FA;
+  --sem-purple:#5B21B6; --sem-purple-lt:#F5F3FF;
+  --radius:8px; --radius-sm:5px;
+  --shadow-sm:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.06);
+  --shadow-md:0 4px 10px rgba(16,24,40,.10),0 2px 5px rgba(16,24,40,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--on-light-b);font-size:15px;line-height:1.65;min-height:100vh;}
 
-    <style>
-        :root {
-            --bg:          #F0F2F5;
-            --surface:     #FFFFFF;
-            --surface-2:   #F7F8FA;
-            --border:      #E4E7EC;
-            --border-2:    #CDD2DA;
-            --txt-h:       #101828;
-            --txt-b:       #344054;
-            --txt-m:       #667085;
-            --txt-x:       #98A2B3;
-            --corp-red:    #C0392B;
-            --corp-red-lt: #FDEDEC;
-            --corp-gold:   #B7860B;
-            --corp-gold-lt:#FEF9EC;
-            --sem-green:   #12B76A;
-            --sem-green-lt:#ECFDF3;
-            --sem-amber:   #F79009;
-            --sem-amber-lt:#FFFAEB;
-            --sem-red:     #F04438;
-            --sem-red-lt:  #FEF3F2;
-            --sem-blue:    #2E90FA;
-            --sem-blue-lt: #EFF8FF;
-            --radius:    8px;
-            --radius-sm: 4px;
-            --shadow-sm: 0 1px 3px rgba(16,24,40,0.08), 0 1px 2px rgba(16,24,40,0.06);
-            --shadow-md: 0 4px 8px -2px rgba(16,24,40,0.10), 0 2px 4px -2px rgba(16,24,40,0.06);
-        }
+/* NAV */
+.topnav{background:var(--surface-dk);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.tnav-l{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:30px;height:30px;background:var(--corp-red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;letter-spacing:-1px;flex-shrink:0;}
+.brand-name{font-size:15px;font-weight:800;color:var(--on-dark-h);}
+.brand-sep{color:#2A3441;font-size:20px;}
+.brand-sub{font-size:13px;font-weight:500;color:var(--on-dark-m);}
+.clock-badge{font-size:12px;font-weight:700;color:var(--on-dark-m);background:var(--surface-dk2);border:1px solid #2A3441;padding:4px 12px;border-radius:20px;font-variant-numeric:tabular-nums;}
+.tnav-r{display:flex;align-items:center;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius-sm);border:none;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-ghost{background:var(--surface-dk2);color:var(--on-dark-h);border:1px solid #2A3441;}
+.btn-ghost:hover{background:#2A3441;}
+.btn-red{background:var(--corp-red);color:#fff;box-shadow:0 2px 8px rgba(192,57,43,.3);}
+.btn-red:hover{background:var(--corp-red-dk);transform:translateY(-1px);}
+.btn-red:disabled{background:#9AA5B1;box-shadow:none;cursor:not-allowed;transform:none;}
 
-        * { margin:0; padding:0; box-sizing:border-box; }
+.container{max-width:1280px;margin:0 auto;padding:24px 20px 56px;}
 
-        body {
-            font-family: 'Noto Sans Thai', sans-serif;
-            background: var(--bg);
-            color: var(--txt-b);
-            min-height: 100vh;
-            font-size: 16px;
-            line-height: 1.65;
-        }
+/* ── UPLOAD ZONE ── */
+.upload-zone{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow-sm);overflow:hidden;}
+.uz-hero{background:linear-gradient(135deg,var(--surface-dk) 0%,#1a2535 100%);padding:36px 40px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+.uz-icon-wrap{width:72px;height:72px;background:rgba(192,57,43,.15);border:2px solid rgba(192,57,43,.3);border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.uz-icon-wrap i{font-size:30px;color:#F87171;}
+.uz-text h2{font-size:20px;font-weight:900;color:var(--on-dark-h);margin-bottom:4px;}
+.uz-text p{font-size:13px;color:var(--on-dark-m);line-height:1.6;margin-bottom:0;}
+.uz-text .uz-source{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:12px;color:#94A3B8;}
+.uz-text .uz-source i{color:var(--sem-amber-fill);}
+.uz-actions{padding:20px 40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid var(--border);}
+.uz-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--on-light-m);}
+.uz-step-num{width:22px;height:22px;border-radius:50%;background:var(--surface-dk);color:var(--on-dark-h);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.uz-divider{color:var(--border-2);font-size:18px;}
+#uploadStatus{font-size:13px;min-height:18px;}
+.st-ok{color:var(--sem-green);font-weight:700;}
+.st-err{color:var(--sem-red);font-weight:700;}
+.st-spin{color:var(--sem-blue);font-weight:600;}
 
-        /* TOP NAV */
-        .topnav {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-sm);
-        }
-        .topnav-left { display:flex; align-items:center; gap:12px; }
-        .brand-dot { width:10px; height:10px; background:var(--corp-red); border-radius:50%; }
-        .brand-name { font-size:16px; font-weight:800; color:var(--txt-h); }
-        .brand-sep  { color:var(--border-2); font-weight:200; font-size:20px; }
-        .brand-sub  { font-size:15px; color:var(--txt-m); font-weight:500; }
-        .clock-badge {
-            font-size:13px; color:var(--txt-m);
-            background:var(--surface-2); border:1px solid var(--border);
-            padding:4px 12px; border-radius:20px; font-weight:600;
-            font-variant-numeric: tabular-nums;
-        }
+/* PAGE HEADER */
+.page-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;box-shadow:var(--shadow-sm);}
+.ph-eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px;color:var(--corp-red);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.ph-eyebrow::before{content:'';width:18px;height:2px;background:var(--corp-red);display:inline-block;}
+.ph-title{font-size:26px;font-weight:900;color:var(--on-light-h);line-height:1.15;}
+.ph-sub{font-size:13px;color:var(--on-light-m);margin-top:4px;}
+.ph-period{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 14px;background:var(--corp-red-lt);border:1px solid #FECACA;border-radius:20px;font-size:12px;font-weight:700;color:var(--corp-red);}
+.ph-meta{background:var(--surface-dk);border-radius:var(--radius);padding:16px 22px;min-width:190px;flex-shrink:0;}
+.ph-meta-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--on-dark-m);margin-bottom:3px;}
+.ph-meta-val{font-size:18px;font-weight:800;color:var(--on-dark-h);}
+.ph-meta-note{font-size:11px;color:var(--on-dark-m);margin-top:1px;}
+.ph-meta-div{height:1px;background:#1C2431;margin:10px 0;}
+.ph-meta-conf{font-size:12px;font-weight:700;color:#F87171;}
 
-        /* LAYOUT */
-        .container { max-width:1320px; margin:0 auto; padding:24px 20px 48px; }
+/* FILTER */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;margin-bottom:14px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow-sm);}
+.filter-bar label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--on-light-m);margin-bottom:4px;}
+.form-select{height:36px;padding:0 10px;border:1px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface);color:var(--on-light-b);font-family:'Noto Sans Thai',sans-serif;font-size:13px;min-width:155px;cursor:pointer;transition:border-color .2s;}
+.form-select:focus{outline:none;border-color:var(--sem-blue-fill);}
+.reset-btn{height:36px;padding:0 14px;background:var(--surface-2);color:var(--on-light-b);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.reset-btn:hover{border-color:var(--border-2);color:var(--on-light-h);}
 
-        /* PAGE HEADER */
-        .page-header {
-            background:var(--surface); border:1px solid var(--border);
-            border-radius:var(--radius); padding:24px 28px; margin-bottom:16px;
-            display:flex; align-items:center; justify-content:space-between;
-            flex-wrap:wrap; gap:16px; box-shadow:var(--shadow-sm);
-        }
-        .page-header-eyebrow {
-            font-size:13px; font-weight:700; text-transform:uppercase;
-            letter-spacing:1.2px; color:var(--corp-red); margin-bottom:4px;
-        }
-        .page-header h1 { font-size:26px; font-weight:800; color:var(--txt-h); line-height:1.2; }
-        .page-header-date { font-size:14px; color:var(--txt-m); margin-top:4px; }
+/* INSIGHT STRIP */
+.insight-strip{background:var(--surface-dk);border-radius:var(--radius);display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:14px;overflow:hidden;}
+.ins-item{padding:16px 22px;border-right:1px solid #1C2431;}
+.ins-item:last-child{border-right:none;}
+.ins-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.1px;color:var(--on-dark-m);margin-bottom:5px;}
+.ins-val{font-size:28px;font-weight:900;color:var(--on-dark-h);line-height:1;font-variant-numeric:tabular-nums;}
+.ins-sub{font-size:11px;color:var(--on-dark-m);margin-top:3px;}
+@media(max-width:700px){.insight-strip{grid-template-columns:1fr;}.ins-item{border-right:none;border-bottom:1px solid #1C2431;}.ins-item:last-child{border-bottom:none;}}
 
-        .upload-btn {
-            display:inline-flex; align-items:center; gap:8px;
-            padding:10px 20px; background:var(--corp-red); color:#fff;
-            border:none; border-radius:var(--radius-sm);
-            font-family:'Noto Sans Thai',sans-serif; font-size:15px; font-weight:600;
-            cursor:pointer; transition:all 0.2s;
-            box-shadow:0 1px 4px rgba(192,57,43,0.3);
-        }
-        .upload-btn:hover { background:#a93226; transform:translateY(-1px); box-shadow:0 4px 12px rgba(192,57,43,0.3); }
-        #uploadStatus { font-size:13px; margin-top:6px; min-height:16px; text-align:right; }
-        .status-success { color:var(--sem-green); font-weight:600; }
-        .status-error   { color:var(--sem-red);   font-weight:600; }
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.kpi-grid{grid-template-columns:1fr;}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;}
+.kpi:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.kpi.kb::before{background:var(--sem-blue-fill);} .kpi.ka::before{background:var(--sem-amber-fill);}
+.kpi.kg::before{background:var(--sem-green-fill);} .kpi.kr::before{background:var(--sem-red-fill);}
+.kpi.kp::before{background:#8B5CF6;}
+.kpi-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px;}
+.kpi.kb .kpi-icon{background:var(--sem-blue-lt);color:var(--sem-blue);}
+.kpi.ka .kpi-icon{background:var(--sem-amber-lt);color:var(--sem-amber);}
+.kpi.kg .kpi-icon{background:var(--sem-green-lt);color:var(--sem-green);}
+.kpi.kr .kpi-icon{background:var(--sem-red-lt);color:var(--sem-red);}
+.kpi.kp .kpi-icon{background:var(--sem-purple-lt);color:var(--sem-purple);}
+.kpi-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--on-light-m);margin-bottom:6px;}
+.kpi-val{font-size:34px;font-weight:900;color:var(--on-light-h);line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-note{font-size:12px;color:var(--on-light-m);margin-top:5px;}
+.kpi-trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;margin-top:5px;padding:2px 7px;border-radius:10px;}
+.trend-up{background:var(--sem-red-lt);color:var(--sem-red);}
+.trend-dn{background:var(--sem-green-lt);color:var(--sem-green);}
+.trend-eq{background:var(--surface-2);color:var(--on-light-m);}
 
-        /* FILTER */
-        .filter-card {
-            background:var(--surface); border:1px solid var(--border);
-            border-radius:var(--radius); padding:14px 20px; margin-bottom:16px;
-            display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap;
-            box-shadow:var(--shadow-sm);
-        }
-        .filter-card label {
-            display:block; font-size:12px; font-weight:700; color:var(--txt-m);
-            text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px;
-        }
-        .form-select {
-            height:38px; padding:0 10px;
-            border:1px solid var(--border-2); border-radius:var(--radius-sm);
-            background:var(--surface); color:var(--txt-b);
-            font-family:'Noto Sans Thai',sans-serif; font-size:14px;
-            min-width:160px; cursor:pointer; transition:border-color 0.2s;
-        }
-        .form-select:focus { outline:none; border-color:var(--sem-blue); }
-        .reset-btn {
-            height:38px; padding:0 16px;
-            background:var(--surface-2); color:var(--txt-m);
-            border:1px solid var(--border); border-radius:var(--radius-sm);
-            font-family:'Noto Sans Thai',sans-serif; font-size:14px;
-            cursor:pointer; transition:all 0.2s; white-space:nowrap;
-        }
-        .reset-btn:hover { border-color:var(--border-2); color:var(--txt-b); }
+/* SEC LABEL */
+.sec-label{display:flex;align-items:center;gap:10px;margin-bottom:10px;margin-top:4px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.3px;color:var(--on-light-m);}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
-        /* KPI CARDS */
-        .kpi-grid {
-            display:grid;
-            grid-template-columns:repeat(4,1fr);
-            gap:16px; margin-bottom:16px;
-        }
-        @media(max-width:900px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
-        @media(max-width:500px){ .kpi-grid{ grid-template-columns:1fr; } }
+/* GRIDS */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid-1{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px;}
+.grid-13{display:grid;grid-template-columns:1fr 3fr;gap:14px;margin-bottom:14px;}
+.grid-31{display:grid;grid-template-columns:3fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:1000px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:1fr 1fr;}.grid-13,.grid-31{grid-template-columns:1fr;}}
+@media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr;}}
 
-        .kpi-card {
-            background:var(--surface); border:1px solid var(--border);
-            border-radius:var(--radius); padding:20px 20px 18px;
-            box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
-            transition:box-shadow 0.2s, transform 0.2s;
-        }
-        .kpi-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
-        .kpi-card::before {
-            content:''; position:absolute; top:0; left:0; right:0; height:3px;
-            border-radius:var(--radius) var(--radius) 0 0;
-        }
-        .kpi-card.blue::before   { background:var(--sem-blue); }
-        .kpi-card.green::before  { background:var(--sem-green); }
-        .kpi-card.amber::before  { background:var(--sem-amber); }
-        .kpi-card.red::before    { background:var(--sem-red); }
-        .kpi-icon {
-            position:absolute; top:18px; right:18px;
-            width:36px; height:36px; border-radius:var(--radius-sm);
-            display:flex; align-items:center; justify-content:center; font-size:15px;
-        }
-        .kpi-card.blue  .kpi-icon { background:var(--sem-blue-lt);  color:var(--sem-blue); }
-        .kpi-card.green .kpi-icon { background:var(--sem-green-lt); color:var(--sem-green); }
-        .kpi-card.amber .kpi-icon { background:var(--sem-amber-lt); color:var(--sem-amber); }
-        .kpi-card.red   .kpi-icon { background:var(--sem-red-lt);   color:var(--sem-red); }
-        .kpi-label { font-size:12px; font-weight:700; color:var(--txt-m); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
-        .kpi-value { font-size:36px; font-weight:800; color:var(--txt-h); line-height:1; font-variant-numeric:tabular-nums; }
-        .kpi-sub   { font-size:13px; color:var(--txt-x); margin-top:6px; }
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid var(--border);}
+.card-title{font-size:13px;font-weight:800;color:var(--on-light-h);display:flex;align-items:center;gap:8px;}
+.card-title i{color:var(--corp-red);font-size:12px;}
+.card-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--on-light-m);background:var(--surface-2);border:1px solid var(--border);padding:3px 8px;border-radius:12px;}
+.card-note{font-size:11px;color:var(--on-light-m);margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
 
-        /* CHART ROWS */
-        .chart-row { display:grid; gap:16px; margin-bottom:16px; }
-        .chart-row.col-1   { grid-template-columns:1fr; }
-        .chart-row.col-2   { grid-template-columns:1fr 1fr; }
-        @media(max-width:900px){ .chart-row.col-2{ grid-template-columns:1fr; } }
+.ch-180{position:relative;height:180px;}
+.ch-220{position:relative;height:220px;}
+.ch-260{position:relative;height:260px;}
+.ch-280{position:relative;height:280px;}
+.ch-300{position:relative;height:300px;}
+.ch-320{position:relative;height:320px;}
 
-        /* CARD */
-        .card {
-            background:var(--surface); border:1px solid var(--border);
-            border-radius:var(--radius); padding:20px; box-shadow:var(--shadow-sm);
-        }
-        .card-header {
-            display:flex; align-items:center; justify-content:space-between;
-            margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border);
-        }
-        .card-title { font-size:15px; font-weight:700; color:var(--txt-h); display:flex; align-items:center; gap:8px; }
-        .card-title i { color:var(--corp-red); font-size:13px; }
-        .card-tag {
-            font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-            color:var(--txt-m); background:var(--surface-2); border:1px solid var(--border);
-            padding:3px 8px; border-radius:20px;
-        }
-        .chart-wrap         { position:relative; height:280px; }
-        .chart-wrap.tall    { height:380px; }
-        .chart-wrap.medium  { height:320px; }
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-wrap input{width:100%;height:36px;padding:0 12px 0 34px;border:1px solid var(--border-2);border-radius:var(--radius-sm);background:var(--surface);color:var(--on-light-b);font-family:'Noto Sans Thai',sans-serif;font-size:13px;transition:border-color .2s;}
+.search-wrap input::placeholder{color:var(--on-light-x);}
+.search-wrap input:focus{outline:none;border-color:var(--sem-blue-fill);}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none;}
 
-        /* TABLE */
-        .search-box { position:relative; margin-bottom:12px; }
-        .search-box input {
-            width:100%; height:38px; padding:0 12px 0 36px;
-            border:1px solid var(--border-2); border-radius:var(--radius-sm);
-            background:var(--surface); color:var(--txt-b);
-            font-family:'Noto Sans Thai',sans-serif; font-size:14px; transition:border-color 0.2s;
-        }
-        .search-box input::placeholder { color:var(--txt-x); }
-        .search-box input:focus { outline:none; border-color:var(--sem-blue); }
-        .search-box::before {
-            content:'🔍'; position:absolute; left:10px; top:50%;
-            transform:translateY(-50%); font-size:12px;
-        }
-        .table-wrap { overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; min-width:520px; }
-        thead tr { background:var(--surface-2); }
-        th {
-            padding:11px 14px; font-size:12px; font-weight:700;
-            text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-m);
-            text-align:left; border-bottom:1px solid var(--border); white-space:nowrap;
-        }
-        td {
-            padding:11px 14px; border-bottom:1px solid var(--border);
-            font-size:14px; color:var(--txt-b); vertical-align:middle;
-        }
-        tr:last-child td { border-bottom:none; }
-        tbody tr:hover td { background:var(--surface-2); }
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:380px;}
+thead tr{background:var(--surface-2);}
+th{padding:9px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--on-light-m);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--on-light-b);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--surface-2);}
+.empty-td{text-align:center;padding:24px;color:var(--on-light-m);font-size:13px;}
 
-        /* BADGES */
-        .badge {
-            display:inline-flex; align-items:center; gap:4px;
-            padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700;
-        }
-        .badge-blue   { background:var(--sem-blue-lt);  color:var(--sem-blue); }
-        .badge-green  { background:var(--sem-green-lt); color:var(--sem-green); }
-        .badge-amber  { background:var(--sem-amber-lt); color:var(--sem-amber); }
-        .badge-red    { background:var(--sem-red-lt);   color:var(--sem-red); }
-        .badge-grey   { background:var(--surface-2);    color:var(--txt-m); border:1px solid var(--border); }
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;}
+.b-blue{background:var(--sem-blue-lt);color:var(--sem-blue);}
+.b-green{background:var(--sem-green-lt);color:var(--sem-green);}
+.b-amber{background:var(--sem-amber-lt);color:var(--sem-amber);}
+.b-red{background:var(--sem-red-lt);color:var(--sem-red);}
+.b-grey{background:var(--surface-2);color:var(--on-light-b);border:1px solid var(--border);}
+.b-purple{background:var(--sem-purple-lt);color:var(--sem-purple);}
+.b-gold{background:var(--corp-gold-lt);color:var(--corp-gold);}
 
-        /* RANK */
-        .rank-num {
-            display:inline-flex; align-items:center; justify-content:center;
-            width:24px; height:24px; border-radius:50%; font-size:11px; font-weight:800;
-        }
-        .rank-1 { background:#FEF9EC; color:#B7860B; border:1px solid #F6D860; }
-        .rank-2 { background:#F0F2F5; color:#667085; border:1px solid #CDD2DA; }
-        .rank-3 { background:#FFF4F0; color:#B54708; border:1px solid #FDCFB0; }
-        .rank-n { background:var(--surface-2); color:var(--txt-x); border:1px solid var(--border); }
+/* RANK */
+.rk{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;}
+.rk-1{background:#FEF9EC;color:#7A5800;border:1px solid #F6D860;}
+.rk-2{background:var(--surface-2);color:var(--on-light-m);border:1px solid var(--border-2);}
+.rk-3{background:#FFF4F0;color:#7D2D00;border:1px solid #FDCFB0;}
+.rk-n{background:var(--surface-2);color:var(--on-light-x);border:1px solid var(--border);}
 
-        /* BLINK */
-        .blink-alert { animation:blink 1.8s ease-in-out infinite; color:var(--sem-red); font-weight:700; display:inline-flex; align-items:center; gap:5px; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.alert-blink{animation:blink 1.8s ease-in-out infinite;color:var(--sem-red);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* QUOTA BARS */
-        .qbar-wrap { margin-bottom:7px; }
-        .qbar-row  { display:flex; justify-content:space-between; font-size:11px; margin-bottom:3px; }
-        .qbar-bg   { height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-        .qbar-fill { height:100%; border-radius:3px; }
+/* QBAR */
+.qbar-wrap{margin-bottom:6px;}
+.qbar-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;}
+.qbar-row span:first-child{color:var(--on-light-b);font-weight:600;}
+.qbar-row span:last-child{color:var(--on-light-m);}
+.qbar-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.qbar-fill{height:100%;border-radius:3px;}
 
-        /* FOOTER */
-        .footer {
-            text-align:center; padding:24px; font-size:11px;
-            color:var(--txt-x); letter-spacing:1px; text-transform:uppercase;
-            border-top:1px solid var(--border);
-        }
-        .footer span { color:var(--corp-red); font-weight:700; }
-    </style>
+/* ── NEW: Risk Score Card ── */
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:800px){.risk-grid{grid-template-columns:1fr 1fr;}}
+.risk-item{padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);}
+.risk-item.r-high{background:var(--sem-red-lt);border-color:#FECACA;}
+.risk-item.r-mid {background:var(--sem-amber-lt);border-color:#FDE68A;}
+.risk-item.r-low {background:var(--sem-green-lt);border-color:#A7F3D0;}
+.risk-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.risk-item.r-high .risk-label{color:var(--sem-red);}
+.risk-item.r-mid  .risk-label{color:var(--sem-amber);}
+.risk-item.r-low  .risk-label{color:var(--sem-green);}
+.risk-names{font-size:12px;color:var(--on-light-b);line-height:1.7;}
+
+/* ── NEW: Absence Rate Card ── */
+.absrate-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.absrate-row:last-child{border-bottom:none;}
+.absrate-dept{font-size:13px;font-weight:600;color:var(--on-light-h);}
+.absrate-bar-wrap{flex:1;margin:0 12px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.absrate-bar{height:100%;border-radius:3px;}
+.absrate-pct{font-size:12px;font-weight:700;min-width:38px;text-align:right;}
+
+/* ── NEW: Day of Week chart note ── */
+.dow-note{font-size:11px;color:var(--on-light-m);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;}
+.dow-note span{display:flex;align-items:center;gap:5px;}
+.dow-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── NEW: Consecutive leave risk pill ── */
+.consec-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin:2px;}
+.cp-high{background:var(--sem-red-lt);color:var(--sem-red);}
+.cp-mid{background:var(--sem-amber-lt);color:var(--sem-amber);}
+
+/* ── NEW: Month comparison mini table ── */
+.mcmp-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.mcmp-row:last-child{border-bottom:none;}
+.mcmp-month{width:62px;font-size:12px;font-weight:700;color:var(--on-light-h);}
+.mcmp-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.mcmp-bar{height:100%;border-radius:4px;background:var(--sem-blue-fill);}
+.mcmp-val{font-size:12px;font-weight:700;color:var(--on-light-m);min-width:32px;text-align:right;}
+.mcmp-delta{font-size:11px;font-weight:700;min-width:48px;text-align:right;}
+
+/* HEATMAP */
+.hm-outer{overflow-x:auto;}
+.hm-months{display:flex;gap:3px;padding-left:86px;margin-bottom:3px;}
+.hm-month{width:26px;font-size:9px;font-weight:700;color:var(--on-light-m);text-align:center;}
+.hm-row{display:flex;gap:3px;align-items:center;margin-bottom:3px;}
+.hm-label{font-size:10px;font-weight:700;color:var(--on-light-m);width:82px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hm-cell{width:26px;height:22px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:default;transition:transform .1s;}
+.hm-cell:hover{transform:scale(1.2);z-index:5;position:relative;}
+
+/* ALERTS */
+.alert-item{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
+.alert-item:last-child{border-bottom:none;}
+.alert-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.alert-title{font-size:13px;font-weight:700;color:var(--on-light-h);margin-bottom:2px;}
+.alert-body{font-size:12px;color:var(--on-light-m);}
+
+/* FOOTER */
+.rpt-footer{margin-top:20px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--on-light-m);}
+.rpt-footer strong{color:var(--corp-red);}
+
+/* PDF overlay */
+#pdfOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#pdfOverlay.show{display:flex;}
+.pdf-spin{width:44px;height:44px;border:4px solid #333;border-top-color:var(--corp-red);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.pdf-msg{color:var(--on-dark-h);font-size:14px;font-weight:600;}
+</style>
 </head>
 <body>
 
+<div id="pdfOverlay"><div class="pdf-spin"></div><div class="pdf-msg">กำลังสร้าง PDF รายงาน…</div></div>
+
+<!-- NAV -->
 <nav class="topnav">
-    <div class="topnav-left">
-        <div class="brand-dot"></div>
-        <span class="brand-name">Nigiwai Group</span>
-        <span class="brand-sep">|</span>
-        <span class="brand-sub">HR Analytics</span>
-    </div>
-    <span class="clock-badge" id="liveTime">00:00:00</span>
+  <div class="tnav-l">
+    <div class="brand-mark">NG</div>
+    <span class="brand-name">Nigiwai Group</span>
+    <span class="brand-sep">|</span>
+    <span class="brand-sub">HR Analytics · 2026</span>
+  </div>
+  <div class="tnav-r">
+    <span class="clock-badge" id="liveClock">00:00:00</span>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+    <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
+      <i class="fas fa-file-upload"></i> อัพเดทข้อมูล
+    </button>
+    <button class="btn btn-red" id="pdfBtn" onclick="exportPDF()" disabled>
+      <i class="fas fa-file-pdf"></i> Export PDF
+    </button>
+  </div>
 </nav>
 
 <div class="container">
 
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-        <div>
-            <div class="page-header-eyebrow">Human Resources · 2026</div>
-            <h1>Dashboard การลาพนักงาน</h1>
-            <div class="page-header-date" id="dateRange">กรุณาอัพโหลดไฟล์ข้อมูล (.xlsx) เพื่อเริ่มใช้งาน</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
-            <button onclick="document.getElementById('fileInput').click()" class="upload-btn">
-                <i class="fas fa-file-upload"></i> อัพเดทข้อมูล (Excel)
-            </button>
-            <div id="uploadStatus"></div>
-        </div>
+<!-- ══════════════════════════════
+     UPLOAD ZONE — redesigned
+     ══════════════════════════════ -->
+<div class="upload-zone" id="uploadZone">
+  <div class="uz-hero">
+    <div class="uz-icon-wrap"><i class="fas fa-file-chart-column"></i></div>
+    <div class="uz-text">
+      <h2>HR Leave Report Dashboard</h2>
+      <p>นำเข้าไฟล์ข้อมูลการลาพนักงานจากระบบ <strong style="color:#F87171">HumanOS</strong> เพื่อสร้าง Executive Report<br>พร้อม Analytics เชิงลึก · Heatmap · Risk Score · Absence Rate · วิเคราะห์ Pattern การลา</p>
+      <span class="uz-source">
+        <i class="fas fa-database"></i>
+        แหล่งข้อมูล: <strong style="color:#E2E8F0">ระบบ HumanOS</strong> &nbsp;→&nbsp; Export <strong style="color:#E2E8F0">รายงานสรุปการลา</strong>
+      </span>
     </div>
-
-    <!-- FILTERS -->
-    <div class="filter-card">
-        <div><label>เดือน</label><select id="monthFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
-        <div><label>แผนก</label><select id="deptFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
-        <div><label>ประเภทการลา</label><select id="leaveTypeFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
-        <button id="resetFilter" class="reset-btn"><i class="fas fa-rotate-left"></i> รีเซ็ต</button>
+  </div>
+  <div class="uz-actions">
+    <div class="uz-step"><div class="uz-step-num">1</div> Login HumanOS → เมนู <strong>รายงาน</strong></div>
+    <span class="uz-divider">›</span>
+    <div class="uz-step"><div class="uz-step-num">2</div> เลือก <strong>รายงานสรุปการลา</strong> → กด <strong>Export Excel</strong></div>
+    <span class="uz-divider">›</span>
+    <div class="uz-step"><div class="uz-step-num">3</div> อัปโหลดไฟล์ที่ได้ด้านล่าง</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+      <button class="btn btn-red" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-file-upload"></i> เลือกไฟล์ Excel (.xlsx)
+      </button>
+      <div id="uploadStatus"></div>
     </div>
-
-    <!-- KPI ROW — Z-pattern overview -->
-    <div class="kpi-grid">
-        <div class="kpi-card blue">
-            <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
-            <div class="kpi-label">จำนวนครั้งทั้งหมด</div>
-            <div class="kpi-value" id="totalLeaves">—</div>
-            <div class="kpi-sub">รายการการลา</div>
-        </div>
-        <div class="kpi-card amber">
-            <div class="kpi-icon"><i class="fas fa-calendar-day"></i></div>
-            <div class="kpi-label">รวมวันลา</div>
-            <div class="kpi-value" id="totalDays">—</div>
-            <div class="kpi-sub">วันทำงาน</div>
-        </div>
-        <div class="kpi-card green">
-            <div class="kpi-icon"><i class="fas fa-building"></i></div>
-            <div class="kpi-label">จำนวนแผนก</div>
-            <div class="kpi-value" id="totalDepts">—</div>
-            <div class="kpi-sub">แผนกที่มีการลา</div>
-        </div>
-        <div class="kpi-card red">
-            <div class="kpi-icon"><i class="fas fa-users"></i></div>
-            <div class="kpi-label">พนักงานที่ลา</div>
-            <div class="kpi-value" id="totalEmployees">—</div>
-            <div class="kpi-sub">คน</div>
-        </div>
-    </div>
-
-    <!-- Monthly Trend -->
-    <div class="chart-row col-1">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-chart-line"></i> สถิติการลาแยกตามเดือน</div>
-                <span class="card-tag">Monthly Trend</span>
-            </div>
-            <div class="chart-wrap medium"><canvas id="monthChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- Dept + Leave Type -->
-    <div class="chart-row col-2">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-chart-bar"></i> การลาแยกตามแผนก</div>
-                <span class="card-tag">By Department</span>
-            </div>
-            <div class="chart-wrap"><canvas id="deptChart"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-tags"></i> ประเภทการลา</div>
-                <span class="card-tag">Leave Type</span>
-            </div>
-            <div class="chart-wrap"><canvas id="leaveTypeChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- Horizontal Overview -->
-    <div class="chart-row col-1">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-chart-area"></i> ภาพรวมจำนวนครั้งรายแผนก</div>
-                <span class="card-tag">Overview</span>
-            </div>
-            <div class="chart-wrap tall"><canvas id="deptBarChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- Top 10 + Dept Summary -->
-    <div class="chart-row col-2">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-trophy"></i> Top 10 พนักงานลามากที่สุด</div>
-                <span class="card-tag">Ranking</span>
-            </div>
-            <div class="table-wrap">
-                <table id="topEmployeesTable">
-                    <thead><tr><th>#</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-table"></i> สรุปรายแผนก</div>
-                <span class="card-tag">Dept Summary</span>
-            </div>
-            <div class="table-wrap">
-                <table id="deptSummaryTable">
-                    <thead><tr><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th><th style="text-align:center">เฉลี่ย/ครั้ง</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Individual Detail -->
-    <div class="chart-row col-1">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-address-book"></i> รายละเอียดสิทธิ์รายบุคคล</div>
-                <span class="card-tag">Individual</span>
-            </div>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="ค้นหาชื่อพนักงาน หรือ แผนก...">
-            </div>
-            <div class="table-wrap">
-                <table id="employeeDetailTable">
-                    <thead><tr><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สถานะสิทธิ์การลา</th><th style="text-align:center">รวมวัน</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
+  </div>
 </div>
 
-<div class="footer"><span>Nigiwai Group</span> · HR Leave Dashboard · © 2026</div>
+<!-- ══════════════════════════════
+     REPORT ROOT
+     ══════════════════════════════ -->
+<div id="reportRoot" style="display:none">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="ph-eyebrow">Executive Summary Report</div>
+      <div class="ph-title">รายงานสถิติการลาพนักงาน</div>
+      <div class="ph-sub">Human Resources · Nigiwai Group · ประจำปี 2569</div>
+      <div class="ph-period"><i class="fas fa-calendar-range"></i>&nbsp;<span id="datePeriod">—</span></div>
+    </div>
+    <div class="ph-meta">
+      <div class="ph-meta-label">Generated</div>
+      <div class="ph-meta-val" id="genDate">—</div>
+      <div class="ph-meta-note" id="genTime">—</div>
+      <div class="ph-meta-div"></div>
+      <div class="ph-meta-label">Data Source</div>
+      <div class="ph-meta-val" style="font-size:13px;">HumanOS</div>
+      <div class="ph-meta-div"></div>
+      <div class="ph-meta-label">Classification</div>
+      <div class="ph-meta-conf">INTERNAL USE ONLY</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <div><label>เดือน</label><select id="monthFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
+    <div><label>แผนก</label><select id="deptFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
+    <div><label>ประเภทการลา</label><select id="leaveTypeFilter" class="form-select"><option value="">ทั้งหมด</option></select></div>
+    <button id="resetFilter" class="reset-btn"><i class="fas fa-rotate-left"></i> รีเซ็ต</button>
+  </div>
+
+  <!-- INSIGHT STRIP -->
+  <div class="insight-strip">
+    <div class="ins-item">
+      <div class="ins-label">รวมครั้งที่ลา</div>
+      <div class="ins-val" id="insTotal">—</div>
+      <div class="ins-sub">รายการทั้งหมด</div>
+    </div>
+    <div class="ins-item">
+      <div class="ins-label">รวมวันลาทั้งสิ้น</div>
+      <div class="ins-val" id="insDays">—</div>
+      <div class="ins-sub">วันทำงาน</div>
+    </div>
+    <div class="ins-item">
+      <div class="ins-label">เฉลี่ยวัน / คน</div>
+      <div class="ins-val" id="insAvg">—</div>
+      <div class="ins-sub">วันต่อพนักงาน 1 คน</div>
+    </div>
+  </div>
+
+  <!-- ── KPI ROW 1: Core ── -->
+  <div class="kpi-grid">
+    <div class="kpi kb">
+      <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+      <div class="kpi-label">จำนวนครั้งทั้งหมด</div>
+      <div class="kpi-val" id="k1">—</div>
+      <div class="kpi-note">รายการการลา</div>
+    </div>
+    <div class="kpi ka">
+      <div class="kpi-icon"><i class="fas fa-calendar-day"></i></div>
+      <div class="kpi-label">รวมวันลา</div>
+      <div class="kpi-val" id="k2">—</div>
+      <div class="kpi-note">วันทำงาน</div>
+    </div>
+    <div class="kpi kg">
+      <div class="kpi-icon"><i class="fas fa-users"></i></div>
+      <div class="kpi-label">พนักงานที่ลา</div>
+      <div class="kpi-val" id="k3">—</div>
+      <div class="kpi-note">คน</div>
+    </div>
+    <div class="kpi kr">
+      <div class="kpi-icon"><i class="fas fa-building"></i></div>
+      <div class="kpi-label">แผนกที่มีการลา</div>
+      <div class="kpi-val" id="k4">—</div>
+      <div class="kpi-note">แผนก</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       ★ NEW KPI ROW 2: HR Expert Metrics
+       ══════════════════════════════════════════════════ -->
+  <div class="sec-label">HR Expert Metrics — ตัวชี้วัดเชิงลึก</div>
+  <div class="kpi-grid">
+    <div class="kpi kb">
+      <div class="kpi-icon"><i class="fas fa-percent"></i></div>
+      <div class="kpi-label">Absence Rate</div>
+      <div class="kpi-val" id="kAbsRate">—</div>
+      <div class="kpi-note">% วันลา / วันทำงานรวม</div>
+      <div id="kAbsTrend" class="kpi-trend trend-eq" style="display:none"></div>
+    </div>
+    <div class="kpi ka">
+      <div class="kpi-icon"><i class="fas fa-rotate"></i></div>
+      <div class="kpi-label">Leave Frequency</div>
+      <div class="kpi-val" id="kFreq">—</div>
+      <div class="kpi-note">เฉลี่ยครั้ง/คน</div>
+    </div>
+    <div class="kpi kr">
+      <div class="kpi-icon"><i class="fas fa-triangle-exclamation"></i></div>
+      <div class="kpi-label">High-Risk Employees</div>
+      <div class="kpi-val" id="kHighRisk">—</div>
+      <div class="kpi-note">คน (≥ 8 วัน/ปี)</div>
+    </div>
+    <div class="kpi kp">
+      <div class="kpi-icon"><i class="fas fa-calendar-week"></i></div>
+      <div class="kpi-label">Mon/Fri Leave %</div>
+      <div class="kpi-val" id="kMonFri">—</div>
+      <div class="kpi-note">% ลา จ./ศ. (Bridge Day Risk)</div>
+    </div>
+  </div>
+
+  <!-- MONTHLY + LEAVE TYPE -->
+  <div class="sec-label">แนวโน้มและประเภทการลา</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-line"></i> สถิติการลาแยกตามเดือน</div>
+        <span class="card-tag">Monthly Trend</span>
+      </div>
+      <div class="ch-280"><canvas id="cMonth"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-tags"></i> ประเภทการลา</div>
+        <span class="card-tag">Leave Type</span>
+      </div>
+      <div class="ch-280"><canvas id="cType"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ★ NEW: DOW Pattern + Monthly Comparison -->
+  <div class="sec-label">Pattern การลา — วิเคราะห์รูปแบบ</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-calendar-week"></i> Pattern การลาแยกตามวันในสัปดาห์</div>
+        <span class="card-tag">Day of Week</span>
+      </div>
+      <div class="ch-220"><canvas id="cDow"></canvas></div>
+      <div class="dow-note">
+        <span><span class="dow-dot" style="background:var(--sem-red-fill)"></span>จ. / ศ. = ความเสี่ยง Bridge Day</span>
+        <span><span class="dow-dot" style="background:var(--sem-blue-fill)"></span>วันปกติ</span>
+      </div>
+      <div class="card-note" id="dowInsight">—</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-arrow-trend-up"></i> เปรียบเทียบการลาแต่ละเดือน (MoM)</div>
+        <span class="card-tag">Month-on-Month</span>
+      </div>
+      <div id="momWrap" style="max-height:260px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- DEPT CHARTS -->
+  <div class="sec-label">การลาแยกตามแผนก</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-bar"></i> การลาแยกตามแผนก</div>
+        <span class="card-tag">By Department</span>
+      </div>
+      <div class="ch-280"><canvas id="cDept"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-area"></i> ภาพรวมจำนวนครั้งรายแผนก</div>
+        <span class="card-tag">Overview</span>
+      </div>
+      <div class="ch-280"><canvas id="cDeptBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ★ NEW: Absence Rate per Department -->
+  <div class="sec-label">Absence Rate รายแผนก — % วันลาต่อวันทำงานรวม</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-percent"></i> Absence Rate รายแผนก</div>
+        <span class="card-tag">Risk Indicator</span>
+      </div>
+      <div id="absRateWrap"></div>
+      <div class="card-note">⚠️ เกณฑ์แนะนำ: Absence Rate ไม่ควรเกิน <strong>3%</strong> ของวันทำงานทั้งหมด</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-shield-halved"></i> จัดกลุ่มความเสี่ยงพนักงาน</div>
+        <span class="card-tag">Risk Segmentation</span>
+      </div>
+      <div id="riskSegWrap"></div>
+      <div class="card-note">🔴 High Risk ≥ 8 วัน &nbsp;|&nbsp; 🟡 Medium Risk 4–7 วัน &nbsp;|&nbsp; 🟢 Normal &lt; 4 วัน</div>
+    </div>
+  </div>
+
+  <!-- STACKED -->
+  <div class="grid-1">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-layer-group"></i> ประเภทการลาแยกตามแผนก (Stacked)</div>
+        <span class="card-tag">Breakdown</span>
+      </div>
+      <div class="ch-320"><canvas id="cStacked"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOP 10 + DEPT SUMMARY -->
+  <div class="sec-label">รายบุคคลและสรุปรายแผนก</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-trophy"></i> Top 10 พนักงานลามากที่สุด</div>
+        <span class="card-tag">Ranking</span>
+      </div>
+      <div class="tbl-wrap">
+        <table id="tTop">
+          <thead><tr><th>#</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-table"></i> สรุปรายแผนก</div>
+        <span class="card-tag">Dept Summary</span>
+      </div>
+      <div class="tbl-wrap">
+        <table id="tDept">
+          <thead><tr><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th><th style="text-align:center">เฉลี่ย/ครั้ง</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="sec-label">Heatmap แผนก × เดือน</div>
+  <div class="grid-1">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-th"></i> ความเข้มการลาแยกตามแผนก × ช่วงเวลา</div>
+        <span class="card-tag">Leave Heatmap</span>
+      </div>
+      <div class="hm-outer" id="heatmapWrap"></div>
+    </div>
+  </div>
+
+  <!-- ★ NEW: Sick Leave Concern -->
+  <div class="sec-label">Sick Leave Analysis — วิเคราะห์ลาป่วย</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-stethoscope"></i> Top พนักงานลาป่วยบ่อยที่สุด</div>
+        <span class="card-tag">Sick Leave Focus</span>
+      </div>
+      <div class="tbl-wrap">
+        <table id="tSick">
+          <thead><tr><th>#</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card-note">💡 ลาป่วย ≥ 3 ครั้ง/ปี อาจบ่งชี้ปัญหาสุขภาพ ควรส่งเสริม Employee Wellness</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-pie"></i> สัดส่วนประเภทการลา (วัน)</div>
+        <span class="card-tag">Leave Type Mix</span>
+      </div>
+      <div class="ch-260"><canvas id="cTypeDays"></canvas></div>
+    </div>
+  </div>
+
+  <!-- INDIVIDUAL DETAIL -->
+  <div class="sec-label">รายละเอียดสิทธิ์รายบุคคล</div>
+  <div class="grid-1">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-address-book"></i> รายละเอียดสิทธิ์รายบุคคล</div>
+        <span class="card-tag">Individual</span>
+      </div>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="ค้นหาชื่อพนักงาน หรือ แผนก…">
+      </div>
+      <div class="tbl-wrap">
+        <table id="tEmployee">
+          <thead><tr>
+            <th>ชื่อ-นามสกุล</th><th>แผนก</th>
+            <th>สถานะสิทธิ์การลา</th>
+            <th style="text-align:center">รวมวัน</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="sec-label">การแจ้งเตือนและข้อสังเกต</div>
+  <div class="grid-1">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-triangle-exclamation"></i> สัญญาณเตือนและข้อเสนอแนะเชิง HR</div>
+        <span class="card-tag">Smart Insights</span>
+      </div>
+      <div id="alertList"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="rpt-footer">
+    <div>รายงานจัดทำโดยระบบ HR Analytics · <strong>Nigiwai Group</strong> · ข้อมูลจาก <strong>HumanOS</strong></div>
+    <div>ข้อมูลเป็นความลับ — ห้ามเผยแพร่ต่อบุคคลภายนอก</div>
+    <div id="footerDate">—</div>
+  </div>
+
+</div><!-- /reportRoot -->
+</div><!-- /container -->
 
 <script>
-// Clock
+/* ─── Clock ─── */
 (function tick(){
-    const d=new Date(), p=n=>String(n).padStart(2,'0');
-    document.getElementById('liveTime').textContent=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-    setTimeout(tick,1000);
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  document.getElementById('liveClock').textContent=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  setTimeout(tick,1000);
 })();
-
 Chart.register(ChartDataLabels);
 
-const PALETTE = ['#2E90FA','#12B76A','#F79009','#F04438','#7F56D9','#0BA5EC','#EE46BC','#16B364'];
-const C = { blue:'#2E90FA', green:'#12B76A', amber:'#F79009', red:'#F04438',
-            txt:'#667085', grid:'#F0F2F5', txtH:'#101828', corpRed:'#C0392B' };
-const thaiMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const TH_M =['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TH_MF=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const DOW_TH=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+const PAL=['#2E90FA','#12B76A','#F79009','#F04438','#7F56D9','#0BA5EC','#EE46BC','#16B364','#FF7E5F','#3EC6CF'];
+const C={red:'#C0392B',grid:'#F0F2F5',txt:'#667085',txtH:'#101828'};
+const WORK_DAYS_PER_MONTH=22; // assumption for absence rate
 
-let charts={}, originalData={raw_data:[]}, processedState={};
+let charts={}, originalData=[], processedState={};
 
-// Upload
+/* ─── Upload ─── */
 document.getElementById('fileInput').addEventListener('change',function(e){
-    const file=e.target.files[0]; if(!file) return;
-    const st=document.getElementById('uploadStatus');
-    st.innerHTML='<span style="color:var(--sem-blue)"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล...</span>';
-    const reader=new FileReader();
-    reader.onload=ev=>{
-        try{
-            const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
-            const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-            processData(json);
-            st.innerHTML='<span class="status-success"><i class="fas fa-check-circle"></i> อัพเดทข้อมูลสำเร็จ</span>';
-            setTimeout(()=>st.innerHTML='',3000);
-        }catch(err){
-            st.innerHTML=`<span class="status-error"><i class="fas fa-times-circle"></i> ${err.message}</span>`;
-        }
-    };
-    reader.readAsArrayBuffer(file);
+  const f=e.target.files[0];if(!f)return;
+  const st=document.getElementById('uploadStatus');
+  st.innerHTML='<span class="st-spin"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล…</span>';
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+      const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+      parseData(json);
+      st.innerHTML='<span class="st-ok"><i class="fas fa-check-circle"></i> โหลดข้อมูลสำเร็จ</span>';
+      setTimeout(()=>st.innerHTML='',3000);
+    }catch(err){st.innerHTML=`<span class="st-err"><i class="fas fa-times-circle"></i> ${err.message}</span>`;}
+  };
+  r.readAsArrayBuffer(f);
 });
 
 function toDate(v){
-    if(!v) return null;
-    if(v instanceof Date) return v;
-    if(typeof v==='number') return new Date(Math.round((v-25569)*86400*1000));
-    return new Date(v);
+  if(!v)return null;
+  if(v instanceof Date)return v;
+  if(typeof v==='number')return new Date(Math.round((v-25569)*86400*1000));
+  return new Date(v);
 }
 
-function processData(json){
-    let hi=-1;
-    for(let i=0;i<Math.min(json.length,20);i++){
-        if(json[i]&&json[i].includes('No')&&json[i].includes('รหัส')){hi=i;break;}
-    }
-    if(hi===-1) hi=2;
-    const data=json.slice(hi+1).filter(r=>r&&r[2]).map(r=>{
-        const d=toDate(r[7]);
-        return{No:r[0],รหัส:r[1],ชื่อ:r[2],สาขา:r[3],แผนก:r[4],ตำแหน่ง:r[5],
-            ประเภท:r[6],ลาตั้งแต่:d,ลา_วัน:parseFloat(r[11])||0,เหตุผล:r[12],
-            monthKey:d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null};
-    });
-    originalData.raw_data=data;
-    const dates=data.map(d=>d.ลาตั้งแต่).filter(d=>d&&!isNaN(d)).sort((a,b)=>a-b);
-    if(dates.length){
-        const f=dates[0],l=dates[dates.length-1];
-        document.getElementById('dateRange').textContent=
-            `ข้อมูลตั้งแต่ ${f.getDate()} ${thaiMonths[f.getMonth()]} ${f.getFullYear()+543} — ${l.getDate()} ${thaiMonths[l.getMonth()]} ${l.getFullYear()+543}`;
-    }
-    initFilters(); applyFilters();
+function parseData(json){
+  let hi=2;
+  for(let i=0;i<Math.min(json.length,20);i++){
+    if(json[i]&&json[i].includes('No')&&json[i].includes('รหัส')){hi=i;break;}
+  }
+  originalData=json.slice(hi+1).filter(r=>r&&r[2]).map(r=>{
+    const d=toDate(r[7]);
+    return{
+      No:r[0],รหัส:r[1],ชื่อ:r[2],สาขา:r[3],
+      แผนก:r[4]||'ไม่ระบุ',ตำแหน่ง:r[5],
+      ประเภท:r[6]||'ไม่ระบุ',ลาตั้งแต่:d,
+      ลา_วัน:parseFloat(r[11])||0,เหตุผล:r[12],
+      monthKey:d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null,
+      dow:d?d.getDay():null  // 0=Sun,1=Mon,...,6=Sat
+    };
+  });
+  setHeaderDates();
+  initFilters();
+  applyFilters();
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('reportRoot').style.display='block';
+  document.getElementById('pdfBtn').disabled=false;
 }
 
+function setHeaderDates(){
+  const dates=originalData.map(r=>r.ลาตั้งแต่).filter(d=>d&&!isNaN(d)).sort((a,b)=>a-b);
+  const now=new Date(),thY=now.getFullYear()+543;
+  document.getElementById('genDate').textContent=`${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
+  document.getElementById('genTime').textContent=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+  document.getElementById('footerDate').textContent=`พิมพ์เมื่อ ${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
+  if(dates.length){
+    const f=dates[0],l=dates[dates.length-1];
+    document.getElementById('datePeriod').textContent=
+      `${f.getDate()} ${TH_MF[f.getMonth()]} ${f.getFullYear()+543} — ${l.getDate()} ${TH_MF[l.getMonth()]} ${l.getFullYear()+543}`;
+  }
+}
+
+/* ─── Filters ─── */
 function initFilters(){
-    const ms=new Set(),ds=new Set(),ts=new Set();
-    originalData.raw_data.forEach(d=>{
-        if(d.monthKey) ms.add(d.monthKey);
-        if(d.แผนก) ds.add(d.แผนก);
-        if(d.ประเภท) ts.add(d.ประเภท);
-    });
-    fill('monthFilter',[...ms].sort(),v=>{const[y,m]=v.split('-');return`${thaiMonths[+m-1]} ${+y+543}`;});
-    fill('deptFilter',[...ds].sort());
-    fill('leaveTypeFilter',[...ts].sort());
+  const ms=new Set(),ds=new Set(),ts=new Set();
+  originalData.forEach(r=>{
+    if(r.monthKey)ms.add(r.monthKey);
+    if(r.แผนก)ds.add(r.แผนก);
+    if(r.ประเภท)ts.add(r.ประเภท);
+  });
+  fillSel('monthFilter',[...ms].sort(),v=>{const[y,m]=v.split('-');return`${TH_MF[+m-1]} ${+y+543}`;});
+  fillSel('deptFilter',[...ds].sort());
+  fillSel('leaveTypeFilter',[...ts].sort());
 }
-
-function fill(id,items,fn){
-    const s=document.getElementById(id),cur=s.value;
-    s.innerHTML='<option value="">ทั้งหมด</option>';
-    items.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fn?fn(v):v;s.appendChild(o);});
-    if(items.includes(cur)) s.value=cur;
+function fillSel(id,items,fn){
+  const s=document.getElementById(id),cur=s.value;
+  s.innerHTML='<option value="">ทั้งหมด</option>';
+  items.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fn?fn(v):v;s.appendChild(o);});
+  if(items.includes(cur))s.value=cur;
 }
-
 function applyFilters(){
-    const month=document.getElementById('monthFilter').value;
-    const dept=document.getElementById('deptFilter').value;
-    const type=document.getElementById('leaveTypeFilter').value;
-    const f=originalData.raw_data.filter(d=>
-        (!month||d.monthKey===month)&&(!dept||d.แผนก===dept)&&(!type||d.ประเภท===type));
-    calcStats(f); renderUI();
+  const mth=document.getElementById('monthFilter').value;
+  const dept=document.getElementById('deptFilter').value;
+  const type=document.getElementById('leaveTypeFilter').value;
+  const f=originalData.filter(r=>(!mth||r.monthKey===mth)&&(!dept||r.แผนก===dept)&&(!type||r.ประเภท===type));
+  calcStats(f);
+  renderUI();
 }
-
 ['monthFilter','deptFilter','leaveTypeFilter'].forEach(id=>
-    document.getElementById(id).addEventListener('change',applyFilters));
+  document.getElementById(id).addEventListener('change',applyFilters));
 document.getElementById('resetFilter').onclick=()=>{
-    ['monthFilter','deptFilter','leaveTypeFilter'].forEach(id=>document.getElementById(id).value='');
-    applyFilters();
+  ['monthFilter','deptFilter','leaveTypeFilter'].forEach(id=>document.getElementById(id).value='');
+  applyFilters();
 };
 
+/* ─── Stats ─── */
 function calcStats(data){
-    const s={totalLeaves:data.length,totalDays:0,depts:{},types:{},employees:{},empDetails:{},months:{}};
-    data.forEach(r=>{
-        s.totalDays+=r.ลา_วัน||0;
-        const dept=r.แผนก||'Unknown';
-        if(!s.depts[dept]) s.depts[dept]={count:0,days:0};
-        s.depts[dept].count++; s.depts[dept].days+=r.ลา_วัน;
-        const type=r.ประเภท||'Unknown';
-        if(!s.types[type]) s.types[type]={count:0,days:0};
-        s.types[type].count++; s.types[type].days+=r.ลา_วัน;
-        if(!s.employees[r.ชื่อ]) s.employees[r.ชื่อ]={count:0,days:0,dept};
-        s.employees[r.ชื่อ].count++; s.employees[r.ชื่อ].days+=r.ลา_วัน;
-        const key=`${r.ชื่อ}|${dept}|${r.รหัส}`;
-        if(!s.empDetails[key]) s.empDetails[key]={name:r.ชื่อ,id:r.รหัส,dept,types:{},totalDays:0};
-        if(!s.empDetails[key].types[type]) s.empDetails[key].types[type]={days:0};
-        s.empDetails[key].types[type].days+=r.ลา_วัน;
-        s.empDetails[key].totalDays+=r.ลา_วัน;
-        const mk=r.monthKey||'Unknown';
-        if(!s.months[mk]) s.months[mk]={count:0,days:0};
-        s.months[mk].count++; s.months[mk].days+=r.ลา_วัน;
-    });
-    processedState=s;
+  const s={
+    total:data.length,days:0,
+    depts:{},types:{},emps:{},empDetails:{},months:{},deptType:{},
+    dow:[0,0,0,0,0,0,0],  // NEW: day of week count
+    sickLeave:{}           // NEW: sick leave per employee
+  };
+  data.forEach(r=>{
+    s.days+=r.ลา_วัน;
+    const dept=r.แผนก,type=r.ประเภท;
+    if(!s.depts[dept])s.depts[dept]={c:0,d:0};
+    s.depts[dept].c++;s.depts[dept].d+=r.ลา_วัน;
+    if(!s.types[type])s.types[type]={c:0,d:0};
+    s.types[type].c++;s.types[type].d+=r.ลา_วัน;
+    if(!s.emps[r.ชื่อ])s.emps[r.ชื่อ]={c:0,d:0,dept};
+    s.emps[r.ชื่อ].c++;s.emps[r.ชื่อ].d+=r.ลา_วัน;
+    const key=`${r.ชื่อ}|${dept}|${r.รหัส}`;
+    if(!s.empDetails[key])s.empDetails[key]={name:r.ชื่อ,id:r.รหัส,dept,types:{},totalDays:0};
+    if(!s.empDetails[key].types[type])s.empDetails[key].types[type]={days:0};
+    s.empDetails[key].types[type].days+=r.ลา_วัน;
+    s.empDetails[key].totalDays+=r.ลา_วัน;
+    const mk=r.monthKey||'Unknown';
+    if(!s.months[mk])s.months[mk]={c:0,d:0};
+    s.months[mk].c++;s.months[mk].d+=r.ลา_วัน;
+    const dk=`${dept}|${type}`;
+    if(!s.deptType[dk])s.deptType[dk]={dept,type,c:0};
+    s.deptType[dk].c++;
+    // DOW
+    if(r.dow!==null)s.dow[r.dow]++;
+    // Sick leave tracking
+    const tp=(type||'').toLowerCase();
+    if(tp.includes('ป่วย')||tp.includes('sick')){
+      if(!s.sickLeave[r.ชื่อ])s.sickLeave[r.ชื่อ]={c:0,d:0,dept};
+      s.sickLeave[r.ชื่อ].c++;s.sickLeave[r.ชื่อ].d+=r.ลา_วัน;
+    }
+  });
+  processedState=s;
 }
 
 function tenureYears(id){
-    if(!id) return 0;
-    const s=String(id).replace(/\D/g,'');
-    if(s.length<2) return 0;
-    const y=parseInt(s.substring(0,2));
-    return isNaN(y)?0:Math.max(0,2569-(2500+y));
+  const s=String(id||'').replace(/\D/g,'');
+  if(s.length<2)return 0;
+  const y=parseInt(s.substring(0,2));
+  return isNaN(y)?0:Math.max(0,2569-(2500+y));
 }
 function getQuota(type,t){
-    const tp=(type||'').toLowerCase();
-    if(tp.includes('พักร้อน')||tp.includes('annual')) return t>=9?12:t>=6?10:t>=3?8:t>=1?6:0;
-    if(tp.includes('กิจ')||tp.includes('personal')) return 3;
-    if(tp.includes('ป่วย')||tp.includes('sick')) return 30;
-    return null;
+  const tp=(type||'').toLowerCase();
+  if(tp.includes('พักร้อน')||tp.includes('annual'))return t>=9?12:t>=6?10:t>=3?8:t>=1?6:0;
+  if(tp.includes('กิจ')||tp.includes('personal'))return 3;
+  if(tp.includes('ป่วย')||tp.includes('sick'))return 30;
+  return null;
 }
 
+/* ─── Render UI ─── */
 function renderUI(){
-    const p=processedState;
-    document.getElementById('totalLeaves').textContent=p.totalLeaves.toLocaleString();
-    document.getElementById('totalDays').textContent=p.totalDays.toFixed(1);
-    document.getElementById('totalDepts').textContent=Object.keys(p.depts).length;
-    document.getElementById('totalEmployees').textContent=Object.keys(p.employees).length;
-    renderCharts(); renderTables();
+  const p=processedState;
+  const empCount=Object.keys(p.emps).length;
+  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+  const totalWorkDays=mKeys.length*WORK_DAYS_PER_MONTH*empCount||1;
+  const absRate=((p.days/totalWorkDays)*100);
+  const freq=empCount?(p.total/empCount).toFixed(1):'0';
+  const highRisk=Object.values(p.emps).filter(e=>e.d>=8).length;
+  const monFriCount=p.dow[1]+p.dow[5]; // Mon+Fri
+  const monFriPct=p.total?((monFriCount/p.total)*100).toFixed(1):'0';
+
+  // KPI core
+  document.getElementById('insTotal').textContent=p.total.toLocaleString();
+  document.getElementById('insDays').textContent=p.days.toFixed(1);
+  document.getElementById('insAvg').textContent=empCount?(p.days/empCount).toFixed(1):'0';
+  document.getElementById('k1').textContent=p.total.toLocaleString();
+  document.getElementById('k2').textContent=p.days.toFixed(1);
+  document.getElementById('k3').textContent=empCount;
+  document.getElementById('k4').textContent=Object.keys(p.depts).length;
+
+  // KPI expert
+  document.getElementById('kAbsRate').textContent=absRate.toFixed(1)+'%';
+  document.getElementById('kFreq').textContent=freq;
+  document.getElementById('kHighRisk').textContent=highRisk;
+  document.getElementById('kMonFri').textContent=monFriPct+'%';
+
+  renderCharts();
+  renderNewWidgets();
+  renderTables();
+  renderHeatmap();
+  renderAlerts();
 }
 
-function tip(){
-    return{backgroundColor:'#1D2939',borderColor:'#344054',borderWidth:1,
-        titleColor:'#F9FAFB',bodyColor:'#D0D5DD',padding:10,cornerRadius:6,
-        titleFont:{family:'Noto Sans Thai',weight:'700'},bodyFont:{family:'Noto Sans Thai'}};
+/* ─── Chart helpers ─── */
+const tipCfg={backgroundColor:'#1D2939',borderColor:'#344054',borderWidth:1,titleColor:'#F9FAFB',bodyColor:'#D0D5DD',padding:10,cornerRadius:6,titleFont:{family:'Noto Sans Thai',weight:'700'},bodyFont:{family:'Noto Sans Thai'}};
+const dlFont={weight:'700',family:'Noto Sans Thai',size:11};
+function axes(h=false){
+  const a={grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
+  const b={beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
+  return h?{y:a,x:b}:{x:a,y:b};
 }
-function sc(h=false){
-    const xK=h?'y':'x',yK=h?'x':'y';
-    return{[xK]:{grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:12}}},
-           [yK]:{beginAtZero:true,grid:{color:'#F0F2F5'},border:{color:'transparent'},
-                 ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:12}}}};
+function mkLine(id,labels,data){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'line',data:{labels,datasets:[{data,fill:true,backgroundColor:'rgba(192,57,43,.07)',borderColor:C.red,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:C.red,pointBorderWidth:2,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:'top',formatter:v=>v>0?v:'',font:dlFont,color:C.txt,padding:2}},scales:axes()}});
 }
-
-function mkBar(id,labels,data,colors,horizontal=false){
-    if(charts[id]) charts[id].destroy();
-    charts[id]=new Chart(document.getElementById(id),{
-        type:'bar',
-        data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,maxBarThickness:48}]},
-        options:{
-            indexAxis:horizontal?'y':'x',
-            responsive:true,maintainAspectRatio:false,
-            plugins:{
-                legend:{display:false},tooltip:tip(),
-                datalabels:{
-                    anchor:'end',align:horizontal?'end':'top',
-                    formatter:v=>v>0?v:'',
-                    font:{weight:'700',family:'Noto Sans Thai',size:12},
-                    color:C.txt,padding:2
-                }
-            },
-            scales:sc(horizontal)
-        }
-    });
+function mkBar(id,labels,data,colors,h=false){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,maxBarThickness:46}]},options:{indexAxis:h?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:h?'end':'top',formatter:v=>v>0?v:'',font:dlFont,color:C.txt,padding:2}},scales:axes(h)}});
+}
+function mkStacked(id,labels,datasets){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12}},tooltip:tipCfg,datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}},y:{stacked:true,beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}}}}});
+}
+function mkDoughnut(id,labels,data,colors){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12,padding:10}},tooltip:tipCfg,datalabels:{formatter:(v,ctx)=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return tot>0?((v/tot)*100).toFixed(1)+'%':'';},color:'#fff',font:{weight:'900',family:'Noto Sans Thai',size:12}}}}});
 }
 
 function renderCharts(){
-    const p=processedState;
-    const mKeys=Object.keys(p.months).sort();
-    const mLabels=mKeys.map(k=>{
-        if(k==='Unknown') return 'ไม่ระบุ';
-        const[y,m]=k.split('-');return`${thaiMonths[+m-1]} ${+y+543}`;
-    });
-    const mVals=mKeys.map(k=>p.months[k].count);
-    const maxM=Math.max(...mVals,0);
-    // Semantic: highlight max bar red (alert), rest blue
-    mkBar('monthChart',mLabels,mVals,mVals.map(v=>v===maxM?C.red:C.blue));
+  const p=processedState;
+  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+  const mVals=mKeys.map(k=>p.months[k].c);
+  mkLine('cMonth',mKeys.map(k=>{const[y,m]=k.split('-');return`${TH_M[+m-1]}'${+y-2500}`;}),mVals);
 
-    const deptD=Object.entries(p.depts).map(([k,v])=>({k,v:v.count})).sort((a,b)=>b.v-a.v);
-    mkBar('deptChart',deptD.map(d=>d.k),deptD.map(d=>d.v),deptD.map((_,i)=>PALETTE[i%PALETTE.length]));
+  const tArr=Object.entries(p.types).sort((a,b)=>b[1].c-a[1].c);
+  mkBar('cType',tArr.map(d=>d[0]),tArr.map(d=>d[1].c),tArr.map((_,i)=>PAL[i%PAL.length]));
 
-    const typeD=Object.entries(p.types).map(([k,v])=>({k,v:v.count})).sort((a,b)=>b.v-a.v);
-    mkBar('leaveTypeChart',typeD.map(d=>d.k),typeD.map(d=>d.v),typeD.map((_,i)=>PALETTE[i%PALETTE.length]));
+  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
+  const maxD=Math.max(...dArr.map(d=>d[1].c),0);
+  mkBar('cDept',dArr.map(d=>d[0]),dArr.map(d=>d[1].c),dArr.map((_,i)=>PAL[i%PAL.length]));
+  mkBar('cDeptBar',dArr.map(d=>d[0]),dArr.map(d=>d[1].c),dArr.map(d=>d[1].c===maxD?C.red:PAL[1]),true);
 
-    mkBar('deptBarChart',deptD.map(d=>d.k),deptD.map(d=>d.v),deptD.map((_,i)=>PALETTE[i%PALETTE.length]),true);
+  const types=Object.keys(p.types).slice(0,7);
+  const depts=dArr.slice(0,8).map(d=>d[0]);
+  mkStacked('cStacked',depts,types.map((t,ti)=>({label:t,backgroundColor:PAL[ti%PAL.length]+'CC',data:depts.map(dep=>{const k=`${dep}|${t}`;return p.deptType[k]?p.deptType[k].c:0;})})));
+
+  // NEW: DOW chart
+  const dowColors=p.dow.map((_,i)=>(i===1||i===5)?'#F04438':'#2E90FA');
+  mkBar('cDow',DOW_TH,p.dow,dowColors);
+
+  // NEW: Leave type by DAYS doughnut
+  const tArrD=Object.entries(p.types).sort((a,b)=>b[1].d-a[1].d).slice(0,6);
+  mkDoughnut('cTypeDays',tArrD.map(d=>d[0]),tArrD.map(d=>d[1].d),tArrD.map((_,i)=>PAL[i%PAL.length]));
 }
 
+/* ─── NEW WIDGETS ─── */
+function renderNewWidgets(){
+  const p=processedState;
+
+  // ── DOW Insight text ──
+  const dowTotal=p.dow.reduce((a,b)=>a+b,0)||1;
+  const mfPct=((p.dow[1]+p.dow[5])/dowTotal*100).toFixed(1);
+  document.getElementById('dowInsight').innerHTML=
+    `<i class="fas fa-lightbulb" style="color:var(--sem-amber)"></i> &nbsp;
+     วันจันทร์และศุกร์รวมกัน <strong>${mfPct}%</strong> ของการลาทั้งหมด
+     ${parseFloat(mfPct)>35?' — <span style="color:var(--sem-red);font-weight:700">⚠️ สัดส่วนสูง ควรระวัง Bridge Day Leave</span>':' — อยู่ในเกณฑ์ปกติ'}`;
+
+  // ── MoM Table ──
+  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+  const maxMom=Math.max(...mKeys.map(k=>p.months[k].c),1);
+  let momHtml='';
+  mKeys.forEach((mk,i)=>{
+    const[y,m]=mk.split('-');
+    const cur=p.months[mk].c;
+    const prev=i>0?p.months[mKeys[i-1]].c:null;
+    const delta=prev!==null?cur-prev:null;
+    const barW=Math.round((cur/maxMom)*100);
+    const deltaHtml=delta===null?''
+      :delta>0?`<span class="mcmp-delta" style="color:var(--sem-red)">▲${delta}</span>`
+      :delta<0?`<span class="mcmp-delta" style="color:var(--sem-green)">▼${Math.abs(delta)}</span>`
+      :`<span class="mcmp-delta" style="color:var(--on-light-x)">—</span>`;
+    momHtml+=`<div class="mcmp-row">
+      <div class="mcmp-month">${TH_M[+m-1]}'${+y-2500}</div>
+      <div class="mcmp-bar-wrap"><div class="mcmp-bar" style="width:${barW}%;background:${cur===maxMom?C.red:'#2E90FA'}"></div></div>
+      <div class="mcmp-val">${cur}</div>${deltaHtml}
+    </div>`;
+  });
+  document.getElementById('momWrap').innerHTML=momHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
+
+  // ── Absence Rate per Dept ──
+  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].d-a[1].d);
+  const totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+  const maxAbs=Math.max(...dArr.map(d=>d[1].d/totalWD*100),1);
+  let absHtml='';
+  dArr.slice(0,8).forEach(([dept,v])=>{
+    const rate=(v.d/totalWD*100);
+    const barW=Math.min((rate/maxAbs)*100,100);
+    const barColor=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
+    const pctColor=rate>=3?'var(--sem-red)':rate>=1.5?'var(--sem-amber)':'var(--sem-green)';
+    absHtml+=`<div class="absrate-row">
+      <div class="absrate-dept">${dept}</div>
+      <div class="absrate-bar-wrap"><div class="absrate-bar" style="width:${barW}%;background:${barColor}"></div></div>
+      <div class="absrate-pct" style="color:${pctColor}">${rate.toFixed(2)}%</div>
+    </div>`;
+  });
+  document.getElementById('absRateWrap').innerHTML=absHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
+
+  // ── Risk Segmentation ──
+  const empArr=Object.entries(p.emps).map(([n,v])=>({n,d:v.d,dept:v.dept}));
+  const high=empArr.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,5);
+  const mid =empArr.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,5);
+  const low =empArr.filter(e=>e.d<4);
+  document.getElementById('riskSegWrap').innerHTML=`
+    <div class="risk-grid">
+      <div class="risk-item r-high">
+        <div class="risk-label"><i class="fas fa-circle-exclamation"></i> High Risk (${empArr.filter(e=>e.d>=8).length} คน)</div>
+        <div class="risk-names">${high.length?high.map(e=>`${e.n} <span style="color:var(--sem-red);font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
+      </div>
+      <div class="risk-item r-mid">
+        <div class="risk-label"><i class="fas fa-circle-minus"></i> Medium Risk (${empArr.filter(e=>e.d>=4&&e.d<8).length} คน)</div>
+        <div class="risk-names">${mid.length?mid.map(e=>`${e.n} <span style="color:var(--sem-amber);font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
+      </div>
+      <div class="risk-item r-low">
+        <div class="risk-label"><i class="fas fa-circle-check"></i> Normal (${low.length} คน)</div>
+        <div class="risk-names" style="color:var(--sem-green)">ลาน้อยกว่า 4 วัน / ปี<br><strong>${low.length}</strong> คน</div>
+      </div>
+    </div>`;
+}
+
+/* ─── Tables ─── */
 function renderTables(){
-    const p=processedState;
-    const top=Object.entries(p.employees).map(([k,v])=>({name:k,...v})).sort((a,b)=>b.count-a.count).slice(0,10);
-    document.querySelector('#topEmployeesTable tbody').innerHTML=top.map((e,i)=>{
-        const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-        const nm=i<3?`<span class="blink-alert"><i class="fas fa-exclamation-triangle"></i>${e.name}</span>`
-                    :`<span style="font-weight:600;color:var(--txt-h)">${e.name}</span>`;
-        const bc=i<3?'badge-red':i<6?'badge-amber':'badge-grey';
-        return`<tr><td><span class="rank-num ${rc}">${i+1}</span></td><td>${nm}</td>
-            <td><span class="badge badge-grey">${e.dept}</span></td>
-            <td style="text-align:center"><span class="badge ${bc}">${e.count}</span></td>
-            <td style="text-align:center;font-weight:700;color:var(--txt-h)">${e.days.toFixed(1)}</td></tr>`;
-    }).join('');
+  const p=processedState;
+  const top10=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c).slice(0,10);
+  document.querySelector('#tTop tbody').innerHTML=top10.length
+    ?top10.map(([name,v],i)=>{
+      const rc=i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n';
+      const bc=i<3?'b-red':i<6?'b-amber':'b-grey';
+      const nm=i<3?`<span class="alert-blink"><i class="fas fa-exclamation-triangle"></i>${name}</span>`
+                  :`<span style="font-weight:700;color:var(--on-light-h)">${name}</span>`;
+      return`<tr><td><span class="rk ${rc}">${i+1}</span></td><td>${nm}</td>
+        <td><span class="badge b-grey">${v.dept}</span></td>
+        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
+        <td style="text-align:center;font-weight:700;color:var(--on-light-h)">${v.d.toFixed(1)}</td></tr>`;
+    }).join(''):'<tr><td colspan="5" class="empty-td">ไม่มีข้อมูล</td></tr>';
 
-    const dsum=Object.entries(p.depts).map(([k,v])=>({dept:k,...v})).sort((a,b)=>b.count-a.count);
-    const maxC=Math.max(...dsum.map(d=>d.count),1);
-    document.querySelector('#deptSummaryTable tbody').innerHTML=dsum.map(d=>{
-        const pct=Math.round((d.count/maxC)*100);
-        const cls=pct>75?'badge-red':pct>40?'badge-amber':'badge-blue';
-        return`<tr><td style="font-weight:600;color:var(--txt-h)">${d.dept}</td>
-            <td style="text-align:center"><span class="badge ${cls}">${d.count}</span></td>
-            <td style="text-align:center">${d.days.toFixed(1)}</td>
-            <td style="text-align:center;color:var(--txt-m)">${(d.days/d.count).toFixed(1)}</td></tr>`;
-    }).join('');
+  const dSum=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
+  const maxC=Math.max(...dSum.map(d=>d[1].c),1);
+  document.querySelector('#tDept tbody').innerHTML=dSum.length
+    ?dSum.map(([dept,v])=>{
+      const pct=Math.round((v.c/maxC)*100);
+      const bc=pct>75?'b-red':pct>40?'b-amber':'b-blue';
+      return`<tr><td style="font-weight:700;color:var(--on-light-h)">${dept}</td>
+        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
+        <td style="text-align:center">${v.d.toFixed(1)}</td>
+        <td style="text-align:center;color:var(--on-light-m)">${(v.d/v.c).toFixed(1)}</td></tr>`;
+    }).join(''):'<tr><td colspan="4" class="empty-td">ไม่มีข้อมูล</td></tr>';
 
-    renderDetailTable();
+  // Sick leave table
+  const sickArr=Object.entries(processedState.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,8);
+  document.querySelector('#tSick tbody').innerHTML=sickArr.length
+    ?sickArr.map(([name,v],i)=>{
+      const bc=i<3?'b-red':i<6?'b-amber':'b-grey';
+      return`<tr><td><span class="rk ${i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n'}">${i+1}</span></td>
+        <td style="font-weight:700;color:var(--on-light-h)">${name}</td>
+        <td><span class="badge b-grey">${v.dept}</span></td>
+        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
+        <td style="text-align:center;font-weight:700">${v.d.toFixed(1)}</td></tr>`;
+    }).join(''):'<tr><td colspan="5" class="empty-td">ไม่พบข้อมูลลาป่วย</td></tr>';
+
+  renderDetailTable();
 }
 
 function renderDetailTable(){
-    const term=document.getElementById('searchInput').value.toLowerCase();
-    const details=Object.values(processedState.empDetails||{})
-        .filter(d=>d.name.toLowerCase().includes(term)||d.dept.toLowerCase().includes(term))
-        .sort((a,b)=>b.totalDays-a.totalDays);
-    const tbody=document.querySelector('#employeeDetailTable tbody');
-    if(!details.length){
-        tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--txt-x)">ไม่พบข้อมูล</td></tr>';
-        return;
-    }
-    tbody.innerHTML=details.map(emp=>{
-        const t=tenureYears(emp.id);
-        const bars=Object.entries(emp.types).map(([type,st])=>{
-            const q=getQuota(type,t);
-            let w=0,col=C.blue,txt=`ใช้ ${st.days.toFixed(1)} วัน`;
-            if(q){
-                const pct=(st.days/q)*100;
-                w=Math.min(pct,100);
-                col=pct>=100?C.red:pct>=80?C.amber:C.green;
-                txt+=` / สิทธิ์ ${q} วัน`;
-            }
-            return`<div class="qbar-wrap">
-                <div class="qbar-row">
-                    <span style="color:var(--txt-b);font-weight:500">${type}</span>
-                    <span style="color:var(--txt-m)">${txt}</span>
-                </div>
-                ${q?`<div class="qbar-bg"><div class="qbar-fill" style="width:${w}%;background:${col}"></div></div>`:''}
-            </div>`;
-        }).join('');
-        const tc=emp.totalDays>=10?'badge-red':emp.totalDays>=5?'badge-amber':'badge-green';
-        return`<tr>
-            <td style="font-weight:700;color:var(--txt-h)">${emp.name}</td>
-            <td><span class="badge badge-grey">${emp.dept}</span></td>
-            <td style="min-width:260px">${bars}</td>
-            <td style="text-align:center"><span class="badge ${tc}">${emp.totalDays.toFixed(1)}</span></td>
-        </tr>`;
+  const term=(document.getElementById('searchInput').value||'').toLowerCase();
+  const details=Object.values(processedState.empDetails||{})
+    .filter(d=>d.name.toLowerCase().includes(term)||d.dept.toLowerCase().includes(term))
+    .sort((a,b)=>b.totalDays-a.totalDays);
+  const tbody=document.querySelector('#tEmployee tbody');
+  if(!details.length){tbody.innerHTML='<tr><td colspan="4" class="empty-td">ไม่พบข้อมูล</td></tr>';return;}
+  tbody.innerHTML=details.map(emp=>{
+    const t=tenureYears(emp.id);
+    const bars=Object.entries(emp.types).map(([type,st])=>{
+      const q=getQuota(type,t);
+      let w=0,col='#2E90FA',txt=`ใช้ ${st.days.toFixed(1)} วัน`;
+      if(q){const pct=(st.days/q)*100;w=Math.min(pct,100);col=pct>=100?'#F04438':pct>=80?'#F79009':'#12B76A';txt+=` / สิทธิ์ ${q} วัน`;}
+      return`<div class="qbar-wrap"><div class="qbar-row"><span>${type}</span><span>${txt}</span></div>${q?`<div class="qbar-bg"><div class="qbar-fill" style="width:${w}%;background:${col}"></div></div>`:''}</div>`;
     }).join('');
+    const tc=emp.totalDays>=10?'b-red':emp.totalDays>=5?'b-amber':'b-green';
+    return`<tr><td style="font-weight:700;color:var(--on-light-h)">${emp.name}</td>
+      <td><span class="badge b-grey">${emp.dept}</span></td>
+      <td style="min-width:260px">${bars}</td>
+      <td style="text-align:center"><span class="badge ${tc}">${emp.totalDays.toFixed(1)}</span></td></tr>`;
+  }).join('');
+}
+document.getElementById('searchInput').addEventListener('input',renderDetailTable);
+
+/* ─── Heatmap ─── */
+function renderHeatmap(){
+  const p=processedState;
+  const mF=document.getElementById('monthFilter').value;
+  const dF=document.getElementById('deptFilter').value;
+  const tF=document.getElementById('leaveTypeFilter').value;
+  const filtered=originalData.filter(r=>(!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF));
+  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+  const depts=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c).slice(0,10).map(d=>d[0]);
+  const wrap=document.getElementById('heatmapWrap');
+  if(!depts.length||!mKeys.length){wrap.innerHTML='<p style="color:var(--on-light-m);padding:12px;font-size:13px;">ข้อมูลไม่เพียงพอ</p>';return;}
+  const mat={};
+  filtered.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!mat[d])mat[d]={};mat[d][mk]=(mat[d][mk]||0)+1;});
+  const allV=Object.values(mat).flatMap(row=>Object.values(row));
+  const maxV=Math.max(...allV,1);
+  function hmCol(v){if(!v)return{bg:'#F1F5F9',fg:'#98A2B3'};const t=v/maxV;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175CD3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7A3B00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#FFFFFF'};}
+  let html=`<div class="hm-months">`;
+  mKeys.forEach(k=>{const[,m]=k.split('-');html+=`<div class="hm-month">${TH_M[+m-1]}</div>`;});
+  html+='</div>';
+  depts.forEach(dept=>{
+    html+=`<div class="hm-row"><div class="hm-label" title="${dept}">${dept.length>10?dept.slice(0,10)+'…':dept}</div>`;
+    mKeys.forEach(mk=>{const v=(mat[dept]&&mat[dept][mk])||0;const{bg,fg}=hmCol(v);html+=`<div class="hm-cell" style="background:${bg};color:${fg}" title="${dept}·${mk}:${v}ครั้ง">${v||''}</div>`;});
+    html+='</div>';
+  });
+  wrap.innerHTML=html;
 }
 
-document.getElementById('searchInput').addEventListener('input',renderDetailTable);
+/* ─── Alerts (expanded) ─── */
+function renderAlerts(){
+  const p=processedState;
+  const empArr=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
+  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
+  const mArr=Object.entries(p.months).filter(([k])=>k!=='Unknown').sort((a,b)=>b[1].c-a[1].c);
+  const empCount=Object.keys(p.emps).length;
+  const avg=empCount?p.days/empCount:0;
+  const dowTotal=p.dow.reduce((a,b)=>a+b,0)||1;
+  const mfPct=(p.dow[1]+p.dow[5])/dowTotal*100;
+  const sickArr=Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c);
+  const alerts=[];
+
+  if(empArr.length&&empArr[0][1].c>=5)
+    alerts.push({icon:'fa-user-xmark',bg:'#FEF3F2',ic:'#B42318',
+      title:`พนักงานลามากที่สุด: ${empArr[0][0]}`,
+      body:`ลาทั้งสิ้น ${empArr[0][1].c} ครั้ง (${empArr[0][1].d.toFixed(1)} วัน) — แนะนำ: สัมภาษณ์รายบุคคล, ตรวจสอบ Burnout`});
+
+  if(dArr.length){const[dept,v]=dArr[0];
+    alerts.push({icon:'fa-building-circle-exclamation',bg:'#FFFAEB',ic:'#B54708',
+      title:`แผนกที่ลามากที่สุด: ${dept}`,
+      body:`${v.c} ครั้ง · ${v.d.toFixed(1)} วัน · เฉลี่ย ${(v.d/v.c).toFixed(1)} วัน/ครั้ง — ควรจัดเตรียมพนักงานสำรองและทบทวน Workload`});}
+
+  if(mArr.length){const[mk,mv]=mArr[0];const[y,m]=mk.split('-');
+    alerts.push({icon:'fa-calendar-xmark',bg:'#EFF8FF',ic:'#175CD3',
+      title:`เดือน Peak: ${TH_MF[+m-1]} ${+y+543} (${mv.c} ครั้ง)`,
+      body:`ควรวางแผน Coverage ล่วงหน้าในช่วงนี้ปีหน้า และพิจารณาห้ามลา/จำกัดโควต้าในช่วง Peak Season`});}
+
+  if(mfPct>35)
+    alerts.push({icon:'fa-calendar-week',bg:'#FFF7ED',ic:'#C2410C',
+      title:`Bridge Day Risk: ${mfPct.toFixed(1)}% ของการลาตกวันจันทร์-ศุกร์`,
+      body:`สัดส่วนสูงกว่าเกณฑ์ปกติ (35%) — แนะนำ: กำหนดนโยบาย Pre-Approval สำหรับการลาติดวันหยุด`});
+
+  if(sickArr.length&&sickArr[0][1].c>=3)
+    alerts.push({icon:'fa-stethoscope',bg:'#F0FDF4',ic:'#027A48',
+      title:`Sick Leave Alert: ${sickArr[0][0]} ลาป่วย ${sickArr[0][1].c} ครั้ง`,
+      body:`ลาป่วยบ่อยอาจบ่งชี้ปัญหาสุขภาพหรือ Disengagement — แนะนำ: จัด Employee Health Check-up และ Wellness Program`});
+
+  if(avg>3)
+    alerts.push({icon:'fa-chart-line',bg:'#F5F3FF',ic:'#5B21B6',
+      title:`ค่าเฉลี่ยวันลาสูง: ${avg.toFixed(1)} วัน/คน`,
+      body:`สูงกว่าเกณฑ์มาตรฐาน — ควรทบทวนนโยบายการลา, สำรวจ Employee Satisfaction, และพิจารณา Flexible Work Policy`});
+
+  const highRiskCount=Object.values(p.emps).filter(e=>e.d>=8).length;
+  if(highRiskCount>0)
+    alerts.push({icon:'fa-shield-halved',bg:'#FFF1F2',ic:'#BE123C',
+      title:`พนักงาน High Risk ${highRiskCount} คน (ลา ≥ 8 วัน/ปี)`,
+      body:`กลุ่มนี้ต้องการการดูแลพิเศษ — แนะนำ: 1-on-1 Check-in, Performance Review และ Retention Program`});
+
+  if(!alerts.length)
+    alerts.push({icon:'fa-circle-check',bg:'#ECFDF5',ic:'#027A48',
+      title:'ไม่พบสัญญาณผิดปกติ',body:'สถิติการลาอยู่ในเกณฑ์ปกติ องค์กรมีสุขภาพ HR ที่ดี'});
+
+  document.getElementById('alertList').innerHTML=alerts.map(a=>`
+    <div class="alert-item">
+      <div class="alert-icon" style="background:${a.bg};color:${a.ic}"><i class="fas ${a.icon}"></i></div>
+      <div><div class="alert-title">${a.title}</div><div class="alert-body">${a.body}</div></div>
+    </div>`).join('');
+}
+
+/* ─── PDF ─── */
+async function exportPDF(){
+  const ov=document.getElementById('pdfOverlay');
+  ov.classList.add('show');
+  await new Promise(r=>setTimeout(r,200));
+  try{
+    const{jsPDF}=window.jspdf;
+    const root=document.getElementById('reportRoot');
+    const canvas=await html2canvas(root,{scale:2,useCORS:true,logging:false,backgroundColor:'#F0F2F5',scrollX:0,scrollY:-window.scrollY,windowWidth:root.scrollWidth,windowHeight:root.scrollHeight});
+    const margin=10,pw=210,ph=297,printW=pw-margin*2,printH=ph-margin*2;
+    const ratio=printW/canvas.width;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    let srcY=0,first=true;
+    while(srcY<canvas.height){
+      if(!first)pdf.addPage();first=false;
+      const slH=Math.ceil(printH/ratio);
+      const sc=document.createElement('canvas');sc.width=canvas.width;sc.height=Math.min(slH,canvas.height-srcY);
+      sc.getContext('2d').drawImage(canvas,0,srcY,sc.width,sc.height,0,0,sc.width,sc.height);
+      pdf.addImage(sc.toDataURL('image/jpeg',.92),'JPEG',margin,margin,printW,sc.height*ratio);
+      srcY+=sc.height;
+    }
+    const n=new Date();
+    pdf.save(`Nigiwai_Leave_Report_${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}.pdf`);
+  }catch(err){alert('เกิดข้อผิดพลาด: '+err.message);}
+  finally{ov.classList.remove('show');}
+}
 </script>
 </body>
 </html>
