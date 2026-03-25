@@ -421,6 +421,95 @@ tbody tr:hover td{background:var(--surface-2);}
 #pdfFrame .pdf-footer{margin-top:10px;padding:8px 12px;background:#fff;border:1px solid #E4E7EC;border-radius:6px;display:flex;justify-content:space-between;font-size:9px;color:#667085;}
 #pdfFrame .pdf-footer strong{color:#C0392B;}
 #pdfFrame .pdf-page-num{font-size:9px;color:#98A2B3;text-align:right;margin-top:4px;}
+
+/* ══════════════════════════════════════════════════
+   @MEDIA PRINT — Native browser A4 layout
+   วิธีนี้เบราว์เซอร์จัดการ font rendering, chart canvas,
+   และ page breaks เอง — ได้ผลตรงและสะอาดที่สุด
+   ══════════════════════════════════════════════════ */
+@media print {
+  @page { size: A4 portrait; margin: 11mm 13mm; }
+
+  /* force color printing */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* hide screen-only elements */
+  .topnav, .upload-zone, #uploadZone, .filter-bar,
+  #pdfOverlay, #pdfFrame, .tnav-r, .btn,
+  .rpt-footer { display: none !important; }
+
+  body { background: #fff !important; font-size: 8pt !important; color: #101828 !important; margin:0 !important; }
+  .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+  #reportRoot { display: block !important; }
+
+  /* hide the normal dashboard sections — only show #printLayout */
+  .page-header, .insight-strip, .kpi-grid,
+  .sec-label, .grid-2, .grid-1,
+  .grid-3, .grid-4, .grid-13, .grid-31,
+  .grid-31, .filter-bar { display: none !important; }
+
+  /* show print layout */
+  #printLayout { display: block !important; }
+
+  /* print page breaks */
+  .print-page { page-break-after: always; break-after: page; }
+  .print-page:last-child { page-break-after: avoid; break-after: avoid; }
+  .pno-break { page-break-inside: avoid; break-inside: avoid; }
+
+  /* print card styling */
+  .pr-card {
+    background: #fff !important;
+    border: 1px solid #dde2eb !important;
+    border-radius: 5px !important;
+    padding: 8pt 10pt !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .pr-card-title {
+    font-size: 8pt !important; font-weight: 800 !important;
+    color: #101828 !important; margin-bottom: 5pt !important;
+    padding-bottom: 4pt !important; border-bottom: 1px solid #eee !important;
+  }
+
+  /* print grid — using table for reliable cross-browser print */
+  .pr-g2 { display: table !important; width: 100% !important; border-spacing: 6pt !important; }
+  .pr-g2 > * { display: table-cell !important; width: 50% !important; vertical-align: top !important; }
+  .pr-g3 { display: table !important; width: 100% !important; border-spacing: 6pt !important; }
+  .pr-g3 > * { display: table-cell !important; width: 33.33% !important; vertical-align: top !important; }
+  .pr-g4 { display: table !important; width: 100% !important; border-spacing: 4pt !important; }
+  .pr-g4 > * { display: table-cell !important; width: 25% !important; vertical-align: top !important; }
+
+  /* print table */
+  .pr-tbl { width: 100% !important; border-collapse: collapse !important; font-size: 7.5pt !important; }
+  .pr-tbl th { background: #f7f8fa !important; padding: 3pt 5pt !important; font-size: 7pt !important; font-weight: 800 !important; color: #667085 !important; border-bottom: 1px solid #e4e7ec !important; text-align: left !important; }
+  .pr-tbl td { padding: 3pt 5pt !important; border-bottom: 1px solid #f0f0f0 !important; font-size: 7.5pt !important; color: #344054 !important; }
+
+  /* print badge */
+  .pr-badge { display: inline-block !important; padding: 1pt 5pt !important; border-radius: 8pt !important; font-size: 7pt !important; font-weight: 700 !important; }
+  .pr-badge.br { background: #fef3f2 !important; color: #b42318 !important; }
+  .pr-badge.ba { background: #fffaeb !important; color: #b54708 !important; }
+  .pr-badge.bg { background: #ecfdf3 !important; color: #027a48 !important; }
+  .pr-badge.bb { background: #eff8ff !important; color: #175cd3 !important; }
+  .pr-badge.bk { background: #f7f8fa !important; color: #344054 !important; border: 1px solid #e4e7ec !important; }
+
+  /* print section label */
+  .pr-sec { font-size: 7pt !important; font-weight: 800 !important; text-transform: uppercase !important; letter-spacing: 1pt !important; color: #98a2b3 !important; margin: 8pt 0 5pt !important; border-bottom: 1px solid #e4e7ec !important; padding-bottom: 3pt !important; }
+
+  /* print dark block */
+  .pr-dark { background: #0d1117 !important; border-radius: 5pt !important; padding: 8pt 12pt !important; }
+
+  /* kpi card in print */
+  .pr-kpi { background: #fff !important; border: 1px solid #e4e7ec !important; border-radius: 4pt !important; padding: 6pt 8pt !important; }
+  .pr-kpi-lbl { font-size: 6.5pt !important; font-weight: 800 !important; text-transform: uppercase !important; color: #98a2b3 !important; margin-bottom: 1pt !important; }
+  .pr-kpi-val { font-size: 17pt !important; font-weight: 900 !important; color: #101828 !important; line-height: 1.1 !important; }
+  .pr-kpi-note { font-size: 7pt !important; color: #98a2b3 !important; margin-top: 1pt !important; }
+
+  /* heatmap cell */
+  .pr-hm-cell { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 18pt !important; height: 14pt !important; border-radius: 2pt !important; font-size: 6.5pt !important; font-weight: 700 !important; margin: 1pt !important; }
+}
+
+/* screen: hide print layout */
+#printLayout { display: none; }
 </style>
 </head>
 <body>
@@ -803,6 +892,12 @@ tbody tr:hover td{background:var(--surface-2);}
   </div>
 
 </div><!-- /reportRoot -->
+
+<!-- ═══════════════════════════════════════════════════════
+     PRINT LAYOUT — rendered only during window.print()
+     สร้าง DOM ใหม่ก่อนพิมพ์ด้วย JS (buildPrintLayout)
+     ═══════════════════════════════════════════════════════ -->
+<div id="printLayout"></div>
 </div><!-- /container -->
 
 <script>
@@ -1339,328 +1434,437 @@ function renderAlerts(){
 }
 
 // pg2_inner: used inside exportPDF to build page 2 content
-let pg2_inner='';
 
+/* ══════════════════════════════════════════════════════════
+   EXPORT PDF — window.print() approach
+   1. buildPrintLayout() สร้าง #printLayout DOM จากข้อมูลจริง
+   2. window.print() → เบราว์เซอร์ใช้ @media print CSS จัดหน้า
+   3. afterprint → ลบ printLayout ออก
+   ผลลัพธ์: font ถูก, chart ถูก, layout พอดี A4 ทุกครั้ง
+   ══════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════
-   PDF EXPORT v4 — EXPLICIT PIXEL-BUDGET PER SECTION
-   A4 @ 96dpi = 794×1122px | PAD=16 | FOOTER=30px
-   USABLE HEIGHT = 1122-32-30 = 1060px per page
-   Each block has a fixed px height so total NEVER exceeds 1060px
-   ════════════════════════════════════════════════════════ */
-async function exportPDF(){
-  const ov=document.getElementById('pdfOverlay');
-  const msgEl=document.getElementById('pdfMsg');
-  const barEl=document.getElementById('pdfBar');
-  const setP=(pct,msg)=>{barEl.style.width=pct+'%';if(msg)msgEl.textContent=msg;};
-  ov.classList.add('show'); setP(5,'กำลังเตรียม layout…');
-  await new Promise(r=>setTimeout(r,80));
+function buildPrintLayout(){
+  const p = processedState;
+  const empCount = Object.keys(p.emps).length || 1;
+  const mKeys = Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+  const totalWD = mKeys.length * WORK_DAYS_PER_MONTH || 1;
+  const totalWDAll = totalWD * empCount;
+  const dArr = Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
+  const empArr = Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
+  const absRate = ((p.days/totalWDAll)*100).toFixed(2);
+  const freq = (p.total/empCount).toFixed(1);
+  const highRisk = Object.values(p.emps).filter(e=>e.d>=8).length;
+  const mfPct = p.total ? ((p.dow[1]+p.dow[5])/p.total*100).toFixed(1) : '0';
 
-  try{
-    const{jsPDF}=window.jspdf;
-    const p=processedState;
-    const empCount=Object.keys(p.emps).length||1;
-    const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-    const totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
-    const totalWDAll=totalWD*empCount;
-    const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
-    const empArr=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
+  const now = new Date(), thY = now.getFullYear()+543;
+  const gDate = `${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
+  const gTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
 
-    /* ── constants ── */
-    const A4W=794, A4H=1122, PAD=16, FH=30;
-    const IW=A4W-PAD*2;   // 762px
-    // UH = 1122-32-30 = 1060px usable per page
+  /* helpers */
+  const bdg = (cls,txt) => `<span class="pr-badge ${cls}">${txt}</span>`;
+  const th = (t,a='left') => `<th style="text-align:${a}">${t}</th>`;
+  const sec = t => `<div class="pr-sec">${t}</div>`;
 
-    const now=new Date(), thY=now.getFullYear()+543;
-    const gDate=`${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
-    const gTime=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-    const absRate=((p.days/totalWDAll)*100).toFixed(2);
-    const freq=(p.total/empCount).toFixed(1);
-    const highRisk=Object.values(p.emps).filter(e=>e.d>=8).length;
-    const mfPct=p.total?((p.dow[1]+p.dow[5])/p.total*100).toFixed(1):'0';
+  /* capture chart canvas as <img> — same size as screen canvas */
+  function chartImg(id, w, h){
+    const el = document.getElementById(id);
+    if(!el) return '';
+    const c = document.createElement('canvas');
+    c.width = w*2; c.height = h*2;
+    c.getContext('2d').drawImage(el, 0, 0, c.width, c.height);
+    return `<img src="${c.toDataURL('image/png')}" style="width:${w}pt;height:${h}pt;display:block;max-width:100%">`;
+  }
 
-    const bdg=(cls,txt)=>{
-      const s={br:'background:#FEF3F2;color:#B42318',ba:'background:#FFFAEB;color:#B54708',
-               bg:'background:#ECFDF3;color:#027A48',bb:'background:#EFF8FF;color:#175CD3',
-               bk:'background:#F7F8FA;color:#344054;border:1px solid #E4E7EC'}[cls]||'';
-      return`<span style="display:inline-flex;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;${s}">${txt}</span>`;
-    };
-
-    function ci(id,w,h){
-      const el=document.getElementById(id); if(!el)return'';
-      const c=document.createElement('canvas'); c.width=w*2; c.height=h*2;
-      c.getContext('2d').drawImage(el,0,0,c.width,c.height);
-      return`<img src="${c.toDataURL('image/png')}" width="${w}" height="${h}" style="display:block;max-width:100%;">`;
-    }
-
-    /* fixed-height section label = 14px */
-    const sec=(t)=>`<div style="height:14px;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#98A2B3;display:flex;align-items:center;gap:6px;flex-shrink:0;">${t}<span style="flex:1;height:1px;background:#E4E7EC;"></span></div>`;
-
-    /* card with FIXED total height */
-    const card=(h,title,icon,body)=>`<div style="height:${h};background:#fff;border:1px solid #E4E7EC;border-radius:5px;padding:7px 10px;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;flex-shrink:0;">
-      <div style="font-size:8px;font-weight:800;color:#101828;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;gap:4px;flex-shrink:0;">
-        <i class="fas ${icon}" style="color:#C0392B;font-size:7.5px;"></i>${title}
-      </div>
-      <div style="flex:1;overflow:hidden;min-height:0;">${body}</div>
+  /* print footer bar */
+  const footerBar = (n,tot) => `
+    <div style="border-top:1px solid #dde2eb;padding-top:4pt;margin-top:6pt;
+                display:flex;justify-content:space-between;font-size:7pt;color:#98a2b3;">
+      <span>HR Analytics · <strong style="color:#c0392b">Nigiwai Group</strong> · HumanOS</span>
+      <span>พิมพ์เมื่อ ${gDate} ${gTime} | หน้า ${n}/4</span>
     </div>`;
 
-    /* table helpers */
-    const th=(t,a='left')=>`<th style="padding:3px 5px;font-size:7.5px;font-weight:800;text-transform:uppercase;color:#667085;border-bottom:1px solid #E4E7EC;background:#F7F8FA;text-align:${a};white-space:nowrap;">${t}</th>`;
-
-    /* page wrapper: EXACTLY A4W×A4H, overflow:hidden */
-    const page=(rows,n,tot)=>`<div style="width:${A4W}px;height:${A4H}px;padding:${PAD}px;box-sizing:border-box;background:#F0F2F5;font-family:'Noto Sans Thai',sans-serif;overflow:hidden;display:flex;flex-direction:column;gap:6px;">
-      ${rows}
-      <div style="height:24px;flex-shrink:0;border-top:1px solid #DDE2EB;display:flex;align-items:center;justify-content:space-between;font-size:8px;color:#98A2B3;padding-top:3px;">
-        <span>HR Analytics · <strong style="color:#C0392B">Nigiwai Group</strong> · HumanOS</span>
-        <span>พิมพ์เมื่อ ${gDate} ${gTime} | หน้า ${n}/4</span>
-      </div>
+  /* ── KPI card helper ── */
+  const kpiCard = (topColor, lbl, val, note) => `
+    <div class="pr-kpi" style="border-top:2pt solid ${topColor}">
+      <div class="pr-kpi-lbl">${lbl}</div>
+      <div class="pr-kpi-val">${val}</div>
+      <div class="pr-kpi-note">${note}</div>
     </div>`;
 
-    /* ── KPI mini card template (h=54px) ── */
-    const kpi=(col,lbl,val,note)=>`<div style="height:54px;background:#fff;border:1px solid #E4E7EC;border-top:2px solid ${col};border-radius:5px;padding:6px 10px;box-sizing:border-box;overflow:hidden;flex-shrink:0;">
-      <div style="font-size:7px;font-weight:800;text-transform:uppercase;color:#98A2B3;letter-spacing:.5px;">${lbl}</div>
-      <div style="font-size:17px;font-weight:900;color:#101828;line-height:1.15;margin-top:1px;">${val}</div>
-      <div style="font-size:7.5px;color:#98A2B3;margin-top:1px;">${note}</div>
-    </div>`;
-
-    /* ══════════════════════════════════════════════════════
-       PAGE 1 HEIGHT BUDGET (total must ≤ 1060px, gaps=6px)
-       cover    70px
-       gap       6px
-       insight  52px
-       gap       6px
-       sec      14px
-       gap       6px
-       kpi-r1   54px  (4 cols)
-       gap       6px
-       sec      14px
-       gap       6px
-       kpi-r2   54px  (4 cols)
-       gap       6px
-       sec      14px
-       gap       6px
-       charts  346px  (2 charts side by side, inner=320px)
-       footer   30px  (included in page wrapper)
-       ─────────────────
-       content: 70+52+14+54+14+54+14+346 = 618px
-       gaps:    7 × 6 = 42px
-       footer:  30px
-       padding: 32px
-       TOTAL:   618+42+30+32 = 722px ✓ safe
-       ══════════════════════════════════════════════════════ */
-    const pg1=page(`
-      <div style="height:70px;background:#0D1117;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+  /* ═══════════════ PAGE 1 ═══════════════
+     Cover · KPIs · Monthly + Type charts  */
+  const pg1 = `<div class="print-page">
+    <!-- Cover -->
+    <div class="pr-dark" style="margin-bottom:6pt">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
-          <div style="font-size:7.5px;font-weight:700;text-transform:uppercase;color:#C0392B;letter-spacing:1px;margin-bottom:2px;">Nigiwai Group · HR Analytics · 2026</div>
-          <div style="font-size:17px;font-weight:900;color:#F2F4F7;line-height:1.15;">รายงานสถิติการลาพนักงาน</div>
-          <div style="font-size:8px;color:#8899AA;margin-top:1px;">Human Resources · ประจำปี 2569 · ข้อมูลจากระบบ HumanOS · ${document.getElementById('datePeriod').textContent}</div>
+          <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#c0392b;letter-spacing:1pt;margin-bottom:2pt">
+            Nigiwai Group · HR Analytics · 2026</div>
+          <div style="font-size:16pt;font-weight:900;color:#f2f4f7;line-height:1.1">รายงานสถิติการลาพนักงาน</div>
+          <div style="font-size:8pt;color:#8899aa;margin-top:2pt">
+            Human Resources · ประจำปี 2569 · ข้อมูลจากระบบ HumanOS</div>
+          <div style="margin-top:5pt;display:inline-flex;align-items:center;gap:3pt;padding:2pt 8pt;
+                      background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.45);
+                      border-radius:8pt;font-size:7.5pt;font-weight:700;color:#f87171">
+            <i class="fas fa-calendar" style="font-size:7pt"></i>
+            ${document.getElementById('datePeriod').textContent}
+          </div>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:7px;text-transform:uppercase;color:#55667A;letter-spacing:.8px;">Generated</div>
-          <div style="font-size:12px;font-weight:800;color:#F2F4F7;">${gDate} ${gTime}</div>
-          <div style="font-size:7.5px;font-weight:700;color:#F87171;margin-top:2px;">INTERNAL USE ONLY</div>
+        <div style="text-align:right">
+          <div style="font-size:7pt;text-transform:uppercase;color:#55667a;letter-spacing:.8pt">Generated</div>
+          <div style="font-size:12pt;font-weight:800;color:#f2f4f7">${gDate}</div>
+          <div style="font-size:8pt;color:#8899aa">${gTime}</div>
+          <div style="margin-top:3pt;font-size:7.5pt;font-weight:700;color:#f87171">INTERNAL USE ONLY</div>
         </div>
       </div>
+    </div>
 
-      <div style="height:52px;display:grid;grid-template-columns:repeat(3,1fr);background:#0D1117;border-radius:6px;overflow:hidden;flex-shrink:0;">
-        ${[['รวมครั้งที่ลา',p.total.toLocaleString(),'รายการ'],['รวมวันลาทั้งสิ้น',p.days.toFixed(1),'วันทำงาน'],['เฉลี่ย / คน',(p.days/empCount).toFixed(1),'วัน/คน']]
-          .map((x,i)=>`<div style="padding:7px 14px;${i<2?'border-right:1px solid #1C2431':''}">
-            <div style="font-size:7px;font-weight:800;text-transform:uppercase;color:#8899AA;letter-spacing:.6px;">${x[0]}</div>
-            <div style="font-size:17px;font-weight:900;color:#F2F4F7;line-height:1.15;">${x[1]}</div>
-            <div style="font-size:7.5px;color:#8899AA;">${x[2]}</div>
+    <!-- Insight strip -->
+    <div style="display:table;width:100%;background:#0d1117;border-radius:5pt;
+                margin-bottom:6pt;overflow:hidden">
+      ${[['รวมครั้งที่ลา',p.total.toLocaleString(),'รายการ'],
+         ['รวมวันลาทั้งสิ้น',p.days.toFixed(1),'วันทำงาน'],
+         ['เฉลี่ยวัน / คน',(p.days/empCount).toFixed(1),'วัน/คน']]
+        .map((x,i)=>`<div style="display:table-cell;padding:8pt 13pt;
+          ${i<2?'border-right:1px solid #1c2431':''}">
+          <div style="font-size:6.5pt;font-weight:800;text-transform:uppercase;color:#8899aa;
+                      letter-spacing:.6pt;margin-bottom:1pt">${x[0]}</div>
+          <div style="font-size:17pt;font-weight:900;color:#f2f4f7;line-height:1.1">${x[1]}</div>
+          <div style="font-size:7pt;color:#8899aa">${x[2]}</div>
+        </div>`).join('')}
+    </div>
+
+    ${sec('Core KPIs')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
+      <div style="display:table-row">
+        ${[['#2e90fa','จำนวนครั้ง',p.total.toLocaleString(),'รายการ'],
+           ['#f79009','รวมวันลา',p.days.toFixed(1),'วัน'],
+           ['#12b76a','พนักงานที่ลา',empCount,'คน'],
+           ['#f04438','แผนก',Object.keys(p.depts).length,'แผนก']]
+          .map(x=>`<div style="display:table-cell;width:25%;padding-right:5pt">
+            ${kpiCard(x[0],x[1],x[2],x[3])}
           </div>`).join('')}
       </div>
+    </div>
 
-      ${sec('Core KPIs')}
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex-shrink:0;">
-        ${kpi('#2E90FA','จำนวนครั้ง',p.total.toLocaleString(),'รายการ')}
-        ${kpi('#F79009','รวมวันลา',p.days.toFixed(1),'วัน')}
-        ${kpi('#12B76A','พนักงานที่ลา',empCount,'คน')}
-        ${kpi('#F04438','แผนก',Object.keys(p.depts).length,'แผนก')}
+    ${sec('HR Expert Metrics')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:6pt">
+      <div style="display:table-row">
+        ${[['#2e90fa','Absence Rate',absRate+'%','% ต่อวันทำงาน'],
+           ['#f79009','Leave Frequency',freq,'ครั้ง/คน'],
+           ['#f04438','High-Risk Empl.',highRisk,'คน (≥8วัน)'],
+           ['#8b5cf6','Mon/Fri Leave',mfPct+'%','Bridge Day Risk']]
+          .map(x=>`<div style="display:table-cell;width:25%;padding-right:5pt">
+            ${kpiCard(x[0],x[1],x[2],x[3])}
+          </div>`).join('')}
       </div>
+    </div>
 
-      ${sec('HR Expert Metrics')}
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex-shrink:0;">
-        ${kpi('#2E90FA','Absence Rate',absRate+'%','% ต่อวันทำงาน')}
-        ${kpi('#F79009','Leave Frequency',freq,'ครั้ง/คน')}
-        ${kpi('#F04438','High-Risk Empl.',highRisk,'คน (≥8วัน)')}
-        ${kpi('#8B5CF6','Mon/Fri Leave',mfPct+'%','Bridge Day Risk')}
-      </div>
-
-      ${sec('แนวโน้มและประเภทการลา')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;height:346px;">
-        ${card('346px','สถิติการลาแยกตามเดือน','fa-chart-line',ci('cMonth',Math.floor(IW/2)-12,305))}
-        ${card('346px','ประเภทการลา','fa-tags',ci('cType',Math.floor(IW/2)-12,305))}
-      </div>
-    `,1,4);
-
-    /* ══════════════════════════════════════════════════════
-       PAGE 2 HEIGHT BUDGET
-       sec      14px
-       dept2    200px
-       gap       6px
-       sec      14px
-       stk+dow  200px
-       gap       6px
-       sec      14px
-       sick+dnt 196px
-       ─────────────────
-       content: 14+200+14+200+14+196 = 638px
-       gaps:    5 × 6 = 30px
-       footer:  30px | padding: 32px
-       TOTAL:   638+30+30+32 = 730px ✓
-       ══════════════════════════════════════════════════════ */
-    const sickArr2=Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,7);
-    const sickRows2=sickArr2.map(([n,v],i)=>`<tr>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;font-weight:700;">${i+1}</td>
-      <td style="padding:2.5px 5px;font-size:9px;font-weight:700;color:#101828;">${n.length>13?n.slice(0,13)+'…':n}</td>
-      <td style="padding:2.5px 5px;font-size:9px;">${bdg('bk',(v.dept||'').length>7?(v.dept||'').slice(0,7)+'…':v.dept||'')}</td>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;">${bdg(i<3?'br':i<5?'ba':'bk',v.c)}</td>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;">${v.d.toFixed(1)}</td>
-    </tr>`).join('');
-
-    pg2_inner=`
-      ${sec('การลาแยกตามแผนก')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;height:200px;">
-        ${card('200px','จำนวนครั้งรายแผนก (แนวตั้ง)','fa-chart-bar',ci('cDept',Math.floor(IW/2)-12,168))}
-        ${card('200px','จำนวนครั้งรายแผนก (แนวนอน)','fa-chart-area',ci('cDeptBar',Math.floor(IW/2)-12,168))}
-      </div>
-
-      ${sec('Stacked Breakdown &amp; Day of Week Pattern')}
-      <div style="display:grid;grid-template-columns:3fr 2fr;gap:6px;flex-shrink:0;height:200px;">
-        ${card('200px','ประเภทการลาแยกตามแผนก (Stacked)','fa-layer-group',ci('cStacked',Math.floor(IW*0.6)-8,168))}
-        ${card('200px','Pattern วันในสัปดาห์','fa-calendar-week',ci('cDow',Math.floor(IW*0.4)-8,168))}
-      </div>
-
-      ${sec('Sick Leave &amp; สัดส่วนประเภทการลา (วัน)')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0;height:196px;">
-        ${card('196px','Top พนักงานลาป่วยบ่อย','fa-stethoscope',`
-          <table style="width:100%;border-collapse:collapse;">
-            <thead><tr>${th('#','center')}${th('ชื่อ')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
-            <tbody>${sickRows2}</tbody>
-          </table>
-          <div style="font-size:7.5px;color:#667085;margin-top:5px;padding-top:4px;border-top:1px dashed #E4E7EC;">💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div>
-        `)}
-        ${card('196px','สัดส่วนประเภทการลา (วัน)','fa-chart-pie',ci('cTypeDays',Math.floor(IW/2)-12,160))}
-      </div>`;
-    const pg2=page(pg2_inner,2,4);
-
-    /* ══════════════════════════════════════════════════════
-       PAGE 3 HEIGHT BUDGET
-       sec      14px
-       t10+dep  240px
-       gap       6px
-       sec      14px
-       abs+rsk  240px
-       gap       6px
-       sec      14px
-       heatmap  rest (flex:1) ~  226px
-       ─────────────────
-       content: 14+240+14+240+14+226 = 748px
-       gaps:    5 × 6 = 30px
-       footer:  30px | padding: 32px
-       TOTAL:   748+30+30+32 = 840px ✓
-       ══════════════════════════════════════════════════════ */
-    const maxC=Math.max(...dArr.map(d=>d[1].c),1);
-    const top10rows=empArr.slice(0,10).map(([n,v],i)=>`<tr>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;font-weight:700;">${i+1}</td>
-      <td style="padding:2.5px 5px;font-size:9px;font-weight:700;color:#101828;">${(i<3?'⚠ ':'')}${n.length>13?n.slice(0,13)+'…':n}</td>
-      <td style="padding:2.5px 5px;font-size:9px;">${bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')}</td>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;">${bdg(i<3?'br':i<6?'ba':'bk',v.c)}</td>
-      <td style="padding:2.5px 5px;font-size:9px;text-align:center;font-weight:700;">${v.d.toFixed(1)}</td>
-    </tr>`).join('');
-
-    const deptRows=dArr.slice(0,10).map(([dept,v])=>{
-      const pct=Math.round((v.c/maxC)*100);
-      return`<tr>
-        <td style="padding:2.5px 5px;font-size:9px;font-weight:700;color:#101828;">${dept.length>13?dept.slice(0,13)+'…':dept}</td>
-        <td style="padding:2.5px 5px;font-size:9px;text-align:center;">${bdg(pct>75?'br':pct>40?'ba':'bb',v.c)}</td>
-        <td style="padding:2.5px 5px;font-size:9px;text-align:center;">${v.d.toFixed(1)}</td>
-        <td style="padding:2.5px 5px;font-size:9px;text-align:center;color:#667085;">${(v.d/v.c).toFixed(1)}</td>
-      </tr>`;
-    }).join('');
-
-    const maxAbs=Math.max(...dArr.map(d=>d[1].d/totalWD*100),0.01);
-    const absRowsH=dArr.slice(0,8).map(([dept,v])=>{
-      const rate=(v.d/totalWD*100);
-      const barW=Math.min((rate/maxAbs)*100,100);
-      const col=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
-      const tc=rate>=3?'#B42318':rate>=1.5?'#B54708':'#027A48';
-      return`<div style="display:flex;align-items:center;gap:5px;padding:2.5px 0;border-bottom:1px solid #F5F5F5;">
-        <div style="font-size:8.5px;font-weight:600;color:#101828;width:72px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${dept.length>10?dept.slice(0,10)+'…':dept}</div>
-        <div style="flex:1;height:5px;background:#E4E7EC;border-radius:3px;overflow:hidden;">
-          <div style="width:${barW}%;height:100%;background:${col};border-radius:3px;"></div>
+    ${sec('แนวโน้มและประเภทการลา')}
+    <div style="display:table;width:100%;border-spacing:5pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-chart-line" style="color:#c0392b;margin-right:4pt"></i>สถิติการลาแยกตามเดือน</div>
+            ${chartImg('cMonth', 235, 155)}
+          </div>
         </div>
-        <div style="font-size:9px;font-weight:700;color:${tc};min-width:40px;text-align:right;">${rate.toFixed(2)}%</div>
-      </div>`;
-    }).join('');
-
-    const allEmps=Object.entries(p.emps).map(([n,v])=>({n,d:v.d}));
-    const highR=allEmps.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,4);
-    const midR=allEmps.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,4);
-    const lowR=allEmps.filter(e=>e.d<4);
-    const riskBox=(bg,bdr,lc,lbl,names)=>`<div style="background:${bg};border:1px solid ${bdr};border-radius:4px;padding:5px 8px;margin-bottom:4px;">
-      <div style="font-size:7.5px;font-weight:800;text-transform:uppercase;color:${lc};margin-bottom:2px;">${lbl}</div>
-      <div style="font-size:8.5px;color:#344054;line-height:1.5;">${names||'—'}</div>
-    </div>`;
-
-    // Heatmap
-    const mF2=document.getElementById('monthFilter').value;
-    const dF2=document.getElementById('deptFilter').value;
-    const tF2=document.getElementById('leaveTypeFilter').value;
-    const filt=originalData.filter(r=>(!mF2||r.monthKey===mF2)&&(!dF2||r.แผนก===dF2)&&(!tF2||r.ประเภท===tF2));
-    const hmDepts=dArr.slice(0,8).map(d=>d[0]);
-    const hmMat={};
-    filt.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!hmMat[d])hmMat[d]={};hmMat[d][mk]=(hmMat[d][mk]||0)+1;});
-    const allHV=Object.values(hmMat).flatMap(r=>Object.values(r));
-    const hmMax=Math.max(...allHV,1);
-    function hmc(v){if(!v)return{bg:'#F1F5F9',fg:'#98A2B3'};const t=v/hmMax;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175CD3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7A3B00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#fff'};}
-    const cellW=Math.min(22,Math.floor((IW-80)/(mKeys.length||1)));
-    let hmHtml=`<div style="display:flex;gap:2px;padding-left:75px;margin-bottom:2px;">
-      ${mKeys.map(k=>{const[,m]=k.split('-');return`<div style="width:${cellW}px;font-size:7px;font-weight:700;color:#667085;text-align:center;">${TH_M[+m-1]}</div>`;}).join('')}
-    </div>`;
-    hmDepts.forEach(dept=>{
-      hmHtml+=`<div style="display:flex;gap:2px;align-items:center;margin-bottom:2px;">
-        <div style="font-size:8px;font-weight:700;color:#667085;width:72px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${dept.length>10?dept.slice(0,10)+'…':dept}</div>`;
-      mKeys.forEach(mk=>{const v=(hmMat[dept]&&hmMat[dept][mk])||0;const{bg,fg}=hmc(v);hmHtml+=`<div style="width:${cellW}px;height:17px;border-radius:2px;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0;">${v||''}</div>`;});
-      hmHtml+='</div>';
-    });
-
-    const pg3=page(`
-      ${sec('รายบุคคลและสรุปรายแผนก')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;height:240px;flex-shrink:0;">
-        ${card('240px','Top 10 พนักงานลามากที่สุด','fa-trophy',`<table style="width:100%;border-collapse:collapse;">
-          <thead><tr>${th('#','center')}${th('ชื่อ-นามสกุล')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
-          <tbody>${top10rows}</tbody></table>`)}
-        ${card('240px','สรุปรายแผนก','fa-table',`<table style="width:100%;border-collapse:collapse;">
-          <thead><tr>${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}${th('เฉลี่ย','center')}</tr></thead>
-          <tbody>${deptRows}</tbody></table>`)}
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-tags" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลา</div>
+            ${chartImg('cType', 235, 155)}
+          </div>
+        </div>
       </div>
+    </div>
+    ${footerBar(1,4)}
+  </div>`;
 
-      ${sec('Absence Rate &amp; Risk Segmentation')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;height:240px;flex-shrink:0;">
-        ${card('240px','Absence Rate รายแผนก','fa-percent',`
-          <div style="background:#0D1117;border-radius:4px;padding:5px 8px;margin-bottom:5px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;">
-            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:3px 7px;text-align:center;">
-              <div style="font-size:10px;font-weight:900;color:#F2F4F7;">${p.days.toFixed(1)}</div>
-              <div style="font-size:6.5px;color:#8899AA;">วันลา</div>
+  /* ═══════════════ PAGE 2 ═══════════════
+     Dept charts · Stacked · DOW · Sick · Doughnut */
+  const sickArr = Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,7);
+
+  const pg2 = `<div class="print-page">
+    ${sec('การลาแยกตามแผนก')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-chart-bar" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวตั้ง)</div>
+            ${chartImg('cDept', 235, 155)}
+          </div>
+        </div>
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-chart-area" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวนอน)</div>
+            ${chartImg('cDeptBar', 235, 155)}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${sec('Stacked Breakdown &amp; Day of Week Pattern')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:60%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-layer-group" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลาแยกตามแผนก (Stacked)</div>
+            ${chartImg('cStacked', 280, 148)}
+          </div>
+        </div>
+        <div style="display:table-cell;width:40%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-calendar-week" style="color:#c0392b;margin-right:4pt"></i>Pattern วันในสัปดาห์</div>
+            ${chartImg('cDow', 185, 148)}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${sec('Sick Leave &amp; สัดส่วนประเภทการลา (วัน)')}
+    <div style="display:table;width:100%;border-spacing:5pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-stethoscope" style="color:#c0392b;margin-right:4pt"></i>Top พนักงานลาป่วยบ่อย</div>
+            <table class="pr-tbl">
+              <thead><tr>${th('#','center')}${th('ชื่อ')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
+              <tbody>
+                ${sickArr.map(([n,v],i)=>`<tr>
+                  <td style="text-align:center;font-weight:700">${i+1}</td>
+                  <td style="font-weight:700;color:#101828">${n.length>14?n.slice(0,14)+'…':n}</td>
+                  <td>${bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')}</td>
+                  <td style="text-align:center">${bdg(i<3?'br':i<5?'ba':'bk',v.c)}</td>
+                  <td style="text-align:center">${v.d.toFixed(1)}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+            <div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">
+              💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div>
+          </div>
+        </div>
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-chart-pie" style="color:#c0392b;margin-right:4pt"></i>สัดส่วนประเภทการลา (วัน)</div>
+            ${chartImg('cTypeDays', 235, 155)}
+          </div>
+        </div>
+      </div>
+    </div>
+    ${footerBar(2,4)}
+  </div>`;
+
+  /* ═══════════════ PAGE 3 ═══════════════
+     Top10 · Dept table · Absence Rate · Risk · Heatmap */
+  const maxC = Math.max(...dArr.map(d=>d[1].c),1);
+  const allEmps = Object.entries(p.emps).map(([n,v])=>({n,d:v.d}));
+  const highR = allEmps.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,5);
+  const midR  = allEmps.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,5);
+  const lowR  = allEmps.filter(e=>e.d<4);
+  const maxAbs = Math.max(...dArr.map(d=>d[1].d/totalWD*100),0.01);
+
+  // Heatmap
+  const mF=document.getElementById('monthFilter').value;
+  const dF=document.getElementById('deptFilter').value;
+  const tF=document.getElementById('leaveTypeFilter').value;
+  const filt=originalData.filter(r=>(!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF));
+  const hmDepts=dArr.slice(0,8).map(d=>d[0]);
+  const hmMat={};
+  filt.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!hmMat[d])hmMat[d]={};hmMat[d][mk]=(hmMat[d][mk]||0)+1;});
+  const allHV=Object.values(hmMat).flatMap(r=>Object.values(r));
+  const hmMax=Math.max(...allHV,1);
+  function hmc(v){if(!v)return{bg:'#f1f5f9',fg:'#98a2b3'};const t=v/hmMax;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175cd3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7a3b00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#fff'};}
+
+  let hmHTML = `<div style="margin-top:3pt">
+    <div style="display:flex;gap:2pt;padding-left:55pt;margin-bottom:2pt">
+      ${mKeys.map(k=>{const[,m]=k.split('-');return`<div style="width:16pt;font-size:6.5pt;font-weight:700;color:#667085;text-align:center">${TH_M[+m-1]}</div>`;}).join('')}
+    </div>`;
+  hmDepts.forEach(dept=>{
+    hmHTML += `<div style="display:flex;align-items:center;gap:2pt;margin-bottom:2pt">
+      <div style="font-size:7pt;font-weight:700;color:#667085;width:52pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${dept.length>9?dept.slice(0,9)+'…':dept}</div>`;
+    mKeys.forEach(mk=>{const v=(hmMat[dept]&&hmMat[dept][mk])||0;const{bg,fg}=hmc(v);
+      hmHTML+=`<div style="width:16pt;height:13pt;border-radius:2pt;background:${bg};color:${fg};display:inline-flex;align-items:center;justify-content:center;font-size:6.5pt;font-weight:700">${v||''}</div>`;});
+    hmHTML += '</div>';
+  });
+  hmHTML += '</div>';
+
+  const pg3 = `<div class="print-page">
+    ${sec('รายบุคคลและสรุปรายแผนก')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-trophy" style="color:#c0392b;margin-right:4pt"></i>Top 10 พนักงานลามากที่สุด</div>
+            <table class="pr-tbl">
+              <thead><tr>${th('#','center')}${th('ชื่อ-นามสกุล')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
+              <tbody>${empArr.slice(0,10).map(([n,v],i)=>`<tr>
+                <td style="text-align:center;font-weight:700">${i+1}</td>
+                <td style="font-weight:700;color:#101828">${(i<3?'⚠ ':'')}${n.length>13?n.slice(0,13)+'…':n}</td>
+                <td>${bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')}</td>
+                <td style="text-align:center">${bdg(i<3?'br':i<6?'ba':'bk',v.c)}</td>
+                <td style="text-align:center;font-weight:700">${v.d.toFixed(1)}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-table" style="color:#c0392b;margin-right:4pt"></i>สรุปรายแผนก</div>
+            <table class="pr-tbl">
+              <thead><tr>${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}${th('เฉลี่ย','center')}</tr></thead>
+              <tbody>${dArr.slice(0,10).map(([dept,v])=>{
+                const pct=Math.round((v.c/maxC)*100);
+                return`<tr>
+                  <td style="font-weight:700;color:#101828">${dept.length>13?dept.slice(0,13)+'…':dept}</td>
+                  <td style="text-align:center">${bdg(pct>75?'br':pct>40?'ba':'bb',v.c)}</td>
+                  <td style="text-align:center">${v.d.toFixed(1)}</td>
+                  <td style="text-align:center;color:#667085">${(v.d/v.c).toFixed(1)}</td>
+                </tr>`;}).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${sec('Absence Rate รายแผนก &amp; Risk Segmentation')}
+    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
+      <div style="display:table-row">
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-percent" style="color:#c0392b;margin-right:4pt"></i>Absence Rate รายแผนก</div>
+            <!-- Formula -->
+            <div style="background:#0d1117;border-radius:4pt;padding:5pt 8pt;margin-bottom:5pt;
+                        display:flex;align-items:center;gap:4pt;flex-wrap:wrap">
+              <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center">
+                <div style="font-size:9pt;font-weight:900;color:#f2f4f7">${p.days.toFixed(1)}</div>
+                <div style="font-size:6pt;color:#8899aa">วันลา</div>
+              </div>
+              <span style="color:#3a4451;font-size:11pt">÷</span>
+              <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center">
+                <div style="font-size:9pt;font-weight:900;color:#f2f4f7">${totalWDAll.toLocaleString()}</div>
+                <div style="font-size:6pt;color:#8899aa">${empCount}×${mKeys.length}×${WORK_DAYS_PER_MONTH}</div>
+              </div>
+              <span style="color:#3a4451;font-size:11pt">×100=</span>
+              <div style="background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:3pt;padding:2pt 8pt;text-align:center">
+                <div style="font-size:11pt;font-weight:900;color:#f87171">${absRate}%</div>
+                <div style="font-size:6pt;color:#f87171">Absence Rate</div>
+              </div>
             </div>
-            <span style="color:#3A4451;font-size:12px;">÷</span>
-            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:3px 7px;text-align:center;">
-              <div style="font-size:10px;font-weight:900;color:#F2F4F7;">${totalWDAll.toLocaleString()}</div>
-              <div style="font-size:6.5px;color:#8899AA;">${empCount}×${mKeys.length}×${WORK_DAYS_PER_MONTH}</div>
+            <!-- Bars -->
+            ${dArr.slice(0,8).map(([dept,v])=>{
+              const rate=(v.d/totalWD*100);
+              const barW=Math.min((rate/maxAbs)*100,100);
+              const col=rate>=3?'#f04438':rate>=1.5?'#f79009':'#12b76a';
+              const tc=rate>=3?'#b42318':rate>=1.5?'#b54708':'#027a48';
+              return`<div style="display:flex;align-items:center;gap:4pt;padding:2pt 0;border-bottom:1px solid #f5f5f5">
+                <div style="font-size:8pt;font-weight:600;color:#101828;width:55pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${dept.length>9?dept.slice(0,9)+'…':dept}</div>
+                <div style="flex:1;height:5pt;background:#e4e7ec;border-radius:3pt;overflow:hidden">
+                  <div style="width:${barW}%;height:100%;background:${col};border-radius:3pt"></div>
+                </div>
+                <div style="font-size:8pt;font-weight:700;color:${tc};min-width:36pt;text-align:right">${rate.toFixed(2)}%</div>
+              </div>`;
+            }).join('')}
+            <div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">
+              ⚠️ เกณฑ์: ≥3% สูง | 1.5–3% ปานกลาง | &lt;1.5% ดี</div>
+          </div>
+        </div>
+        <div style="display:table-cell;width:50%;vertical-align:top">
+          <div class="pr-card pno-break">
+            <div class="pr-card-title"><i class="fas fa-shield-halved" style="color:#c0392b;margin-right:4pt"></i>Risk Segmentation</div>
+            <div style="background:#fef3f2;border:1px solid #fecaca;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt">
+              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b42318;margin-bottom:2pt">⚠ High Risk — ${allEmps.filter(e=>e.d>=8).length} คน</div>
+              <div style="font-size:8pt;color:#344054;line-height:1.6">${highR.map(e=>`${e.n.length>12?e.n.slice(0,12)+'…':e.n} <strong style="color:#b42318">${e.d.toFixed(1)}วัน</strong>`).join('<br>') || '—'}</div>
             </div>
-            <span style="color:#3A4451;font-size:12px;">×100=</span>
-            <div style="background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:3px;padding:3px 9px;text-align:center;">
-              <div style="font-size:12px;font-weight:900;color:#F87171;">${absRate}%</div>
-              <div style="font-size:6.5px;color:#F87171;">Absence Rate</div>
+            <div style="background:#fffaeb;border:1px solid #fde68a;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt">
+              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b54708;margin-bottom:2pt">— Medium Risk — ${allEmps.filter(e=>e.d>=4&&e.d<8).length} คน</div>
+              <div style="font-size:8pt;color:#344054;line-height:1.6">${midR.map(e=>`${e.n.length>12?e.n.slice(0,12)+'…':e.n} <strong style="color:#b54708">${e.d.toFixed(1)}วัน</strong>`).join('<br>') || '—'}</div>
+            </div>
+            <div style="background:#ecfdf3;border:1px solid #a7f3d0;border-radius:4pt;padding:5pt 7pt">
+              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#027a48;margin-bottom:2pt">✓ Normal — ${lowR.length} คน</div>
+              <div style="font-size:8pt;color:#027a48">ลาน้อยกว่า 4 วัน/ปี</div>
             </div>
           </div>
-          ${absRowsH}
-          <div style="font-size:7.5px;color:#667085;margin-top:3px;">⚠️ เกณฑ์: ≥3% สูง | 1.5–3% ปานกลาง | &lt;1.5% ดี</div>
-        `)}
-        ${card('240px','Risk Segmentation','fa-shield-halved',`
-          ${riskBox('#FEF3F2','#FECACA','#B42318',`⚠ High Risk — ${allEmps.filter(e=>e.d>=8).length} คน`,
+        </div>
+      </div>
+    </div>
+
+    ${sec('Heatmap แผนก × เดือน')}
+    <div class="pr-card pno-break">
+      <div class="pr-card-title"><i class="fas fa-th" style="color:#c0392b;margin-right:4pt"></i>ความเข้มการลาแยกตามแผนก × ช่วงเวลา</div>
+      ${hmHTML}
+    </div>
+    ${footerBar(3,4)}
+  </div>`;
+
+  /* ═══════════════ PAGE 4 ═══════════════
+     Smart Alerts + Summary */
+  const alertsEl = document.getElementById('alertList');
+  const alertsBody = [...alertsEl.querySelectorAll('.alert-item')].map(el=>{
+    const icon = el.querySelector('.alert-icon i');
+    const iconDiv = el.querySelector('.alert-icon');
+    const title = el.querySelector('.alert-title').textContent;
+    const body = el.querySelector('.alert-body').textContent;
+    return `<div style="display:flex;gap:7pt;align-items:flex-start;padding:7pt 0;border-bottom:1px solid #f0f0f0">
+      <div style="width:20pt;height:20pt;border-radius:4pt;flex-shrink:0;background:${iconDiv.style.background};
+                  color:${iconDiv.style.color};display:flex;align-items:center;justify-content:center;font-size:8.5pt">
+        <i class="${icon.className}"></i>
+      </div>
+      <div>
+        <div style="font-size:9.5pt;font-weight:700;color:#101828;margin-bottom:1.5pt">${title}</div>
+        <div style="font-size:8.5pt;color:#667085;line-height:1.5">${body}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const pg4 = `<div class="print-page">
+    ${sec('สัญญาณเตือนและข้อเสนอแนะเชิง HR')}
+    <div class="pr-card pno-break" style="margin-bottom:8pt">
+      <div class="pr-card-title">
+        <i class="fas fa-triangle-exclamation" style="color:#c0392b;margin-right:4pt"></i>
+        Smart Insights — วิเคราะห์อัตโนมัติจากข้อมูล
+      </div>
+      ${alertsBody}
+    </div>
+
+    ${sec('สรุปภาพรวมองค์กร')}
+    <div style="display:table;width:100%;border-spacing:5pt">
+      <div style="display:table-row">
+        ${[['รวมครั้งลา',p.total.toLocaleString(),'#2e90fa'],
+           ['รวมวันลา',p.days.toFixed(1),'#f79009'],
+           ['พนักงาน',empCount+' คน','#12b76a'],
+           ['แผนก',Object.keys(p.depts).length+' แผนก','#f04438'],
+           ['Absence Rate',absRate+'%','#8b5cf6'],
+           ['High Risk',highRisk+' คน','#c0392b']]
+          .map(x=>`<div style="display:table-cell;padding-right:4pt">
+            <div style="background:#fff;border:1px solid #e4e7ec;border-left:3pt solid ${x[2]};
+                        border-radius:4pt;padding:6pt 8pt">
+              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#98a2b3">${x[0]}</div>
+              <div style="font-size:14pt;font-weight:900;color:#101828">${x[1]}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${footerBar(4,4)}
+  </div>`;
+
+  document.getElementById('printLayout').innerHTML = pg1 + pg2 + pg3 + pg4;
+}
+
+async function exportPDF(){
+  if(!processedState || !processedState.total){
+    alert('กรุณาโหลดข้อมูลก่อน'); return;
+  }
+  // Build print DOM
+  buildPrintLayout();
+  // Small delay to let images render
+  await new Promise(r=>setTimeout(r,300));
+  // Print
+  window.print();
+  // Cleanup after print dialog closes
+  window.addEventListener('afterprint', ()=>{
+    document.getElementById('printLayout').innerHTML='';
+  }, {once:true});
+}
             highR.map(e=>`${e.n.length>11?e.n.slice(0,11)+'…':e.n} <strong style="color:#B42318">${e.d.toFixed(1)}วัน</strong>`).join('<br>'))}
           ${riskBox('#FFFAEB','#FDE68A','#B54708',`— Medium Risk — ${allEmps.filter(e=>e.d>=4&&e.d<8).length} คน`,
             midR.map(e=>`${e.n.length>11?e.n.slice(0,11)+'…':e.n} <strong style="color:#B54708">${e.d.toFixed(1)}วัน</strong>`).join('<br>'))}
