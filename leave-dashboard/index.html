@@ -1387,7 +1387,24 @@ function buildPrintLayout(){
   var gTime=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+' น.';
 
   function bdg(cls,txt){ var s={br:'background:#fef3f2;color:#b42318',ba:'background:#fffaeb;color:#b54708',bg:'background:#ecfdf3;color:#027a48',bb:'background:#eff8ff;color:#175cd3',bk:'background:#f7f8fa;color:#344054;border:1px solid #e4e7ec'}[cls]||''; return '<span style="display:inline-flex;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;'+s+'">'+txt+'</span>'; }
-  function ci(id,w,h){ var el=document.getElementById(id); if(!el)return''; var c=document.createElement('canvas'); c.width=w*2; c.height=h*2; c.getContext('2d').drawImage(el,0,0,c.width,c.height); return '<img src="'+c.toDataURL('image/png')+'" style="width:'+w+'pt;height:'+h+'pt;display:block;max-width:100%">'; }
+  /* ci(id, targetWidthPt, maxHeightPt)
+     - อ่าน aspect ratio จาก canvas จริง
+     - scale ให้ได้ width = targetWidthPt
+     - cap height ไม่เกิน maxHeightPt                  */
+  function ci(id, targetW, maxH){
+    var el=document.getElementById(id);
+    if(!el) return '';
+    // actual canvas dimensions
+    var srcW=el.width||el.offsetWidth||400;
+    var srcH=el.height||el.offsetHeight||300;
+    var ratio=srcH/srcW;
+    var dispH=Math.min(Math.round(targetW*ratio), maxH||999);
+    // render at 2x for crisp output
+    var c=document.createElement('canvas');
+    c.width=srcW*2; c.height=srcH*2;
+    c.getContext('2d').drawImage(el,0,0,c.width,c.height);
+    return '<img src="'+c.toDataURL('image/png')+'" style="width:'+targetW+'pt;height:'+dispH+'pt;display:block;max-width:100%">';
+  }
   function sec(t){ return '<div class="pr-sec">'+t+'</div>'; }
   function footerBar(n,tot){ return '<div style="border-top:1px solid #dde2eb;padding-top:4pt;margin-top:6pt;display:flex;justify-content:space-between;font-size:7pt;color:#98a2b3;"><span>HR Analytics · <strong style="color:#c0392b">Nigiwai Group</strong> · HumanOS</span><span>พิมพ์เมื่อ '+gDate+' '+gTime+' | หน้า '+n+'/4</span></div>'; }
   function kpiCard(col,lbl,val,note){ return '<div class="pr-kpi" style="border-top:2pt solid '+col+'"><div class="pr-kpi-lbl">'+lbl+'</div><div class="pr-kpi-val">'+val+'</div><div class="pr-kpi-note">'+note+'</div></div>'; }
@@ -1414,22 +1431,22 @@ function buildPrintLayout(){
   });
   pg1+='</div></div>';
   pg1+=sec('แนวโน้มและประเภทการลา');
-  pg1+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-line" style="color:#c0392b;margin-right:4pt"></i>สถิติการลาแยกตามเดือน</div>'+ci('cMonth',235,155)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-tags" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลา</div>'+ci('cType',235,155)+'</div></div></div></div>';
+  pg1+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-line" style="color:#c0392b;margin-right:4pt"></i>สถิติการลาแยกตามเดือน</div>'+ci('cMonth',237,170)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-tags" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลา</div>'+ci('cType',237,170)+'</div></div></div></div>';
   pg1+=footerBar(1,4)+'</div>';
 
   /* PAGE 2 */
   var sickArr=Object.entries(p.sickLeave||{}).sort(function(a,b){return b[1].c-a[1].c;}).slice(0,7);
   var pg2='<div class="print-page">';
   pg2+=sec('การลาแยกตามแผนก');
-  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-bar" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวตั้ง)</div>'+ci('cDept',235,155)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-area" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวนอน)</div>'+ci('cDeptBar',235,155)+'</div></div></div></div>';
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-bar" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวตั้ง)</div>'+ci('cDept',237,160)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-area" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวนอน)</div>'+ci('cDeptBar',237,160)+'</div></div></div></div>';
   pg2+=sec('Stacked Breakdown &amp; Day of Week Pattern');
-  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:60%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-layer-group" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลาแยกตามแผนก (Stacked)</div>'+ci('cStacked',280,148)+'</div></div><div style="display:table-cell;width:40%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-calendar-week" style="color:#c0392b;margin-right:4pt"></i>Pattern วันในสัปดาห์</div>'+ci('cDow',185,148)+'</div></div></div></div>';
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:60%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-layer-group" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลาแยกตามแผนก (Stacked)</div>'+ci('cStacked',275,180)+'</div></div><div style="display:table-cell;width:40%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-calendar-week" style="color:#c0392b;margin-right:4pt"></i>Pattern วันในสัปดาห์</div>'+ci('cDow',178,140)+'</div></div></div></div>';
   pg2+=sec('Sick Leave &amp; สัดส่วนประเภทการลา');
   var sickRows=sickArr.map(function(entry,i){
     var n=entry[0], v=entry[1];
     return '<tr><td style="text-align:center;font-weight:700">'+(i+1)+'</td><td style="font-weight:700;color:#101828">'+(n.length>14?n.slice(0,14)+'…':n)+'</td><td>'+bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')+'</td><td style="text-align:center">'+bdg(i<3?'br':i<5?'ba':'bk',v.c)+'</td><td style="text-align:center">'+v.d.toFixed(1)+'</td></tr>';
   }).join('');
-  pg2+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-stethoscope" style="color:#c0392b;margin-right:4pt"></i>Top พนักงานลาป่วยบ่อย</div><table class="pr-tbl"><thead><tr>'+th('#','center')+th('ชื่อ')+th('แผนก')+th('ครั้ง','center')+th('วัน','center')+'</tr></thead><tbody>'+sickRows+'</tbody></table><div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div></div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-pie" style="color:#c0392b;margin-right:4pt"></i>สัดส่วนประเภทการลา (วัน)</div>'+ci('cTypeDays',235,155)+'</div></div></div></div>';
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-stethoscope" style="color:#c0392b;margin-right:4pt"></i>Top พนักงานลาป่วยบ่อย</div><table class="pr-tbl"><thead><tr>'+th('#','center')+th('ชื่อ')+th('แผนก')+th('ครั้ง','center')+th('วัน','center')+'</tr></thead><tbody>'+sickRows+'</tbody></table><div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div></div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-pie" style="color:#c0392b;margin-right:4pt"></i>สัดส่วนประเภทการลา (วัน)</div>'+ci('cTypeDays',237,185)+'</div></div></div></div>';
   pg2+=footerBar(2,4)+'</div>';
 
   /* PAGE 3 */
