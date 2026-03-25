@@ -532,10 +532,9 @@ tbody tr:hover td{background:var(--surface-2);}
   </div>
   <div class="tnav-r">
     <span class="clock-badge" id="liveClock">00:00:00</span>
-    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
-    <button class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">
+    <label for="fileInput" class="btn btn-ghost" style="cursor:pointer;">
       <i class="fas fa-file-upload"></i> อัพเดทข้อมูล
-    </button>
+    </label>
     <button class="btn btn-red" id="pdfBtn" onclick="exportPDF()" disabled>
       <i class="fas fa-file-pdf"></i> Export PDF
     </button>
@@ -559,18 +558,41 @@ tbody tr:hover td{background:var(--surface-2);}
       </span>
     </div>
   </div>
-  <div class="uz-actions">
+
+  <!-- Drag & Drop zone -->
+  <div id="dropZone" style="
+    margin: 0 40px;
+    border: 2px dashed rgba(192,57,43,.4);
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: rgba(192,57,43,.04);
+  ">
+    <i class="fas fa-cloud-upload-alt" style="font-size:32px;color:rgba(192,57,43,.5);margin-bottom:10px;display:block;"></i>
+    <div style="font-size:14px;font-weight:700;color:var(--on-light-h);margin-bottom:4px;">ลากไฟล์มาวางที่นี่</div>
+    <div style="font-size:12px;color:var(--on-light-m);margin-bottom:16px;">หรือคลิกเพื่อเลือกไฟล์ .xlsx</div>
+    <!-- label ทำงานได้โดยไม่ต้องใช้ onclick -->
+    <label for="fileInput" style="
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 22px;background:var(--corp-red);color:#fff;
+      border-radius:6px;font-size:14px;font-weight:700;
+      cursor:pointer;transition:all .2s;
+      box-shadow:0 2px 8px rgba(192,57,43,.3);
+    ">
+      <i class="fas fa-file-excel"></i> เลือกไฟล์ Excel (.xlsx)
+    </label>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+    <div id="uploadStatus" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+  </div>
+
+  <div class="uz-actions" style="margin-top:0;padding-top:16px;">
     <div class="uz-step"><div class="uz-step-num">1</div> Login HumanOS → เมนู <strong>รายงาน</strong></div>
     <span class="uz-divider">›</span>
     <div class="uz-step"><div class="uz-step-num">2</div> เลือก <strong>รายงานสรุปการลา</strong> → กด <strong>Export Excel</strong></div>
     <span class="uz-divider">›</span>
-    <div class="uz-step"><div class="uz-step-num">3</div> อัปโหลดไฟล์ที่ได้ด้านล่าง</div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
-      <button class="btn btn-red" onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-file-upload"></i> เลือกไฟล์ Excel (.xlsx)
-      </button>
-      <div id="uploadStatus"></div>
-    </div>
+    <div class="uz-step"><div class="uz-step-num">3</div> ลากไฟล์มาวาง หรือคลิกปุ่มด้านบน</div>
   </div>
 </div>
 
@@ -907,6 +929,7 @@ tbody tr:hover td{background:var(--surface-2);}
   document.getElementById('liveClock').textContent=`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
   setTimeout(tick,1000);
 })();
+
 Chart.register(ChartDataLabels);
 
 const TH_M =['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -914,49 +937,75 @@ const TH_MF=['มกราคม','กุมภาพันธ์','มีนา
 const DOW_TH=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
 const PAL=['#2E90FA','#12B76A','#F79009','#F04438','#7F56D9','#0BA5EC','#EE46BC','#16B364','#FF7E5F','#3EC6CF'];
 const C={red:'#C0392B',grid:'#F0F2F5',txt:'#667085',txtH:'#101828'};
-const WORK_DAYS_PER_MONTH=22; // assumption for absence rate
+const WORK_DAYS_PER_MONTH=22;
 
 let charts={}, originalData=[], processedState={};
 
-/* ─── Upload ─── */
+/* ─── File Upload via input[type=file] ─── */
 document.getElementById('fileInput').addEventListener('change',function(e){
-  const f=e.target.files[0];if(!f)return;
-  const st=document.getElementById('uploadStatus');
-  st.innerHTML='<span class="st-spin"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล…</span>';
-  const r=new FileReader();
-  r.onload=ev=>{
-    try{
-      const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
-      const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-      parseData(json);
-      st.innerHTML='<span class="st-ok"><i class="fas fa-check-circle"></i> โหลดข้อมูลสำเร็จ</span>';
-      setTimeout(()=>st.innerHTML='',3000);
-    }catch(err){st.innerHTML=`<span class="st-err"><i class="fas fa-times-circle"></i> ${err.message}</span>`;}
-  };
-  r.readAsArrayBuffer(f);
+  const f=e.target.files[0];
+  if(f) processFile(f);
 });
 
+/* ─── Drag & Drop ─── */
+(function initDrop(){
+  const dz=document.getElementById('dropZone');
+  if(!dz) return;
+  const hi=()=>{ dz.style.borderColor='var(--corp-red)'; dz.style.background='rgba(192,57,43,.08)'; };
+  const lo=()=>{ dz.style.borderColor='rgba(192,57,43,.4)'; dz.style.background='rgba(192,57,43,.04)'; };
+  dz.addEventListener('dragenter',function(e){ e.preventDefault(); hi(); });
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); hi(); });
+  dz.addEventListener('dragleave',function(e){ e.preventDefault(); lo(); });
+  dz.addEventListener('drop',function(e){
+    e.preventDefault(); lo();
+    var f=e.dataTransfer.files[0];
+    if(f && (f.name.endsWith('.xlsx')||f.name.endsWith('.xls'))){
+      processFile(f);
+    } else {
+      document.getElementById('uploadStatus').innerHTML='<span class="st-err"><i class="fas fa-times-circle"></i> กรุณาใช้ไฟล์ .xlsx</span>';
+    }
+  });
+}());
+
+function processFile(f){
+  var st=document.getElementById('uploadStatus');
+  st.innerHTML='<span class="st-spin"><i class="fas fa-spinner fa-spin"></i> กำลังประมวลผล…</span>';
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+      var json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+      parseData(json);
+      st.innerHTML='<span class="st-ok"><i class="fas fa-check-circle"></i> โหลดข้อมูลสำเร็จ</span>';
+      setTimeout(function(){ st.innerHTML=''; },3000);
+    } catch(err){
+      st.innerHTML='<span class="st-err"><i class="fas fa-times-circle"></i> '+err.message+'</span>';
+    }
+  };
+  r.readAsArrayBuffer(f);
+}
+
 function toDate(v){
-  if(!v)return null;
-  if(v instanceof Date)return v;
-  if(typeof v==='number')return new Date(Math.round((v-25569)*86400*1000));
+  if(!v) return null;
+  if(v instanceof Date) return v;
+  if(typeof v==='number') return new Date(Math.round((v-25569)*86400*1000));
   return new Date(v);
 }
 
 function parseData(json){
-  let hi=2;
-  for(let i=0;i<Math.min(json.length,20);i++){
-    if(json[i]&&json[i].includes('No')&&json[i].includes('รหัส')){hi=i;break;}
+  var hi=2;
+  for(var i=0;i<Math.min(json.length,20);i++){
+    if(json[i]&&json[i].includes('No')&&json[i].includes('รหัส')){ hi=i; break; }
   }
-  originalData=json.slice(hi+1).filter(r=>r&&r[2]).map(r=>{
-    const d=toDate(r[7]);
+  originalData=json.slice(hi+1).filter(function(r){ return r&&r[2]; }).map(function(r){
+    var d=toDate(r[7]);
     return{
-      No:r[0],รหัส:r[1],ชื่อ:r[2],สาขา:r[3],
-      แผนก:r[4]||'ไม่ระบุ',ตำแหน่ง:r[5],
-      ประเภท:r[6]||'ไม่ระบุ',ลาตั้งแต่:d,
-      ลา_วัน:parseFloat(r[11])||0,เหตุผล:r[12],
-      monthKey:d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:null,
-      dow:d?d.getDay():null  // 0=Sun,1=Mon,...,6=Sat
+      No:r[0], รหัส:r[1], ชื่อ:r[2], สาขา:r[3],
+      แผนก:r[4]||'ไม่ระบุ', ตำแหน่ง:r[5],
+      ประเภท:r[6]||'ไม่ระบุ', ลาตั้งแต่:d,
+      ลา_วัน:parseFloat(r[11])||0, เหตุผล:r[12],
+      monthKey:d?(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')):null,
+      dow:d?d.getDay():null
     };
   });
   setHeaderDates();
@@ -968,118 +1017,121 @@ function parseData(json){
 }
 
 function setHeaderDates(){
-  const dates=originalData.map(r=>r.ลาตั้งแต่).filter(d=>d&&!isNaN(d)).sort((a,b)=>a-b);
-  const now=new Date(),thY=now.getFullYear()+543;
-  document.getElementById('genDate').textContent=`${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
-  document.getElementById('genTime').textContent=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-  document.getElementById('footerDate').textContent=`พิมพ์เมื่อ ${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
+  var dates=originalData.map(function(r){ return r.ลาตั้งแต่; }).filter(function(d){ return d&&!isNaN(d); }).sort(function(a,b){ return a-b; });
+  var now=new Date(), thY=now.getFullYear()+543;
+  document.getElementById('genDate').textContent=now.getDate()+' '+TH_MF[now.getMonth()]+' '+thY;
+  document.getElementById('genTime').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+' น.';
+  document.getElementById('footerDate').textContent='พิมพ์เมื่อ '+now.getDate()+' '+TH_MF[now.getMonth()]+' '+thY;
   if(dates.length){
-    const f=dates[0],l=dates[dates.length-1];
+    var f=dates[0], l=dates[dates.length-1];
     document.getElementById('datePeriod').textContent=
-      `${f.getDate()} ${TH_MF[f.getMonth()]} ${f.getFullYear()+543} — ${l.getDate()} ${TH_MF[l.getMonth()]} ${l.getFullYear()+543}`;
+      f.getDate()+' '+TH_MF[f.getMonth()]+' '+(f.getFullYear()+543)+
+      ' — '+l.getDate()+' '+TH_MF[l.getMonth()]+' '+(l.getFullYear()+543);
   }
 }
 
 /* ─── Filters ─── */
 function initFilters(){
-  const ms=new Set(),ds=new Set(),ts=new Set();
-  originalData.forEach(r=>{
-    if(r.monthKey)ms.add(r.monthKey);
-    if(r.แผนก)ds.add(r.แผนก);
-    if(r.ประเภท)ts.add(r.ประเภท);
+  var ms=new Set(), ds=new Set(), ts=new Set();
+  originalData.forEach(function(r){
+    if(r.monthKey) ms.add(r.monthKey);
+    if(r.แผนก)    ds.add(r.แผนก);
+    if(r.ประเภท)  ts.add(r.ประเภท);
   });
-  fillSel('monthFilter',[...ms].sort(),v=>{const[y,m]=v.split('-');return`${TH_MF[+m-1]} ${+y+543}`;});
+  fillSel('monthFilter',[...ms].sort(),function(v){ var p=v.split('-'); return TH_MF[+p[1]-1]+' '+(+p[0]+543); });
   fillSel('deptFilter',[...ds].sort());
   fillSel('leaveTypeFilter',[...ts].sort());
 }
+
 function fillSel(id,items,fn){
-  const s=document.getElementById(id),cur=s.value;
+  var s=document.getElementById(id), cur=s.value;
   s.innerHTML='<option value="">ทั้งหมด</option>';
-  items.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fn?fn(v):v;s.appendChild(o);});
-  if(items.includes(cur))s.value=cur;
+  items.forEach(function(v){
+    var o=document.createElement('option');
+    o.value=v; o.textContent=fn?fn(v):v; s.appendChild(o);
+  });
+  if(items.includes(cur)) s.value=cur;
 }
+
 function applyFilters(){
-  const mth=document.getElementById('monthFilter').value;
-  const dept=document.getElementById('deptFilter').value;
-  const type=document.getElementById('leaveTypeFilter').value;
-  const f=originalData.filter(r=>(!mth||r.monthKey===mth)&&(!dept||r.แผนก===dept)&&(!type||r.ประเภท===type));
+  var mth=document.getElementById('monthFilter').value;
+  var dept=document.getElementById('deptFilter').value;
+  var type=document.getElementById('leaveTypeFilter').value;
+  var f=originalData.filter(function(r){
+    return (!mth||r.monthKey===mth)&&(!dept||r.แผนก===dept)&&(!type||r.ประเภท===type);
+  });
   calcStats(f);
   renderUI();
 }
-['monthFilter','deptFilter','leaveTypeFilter'].forEach(id=>
-  document.getElementById(id).addEventListener('change',applyFilters));
-document.getElementById('resetFilter').onclick=()=>{
-  ['monthFilter','deptFilter','leaveTypeFilter'].forEach(id=>document.getElementById(id).value='');
+
+['monthFilter','deptFilter','leaveTypeFilter'].forEach(function(id){
+  document.getElementById(id).addEventListener('change',applyFilters);
+});
+document.getElementById('resetFilter').addEventListener('click',function(){
+  ['monthFilter','deptFilter','leaveTypeFilter'].forEach(function(id){ document.getElementById(id).value=''; });
   applyFilters();
-};
+});
 
 /* ─── Stats ─── */
 function calcStats(data){
-  const s={
-    total:data.length,days:0,
-    depts:{},types:{},emps:{},empDetails:{},months:{},deptType:{},
-    dow:[0,0,0,0,0,0,0],  // NEW: day of week count
-    sickLeave:{}           // NEW: sick leave per employee
-  };
-  data.forEach(r=>{
+  var s={total:data.length,days:0,depts:{},types:{},emps:{},empDetails:{},months:{},deptType:{},
+         dow:[0,0,0,0,0,0,0],sickLeave:{}};
+  data.forEach(function(r){
     s.days+=r.ลา_วัน;
-    const dept=r.แผนก,type=r.ประเภท;
-    if(!s.depts[dept])s.depts[dept]={c:0,d:0};
-    s.depts[dept].c++;s.depts[dept].d+=r.ลา_วัน;
-    if(!s.types[type])s.types[type]={c:0,d:0};
-    s.types[type].c++;s.types[type].d+=r.ลา_วัน;
-    if(!s.emps[r.ชื่อ])s.emps[r.ชื่อ]={c:0,d:0,dept};
-    s.emps[r.ชื่อ].c++;s.emps[r.ชื่อ].d+=r.ลา_วัน;
-    const key=`${r.ชื่อ}|${dept}|${r.รหัส}`;
-    if(!s.empDetails[key])s.empDetails[key]={name:r.ชื่อ,id:r.รหัส,dept,types:{},totalDays:0};
-    if(!s.empDetails[key].types[type])s.empDetails[key].types[type]={days:0};
+    var dept=r.แผนก, type=r.ประเภท;
+    if(!s.depts[dept]) s.depts[dept]={c:0,d:0};
+    s.depts[dept].c++; s.depts[dept].d+=r.ลา_วัน;
+    if(!s.types[type]) s.types[type]={c:0,d:0};
+    s.types[type].c++; s.types[type].d+=r.ลา_วัน;
+    if(!s.emps[r.ชื่อ]) s.emps[r.ชื่อ]={c:0,d:0,dept:dept};
+    s.emps[r.ชื่อ].c++; s.emps[r.ชื่อ].d+=r.ลา_วัน;
+    var key=r.ชื่อ+'|'+dept+'|'+r.รหัส;
+    if(!s.empDetails[key]) s.empDetails[key]={name:r.ชื่อ,id:r.รหัส,dept:dept,types:{},totalDays:0};
+    if(!s.empDetails[key].types[type]) s.empDetails[key].types[type]={days:0};
     s.empDetails[key].types[type].days+=r.ลา_วัน;
     s.empDetails[key].totalDays+=r.ลา_วัน;
-    const mk=r.monthKey||'Unknown';
-    if(!s.months[mk])s.months[mk]={c:0,d:0};
-    s.months[mk].c++;s.months[mk].d+=r.ลา_วัน;
-    const dk=`${dept}|${type}`;
-    if(!s.deptType[dk])s.deptType[dk]={dept,type,c:0};
+    var mk=r.monthKey||'Unknown';
+    if(!s.months[mk]) s.months[mk]={c:0,d:0};
+    s.months[mk].c++; s.months[mk].d+=r.ลา_วัน;
+    var dk=dept+'|'+type;
+    if(!s.deptType[dk]) s.deptType[dk]={dept:dept,type:type,c:0};
     s.deptType[dk].c++;
-    // DOW
-    if(r.dow!==null)s.dow[r.dow]++;
-    // Sick leave tracking
-    const tp=(type||'').toLowerCase();
-    if(tp.includes('ป่วย')||tp.includes('sick')){
-      if(!s.sickLeave[r.ชื่อ])s.sickLeave[r.ชื่อ]={c:0,d:0,dept};
-      s.sickLeave[r.ชื่อ].c++;s.sickLeave[r.ชื่อ].d+=r.ลา_วัน;
+    if(r.dow!==null) s.dow[r.dow]++;
+    var tp=(type||'').toLowerCase();
+    if(tp.indexOf('ป่วย')>=0||tp.indexOf('sick')>=0){
+      if(!s.sickLeave[r.ชื่อ]) s.sickLeave[r.ชื่อ]={c:0,d:0,dept:dept};
+      s.sickLeave[r.ชื่อ].c++; s.sickLeave[r.ชื่อ].d+=r.ลา_วัน;
     }
   });
   processedState=s;
 }
 
 function tenureYears(id){
-  const s=String(id||'').replace(/\D/g,'');
-  if(s.length<2)return 0;
-  const y=parseInt(s.substring(0,2));
+  var s=String(id||'').replace(/\D/g,'');
+  if(s.length<2) return 0;
+  var y=parseInt(s.substring(0,2));
   return isNaN(y)?0:Math.max(0,2569-(2500+y));
 }
 function getQuota(type,t){
-  const tp=(type||'').toLowerCase();
-  if(tp.includes('พักร้อน')||tp.includes('annual'))return t>=9?12:t>=6?10:t>=3?8:t>=1?6:0;
-  if(tp.includes('กิจ')||tp.includes('personal'))return 3;
-  if(tp.includes('ป่วย')||tp.includes('sick'))return 30;
+  var tp=(type||'').toLowerCase();
+  if(tp.indexOf('พักร้อน')>=0||tp.indexOf('annual')>=0) return t>=9?12:t>=6?10:t>=3?8:t>=1?6:0;
+  if(tp.indexOf('กิจ')>=0||tp.indexOf('personal')>=0) return 3;
+  if(tp.indexOf('ป่วย')>=0||tp.indexOf('sick')>=0) return 30;
   return null;
 }
 
 /* ─── Render UI ─── */
 function renderUI(){
-  const p=processedState;
-  const empCount=Object.keys(p.emps).length;
-  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-  const totalWorkDays=mKeys.length*WORK_DAYS_PER_MONTH*empCount||1;
-  const absRate=((p.days/totalWorkDays)*100);
-  const freq=empCount?(p.total/empCount).toFixed(1):'0';
-  const highRisk=Object.values(p.emps).filter(e=>e.d>=8).length;
-  const monFriCount=p.dow[1]+p.dow[5]; // Mon+Fri
-  const monFriPct=p.total?((monFriCount/p.total)*100).toFixed(1):'0';
+  var p=processedState;
+  var empCount=Object.keys(p.emps).length;
+  var mKeys=Object.keys(p.months).filter(function(k){ return k!=='Unknown'; }).sort();
+  var totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+  var totalWDAll=totalWD*empCount||1;
+  var absRate=((p.days/totalWDAll)*100);
+  var freq=empCount?(p.total/empCount).toFixed(1):'0';
+  var highRisk=Object.values(p.emps).filter(function(e){ return e.d>=8; }).length;
+  var monFriPct=p.total?((p.dow[1]+p.dow[5])/p.total*100).toFixed(1):'0';
 
-  // KPI core
   document.getElementById('insTotal').textContent=p.total.toLocaleString();
   document.getElementById('insDays').textContent=p.days.toFixed(1);
   document.getElementById('insAvg').textContent=empCount?(p.days/empCount).toFixed(1):'0';
@@ -1087,8 +1139,6 @@ function renderUI(){
   document.getElementById('k2').textContent=p.days.toFixed(1);
   document.getElementById('k3').textContent=empCount;
   document.getElementById('k4').textContent=Object.keys(p.depts).length;
-
-  // KPI expert
   document.getElementById('kAbsRate').textContent=absRate.toFixed(1)+'%';
   document.getElementById('kFreq').textContent=freq;
   document.getElementById('kHighRisk').textContent=highRisk;
@@ -1102,863 +1152,375 @@ function renderUI(){
 }
 
 /* ─── Chart helpers ─── */
-const tipCfg={backgroundColor:'#1D2939',borderColor:'#344054',borderWidth:1,titleColor:'#F9FAFB',bodyColor:'#D0D5DD',padding:10,cornerRadius:6,titleFont:{family:'Noto Sans Thai',weight:'700'},bodyFont:{family:'Noto Sans Thai'}};
-const dlFont={weight:'700',family:'Noto Sans Thai',size:11};
-function axes(h=false){
-  const a={grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
-  const b={beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
+var tipCfg={backgroundColor:'#1D2939',borderColor:'#344054',borderWidth:1,
+  titleColor:'#F9FAFB',bodyColor:'#D0D5DD',padding:10,cornerRadius:6,
+  titleFont:{family:'Noto Sans Thai',weight:'700'},bodyFont:{family:'Noto Sans Thai'}};
+var dlFont={weight:'700',family:'Noto Sans Thai',size:11};
+
+function axes(h){
+  var a={grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
+  var b={beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}};
   return h?{y:a,x:b}:{x:a,y:b};
 }
 function mkLine(id,labels,data){
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id),{type:'line',data:{labels,datasets:[{data,fill:true,backgroundColor:'rgba(192,57,43,.07)',borderColor:C.red,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:C.red,pointBorderWidth:2,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:'top',formatter:v=>v>0?v:'',font:dlFont,color:C.txt,padding:2}},scales:axes()}});
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'line',data:{labels:labels,datasets:[{data:data,fill:true,backgroundColor:'rgba(192,57,43,.07)',borderColor:C.red,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:C.red,pointBorderWidth:2,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:'top',formatter:function(v){return v>0?v:'';},font:dlFont,color:C.txt,padding:2}},scales:axes(false)}});
 }
-function mkBar(id,labels,data,colors,h=false){
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,maxBarThickness:46}]},options:{indexAxis:h?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:h?'end':'top',formatter:v=>v>0?v:'',font:dlFont,color:C.txt,padding:2}},scales:axes(h)}});
+function mkBar(id,labels,data,colors,h){
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderRadius:4,maxBarThickness:46}]},options:{indexAxis:h?'y':'x',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tipCfg,datalabels:{anchor:'end',align:h?'end':'top',formatter:function(v){return v>0?v:'';},font:dlFont,color:C.txt,padding:2}},scales:axes(h)}});
 }
 function mkStacked(id,labels,datasets){
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12}},tooltip:tipCfg,datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}},y:{stacked:true,beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}}}}});
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'bar',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12}},tooltip:tipCfg,datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}},y:{stacked:true,beginAtZero:true,grid:{color:C.grid},border:{color:'transparent'},ticks:{color:C.txt,font:{family:'Noto Sans Thai',size:11}}}}}});
 }
 function mkDoughnut(id,labels,data,colors){
-  if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12,padding:10}},tooltip:tipCfg,datalabels:{formatter:(v,ctx)=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return tot>0?((v/tot)*100).toFixed(1)+'%':'';},color:'#fff',font:{weight:'900',family:'Noto Sans Thai',size:12}}}}});
+  if(charts[id]) charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'Noto Sans Thai',size:11},color:C.txt,boxWidth:12,padding:10}},tooltip:tipCfg,datalabels:{formatter:function(v,ctx){var tot=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return tot>0?((v/tot)*100).toFixed(1)+'%':'';},color:'#fff',font:{weight:'900',family:'Noto Sans Thai',size:12}}}}});
 }
 
 function renderCharts(){
-  const p=processedState;
-  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-  const mVals=mKeys.map(k=>p.months[k].c);
-  mkLine('cMonth',mKeys.map(k=>{const[y,m]=k.split('-');return`${TH_M[+m-1]}'${+y-2500}`;}),mVals);
+  var p=processedState;
+  var mKeys=Object.keys(p.months).filter(function(k){return k!=='Unknown';}).sort();
+  var mVals=mKeys.map(function(k){return p.months[k].c;});
+  mkLine('cMonth',mKeys.map(function(k){var parts=k.split('-');return TH_M[+parts[1]-1]+"'"+(+parts[0]-2500);}),mVals);
 
-  const tArr=Object.entries(p.types).sort((a,b)=>b[1].c-a[1].c);
-  mkBar('cType',tArr.map(d=>d[0]),tArr.map(d=>d[1].c),tArr.map((_,i)=>PAL[i%PAL.length]));
+  var tArr=Object.entries(p.types).sort(function(a,b){return b[1].c-a[1].c;});
+  mkBar('cType',tArr.map(function(d){return d[0];}),tArr.map(function(d){return d[1].c;}),tArr.map(function(_,i){return PAL[i%PAL.length];}),false);
 
-  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
-  const maxD=Math.max(...dArr.map(d=>d[1].c),0);
-  mkBar('cDept',dArr.map(d=>d[0]),dArr.map(d=>d[1].c),dArr.map((_,i)=>PAL[i%PAL.length]));
-  mkBar('cDeptBar',dArr.map(d=>d[0]),dArr.map(d=>d[1].c),dArr.map(d=>d[1].c===maxD?C.red:PAL[1]),true);
+  var dArr=Object.entries(p.depts).sort(function(a,b){return b[1].c-a[1].c;});
+  var maxD=Math.max.apply(null,dArr.map(function(d){return d[1].c;}).concat([0]));
+  mkBar('cDept',dArr.map(function(d){return d[0];}),dArr.map(function(d){return d[1].c;}),dArr.map(function(_,i){return PAL[i%PAL.length];}),false);
+  mkBar('cDeptBar',dArr.map(function(d){return d[0];}),dArr.map(function(d){return d[1].c;}),dArr.map(function(d){return d[1].c===maxD?C.red:PAL[1];}),true);
 
-  const types=Object.keys(p.types).slice(0,7);
-  const depts=dArr.slice(0,8).map(d=>d[0]);
-  mkStacked('cStacked',depts,types.map((t,ti)=>({label:t,backgroundColor:PAL[ti%PAL.length]+'CC',data:depts.map(dep=>{const k=`${dep}|${t}`;return p.deptType[k]?p.deptType[k].c:0;})})));
+  var types=Object.keys(p.types).slice(0,7);
+  var depts=dArr.slice(0,8).map(function(d){return d[0];});
+  mkStacked('cStacked',depts,types.map(function(t,ti){
+    return{label:t,backgroundColor:PAL[ti%PAL.length]+'CC',data:depts.map(function(dep){
+      var k=dep+'|'+t; return p.deptType[k]?p.deptType[k].c:0;
+    })};
+  }));
 
-  // NEW: DOW chart
-  const dowColors=p.dow.map((_,i)=>(i===1||i===5)?'#F04438':'#2E90FA');
-  mkBar('cDow',DOW_TH,p.dow,dowColors);
+  var dowColors=p.dow.map(function(_,i){return (i===1||i===5)?'#F04438':'#2E90FA';});
+  mkBar('cDow',DOW_TH,p.dow,dowColors,false);
 
-  // NEW: Leave type by DAYS doughnut
-  const tArrD=Object.entries(p.types).sort((a,b)=>b[1].d-a[1].d).slice(0,6);
-  mkDoughnut('cTypeDays',tArrD.map(d=>d[0]),tArrD.map(d=>d[1].d),tArrD.map((_,i)=>PAL[i%PAL.length]));
+  var tArrD=Object.entries(p.types).sort(function(a,b){return b[1].d-a[1].d;}).slice(0,6);
+  mkDoughnut('cTypeDays',tArrD.map(function(d){return d[0];}),tArrD.map(function(d){return d[1].d;}),tArrD.map(function(_,i){return PAL[i%PAL.length];}));
 }
 
-/* ─── NEW WIDGETS ─── */
+/* ─── New Widgets ─── */
 function renderNewWidgets(){
-  const p=processedState;
+  var p=processedState;
+  var mKeys=Object.keys(p.months).filter(function(k){return k!=='Unknown';}).sort();
+  var empCount=Object.keys(p.emps).length||1;
+  var totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+  var totalWDAll=totalWD*empCount;
 
-  // ── DOW Insight text ──
-  const dowTotal=p.dow.reduce((a,b)=>a+b,0)||1;
-  const mfPct=((p.dow[1]+p.dow[5])/dowTotal*100).toFixed(1);
+  var dowTotal=p.dow.reduce(function(a,b){return a+b;},0)||1;
+  var mfPct=((p.dow[1]+p.dow[5])/dowTotal*100).toFixed(1);
   document.getElementById('dowInsight').innerHTML=
-    `<i class="fas fa-lightbulb" style="color:var(--sem-amber)"></i> &nbsp;
-     วันจันทร์และศุกร์รวมกัน <strong>${mfPct}%</strong> ของการลาทั้งหมด
-     ${parseFloat(mfPct)>35?' — <span style="color:var(--sem-red);font-weight:700">⚠️ สัดส่วนสูง ควรระวัง Bridge Day Leave</span>':' — อยู่ในเกณฑ์ปกติ'}`;
+    '<i class="fas fa-lightbulb" style="color:var(--sem-amber)"></i>&nbsp;วันจันทร์และศุกร์รวมกัน <strong>'+mfPct+'%</strong> ของการลาทั้งหมด'+
+    (parseFloat(mfPct)>35?' — <span style="color:var(--sem-red);font-weight:700">⚠️ สัดส่วนสูง ควรระวัง Bridge Day Leave</span>':' — อยู่ในเกณฑ์ปกติ');
 
-  // ── MoM Table ──
-  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-  const maxMom=Math.max(...mKeys.map(k=>p.months[k].c),1);
-  let momHtml='';
-  mKeys.forEach((mk,i)=>{
-    const[y,m]=mk.split('-');
-    const cur=p.months[mk].c;
-    const prev=i>0?p.months[mKeys[i-1]].c:null;
-    const delta=prev!==null?cur-prev:null;
-    const barW=Math.round((cur/maxMom)*100);
-    const deltaHtml=delta===null?''
-      :delta>0?`<span class="mcmp-delta" style="color:var(--sem-red)">▲${delta}</span>`
-      :delta<0?`<span class="mcmp-delta" style="color:var(--sem-green)">▼${Math.abs(delta)}</span>`
-      :`<span class="mcmp-delta" style="color:var(--on-light-x)">—</span>`;
-    momHtml+=`<div class="mcmp-row">
-      <div class="mcmp-month">${TH_M[+m-1]}'${+y-2500}</div>
-      <div class="mcmp-bar-wrap"><div class="mcmp-bar" style="width:${barW}%;background:${cur===maxMom?C.red:'#2E90FA'}"></div></div>
-      <div class="mcmp-val">${cur}</div>${deltaHtml}
-    </div>`;
+  var maxMom=Math.max.apply(null,mKeys.map(function(k){return p.months[k].c;}).concat([1]));
+  var momHtml='';
+  mKeys.forEach(function(mk,i){
+    var parts=mk.split('-');
+    var cur=p.months[mk].c;
+    var prev=i>0?p.months[mKeys[i-1]].c:null;
+    var delta=prev!==null?cur-prev:null;
+    var barW=Math.round((cur/maxMom)*100);
+    var deltaHtml=delta===null?'':(delta>0?'<span class="mcmp-delta" style="color:var(--sem-red)">▲'+delta+'</span>':(delta<0?'<span class="mcmp-delta" style="color:var(--sem-green)">▼'+Math.abs(delta)+'</span>':'<span class="mcmp-delta" style="color:var(--on-light-x)">—</span>'));
+    momHtml+='<div class="mcmp-row"><div class="mcmp-month">'+TH_M[+parts[1]-1]+"'"+(+parts[0]-2500)+'</div><div class="mcmp-bar-wrap"><div class="mcmp-bar" style="width:'+barW+'%;background:'+(cur===maxMom?C.red:'#2E90FA')+'"></div></div><div class="mcmp-val">'+cur+'</div>'+deltaHtml+'</div>';
   });
   document.getElementById('momWrap').innerHTML=momHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
 
-  // ── Absence Rate per Dept ──
-  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].d-a[1].d);
-  const totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
-  const empCount=Object.keys(p.emps).length;
-  const totalWDAll=totalWD*empCount; // total possible working days across all employees
+  var dArr=Object.entries(p.depts).sort(function(a,b){return b[1].d-a[1].d;});
+  var maxAbs=Math.max.apply(null,dArr.map(function(d){return d[1].d/totalWD*100;}).concat([0.01]));
 
-  // ── Formula Box (dynamic numbers) ──
-  const overallRate=(p.days/totalWDAll*100);
-  document.getElementById('absFormulaBox').innerHTML=`
-    <div class="formula-box">
-      <div class="formula-box-title">
-        <i class="fas fa-function"></i> สูตรการคำนวณ Absence Rate
-      </div>
+  /* Formula box */
+  var overallRate=(p.days/totalWDAll*100);
+  document.getElementById('absFormulaBox').innerHTML='<div class="formula-box"><div class="formula-box-title"><i class="fas fa-function"></i> สูตรการคำนวณ Absence Rate</div><div class="formula-eq"><div class="fe-block"><div class="fe-val">'+p.days.toFixed(1)+'</div><div class="fe-lbl">รวมวันลา (วัน)</div></div><div class="fe-op">÷</div><div class="fe-block"><div class="fe-val">'+totalWDAll.toLocaleString()+'</div><div class="fe-lbl">วันทำงานทั้งหมด</div></div><div class="fe-op">×</div><div class="fe-block"><div class="fe-val">100</div><div class="fe-lbl">&nbsp;</div></div><div class="fe-op">=</div><div class="fe-result"><div class="fe-val">'+overallRate.toFixed(2)+'%</div><div class="fe-lbl">Absence Rate รวม</div></div></div><div class="formula-chips"><div class="fchip"><i class="fas fa-users"></i> พนักงาน <strong>'+empCount+' คน</strong></div><div class="fchip"><i class="fas fa-calendar-days"></i> จำนวนเดือน <strong>'+mKeys.length+' เดือน</strong></div><div class="fchip"><i class="fas fa-briefcase"></i> วันทำงาน/เดือน <strong>'+WORK_DAYS_PER_MONTH+' วัน</strong></div><div class="fchip"><i class="fas fa-calculator"></i> วันทำงานรวม <strong>'+empCount+' × '+mKeys.length+' × '+WORK_DAYS_PER_MONTH+' = '+totalWDAll.toLocaleString()+' วัน</strong></div></div><div style="font-size:11px;color:var(--on-dark-m);margin-bottom:8px;line-height:1.6;"><strong style="color:var(--on-dark-h)">วันทำงานทั้งหมด</strong> คำนวณจาก จำนวนพนักงาน × จำนวนเดือนในข้อมูล × '+WORK_DAYS_PER_MONTH+' วัน/เดือน (มาตรฐาน)<br><strong style="color:var(--on-dark-h)">Absence Rate รายแผนก</strong> ใช้วันทำงาน = '+mKeys.length+' เดือน × '+WORK_DAYS_PER_MONTH+' วัน = <strong style="color:var(--on-dark-h)">'+totalWD+' วัน</strong></div><div class="formula-legend"><div class="fl-item"><div class="fl-dot" style="background:#F04438"></div> ≥ 3% — ความเสี่ยงสูง</div><div class="fl-item"><div class="fl-dot" style="background:#F79009"></div> 1.5–3% — ความเสี่ยงปานกลาง</div><div class="fl-item"><div class="fl-dot" style="background:#12B76A"></div> &lt; 1.5% — อยู่ในเกณฑ์ดี</div></div></div>';
 
-      <div class="formula-eq">
-        <div class="fe-block">
-          <div class="fe-val">${p.days.toFixed(1)}</div>
-          <div class="fe-lbl">รวมวันลา (วัน)</div>
-        </div>
-        <div class="fe-op">÷</div>
-        <div class="fe-block">
-          <div class="fe-val">${totalWDAll.toLocaleString()}</div>
-          <div class="fe-lbl">วันทำงานทั้งหมด</div>
-        </div>
-        <div class="fe-op">×</div>
-        <div class="fe-block">
-          <div class="fe-val">100</div>
-          <div class="fe-lbl">&nbsp;</div>
-        </div>
-        <div class="fe-op">=</div>
-        <div class="fe-result">
-          <div class="fe-val">${overallRate.toFixed(2)}%</div>
-          <div class="fe-lbl">Absence Rate รวม</div>
-        </div>
-      </div>
-
-      <div class="formula-chips">
-        <div class="fchip"><i class="fas fa-users"></i> พนักงาน <strong>${empCount} คน</strong></div>
-        <div class="fchip"><i class="fas fa-calendar-days"></i> จำนวนเดือน <strong>${mKeys.length} เดือน</strong></div>
-        <div class="fchip"><i class="fas fa-briefcase"></i> วันทำงาน/เดือน <strong>${WORK_DAYS_PER_MONTH} วัน</strong></div>
-        <div class="fchip"><i class="fas fa-calculator"></i> วันทำงานรวม <strong>${empCount} × ${mKeys.length} × ${WORK_DAYS_PER_MONTH} = ${totalWDAll.toLocaleString()} วัน</strong></div>
-      </div>
-
-      <div style="font-size:11px;color:var(--on-dark-m);margin-bottom:8px;line-height:1.6;">
-        <strong style="color:var(--on-dark-h)">วันทำงานทั้งหมด</strong> คำนวณจาก จำนวนพนักงาน × จำนวนเดือนในข้อมูล × ${WORK_DAYS_PER_MONTH} วัน/เดือน (มาตรฐาน)<br>
-        <strong style="color:var(--on-dark-h)">Absence Rate รายแผนก</strong> ใช้วันทำงาน = ${mKeys.length} เดือน × ${WORK_DAYS_PER_MONTH} วัน = <strong style="color:var(--on-dark-h)">${totalWD} วัน</strong> (ไม่ได้หารตามจำนวนคนในแผนก)
-      </div>
-
-      <div class="formula-legend">
-        <div class="fl-item"><div class="fl-dot" style="background:#F04438"></div> ≥ 3% — ความเสี่ยงสูง ต้องติดตาม</div>
-        <div class="fl-item"><div class="fl-dot" style="background:#F79009"></div> 1.5–3% — ความเสี่ยงปานกลาง</div>
-        <div class="fl-item"><div class="fl-dot" style="background:#12B76A"></div> &lt; 1.5% — อยู่ในเกณฑ์ดี</div>
-      </div>
-    </div>`;
-
-  const maxAbs=Math.max(...dArr.map(d=>d[1].d/totalWD*100),1);
-  let absHtml='';
-  dArr.slice(0,8).forEach(([dept,v])=>{
-    const rate=(v.d/totalWD*100);
-    const barW=Math.min((rate/maxAbs)*100,100);
-    const barColor=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
-    const pctColor=rate>=3?'var(--sem-red)':rate>=1.5?'var(--sem-amber)':'var(--sem-green)';
-    absHtml+=`<div class="absrate-row">
-      <div class="absrate-dept">${dept}</div>
-      <div class="absrate-bar-wrap"><div class="absrate-bar" style="width:${barW}%;background:${barColor}"></div></div>
-      <div class="absrate-pct" style="color:${pctColor}">${rate.toFixed(2)}%</div>
-    </div>`;
+  var absHtml='';
+  dArr.slice(0,8).forEach(function(entry){
+    var dept=entry[0], v=entry[1];
+    var rate=(v.d/totalWD*100);
+    var barW=Math.min((rate/maxAbs)*100,100);
+    var barColor=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
+    var pctColor=rate>=3?'var(--sem-red)':rate>=1.5?'var(--sem-amber)':'var(--sem-green)';
+    absHtml+='<div class="absrate-row"><div class="absrate-dept">'+dept+'</div><div class="absrate-bar-wrap"><div class="absrate-bar" style="width:'+barW+'%;background:'+barColor+'"></div></div><div class="absrate-pct" style="color:'+pctColor+'">'+rate.toFixed(2)+'%</div></div>';
   });
   document.getElementById('absRateWrap').innerHTML=absHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
 
-  // ── Risk Segmentation ──
-  const empArr=Object.entries(p.emps).map(([n,v])=>({n,d:v.d,dept:v.dept}));
-  const high=empArr.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,5);
-  const mid =empArr.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,5);
-  const low =empArr.filter(e=>e.d<4);
-  document.getElementById('riskSegWrap').innerHTML=`
-    <div class="risk-grid">
-      <div class="risk-item r-high">
-        <div class="risk-label"><i class="fas fa-circle-exclamation"></i> High Risk (${empArr.filter(e=>e.d>=8).length} คน)</div>
-        <div class="risk-names">${high.length?high.map(e=>`${e.n} <span style="color:var(--sem-red);font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
-      </div>
-      <div class="risk-item r-mid">
-        <div class="risk-label"><i class="fas fa-circle-minus"></i> Medium Risk (${empArr.filter(e=>e.d>=4&&e.d<8).length} คน)</div>
-        <div class="risk-names">${mid.length?mid.map(e=>`${e.n} <span style="color:var(--sem-amber);font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
-      </div>
-      <div class="risk-item r-low">
-        <div class="risk-label"><i class="fas fa-circle-check"></i> Normal (${low.length} คน)</div>
-        <div class="risk-names" style="color:var(--sem-green)">ลาน้อยกว่า 4 วัน / ปี<br><strong>${low.length}</strong> คน</div>
-      </div>
-    </div>`;
+  var empArr=Object.entries(p.emps).map(function(e){return{n:e[0],d:e[1].d,dept:e[1].dept};});
+  var high=empArr.filter(function(e){return e.d>=8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
+  var mid=empArr.filter(function(e){return e.d>=4&&e.d<8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
+  var low=empArr.filter(function(e){return e.d<4;});
+  document.getElementById('riskSegWrap').innerHTML='<div class="risk-grid"><div class="risk-item r-high"><div class="risk-label"><i class="fas fa-circle-exclamation"></i> High Risk ('+empArr.filter(function(e){return e.d>=8;}).length+' คน)</div><div class="risk-names">'+(high.length?high.map(function(e){return e.n+' <span style="color:var(--sem-red);font-weight:700">'+e.d.toFixed(1)+'วัน</span>';}).join('<br>'):'—')+'</div></div><div class="risk-item r-mid"><div class="risk-label"><i class="fas fa-circle-minus"></i> Medium Risk ('+empArr.filter(function(e){return e.d>=4&&e.d<8;}).length+' คน)</div><div class="risk-names">'+(mid.length?mid.map(function(e){return e.n+' <span style="color:var(--sem-amber);font-weight:700">'+e.d.toFixed(1)+'วัน</span>';}).join('<br>'):'—')+'</div></div><div class="risk-item r-low"><div class="risk-label"><i class="fas fa-circle-check"></i> Normal ('+low.length+' คน)</div><div class="risk-names" style="color:var(--sem-green)">ลาน้อยกว่า 4 วัน / ปี<br><strong>'+low.length+'</strong> คน</div></div></div>';
 }
 
 /* ─── Tables ─── */
 function renderTables(){
-  const p=processedState;
-  const top10=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c).slice(0,10);
-  document.querySelector('#tTop tbody').innerHTML=top10.length
-    ?top10.map(([name,v],i)=>{
-      const rc=i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n';
-      const bc=i<3?'b-red':i<6?'b-amber':'b-grey';
-      const nm=i<3?`<span class="alert-blink"><i class="fas fa-exclamation-triangle"></i>${name}</span>`
-                  :`<span style="font-weight:700;color:var(--on-light-h)">${name}</span>`;
-      return`<tr><td><span class="rk ${rc}">${i+1}</span></td><td>${nm}</td>
-        <td><span class="badge b-grey">${v.dept}</span></td>
-        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
-        <td style="text-align:center;font-weight:700;color:var(--on-light-h)">${v.d.toFixed(1)}</td></tr>`;
-    }).join(''):'<tr><td colspan="5" class="empty-td">ไม่มีข้อมูล</td></tr>';
+  var p=processedState;
+  var top10=Object.entries(p.emps).sort(function(a,b){return b[1].c-a[1].c;}).slice(0,10);
+  document.querySelector('#tTop tbody').innerHTML=top10.length?top10.map(function(entry,i){
+    var name=entry[0], v=entry[1];
+    var rc=i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n';
+    var bc=i<3?'b-red':i<6?'b-amber':'b-grey';
+    var nm=i<3?'<span class="alert-blink"><i class="fas fa-exclamation-triangle"></i>'+name+'</span>':'<span style="font-weight:700;color:var(--on-light-h)">'+name+'</span>';
+    return '<tr><td><span class="rk '+rc+'">'+(i+1)+'</span></td><td>'+nm+'</td><td><span class="badge b-grey">'+v.dept+'</span></td><td style="text-align:center"><span class="badge '+bc+'">'+v.c+'</span></td><td style="text-align:center;font-weight:700;color:var(--on-light-h)">'+v.d.toFixed(1)+'</td></tr>';
+  }).join(''):'<tr><td colspan="5" class="empty-td">ไม่มีข้อมูล</td></tr>';
 
-  const dSum=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
-  const maxC=Math.max(...dSum.map(d=>d[1].c),1);
-  document.querySelector('#tDept tbody').innerHTML=dSum.length
-    ?dSum.map(([dept,v])=>{
-      const pct=Math.round((v.c/maxC)*100);
-      const bc=pct>75?'b-red':pct>40?'b-amber':'b-blue';
-      return`<tr><td style="font-weight:700;color:var(--on-light-h)">${dept}</td>
-        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
-        <td style="text-align:center">${v.d.toFixed(1)}</td>
-        <td style="text-align:center;color:var(--on-light-m)">${(v.d/v.c).toFixed(1)}</td></tr>`;
-    }).join(''):'<tr><td colspan="4" class="empty-td">ไม่มีข้อมูล</td></tr>';
+  var dSum=Object.entries(p.depts).sort(function(a,b){return b[1].c-a[1].c;});
+  var maxC=Math.max.apply(null,dSum.map(function(d){return d[1].c;}).concat([1]));
+  document.querySelector('#tDept tbody').innerHTML=dSum.length?dSum.map(function(entry){
+    var dept=entry[0], v=entry[1];
+    var pct=Math.round((v.c/maxC)*100);
+    var bc=pct>75?'b-red':pct>40?'b-amber':'b-blue';
+    return '<tr><td style="font-weight:700;color:var(--on-light-h)">'+dept+'</td><td style="text-align:center"><span class="badge '+bc+'">'+v.c+'</span></td><td style="text-align:center">'+v.d.toFixed(1)+'</td><td style="text-align:center;color:var(--on-light-m)">'+(v.d/v.c).toFixed(1)+'</td></tr>';
+  }).join(''):'<tr><td colspan="4" class="empty-td">ไม่มีข้อมูล</td></tr>';
 
-  // Sick leave table
-  const sickArr=Object.entries(processedState.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,8);
-  document.querySelector('#tSick tbody').innerHTML=sickArr.length
-    ?sickArr.map(([name,v],i)=>{
-      const bc=i<3?'b-red':i<6?'b-amber':'b-grey';
-      return`<tr><td><span class="rk ${i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n'}">${i+1}</span></td>
-        <td style="font-weight:700;color:var(--on-light-h)">${name}</td>
-        <td><span class="badge b-grey">${v.dept}</span></td>
-        <td style="text-align:center"><span class="badge ${bc}">${v.c}</span></td>
-        <td style="text-align:center;font-weight:700">${v.d.toFixed(1)}</td></tr>`;
-    }).join(''):'<tr><td colspan="5" class="empty-td">ไม่พบข้อมูลลาป่วย</td></tr>';
+  var sickArr=Object.entries(p.sickLeave||{}).sort(function(a,b){return b[1].c-a[1].c;}).slice(0,8);
+  document.querySelector('#tSick tbody').innerHTML=sickArr.length?sickArr.map(function(entry,i){
+    var name=entry[0], v=entry[1];
+    var rc=i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n';
+    var bc=i<3?'b-red':i<6?'b-amber':'b-grey';
+    return '<tr><td><span class="rk '+rc+'">'+(i+1)+'</span></td><td style="font-weight:700;color:var(--on-light-h)">'+name+'</td><td><span class="badge b-grey">'+v.dept+'</span></td><td style="text-align:center"><span class="badge '+bc+'">'+v.c+'</span></td><td style="text-align:center;font-weight:700">'+v.d.toFixed(1)+'</td></tr>';
+  }).join(''):'<tr><td colspan="5" class="empty-td">ไม่พบข้อมูลลาป่วย</td></tr>';
 
   renderDetailTable();
 }
 
 function renderDetailTable(){
-  const term=(document.getElementById('searchInput').value||'').toLowerCase();
-  const details=Object.values(processedState.empDetails||{})
-    .filter(d=>d.name.toLowerCase().includes(term)||d.dept.toLowerCase().includes(term))
-    .sort((a,b)=>b.totalDays-a.totalDays);
-  const tbody=document.querySelector('#tEmployee tbody');
-  if(!details.length){tbody.innerHTML='<tr><td colspan="4" class="empty-td">ไม่พบข้อมูล</td></tr>';return;}
-  tbody.innerHTML=details.map(emp=>{
-    const t=tenureYears(emp.id);
-    const bars=Object.entries(emp.types).map(([type,st])=>{
-      const q=getQuota(type,t);
-      let w=0,col='#2E90FA',txt=`ใช้ ${st.days.toFixed(1)} วัน`;
-      if(q){const pct=(st.days/q)*100;w=Math.min(pct,100);col=pct>=100?'#F04438':pct>=80?'#F79009':'#12B76A';txt+=` / สิทธิ์ ${q} วัน`;}
-      return`<div class="qbar-wrap"><div class="qbar-row"><span>${type}</span><span>${txt}</span></div>${q?`<div class="qbar-bg"><div class="qbar-fill" style="width:${w}%;background:${col}"></div></div>`:''}</div>`;
+  var term=(document.getElementById('searchInput').value||'').toLowerCase();
+  var details=Object.values(processedState.empDetails||{}).filter(function(d){
+    return d.name.toLowerCase().indexOf(term)>=0||d.dept.toLowerCase().indexOf(term)>=0;
+  }).sort(function(a,b){return b.totalDays-a.totalDays;});
+  var tbody=document.querySelector('#tEmployee tbody');
+  if(!details.length){ tbody.innerHTML='<tr><td colspan="4" class="empty-td">ไม่พบข้อมูล</td></tr>'; return; }
+  tbody.innerHTML=details.map(function(emp){
+    var t=tenureYears(emp.id);
+    var bars=Object.entries(emp.types).map(function(entry){
+      var type=entry[0], st=entry[1];
+      var q=getQuota(type,t);
+      var w=0, col='#2E90FA', txt='ใช้ '+st.days.toFixed(1)+' วัน';
+      if(q){ var pct=(st.days/q)*100; w=Math.min(pct,100); col=pct>=100?'#F04438':pct>=80?'#F79009':'#12B76A'; txt+=' / สิทธิ์ '+q+' วัน'; }
+      return '<div class="qbar-wrap"><div class="qbar-row"><span>'+type+'</span><span>'+txt+'</span></div>'+(q?'<div class="qbar-bg"><div class="qbar-fill" style="width:'+w+'%;background:'+col+'"></div></div>':'')+'</div>';
     }).join('');
-    const tc=emp.totalDays>=10?'b-red':emp.totalDays>=5?'b-amber':'b-green';
-    return`<tr><td style="font-weight:700;color:var(--on-light-h)">${emp.name}</td>
-      <td><span class="badge b-grey">${emp.dept}</span></td>
-      <td style="min-width:260px">${bars}</td>
-      <td style="text-align:center"><span class="badge ${tc}">${emp.totalDays.toFixed(1)}</span></td></tr>`;
+    var tc=emp.totalDays>=10?'b-red':emp.totalDays>=5?'b-amber':'b-green';
+    return '<tr><td style="font-weight:700;color:var(--on-light-h)">'+emp.name+'</td><td><span class="badge b-grey">'+emp.dept+'</span></td><td style="min-width:260px">'+bars+'</td><td style="text-align:center"><span class="badge '+tc+'">'+emp.totalDays.toFixed(1)+'</span></td></tr>';
   }).join('');
 }
 document.getElementById('searchInput').addEventListener('input',renderDetailTable);
 
 /* ─── Heatmap ─── */
 function renderHeatmap(){
-  const p=processedState;
-  const mF=document.getElementById('monthFilter').value;
-  const dF=document.getElementById('deptFilter').value;
-  const tF=document.getElementById('leaveTypeFilter').value;
-  const filtered=originalData.filter(r=>(!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF));
-  const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-  const depts=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c).slice(0,10).map(d=>d[0]);
-  const wrap=document.getElementById('heatmapWrap');
-  if(!depts.length||!mKeys.length){wrap.innerHTML='<p style="color:var(--on-light-m);padding:12px;font-size:13px;">ข้อมูลไม่เพียงพอ</p>';return;}
-  const mat={};
-  filtered.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!mat[d])mat[d]={};mat[d][mk]=(mat[d][mk]||0)+1;});
-  const allV=Object.values(mat).flatMap(row=>Object.values(row));
-  const maxV=Math.max(...allV,1);
-  function hmCol(v){if(!v)return{bg:'#F1F5F9',fg:'#98A2B3'};const t=v/maxV;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175CD3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7A3B00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#FFFFFF'};}
-  let html=`<div class="hm-months">`;
-  mKeys.forEach(k=>{const[,m]=k.split('-');html+=`<div class="hm-month">${TH_M[+m-1]}</div>`;});
+  var p=processedState;
+  var mF=document.getElementById('monthFilter').value;
+  var dF=document.getElementById('deptFilter').value;
+  var tF=document.getElementById('leaveTypeFilter').value;
+  var filtered=originalData.filter(function(r){ return (!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF); });
+  var mKeys=Object.keys(p.months).filter(function(k){return k!=='Unknown';}).sort();
+  var depts=Object.entries(p.depts).sort(function(a,b){return b[1].c-a[1].c;}).slice(0,10).map(function(d){return d[0];});
+  var wrap=document.getElementById('heatmapWrap');
+  if(!depts.length||!mKeys.length){ wrap.innerHTML='<p style="color:var(--on-light-m);padding:12px;font-size:13px;">ข้อมูลไม่เพียงพอ</p>'; return; }
+  var mat={};
+  filtered.forEach(function(r){ var d=r.แผนก, mk=r.monthKey; if(!mat[d])mat[d]={}; mat[d][mk]=(mat[d][mk]||0)+1; });
+  var allV=Object.values(mat).reduce(function(acc,row){ return acc.concat(Object.values(row)); },[]);
+  var maxV=Math.max.apply(null,allV.concat([1]));
+  function hmCol(v){if(!v)return{bg:'#F1F5F9',fg:'#98A2B3'};var t=v/maxV;if(t<.25)return{bg:'rgba(46,144,250,'+(0.2+t*2)+')',fg:'#175CD3'};if(t<.55)return{bg:'rgba(247,144,9,'+(0.25+t)+')',fg:'#7A3B00'};return{bg:'rgba(192,57,43,'+(0.35+t*0.65)+')',fg:'#FFFFFF'};}
+  var html='<div class="hm-months">';
+  mKeys.forEach(function(k){ var parts=k.split('-'); html+='<div class="hm-month">'+TH_M[+parts[1]-1]+'</div>'; });
   html+='</div>';
-  depts.forEach(dept=>{
-    html+=`<div class="hm-row"><div class="hm-label" title="${dept}">${dept.length>10?dept.slice(0,10)+'…':dept}</div>`;
-    mKeys.forEach(mk=>{const v=(mat[dept]&&mat[dept][mk])||0;const{bg,fg}=hmCol(v);html+=`<div class="hm-cell" style="background:${bg};color:${fg}" title="${dept}·${mk}:${v}ครั้ง">${v||''}</div>`;});
+  depts.forEach(function(dept){
+    html+='<div class="hm-row"><div class="hm-label" title="'+dept+'">'+(dept.length>10?dept.slice(0,10)+'…':dept)+'</div>';
+    mKeys.forEach(function(mk){ var v=(mat[dept]&&mat[dept][mk])||0; var c=hmCol(v); html+='<div class="hm-cell" style="background:'+c.bg+';color:'+c.fg+'" title="'+dept+'·'+mk+':'+v+'ครั้ง">'+(v||'')+'</div>'; });
     html+='</div>';
   });
   wrap.innerHTML=html;
 }
 
-/* ─── Alerts (expanded) ─── */
+/* ─── Alerts ─── */
 function renderAlerts(){
-  const p=processedState;
-  const empArr=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
-  const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
-  const mArr=Object.entries(p.months).filter(([k])=>k!=='Unknown').sort((a,b)=>b[1].c-a[1].c);
-  const empCount=Object.keys(p.emps).length;
-  const avg=empCount?p.days/empCount:0;
-  const dowTotal=p.dow.reduce((a,b)=>a+b,0)||1;
-  const mfPct=(p.dow[1]+p.dow[5])/dowTotal*100;
-  const sickArr=Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c);
-  const alerts=[];
+  var p=processedState;
+  var empArr=Object.entries(p.emps).sort(function(a,b){return b[1].c-a[1].c;});
+  var dArr=Object.entries(p.depts).sort(function(a,b){return b[1].c-a[1].c;});
+  var mArr=Object.entries(p.months).filter(function(e){return e[0]!=='Unknown';}).sort(function(a,b){return b[1].c-a[1].c;});
+  var empCount=Object.keys(p.emps).length;
+  var avg=empCount?p.days/empCount:0;
+  var dowTotal=p.dow.reduce(function(a,b){return a+b;},0)||1;
+  var mfPct=(p.dow[1]+p.dow[5])/dowTotal*100;
+  var sickArr=Object.entries(p.sickLeave||{}).sort(function(a,b){return b[1].c-a[1].c;});
+  var alerts=[];
 
-  if(empArr.length&&empArr[0][1].c>=5)
-    alerts.push({icon:'fa-user-xmark',bg:'#FEF3F2',ic:'#B42318',
-      title:`พนักงานลามากที่สุด: ${empArr[0][0]}`,
-      body:`ลาทั้งสิ้น ${empArr[0][1].c} ครั้ง (${empArr[0][1].d.toFixed(1)} วัน) — แนะนำ: สัมภาษณ์รายบุคคล, ตรวจสอบ Burnout`});
+  if(empArr.length&&empArr[0][1].c>=5) alerts.push({icon:'fa-user-xmark',bg:'#FEF3F2',ic:'#B42318',title:'พนักงานลามากที่สุด: '+empArr[0][0],body:'ลาทั้งสิ้น '+empArr[0][1].c+' ครั้ง ('+empArr[0][1].d.toFixed(1)+' วัน) — แนะนำ: สัมภาษณ์รายบุคคล, ตรวจสอบ Burnout'});
+  if(dArr.length){ var dept=dArr[0][0], v=dArr[0][1]; alerts.push({icon:'fa-building-circle-exclamation',bg:'#FFFAEB',ic:'#B54708',title:'แผนกลามากที่สุด: '+dept,body:v.c+' ครั้ง · '+v.d.toFixed(1)+' วัน · เฉลี่ย '+(v.d/v.c).toFixed(1)+' วัน/ครั้ง — ควรจัดเตรียมพนักงานสำรองและทบทวน Workload'}); }
+  if(mArr.length){ var mk=mArr[0][0], mv=mArr[0][1], parts=mk.split('-'); alerts.push({icon:'fa-calendar-xmark',bg:'#EFF8FF',ic:'#175CD3',title:'เดือน Peak: '+TH_MF[+parts[1]-1]+' '+(+parts[0]+543)+' ('+mv.c+' ครั้ง)',body:'ควรวางแผน Coverage ล่วงหน้าในช่วงนี้ปีหน้า'}); }
+  if(mfPct>35) alerts.push({icon:'fa-calendar-week',bg:'#FFF7ED',ic:'#C2410C',title:'Bridge Day Risk: '+mfPct.toFixed(1)+'% ของการลาตกวันจันทร์-ศุกร์',body:'สัดส่วนสูงกว่าเกณฑ์ (35%) — กำหนดนโยบาย Pre-Approval สำหรับการลาติดวันหยุด'});
+  if(sickArr.length&&sickArr[0][1].c>=3) alerts.push({icon:'fa-stethoscope',bg:'#F0FDF4',ic:'#027A48',title:'Sick Leave Alert: '+sickArr[0][0]+' ลาป่วย '+sickArr[0][1].c+' ครั้ง',body:'อาจบ่งชี้ปัญหาสุขภาพ — จัด Employee Health Check-up และ Wellness Program'});
+  if(avg>3) alerts.push({icon:'fa-chart-line',bg:'#F5F3FF',ic:'#5B21B6',title:'ค่าเฉลี่ยวันลาสูง: '+avg.toFixed(1)+' วัน/คน',body:'ควรทบทวนนโยบายการลา, สำรวจ Employee Satisfaction'});
+  var highRiskCount=Object.values(p.emps).filter(function(e){return e.d>=8;}).length;
+  if(highRiskCount>0) alerts.push({icon:'fa-shield-halved',bg:'#FFF1F2',ic:'#BE123C',title:'พนักงาน High Risk '+highRiskCount+' คน (ลา ≥ 8 วัน/ปี)',body:'แนะนำ: 1-on-1 Check-in, Performance Review และ Retention Program'});
+  if(!alerts.length) alerts.push({icon:'fa-circle-check',bg:'#ECFDF5',ic:'#027A48',title:'ไม่พบสัญญาณผิดปกติ',body:'สถิติการลาอยู่ในเกณฑ์ปกติ'});
 
-  if(dArr.length){const[dept,v]=dArr[0];
-    alerts.push({icon:'fa-building-circle-exclamation',bg:'#FFFAEB',ic:'#B54708',
-      title:`แผนกที่ลามากที่สุด: ${dept}`,
-      body:`${v.c} ครั้ง · ${v.d.toFixed(1)} วัน · เฉลี่ย ${(v.d/v.c).toFixed(1)} วัน/ครั้ง — ควรจัดเตรียมพนักงานสำรองและทบทวน Workload`});}
-
-  if(mArr.length){const[mk,mv]=mArr[0];const[y,m]=mk.split('-');
-    alerts.push({icon:'fa-calendar-xmark',bg:'#EFF8FF',ic:'#175CD3',
-      title:`เดือน Peak: ${TH_MF[+m-1]} ${+y+543} (${mv.c} ครั้ง)`,
-      body:`ควรวางแผน Coverage ล่วงหน้าในช่วงนี้ปีหน้า และพิจารณาห้ามลา/จำกัดโควต้าในช่วง Peak Season`});}
-
-  if(mfPct>35)
-    alerts.push({icon:'fa-calendar-week',bg:'#FFF7ED',ic:'#C2410C',
-      title:`Bridge Day Risk: ${mfPct.toFixed(1)}% ของการลาตกวันจันทร์-ศุกร์`,
-      body:`สัดส่วนสูงกว่าเกณฑ์ปกติ (35%) — แนะนำ: กำหนดนโยบาย Pre-Approval สำหรับการลาติดวันหยุด`});
-
-  if(sickArr.length&&sickArr[0][1].c>=3)
-    alerts.push({icon:'fa-stethoscope',bg:'#F0FDF4',ic:'#027A48',
-      title:`Sick Leave Alert: ${sickArr[0][0]} ลาป่วย ${sickArr[0][1].c} ครั้ง`,
-      body:`ลาป่วยบ่อยอาจบ่งชี้ปัญหาสุขภาพหรือ Disengagement — แนะนำ: จัด Employee Health Check-up และ Wellness Program`});
-
-  if(avg>3)
-    alerts.push({icon:'fa-chart-line',bg:'#F5F3FF',ic:'#5B21B6',
-      title:`ค่าเฉลี่ยวันลาสูง: ${avg.toFixed(1)} วัน/คน`,
-      body:`สูงกว่าเกณฑ์มาตรฐาน — ควรทบทวนนโยบายการลา, สำรวจ Employee Satisfaction, และพิจารณา Flexible Work Policy`});
-
-  const highRiskCount=Object.values(p.emps).filter(e=>e.d>=8).length;
-  if(highRiskCount>0)
-    alerts.push({icon:'fa-shield-halved',bg:'#FFF1F2',ic:'#BE123C',
-      title:`พนักงาน High Risk ${highRiskCount} คน (ลา ≥ 8 วัน/ปี)`,
-      body:`กลุ่มนี้ต้องการการดูแลพิเศษ — แนะนำ: 1-on-1 Check-in, Performance Review และ Retention Program`});
-
-  if(!alerts.length)
-    alerts.push({icon:'fa-circle-check',bg:'#ECFDF5',ic:'#027A48',
-      title:'ไม่พบสัญญาณผิดปกติ',body:'สถิติการลาอยู่ในเกณฑ์ปกติ องค์กรมีสุขภาพ HR ที่ดี'});
-
-  document.getElementById('alertList').innerHTML=alerts.map(a=>`
-    <div class="alert-item">
-      <div class="alert-icon" style="background:${a.bg};color:${a.ic}"><i class="fas ${a.icon}"></i></div>
-      <div><div class="alert-title">${a.title}</div><div class="alert-body">${a.body}</div></div>
-    </div>`).join('');
+  document.getElementById('alertList').innerHTML=alerts.map(function(a){
+    return '<div class="alert-item"><div class="alert-icon" style="background:'+a.bg+';color:'+a.ic+'"><i class="fas '+a.icon+'"></i></div><div><div class="alert-title">'+a.title+'</div><div class="alert-body">'+a.body+'</div></div></div>';
+  }).join('');
 }
 
-// pg2_inner: used inside exportPDF to build page 2 content
-
-/* ══════════════════════════════════════════════════════════
-   EXPORT PDF — window.print() approach
-   1. buildPrintLayout() สร้าง #printLayout DOM จากข้อมูลจริง
-   2. window.print() → เบราว์เซอร์ใช้ @media print CSS จัดหน้า
-   3. afterprint → ลบ printLayout ออก
-   ผลลัพธ์: font ถูก, chart ถูก, layout พอดี A4 ทุกครั้ง
-   ══════════════════════════════════════════════════════════ */
-
+/* ─── Export PDF via window.print() ─── */
 function buildPrintLayout(){
-  const p = processedState;
-  const empCount = Object.keys(p.emps).length || 1;
-  const mKeys = Object.keys(p.months).filter(k=>k!=='Unknown').sort();
-  const totalWD = mKeys.length * WORK_DAYS_PER_MONTH || 1;
-  const totalWDAll = totalWD * empCount;
-  const dArr = Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
-  const empArr = Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
-  const absRate = ((p.days/totalWDAll)*100).toFixed(2);
-  const freq = (p.total/empCount).toFixed(1);
-  const highRisk = Object.values(p.emps).filter(e=>e.d>=8).length;
-  const mfPct = p.total ? ((p.dow[1]+p.dow[5])/p.total*100).toFixed(1) : '0';
+  var p=processedState;
+  var empCount=Object.keys(p.emps).length||1;
+  var mKeys=Object.keys(p.months).filter(function(k){return k!=='Unknown';}).sort();
+  var totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+  var totalWDAll=totalWD*empCount;
+  var dArr=Object.entries(p.depts).sort(function(a,b){return b[1].c-a[1].c;});
+  var empArr=Object.entries(p.emps).sort(function(a,b){return b[1].c-a[1].c;});
+  var absRate=((p.days/totalWDAll)*100).toFixed(2);
+  var freq=(p.total/empCount).toFixed(1);
+  var highRisk=Object.values(p.emps).filter(function(e){return e.d>=8;}).length;
+  var mfPct=p.total?((p.dow[1]+p.dow[5])/p.total*100).toFixed(1):'0';
+  var now=new Date(), thY=now.getFullYear()+543;
+  var gDate=now.getDate()+' '+TH_MF[now.getMonth()]+' '+thY;
+  var gTime=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+' น.';
 
-  const now = new Date(), thY = now.getFullYear()+543;
-  const gDate = `${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
-  const gTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+  function bdg(cls,txt){ var s={br:'background:#fef3f2;color:#b42318',ba:'background:#fffaeb;color:#b54708',bg:'background:#ecfdf3;color:#027a48',bb:'background:#eff8ff;color:#175cd3',bk:'background:#f7f8fa;color:#344054;border:1px solid #e4e7ec'}[cls]||''; return '<span style="display:inline-flex;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;'+s+'">'+txt+'</span>'; }
+  function ci(id,w,h){ var el=document.getElementById(id); if(!el)return''; var c=document.createElement('canvas'); c.width=w*2; c.height=h*2; c.getContext('2d').drawImage(el,0,0,c.width,c.height); return '<img src="'+c.toDataURL('image/png')+'" style="width:'+w+'pt;height:'+h+'pt;display:block;max-width:100%">'; }
+  function sec(t){ return '<div class="pr-sec">'+t+'</div>'; }
+  function footerBar(n,tot){ return '<div style="border-top:1px solid #dde2eb;padding-top:4pt;margin-top:6pt;display:flex;justify-content:space-between;font-size:7pt;color:#98a2b3;"><span>HR Analytics · <strong style="color:#c0392b">Nigiwai Group</strong> · HumanOS</span><span>พิมพ์เมื่อ '+gDate+' '+gTime+' | หน้า '+n+'/4</span></div>'; }
+  function kpiCard(col,lbl,val,note){ return '<div class="pr-kpi" style="border-top:2pt solid '+col+'"><div class="pr-kpi-lbl">'+lbl+'</div><div class="pr-kpi-val">'+val+'</div><div class="pr-kpi-note">'+note+'</div></div>'; }
+  function th(t,a){ return '<th style="text-align:'+(a||'left')+'">'+t+'</th>'; }
 
-  /* helpers */
-  const bdg = (cls,txt) => `<span class="pr-badge ${cls}">${txt}</span>`;
-  const th = (t,a='left') => `<th style="text-align:${a}">${t}</th>`;
-  const sec = t => `<div class="pr-sec">${t}</div>`;
-
-  /* capture chart canvas as <img> — same size as screen canvas */
-  function chartImg(id, w, h){
-    const el = document.getElementById(id);
-    if(!el) return '';
-    const c = document.createElement('canvas');
-    c.width = w*2; c.height = h*2;
-    c.getContext('2d').drawImage(el, 0, 0, c.width, c.height);
-    return `<img src="${c.toDataURL('image/png')}" style="width:${w}pt;height:${h}pt;display:block;max-width:100%">`;
-  }
-
-  /* print footer bar */
-  const footerBar = (n,tot) => `
-    <div style="border-top:1px solid #dde2eb;padding-top:4pt;margin-top:6pt;
-                display:flex;justify-content:space-between;font-size:7pt;color:#98a2b3;">
-      <span>HR Analytics · <strong style="color:#c0392b">Nigiwai Group</strong> · HumanOS</span>
-      <span>พิมพ์เมื่อ ${gDate} ${gTime} | หน้า ${n}/4</span>
-    </div>`;
-
-  /* ── KPI card helper ── */
-  const kpiCard = (topColor, lbl, val, note) => `
-    <div class="pr-kpi" style="border-top:2pt solid ${topColor}">
-      <div class="pr-kpi-lbl">${lbl}</div>
-      <div class="pr-kpi-val">${val}</div>
-      <div class="pr-kpi-note">${note}</div>
-    </div>`;
-
-  /* ═══════════════ PAGE 1 ═══════════════
-     Cover · KPIs · Monthly + Type charts  */
-  const pg1 = `<div class="print-page">
-    <!-- Cover -->
-    <div class="pr-dark" style="margin-bottom:6pt">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#c0392b;letter-spacing:1pt;margin-bottom:2pt">
-            Nigiwai Group · HR Analytics · 2026</div>
-          <div style="font-size:16pt;font-weight:900;color:#f2f4f7;line-height:1.1">รายงานสถิติการลาพนักงาน</div>
-          <div style="font-size:8pt;color:#8899aa;margin-top:2pt">
-            Human Resources · ประจำปี 2569 · ข้อมูลจากระบบ HumanOS</div>
-          <div style="margin-top:5pt;display:inline-flex;align-items:center;gap:3pt;padding:2pt 8pt;
-                      background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.45);
-                      border-radius:8pt;font-size:7.5pt;font-weight:700;color:#f87171">
-            <i class="fas fa-calendar" style="font-size:7pt"></i>
-            ${document.getElementById('datePeriod').textContent}
-          </div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:7pt;text-transform:uppercase;color:#55667a;letter-spacing:.8pt">Generated</div>
-          <div style="font-size:12pt;font-weight:800;color:#f2f4f7">${gDate}</div>
-          <div style="font-size:8pt;color:#8899aa">${gTime}</div>
-          <div style="margin-top:3pt;font-size:7.5pt;font-weight:700;color:#f87171">INTERNAL USE ONLY</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Insight strip -->
-    <div style="display:table;width:100%;background:#0d1117;border-radius:5pt;
-                margin-bottom:6pt;overflow:hidden">
-      ${[['รวมครั้งที่ลา',p.total.toLocaleString(),'รายการ'],
-         ['รวมวันลาทั้งสิ้น',p.days.toFixed(1),'วันทำงาน'],
-         ['เฉลี่ยวัน / คน',(p.days/empCount).toFixed(1),'วัน/คน']]
-        .map((x,i)=>`<div style="display:table-cell;padding:8pt 13pt;
-          ${i<2?'border-right:1px solid #1c2431':''}">
-          <div style="font-size:6.5pt;font-weight:800;text-transform:uppercase;color:#8899aa;
-                      letter-spacing:.6pt;margin-bottom:1pt">${x[0]}</div>
-          <div style="font-size:17pt;font-weight:900;color:#f2f4f7;line-height:1.1">${x[1]}</div>
-          <div style="font-size:7pt;color:#8899aa">${x[2]}</div>
-        </div>`).join('')}
-    </div>
-
-    ${sec('Core KPIs')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
-      <div style="display:table-row">
-        ${[['#2e90fa','จำนวนครั้ง',p.total.toLocaleString(),'รายการ'],
-           ['#f79009','รวมวันลา',p.days.toFixed(1),'วัน'],
-           ['#12b76a','พนักงานที่ลา',empCount,'คน'],
-           ['#f04438','แผนก',Object.keys(p.depts).length,'แผนก']]
-          .map(x=>`<div style="display:table-cell;width:25%;padding-right:5pt">
-            ${kpiCard(x[0],x[1],x[2],x[3])}
-          </div>`).join('')}
-      </div>
-    </div>
-
-    ${sec('HR Expert Metrics')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:6pt">
-      <div style="display:table-row">
-        ${[['#2e90fa','Absence Rate',absRate+'%','% ต่อวันทำงาน'],
-           ['#f79009','Leave Frequency',freq,'ครั้ง/คน'],
-           ['#f04438','High-Risk Empl.',highRisk,'คน (≥8วัน)'],
-           ['#8b5cf6','Mon/Fri Leave',mfPct+'%','Bridge Day Risk']]
-          .map(x=>`<div style="display:table-cell;width:25%;padding-right:5pt">
-            ${kpiCard(x[0],x[1],x[2],x[3])}
-          </div>`).join('')}
-      </div>
-    </div>
-
-    ${sec('แนวโน้มและประเภทการลา')}
-    <div style="display:table;width:100%;border-spacing:5pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-chart-line" style="color:#c0392b;margin-right:4pt"></i>สถิติการลาแยกตามเดือน</div>
-            ${chartImg('cMonth', 235, 155)}
-          </div>
-        </div>
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-tags" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลา</div>
-            ${chartImg('cType', 235, 155)}
-          </div>
-        </div>
-      </div>
-    </div>
-    ${footerBar(1,4)}
-  </div>`;
-
-  /* ═══════════════ PAGE 2 ═══════════════
-     Dept charts · Stacked · DOW · Sick · Doughnut */
-  const sickArr = Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,7);
-
-  const pg2 = `<div class="print-page">
-    ${sec('การลาแยกตามแผนก')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-chart-bar" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวตั้ง)</div>
-            ${chartImg('cDept', 235, 155)}
-          </div>
-        </div>
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-chart-area" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวนอน)</div>
-            ${chartImg('cDeptBar', 235, 155)}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    ${sec('Stacked Breakdown &amp; Day of Week Pattern')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:60%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-layer-group" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลาแยกตามแผนก (Stacked)</div>
-            ${chartImg('cStacked', 280, 148)}
-          </div>
-        </div>
-        <div style="display:table-cell;width:40%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-calendar-week" style="color:#c0392b;margin-right:4pt"></i>Pattern วันในสัปดาห์</div>
-            ${chartImg('cDow', 185, 148)}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    ${sec('Sick Leave &amp; สัดส่วนประเภทการลา (วัน)')}
-    <div style="display:table;width:100%;border-spacing:5pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-stethoscope" style="color:#c0392b;margin-right:4pt"></i>Top พนักงานลาป่วยบ่อย</div>
-            <table class="pr-tbl">
-              <thead><tr>${th('#','center')}${th('ชื่อ')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
-              <tbody>
-                ${sickArr.map(([n,v],i)=>`<tr>
-                  <td style="text-align:center;font-weight:700">${i+1}</td>
-                  <td style="font-weight:700;color:#101828">${n.length>14?n.slice(0,14)+'…':n}</td>
-                  <td>${bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')}</td>
-                  <td style="text-align:center">${bdg(i<3?'br':i<5?'ba':'bk',v.c)}</td>
-                  <td style="text-align:center">${v.d.toFixed(1)}</td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
-            <div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">
-              💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div>
-          </div>
-        </div>
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-chart-pie" style="color:#c0392b;margin-right:4pt"></i>สัดส่วนประเภทการลา (วัน)</div>
-            ${chartImg('cTypeDays', 235, 155)}
-          </div>
-        </div>
-      </div>
-    </div>
-    ${footerBar(2,4)}
-  </div>`;
-
-  /* ═══════════════ PAGE 3 ═══════════════
-     Top10 · Dept table · Absence Rate · Risk · Heatmap */
-  const maxC = Math.max(...dArr.map(d=>d[1].c),1);
-  const allEmps = Object.entries(p.emps).map(([n,v])=>({n,d:v.d}));
-  const highR = allEmps.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,5);
-  const midR  = allEmps.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,5);
-  const lowR  = allEmps.filter(e=>e.d<4);
-  const maxAbs = Math.max(...dArr.map(d=>d[1].d/totalWD*100),0.01);
-
-  // Heatmap
-  const mF=document.getElementById('monthFilter').value;
-  const dF=document.getElementById('deptFilter').value;
-  const tF=document.getElementById('leaveTypeFilter').value;
-  const filt=originalData.filter(r=>(!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF));
-  const hmDepts=dArr.slice(0,8).map(d=>d[0]);
-  const hmMat={};
-  filt.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!hmMat[d])hmMat[d]={};hmMat[d][mk]=(hmMat[d][mk]||0)+1;});
-  const allHV=Object.values(hmMat).flatMap(r=>Object.values(r));
-  const hmMax=Math.max(...allHV,1);
-  function hmc(v){if(!v)return{bg:'#f1f5f9',fg:'#98a2b3'};const t=v/hmMax;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175cd3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7a3b00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#fff'};}
-
-  let hmHTML = `<div style="margin-top:3pt">
-    <div style="display:flex;gap:2pt;padding-left:55pt;margin-bottom:2pt">
-      ${mKeys.map(k=>{const[,m]=k.split('-');return`<div style="width:16pt;font-size:6.5pt;font-weight:700;color:#667085;text-align:center">${TH_M[+m-1]}</div>`;}).join('')}
-    </div>`;
-  hmDepts.forEach(dept=>{
-    hmHTML += `<div style="display:flex;align-items:center;gap:2pt;margin-bottom:2pt">
-      <div style="font-size:7pt;font-weight:700;color:#667085;width:52pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${dept.length>9?dept.slice(0,9)+'…':dept}</div>`;
-    mKeys.forEach(mk=>{const v=(hmMat[dept]&&hmMat[dept][mk])||0;const{bg,fg}=hmc(v);
-      hmHTML+=`<div style="width:16pt;height:13pt;border-radius:2pt;background:${bg};color:${fg};display:inline-flex;align-items:center;justify-content:center;font-size:6.5pt;font-weight:700">${v||''}</div>`;});
-    hmHTML += '</div>';
+  /* PAGE 1 */
+  var pg1='<div class="print-page">';
+  pg1+='<div class="pr-dark" style="margin-bottom:6pt"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#c0392b;letter-spacing:1pt;margin-bottom:2pt">Nigiwai Group · HR Analytics · 2026</div><div style="font-size:16pt;font-weight:900;color:#f2f4f7;line-height:1.1">รายงานสถิติการลาพนักงาน</div><div style="font-size:8pt;color:#8899aa;margin-top:2pt">Human Resources · ประจำปี 2569 · ข้อมูลจากระบบ HumanOS</div><div style="margin-top:5pt;display:inline-flex;align-items:center;gap:3pt;padding:2pt 8pt;background:rgba(192,57,43,.25);border:1px solid rgba(192,57,43,.45);border-radius:8pt;font-size:7.5pt;font-weight:700;color:#f87171"><i class="fas fa-calendar" style="font-size:7pt"></i>'+document.getElementById('datePeriod').textContent+'</div></div><div style="text-align:right"><div style="font-size:7pt;text-transform:uppercase;color:#55667a;letter-spacing:.8pt">Generated</div><div style="font-size:12pt;font-weight:800;color:#f2f4f7">'+gDate+'</div><div style="font-size:8pt;color:#8899aa">'+gTime+'</div><div style="margin-top:3pt;font-size:7.5pt;font-weight:700;color:#f87171">INTERNAL USE ONLY</div></div></div></div>';
+  pg1+='<div style="display:table;width:100%;background:#0d1117;border-radius:5pt;margin-bottom:6pt;overflow:hidden">';
+  [['รวมครั้งที่ลา',p.total.toLocaleString(),'รายการ'],['รวมวันลาทั้งสิ้น',p.days.toFixed(1),'วันทำงาน'],['เฉลี่ยวัน / คน',(p.days/empCount).toFixed(1),'วัน/คน']].forEach(function(x,i){
+    pg1+='<div style="display:table-cell;padding:8pt 13pt;'+(i<2?'border-right:1px solid #1c2431':'')+'"><div style="font-size:6.5pt;font-weight:800;text-transform:uppercase;color:#8899aa;letter-spacing:.6pt;">'+x[0]+'</div><div style="font-size:17pt;font-weight:900;color:#f2f4f7;line-height:1.1">'+x[1]+'</div><div style="font-size:7pt;color:#8899aa">'+x[2]+'</div></div>';
   });
-  hmHTML += '</div>';
+  pg1+='</div>';
+  pg1+=sec('Core KPIs');
+  pg1+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row">';
+  [['#2e90fa','จำนวนครั้ง',p.total.toLocaleString(),'รายการ'],['#f79009','รวมวันลา',p.days.toFixed(1),'วัน'],['#12b76a','พนักงานที่ลา',empCount,'คน'],['#f04438','แผนก',Object.keys(p.depts).length,'แผนก']].forEach(function(x){
+    pg1+='<div style="display:table-cell;width:25%;padding-right:5pt">'+kpiCard(x[0],x[1],x[2],x[3])+'</div>';
+  });
+  pg1+='</div></div>';
+  pg1+=sec('HR Expert Metrics');
+  pg1+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:6pt"><div style="display:table-row">';
+  [['#2e90fa','Absence Rate',absRate+'%','% ต่อวันทำงาน'],['#f79009','Leave Frequency',freq,'ครั้ง/คน'],['#f04438','High-Risk Empl.',highRisk,'คน (≥8วัน)'],['#8b5cf6','Mon/Fri Leave',mfPct+'%','Bridge Day Risk']].forEach(function(x){
+    pg1+='<div style="display:table-cell;width:25%;padding-right:5pt">'+kpiCard(x[0],x[1],x[2],x[3])+'</div>';
+  });
+  pg1+='</div></div>';
+  pg1+=sec('แนวโน้มและประเภทการลา');
+  pg1+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-line" style="color:#c0392b;margin-right:4pt"></i>สถิติการลาแยกตามเดือน</div>'+ci('cMonth',235,155)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-tags" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลา</div>'+ci('cType',235,155)+'</div></div></div></div>';
+  pg1+=footerBar(1,4)+'</div>';
 
-  const pg3 = `<div class="print-page">
-    ${sec('รายบุคคลและสรุปรายแผนก')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-trophy" style="color:#c0392b;margin-right:4pt"></i>Top 10 พนักงานลามากที่สุด</div>
-            <table class="pr-tbl">
-              <thead><tr>${th('#','center')}${th('ชื่อ-นามสกุล')}${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}</tr></thead>
-              <tbody>${empArr.slice(0,10).map(([n,v],i)=>`<tr>
-                <td style="text-align:center;font-weight:700">${i+1}</td>
-                <td style="font-weight:700;color:#101828">${(i<3?'⚠ ':'')}${n.length>13?n.slice(0,13)+'…':n}</td>
-                <td>${bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')}</td>
-                <td style="text-align:center">${bdg(i<3?'br':i<6?'ba':'bk',v.c)}</td>
-                <td style="text-align:center;font-weight:700">${v.d.toFixed(1)}</td>
-              </tr>`).join('')}</tbody>
-            </table>
-          </div>
-        </div>
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-table" style="color:#c0392b;margin-right:4pt"></i>สรุปรายแผนก</div>
-            <table class="pr-tbl">
-              <thead><tr>${th('แผนก')}${th('ครั้ง','center')}${th('วัน','center')}${th('เฉลี่ย','center')}</tr></thead>
-              <tbody>${dArr.slice(0,10).map(([dept,v])=>{
-                const pct=Math.round((v.c/maxC)*100);
-                return`<tr>
-                  <td style="font-weight:700;color:#101828">${dept.length>13?dept.slice(0,13)+'…':dept}</td>
-                  <td style="text-align:center">${bdg(pct>75?'br':pct>40?'ba':'bb',v.c)}</td>
-                  <td style="text-align:center">${v.d.toFixed(1)}</td>
-                  <td style="text-align:center;color:#667085">${(v.d/v.c).toFixed(1)}</td>
-                </tr>`;}).join('')}</tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
+  /* PAGE 2 */
+  var sickArr=Object.entries(p.sickLeave||{}).sort(function(a,b){return b[1].c-a[1].c;}).slice(0,7);
+  var pg2='<div class="print-page">';
+  pg2+=sec('การลาแยกตามแผนก');
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-bar" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวตั้ง)</div>'+ci('cDept',235,155)+'</div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-area" style="color:#c0392b;margin-right:4pt"></i>จำนวนครั้งรายแผนก (แนวนอน)</div>'+ci('cDeptBar',235,155)+'</div></div></div></div>';
+  pg2+=sec('Stacked Breakdown &amp; Day of Week Pattern');
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:60%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-layer-group" style="color:#c0392b;margin-right:4pt"></i>ประเภทการลาแยกตามแผนก (Stacked)</div>'+ci('cStacked',280,148)+'</div></div><div style="display:table-cell;width:40%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-calendar-week" style="color:#c0392b;margin-right:4pt"></i>Pattern วันในสัปดาห์</div>'+ci('cDow',185,148)+'</div></div></div></div>';
+  pg2+=sec('Sick Leave &amp; สัดส่วนประเภทการลา');
+  var sickRows=sickArr.map(function(entry,i){
+    var n=entry[0], v=entry[1];
+    return '<tr><td style="text-align:center;font-weight:700">'+(i+1)+'</td><td style="font-weight:700;color:#101828">'+(n.length>14?n.slice(0,14)+'…':n)+'</td><td>'+bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')+'</td><td style="text-align:center">'+bdg(i<3?'br':i<5?'ba':'bk',v.c)+'</td><td style="text-align:center">'+v.d.toFixed(1)+'</td></tr>';
+  }).join('');
+  pg2+='<div style="display:table;width:100%;border-spacing:5pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-stethoscope" style="color:#c0392b;margin-right:4pt"></i>Top พนักงานลาป่วยบ่อย</div><table class="pr-tbl"><thead><tr>'+th('#','center')+th('ชื่อ')+th('แผนก')+th('ครั้ง','center')+th('วัน','center')+'</tr></thead><tbody>'+sickRows+'</tbody></table><div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div></div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-chart-pie" style="color:#c0392b;margin-right:4pt"></i>สัดส่วนประเภทการลา (วัน)</div>'+ci('cTypeDays',235,155)+'</div></div></div></div>';
+  pg2+=footerBar(2,4)+'</div>';
 
-    ${sec('Absence Rate รายแผนก &amp; Risk Segmentation')}
-    <div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt">
-      <div style="display:table-row">
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-percent" style="color:#c0392b;margin-right:4pt"></i>Absence Rate รายแผนก</div>
-            <!-- Formula -->
-            <div style="background:#0d1117;border-radius:4pt;padding:5pt 8pt;margin-bottom:5pt;
-                        display:flex;align-items:center;gap:4pt;flex-wrap:wrap">
-              <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center">
-                <div style="font-size:9pt;font-weight:900;color:#f2f4f7">${p.days.toFixed(1)}</div>
-                <div style="font-size:6pt;color:#8899aa">วันลา</div>
-              </div>
-              <span style="color:#3a4451;font-size:11pt">÷</span>
-              <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center">
-                <div style="font-size:9pt;font-weight:900;color:#f2f4f7">${totalWDAll.toLocaleString()}</div>
-                <div style="font-size:6pt;color:#8899aa">${empCount}×${mKeys.length}×${WORK_DAYS_PER_MONTH}</div>
-              </div>
-              <span style="color:#3a4451;font-size:11pt">×100=</span>
-              <div style="background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:3pt;padding:2pt 8pt;text-align:center">
-                <div style="font-size:11pt;font-weight:900;color:#f87171">${absRate}%</div>
-                <div style="font-size:6pt;color:#f87171">Absence Rate</div>
-              </div>
-            </div>
-            <!-- Bars -->
-            ${dArr.slice(0,8).map(([dept,v])=>{
-              const rate=(v.d/totalWD*100);
-              const barW=Math.min((rate/maxAbs)*100,100);
-              const col=rate>=3?'#f04438':rate>=1.5?'#f79009':'#12b76a';
-              const tc=rate>=3?'#b42318':rate>=1.5?'#b54708':'#027a48';
-              return`<div style="display:flex;align-items:center;gap:4pt;padding:2pt 0;border-bottom:1px solid #f5f5f5">
-                <div style="font-size:8pt;font-weight:600;color:#101828;width:55pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${dept.length>9?dept.slice(0,9)+'…':dept}</div>
-                <div style="flex:1;height:5pt;background:#e4e7ec;border-radius:3pt;overflow:hidden">
-                  <div style="width:${barW}%;height:100%;background:${col};border-radius:3pt"></div>
-                </div>
-                <div style="font-size:8pt;font-weight:700;color:${tc};min-width:36pt;text-align:right">${rate.toFixed(2)}%</div>
-              </div>`;
-            }).join('')}
-            <div style="font-size:7pt;color:#667085;margin-top:4pt;padding-top:3pt;border-top:1px dashed #e4e7ec">
-              ⚠️ เกณฑ์: ≥3% สูง | 1.5–3% ปานกลาง | &lt;1.5% ดี</div>
-          </div>
-        </div>
-        <div style="display:table-cell;width:50%;vertical-align:top">
-          <div class="pr-card pno-break">
-            <div class="pr-card-title"><i class="fas fa-shield-halved" style="color:#c0392b;margin-right:4pt"></i>Risk Segmentation</div>
-            <div style="background:#fef3f2;border:1px solid #fecaca;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt">
-              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b42318;margin-bottom:2pt">⚠ High Risk — ${allEmps.filter(e=>e.d>=8).length} คน</div>
-              <div style="font-size:8pt;color:#344054;line-height:1.6">${highR.map(e=>`${e.n.length>12?e.n.slice(0,12)+'…':e.n} <strong style="color:#b42318">${e.d.toFixed(1)}วัน</strong>`).join('<br>') || '—'}</div>
-            </div>
-            <div style="background:#fffaeb;border:1px solid #fde68a;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt">
-              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b54708;margin-bottom:2pt">— Medium Risk — ${allEmps.filter(e=>e.d>=4&&e.d<8).length} คน</div>
-              <div style="font-size:8pt;color:#344054;line-height:1.6">${midR.map(e=>`${e.n.length>12?e.n.slice(0,12)+'…':e.n} <strong style="color:#b54708">${e.d.toFixed(1)}วัน</strong>`).join('<br>') || '—'}</div>
-            </div>
-            <div style="background:#ecfdf3;border:1px solid #a7f3d0;border-radius:4pt;padding:5pt 7pt">
-              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#027a48;margin-bottom:2pt">✓ Normal — ${lowR.length} คน</div>
-              <div style="font-size:8pt;color:#027a48">ลาน้อยกว่า 4 วัน/ปี</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  /* PAGE 3 */
+  var maxC=Math.max.apply(null,dArr.map(function(d){return d[1].c;}).concat([1]));
+  var allEmps=Object.entries(p.emps).map(function(e){return{n:e[0],d:e[1].d};});
+  var highR=allEmps.filter(function(e){return e.d>=8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
+  var midR=allEmps.filter(function(e){return e.d>=4&&e.d<8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
+  var lowR=allEmps.filter(function(e){return e.d<4;});
+  var maxAbs=Math.max.apply(null,dArr.map(function(d){return d[1].d/totalWD*100;}).concat([0.01]));
+  var mF=document.getElementById('monthFilter').value;
+  var dF=document.getElementById('deptFilter').value;
+  var tF=document.getElementById('leaveTypeFilter').value;
+  var filt=originalData.filter(function(r){return (!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF);});
+  var hmDepts=dArr.slice(0,8).map(function(d){return d[0];});
+  var hmMat={};
+  filt.forEach(function(r){var d=r.แผนก,mk=r.monthKey;if(!hmMat[d])hmMat[d]={};hmMat[d][mk]=(hmMat[d][mk]||0)+1;});
+  var allHV=Object.values(hmMat).reduce(function(acc,row){return acc.concat(Object.values(row));},[]);
+  var hmMax=Math.max.apply(null,allHV.concat([1]));
+  function hmc(v){if(!v)return{bg:'#f1f5f9',fg:'#98a2b3'};var t=v/hmMax;if(t<.25)return{bg:'rgba(46,144,250,'+(0.2+t*2)+')',fg:'#175cd3'};if(t<.55)return{bg:'rgba(247,144,9,'+(0.25+t)+')',fg:'#7a3b00'};return{bg:'rgba(192,57,43,'+(0.35+t*0.65)+')',fg:'#fff'};}
+  var hmHTML='<div style="margin-top:3pt"><div style="display:flex;gap:2pt;padding-left:55pt;margin-bottom:2pt">';
+  mKeys.forEach(function(k){var parts=k.split('-');hmHTML+='<div style="width:16pt;font-size:6.5pt;font-weight:700;color:#667085;text-align:center">'+TH_M[+parts[1]-1]+'</div>';});
+  hmHTML+='</div>';
+  hmDepts.forEach(function(dept){
+    hmHTML+='<div style="display:flex;align-items:center;gap:2pt;margin-bottom:2pt"><div style="font-size:7pt;font-weight:700;color:#667085;width:52pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(dept.length>9?dept.slice(0,9)+'…':dept)+'</div>';
+    mKeys.forEach(function(mk){var v=(hmMat[dept]&&hmMat[dept][mk])||0;var c=hmc(v);hmHTML+='<div style="width:16pt;height:13pt;border-radius:2pt;background:'+c.bg+';color:'+c.fg+';display:inline-flex;align-items:center;justify-content:center;font-size:6.5pt;font-weight:700">'+(v||'')+'</div>';});
+    hmHTML+='</div>';
+  });
+  hmHTML+='</div>';
 
-    ${sec('Heatmap แผนก × เดือน')}
-    <div class="pr-card pno-break">
-      <div class="pr-card-title"><i class="fas fa-th" style="color:#c0392b;margin-right:4pt"></i>ความเข้มการลาแยกตามแผนก × ช่วงเวลา</div>
-      ${hmHTML}
-    </div>
-    ${footerBar(3,4)}
-  </div>`;
-
-  /* ═══════════════ PAGE 4 ═══════════════
-     Smart Alerts + Summary */
-  const alertsEl = document.getElementById('alertList');
-  const alertsBody = [...alertsEl.querySelectorAll('.alert-item')].map(el=>{
-    const icon = el.querySelector('.alert-icon i');
-    const iconDiv = el.querySelector('.alert-icon');
-    const title = el.querySelector('.alert-title').textContent;
-    const body = el.querySelector('.alert-body').textContent;
-    return `<div style="display:flex;gap:7pt;align-items:flex-start;padding:7pt 0;border-bottom:1px solid #f0f0f0">
-      <div style="width:20pt;height:20pt;border-radius:4pt;flex-shrink:0;background:${iconDiv.style.background};
-                  color:${iconDiv.style.color};display:flex;align-items:center;justify-content:center;font-size:8.5pt">
-        <i class="${icon.className}"></i>
-      </div>
-      <div>
-        <div style="font-size:9.5pt;font-weight:700;color:#101828;margin-bottom:1.5pt">${title}</div>
-        <div style="font-size:8.5pt;color:#667085;line-height:1.5">${body}</div>
-      </div>
-    </div>`;
+  var top10rows=empArr.slice(0,10).map(function(entry,i){
+    var n=entry[0],v=entry[1];
+    return '<tr><td style="text-align:center;font-weight:700">'+(i+1)+'</td><td style="font-weight:700;color:#101828">'+(i<3?'⚠ ':'')+( n.length>13?n.slice(0,13)+'…':n)+'</td><td>'+bdg('bk',(v.dept||'').length>8?(v.dept||'').slice(0,8)+'…':v.dept||'')+'</td><td style="text-align:center">'+bdg(i<3?'br':i<6?'ba':'bk',v.c)+'</td><td style="text-align:center;font-weight:700">'+v.d.toFixed(1)+'</td></tr>';
+  }).join('');
+  var deptRows=dArr.slice(0,10).map(function(entry){
+    var dept=entry[0],v=entry[1];
+    var pct=Math.round((v.c/maxC)*100);
+    return '<tr><td style="font-weight:700;color:#101828">'+(dept.length>13?dept.slice(0,13)+'…':dept)+'</td><td style="text-align:center">'+bdg(pct>75?'br':pct>40?'ba':'bb',v.c)+'</td><td style="text-align:center">'+v.d.toFixed(1)+'</td><td style="text-align:center;color:#667085">'+(v.d/v.c).toFixed(1)+'</td></tr>';
+  }).join('');
+  var absRowsH=dArr.slice(0,8).map(function(entry){
+    var dept=entry[0],v=entry[1];
+    var rate=(v.d/totalWD*100);
+    var barW=Math.min((rate/maxAbs)*100,100);
+    var col=rate>=3?'#f04438':rate>=1.5?'#f79009':'#12b76a';
+    var tc=rate>=3?'#b42318':rate>=1.5?'#b54708':'#027a48';
+    return '<div style="display:flex;align-items:center;gap:4pt;padding:2pt 0;border-bottom:1px solid #f5f5f5"><div style="font-size:8pt;font-weight:600;color:#101828;width:55pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(dept.length>9?dept.slice(0,9)+'…':dept)+'</div><div style="flex:1;height:5pt;background:#e4e7ec;border-radius:3pt;overflow:hidden"><div style="width:'+barW+'%;height:100%;background:'+col+';border-radius:3pt"></div></div><div style="font-size:8pt;font-weight:700;color:'+tc+';min-width:36pt;text-align:right">'+rate.toFixed(2)+'%</div></div>';
   }).join('');
 
-  const pg4 = `<div class="print-page">
-    ${sec('สัญญาณเตือนและข้อเสนอแนะเชิง HR')}
-    <div class="pr-card pno-break" style="margin-bottom:8pt">
-      <div class="pr-card-title">
-        <i class="fas fa-triangle-exclamation" style="color:#c0392b;margin-right:4pt"></i>
-        Smart Insights — วิเคราะห์อัตโนมัติจากข้อมูล
-      </div>
-      ${alertsBody}
-    </div>
+  var pg3='<div class="print-page">';
+  pg3+=sec('รายบุคคลและสรุปรายแผนก');
+  pg3+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-trophy" style="color:#c0392b;margin-right:4pt"></i>Top 10 พนักงานลามากที่สุด</div><table class="pr-tbl"><thead><tr>'+th('#','center')+th('ชื่อ-นามสกุล')+th('แผนก')+th('ครั้ง','center')+th('วัน','center')+'</tr></thead><tbody>'+top10rows+'</tbody></table></div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-table" style="color:#c0392b;margin-right:4pt"></i>สรุปรายแผนก</div><table class="pr-tbl"><thead><tr>'+th('แผนก')+th('ครั้ง','center')+th('วัน','center')+th('เฉลี่ย','center')+'</tr></thead><tbody>'+deptRows+'</tbody></table></div></div></div></div>';
+  pg3+=sec('Absence Rate &amp; Risk Segmentation');
+  pg3+='<div style="display:table;width:100%;border-spacing:5pt;margin-bottom:4pt"><div style="display:table-row"><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-percent" style="color:#c0392b;margin-right:4pt"></i>Absence Rate รายแผนก</div><div style="background:#0d1117;border-radius:4pt;padding:5pt 8pt;margin-bottom:5pt;display:flex;align-items:center;gap:4pt;flex-wrap:wrap"><div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center"><div style="font-size:9pt;font-weight:900;color:#f2f4f7">'+p.days.toFixed(1)+'</div><div style="font-size:6pt;color:#8899aa">วันลา</div></div><span style="color:#3a4451;font-size:11pt">÷</span><div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:3pt;padding:2pt 6pt;text-align:center"><div style="font-size:9pt;font-weight:900;color:#f2f4f7">'+totalWDAll.toLocaleString()+'</div><div style="font-size:6pt;color:#8899aa">'+empCount+'×'+mKeys.length+'×'+WORK_DAYS_PER_MONTH+'</div></div><span style="color:#3a4451;font-size:11pt">×100=</span><div style="background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:3pt;padding:2pt 8pt;text-align:center"><div style="font-size:11pt;font-weight:900;color:#f87171">'+absRate+'%</div><div style="font-size:6pt;color:#f87171">Absence Rate</div></div></div>'+absRowsH+'<div style="font-size:7.5pt;color:#667085;margin-top:3pt">⚠️ ≥3% สูง | 1.5–3% ปานกลาง | &lt;1.5% ดี</div></div></div><div style="display:table-cell;width:50%;vertical-align:top"><div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-shield-halved" style="color:#c0392b;margin-right:4pt"></i>Risk Segmentation</div><div style="background:#fef3f2;border:1px solid #fecaca;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt"><div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b42318;margin-bottom:2pt">⚠ High Risk — '+allEmps.filter(function(e){return e.d>=8;}).length+' คน</div><div style="font-size:8pt;color:#344054;line-height:1.6">'+(highR.length?highR.map(function(e){return (e.n.length>12?e.n.slice(0,12)+'…':e.n)+' <strong style="color:#b42318">'+e.d.toFixed(1)+'วัน</strong>';}).join('<br>'):'—')+'</div></div><div style="background:#fffaeb;border:1px solid #fde68a;border-radius:4pt;padding:5pt 7pt;margin-bottom:4pt"><div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#b54708;margin-bottom:2pt">— Medium Risk — '+allEmps.filter(function(e){return e.d>=4&&e.d<8;}).length+' คน</div><div style="font-size:8pt;color:#344054;line-height:1.6">'+(midR.length?midR.map(function(e){return (e.n.length>12?e.n.slice(0,12)+'…':e.n)+' <strong style="color:#b54708">'+e.d.toFixed(1)+'วัน</strong>';}).join('<br>'):'—')+'</div></div><div style="background:#ecfdf3;border:1px solid #a7f3d0;border-radius:4pt;padding:5pt 7pt"><div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#027a48;margin-bottom:2pt">✓ Normal — '+lowR.length+' คน</div><div style="font-size:8pt;color:#027a48">ลาน้อยกว่า 4 วัน/ปี</div></div></div></div></div></div>';
+  pg3+=sec('Heatmap แผนก × เดือน');
+  pg3+='<div class="pr-card pno-break"><div class="pr-card-title"><i class="fas fa-th" style="color:#c0392b;margin-right:4pt"></i>ความเข้มการลาแยกตามแผนก × ช่วงเวลา</div>'+hmHTML+'</div>';
+  pg3+=footerBar(3,4)+'</div>';
 
-    ${sec('สรุปภาพรวมองค์กร')}
-    <div style="display:table;width:100%;border-spacing:5pt">
-      <div style="display:table-row">
-        ${[['รวมครั้งลา',p.total.toLocaleString(),'#2e90fa'],
-           ['รวมวันลา',p.days.toFixed(1),'#f79009'],
-           ['พนักงาน',empCount+' คน','#12b76a'],
-           ['แผนก',Object.keys(p.depts).length+' แผนก','#f04438'],
-           ['Absence Rate',absRate+'%','#8b5cf6'],
-           ['High Risk',highRisk+' คน','#c0392b']]
-          .map(x=>`<div style="display:table-cell;padding-right:4pt">
-            <div style="background:#fff;border:1px solid #e4e7ec;border-left:3pt solid ${x[2]};
-                        border-radius:4pt;padding:6pt 8pt">
-              <div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#98a2b3">${x[0]}</div>
-              <div style="font-size:14pt;font-weight:900;color:#101828">${x[1]}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
-    ${footerBar(4,4)}
-  </div>`;
+  /* PAGE 4 */
+  var alertsEl=document.getElementById('alertList');
+  var alertsBody=[].slice.call(alertsEl.querySelectorAll('.alert-item')).map(function(el){
+    var icon=el.querySelector('.alert-icon i');
+    var iconDiv=el.querySelector('.alert-icon');
+    var title=el.querySelector('.alert-title').textContent;
+    var body=el.querySelector('.alert-body').textContent;
+    return '<div style="display:flex;gap:7pt;align-items:flex-start;padding:7pt 0;border-bottom:1px solid #f0f0f0"><div style="width:20pt;height:20pt;border-radius:4pt;flex-shrink:0;background:'+iconDiv.style.background+';color:'+iconDiv.style.color+';display:flex;align-items:center;justify-content:center;font-size:8.5pt"><i class="'+icon.className+'"></i></div><div><div style="font-size:9.5pt;font-weight:700;color:#101828;margin-bottom:1.5pt">'+title+'</div><div style="font-size:8.5pt;color:#667085;line-height:1.5">'+body+'</div></div></div>';
+  }).join('');
+  var pg4='<div class="print-page">';
+  pg4+=sec('สัญญาณเตือนและข้อเสนอแนะเชิง HR');
+  pg4+='<div class="pr-card pno-break" style="margin-bottom:8pt"><div class="pr-card-title"><i class="fas fa-triangle-exclamation" style="color:#c0392b;margin-right:4pt"></i>Smart Insights — วิเคราะห์อัตโนมัติจากข้อมูล</div>'+alertsBody+'</div>';
+  pg4+=sec('สรุปภาพรวมองค์กร');
+  pg4+='<div style="display:table;width:100%;border-spacing:5pt">';
+  pg4+='<div style="display:table-row">';
+  [['รวมครั้งลา',p.total.toLocaleString(),'#2e90fa'],['รวมวันลา',p.days.toFixed(1),'#f79009'],['พนักงาน',empCount+' คน','#12b76a'],['แผนก',Object.keys(p.depts).length+' แผนก','#f04438'],['Absence Rate',absRate+'%','#8b5cf6'],['High Risk',highRisk+' คน','#c0392b']].forEach(function(x){
+    pg4+='<div style="display:table-cell;padding-right:4pt"><div style="background:#fff;border:1px solid #e4e7ec;border-left:3pt solid '+x[2]+';border-radius:4pt;padding:6pt 8pt"><div style="font-size:7pt;font-weight:800;text-transform:uppercase;color:#98a2b3">'+x[0]+'</div><div style="font-size:14pt;font-weight:900;color:#101828">'+x[1]+'</div></div></div>';
+  });
+  pg4+='</div></div>';
+  pg4+=footerBar(4,4)+'</div>';
 
-  document.getElementById('printLayout').innerHTML = pg1 + pg2 + pg3 + pg4;
+  document.getElementById('printLayout').innerHTML=pg1+pg2+pg3+pg4;
 }
 
 async function exportPDF(){
-  if(!processedState || !processedState.total){
+  if(!processedState||!processedState.total){
     alert('กรุณาโหลดข้อมูลก่อน'); return;
   }
-  // Build print DOM
   buildPrintLayout();
-  // Small delay to let images render
-  await new Promise(r=>setTimeout(r,300));
-  // Print
+  await new Promise(function(r){setTimeout(r,300);});
   window.print();
-  // Cleanup after print dialog closes
-  window.addEventListener('afterprint', ()=>{
+  window.addEventListener('afterprint',function(){
     document.getElementById('printLayout').innerHTML='';
-  }, {once:true});
+  },{once:true});
 }
-            highR.map(e=>`${e.n.length>11?e.n.slice(0,11)+'…':e.n} <strong style="color:#B42318">${e.d.toFixed(1)}วัน</strong>`).join('<br>'))}
-          ${riskBox('#FFFAEB','#FDE68A','#B54708',`— Medium Risk — ${allEmps.filter(e=>e.d>=4&&e.d<8).length} คน`,
-            midR.map(e=>`${e.n.length>11?e.n.slice(0,11)+'…':e.n} <strong style="color:#B54708">${e.d.toFixed(1)}วัน</strong>`).join('<br>'))}
-          ${riskBox('#ECFDF3','#A7F3D0','#027A48',`✓ Normal — ${lowR.length} คน`,'ลาน้อยกว่า 4 วัน/ปี')}
-        `)}
-      </div>
-
-      ${sec('Heatmap แผนก × เดือน')}
-      <div style="flex:1;min-height:0;background:#fff;border:1px solid #E4E7EC;border-radius:5px;padding:7px 10px;overflow:hidden;display:flex;flex-direction:column;">
-        <div style="font-size:8px;font-weight:800;color:#101828;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          <i class="fas fa-th" style="color:#C0392B;font-size:7.5px;"></i> ความเข้มการลาแยกตามแผนก × ช่วงเวลา
-        </div>
-        <div style="flex:1;overflow:hidden;">${hmHtml}</div>
-      </div>
-    `,3,4);
-
-    /* ══════════════════════════════════════════════════════
-       PAGE 4 — Alerts (flex:1) + Summary strip (50px)
-       ══════════════════════════════════════════════════════ */
-    const alertsEl=document.getElementById('alertList');
-    const alertsBody=[...alertsEl.querySelectorAll('.alert-item')].map(el=>{
-      const icon=el.querySelector('.alert-icon i');
-      const iconDiv=el.querySelector('.alert-icon');
-      const title=el.querySelector('.alert-title').textContent;
-      const body=el.querySelector('.alert-body').textContent;
-      return`<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #F0F0F0;">
-        <div style="width:24px;height:24px;border-radius:5px;flex-shrink:0;background:${iconDiv.style.background};color:${iconDiv.style.color};display:flex;align-items:center;justify-content:center;font-size:9px;">
-          <i class="${icon.className}"></i>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:#101828;margin-bottom:1px;">${title}</div>
-          <div style="font-size:9px;color:#667085;line-height:1.5;">${body}</div>
-        </div>
-      </div>`;
-    }).join('');
-
-    const pg4=page(`
-      ${sec('สัญญาณเตือนและข้อเสนอแนะเชิง HR')}
-      <div style="flex:1;min-height:0;background:#fff;border:1px solid #E4E7EC;border-radius:5px;padding:10px 14px;overflow:hidden;display:flex;flex-direction:column;">
-        <div style="font-size:8px;font-weight:800;color:#101828;margin-bottom:5px;padding-bottom:4px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          <i class="fas fa-triangle-exclamation" style="color:#C0392B;font-size:7.5px;"></i> Smart Insights — วิเคราะห์อัตโนมัติ
-        </div>
-        <div style="flex:1;overflow:hidden;">${alertsBody}</div>
-      </div>
-
-      ${sec('สรุปภาพรวมองค์กร')}
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;flex-shrink:0;">
-        ${[['รวมครั้งลา',p.total.toLocaleString(),'#2E90FA'],['รวมวันลา',p.days.toFixed(1),'#F79009'],
-           ['พนักงาน',empCount+' คน','#12B76A'],['แผนก',Object.keys(p.depts).length+' แผนก','#F04438'],
-           ['Absence Rate',absRate+'%','#8B5CF6'],['High Risk',highRisk+' คน','#C0392B']]
-          .map(x=>`<div style="background:#fff;border:1px solid #E4E7EC;border-left:3px solid ${x[2]};border-radius:5px;padding:6px 9px;">
-            <div style="font-size:7px;font-weight:800;text-transform:uppercase;color:#98A2B3;">${x[0]}</div>
-            <div style="font-size:13px;font-weight:900;color:#101828;">${x[1]}</div>
-          </div>`).join('')}
-      </div>
-    `,4,4);
-
-    /* ── render 4 pages ── */
-    const frame=document.getElementById('pdfFrame');
-    const pages=[pg1,pg2,pg3,pg4];
-    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-    for(let i=0;i<pages.length;i++){
-      setP(Math.round(10+i*20),`กำลังสร้างหน้า ${i+1}/4…`);
-      if(i>0) pdf.addPage();
-      frame.style.cssText=`position:fixed;left:-9999px;top:0;width:${A4W}px;height:${A4H}px;overflow:hidden;z-index:-1;pointer-events:none;`;
-      frame.innerHTML=pages[i];
-      await new Promise(r=>setTimeout(r,200));
-
-      const canvas=await html2canvas(frame,{
-        scale:2, useCORS:true, logging:false,
-        backgroundColor:'#F0F2F5',
-        width:A4W, height:A4H,
-        windowWidth:A4W, windowHeight:A4H
-      });
-      pdf.addImage(canvas.toDataURL('image/jpeg',0.93),'JPEG',0,0,210,297);
-    }
-
-    frame.innerHTML='';
-    frame.style.cssText=`position:fixed;left:-9999px;top:0;width:794px;height:auto;overflow:hidden;z-index:-1;pointer-events:none;`;
-    setP(100,'บันทึก PDF…');
-    await new Promise(r=>setTimeout(r,80));
-    const n=new Date();
-    pdf.save(`Nigiwai_Leave_Report_${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}.pdf`);
-
-  }catch(err){
-    console.error(err);
-    alert('เกิดข้อผิดพลาด:\n'+err.message);
-  }finally{
-    ov.classList.remove('show');
-    setP(0,'');
-  }
-}
-
 </script>
 </body>
 </html>
