@@ -218,6 +218,45 @@ tbody tr:hover td{background:var(--surface-2);}
 .absrate-bar{height:100%;border-radius:3px;}
 .absrate-pct{font-size:12px;font-weight:700;min-width:38px;text-align:right;}
 
+/* ── Absence Rate Formula Box (dark panel) ── */
+.formula-box{
+  background:var(--surface-dk);border-radius:var(--radius-sm);
+  padding:14px 16px;margin-bottom:12px;
+}
+.formula-box-title{
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;
+  color:var(--on-dark-m);margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+.formula-box-title i{color:var(--corp-red);font-size:10px;}
+.formula-eq{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.fe-block{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:5px;padding:6px 12px;text-align:center;min-width:70px;
+}
+.fe-val{font-size:14px;font-weight:900;color:var(--on-dark-h);font-variant-numeric:tabular-nums;line-height:1.2;}
+.fe-lbl{font-size:9px;font-weight:600;color:var(--on-dark-m);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;}
+.fe-op{font-size:20px;font-weight:300;color:#3A4451;line-height:1;}
+.fe-result{
+  background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.35);
+  border-radius:5px;padding:6px 14px;text-align:center;
+}
+.fe-result .fe-val{font-size:18px;color:#F87171;}
+.fe-result .fe-lbl{color:#F87171;}
+.formula-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.fchip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;padding:3px 9px;font-size:11px;color:var(--on-dark-m);
+}
+.fchip strong{color:var(--on-dark-h);}
+.fchip i{font-size:9px;color:var(--sem-amber-fill);}
+.formula-legend{
+  display:flex;gap:14px;flex-wrap:wrap;
+  padding-top:9px;border-top:1px solid rgba(255,255,255,.06);
+}
+.fl-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--on-dark-m);}
+.fl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
 /* ── NEW: Day of Week chart note ── */
 .dow-note{font-size:11px;color:var(--on-light-m);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;}
 .dow-note span{display:flex;align-items:center;gap:5px;}
@@ -258,16 +297,141 @@ tbody tr:hover td{background:var(--surface-2);}
 .rpt-footer strong{color:var(--corp-red);}
 
 /* PDF overlay */
-#pdfOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#pdfOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
 #pdfOverlay.show{display:flex;}
 .pdf-spin{width:44px;height:44px;border:4px solid #333;border-top-color:var(--corp-red);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .pdf-msg{color:var(--on-dark-h);font-size:14px;font-weight:600;}
+.pdf-progress{width:260px;height:4px;background:#2A3441;border-radius:2px;overflow:hidden;}
+.pdf-progress-bar{height:100%;background:var(--corp-red);border-radius:2px;transition:width .3s;}
+
+/* ── PDF PRINT FRAME ──
+   Hidden off-screen container rendered at exactly A4 width (794px).
+   All content is re-laid out here before capture so nothing overflows. */
+#pdfFrame{
+  position:fixed;
+  left:-9999px; top:0;
+  width:794px;           /* A4 @ 96dpi = 794px */
+  background:#F0F2F5;
+  font-family:'Noto Sans Thai',sans-serif;
+  font-size:13px;
+  line-height:1.5;
+  color:#344054;
+  z-index:-1;
+  pointer-events:none;
+}
+/* Inside pdfFrame — tighter, print-optimised overrides */
+#pdfFrame .pdf-page{
+  width:754px;           /* 794 - 20px padding each side */
+  margin:0 auto;
+  padding:20px 0;
+}
+#pdfFrame .pdf-cover{
+  background:#0D1117;border-radius:8px;padding:20px 24px;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:12px;
+}
+#pdfFrame .pfc-left h1{font-size:18px;font-weight:900;color:#F2F4F7;margin:4px 0 2px;}
+#pdfFrame .pfc-left p{font-size:11px;color:#8899AA;margin:0;}
+#pdfFrame .pfc-left .pfc-period{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:3px 10px;background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:12px;font-size:10px;font-weight:700;color:#F87171;}
+#pdfFrame .pfc-right{text-align:right;}
+#pdfFrame .pfc-right .pfc-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#55667A;margin-bottom:2px;}
+#pdfFrame .pfc-right .pfc-val{font-size:13px;font-weight:800;color:#F2F4F7;}
+#pdfFrame .pfc-right .pfc-conf{font-size:10px;font-weight:700;color:#F87171;margin-top:4px;}
+
+/* KPI row in PDF */
+#pdfFrame .pdf-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+#pdfFrame .pdf-kpi{background:#fff;border:1px solid #E4E7EC;border-radius:6px;padding:10px 12px;position:relative;overflow:hidden;}
+#pdfFrame .pdf-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+#pdfFrame .pdf-kpi.kb::before{background:#2E90FA;} #pdfFrame .pdf-kpi.ka::before{background:#F79009;}
+#pdfFrame .pdf-kpi.kg::before{background:#12B76A;} #pdfFrame .pdf-kpi.kr::before{background:#F04438;}
+#pdfFrame .pdf-kpi.kp::before{background:#8B5CF6;}
+#pdfFrame .pdf-kpi-label{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#667085;margin-bottom:3px;}
+#pdfFrame .pdf-kpi-val{font-size:22px;font-weight:900;color:#101828;line-height:1;font-variant-numeric:tabular-nums;}
+#pdfFrame .pdf-kpi-note{font-size:9px;color:#98A2B3;margin-top:2px;}
+
+/* Chart panels in PDF */
+#pdfFrame .pdf-section{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#667085;margin:10px 0 6px;display:flex;align-items:center;gap:8px;}
+#pdfFrame .pdf-section::after{content:'';flex:1;height:1px;background:#E4E7EC;}
+#pdfFrame .pdf-row{display:grid;gap:8px;margin-bottom:8px;}
+#pdfFrame .pdf-row.c2{grid-template-columns:1fr 1fr;}
+#pdfFrame .pdf-row.c1{grid-template-columns:1fr;}
+#pdfFrame .pdf-card{background:#fff;border:1px solid #E4E7EC;border-radius:6px;padding:10px 12px;}
+#pdfFrame .pdf-card-title{font-size:9.5px;font-weight:800;color:#101828;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #E4E7EC;display:flex;align-items:center;gap:5px;}
+#pdfFrame .pdf-card-title i{color:#C0392B;font-size:9px;}
+/* chart canvas inside PDF card */
+#pdfFrame canvas{display:block;}
+
+/* Tables in PDF */
+#pdfFrame table{width:100%;border-collapse:collapse;font-size:10px;}
+#pdfFrame thead tr{background:#F7F8FA;}
+#pdfFrame th{padding:5px 7px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#667085;border-bottom:1px solid #E4E7EC;white-space:nowrap;text-align:left;}
+#pdfFrame td{padding:5px 7px;border-bottom:1px solid #E4E7EC;font-size:10px;color:#344054;vertical-align:middle;}
+#pdfFrame tr:last-child td{border-bottom:none;}
+#pdfFrame .pdf-badge{display:inline-flex;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;}
+#pdfFrame .pdf-badge.br{background:#FEF3F2;color:#B42318;}
+#pdfFrame .pdf-badge.ba{background:#FFFAEB;color:#B54708;}
+#pdfFrame .pdf-badge.bg{background:#ECFDF3;color:#027A48;}
+#pdfFrame .pdf-badge.bb{background:#EFF8FF;color:#175CD3;}
+#pdfFrame .pdf-badge.bk{background:#F7F8FA;color:#344054;border:1px solid #E4E7EC;}
+
+/* Insight strip */
+#pdfFrame .pdf-ins{display:grid;grid-template-columns:repeat(3,1fr);background:#0D1117;border-radius:6px;margin-bottom:10px;overflow:hidden;}
+#pdfFrame .pdf-ins-item{padding:10px 14px;border-right:1px solid #1C2431;}
+#pdfFrame .pdf-ins-item:last-child{border-right:none;}
+#pdfFrame .pdf-ins-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#8899AA;margin-bottom:3px;}
+#pdfFrame .pdf-ins-val{font-size:20px;font-weight:900;color:#F2F4F7;line-height:1;font-variant-numeric:tabular-nums;}
+#pdfFrame .pdf-ins-sub{font-size:8.5px;color:#8899AA;margin-top:2px;}
+
+/* Absence rate bars */
+#pdfFrame .pdf-absrow{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #F0F2F5;}
+#pdfFrame .pdf-absrow:last-child{border-bottom:none;}
+#pdfFrame .pdf-abs-dept{font-size:10px;font-weight:600;color:#101828;width:90px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#pdfFrame .pdf-abs-bar{flex:1;height:5px;background:#E4E7EC;border-radius:3px;overflow:hidden;}
+#pdfFrame .pdf-abs-fill{height:100%;border-radius:3px;}
+#pdfFrame .pdf-abs-pct{font-size:10px;font-weight:700;min-width:36px;text-align:right;}
+
+/* Risk grid */
+#pdfFrame .pdf-risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+#pdfFrame .pdf-risk-item{padding:7px 9px;border-radius:5px;border:1px solid #E4E7EC;}
+#pdfFrame .pdf-risk-item.rh{background:#FEF3F2;border-color:#FECACA;}
+#pdfFrame .pdf-risk-item.rm{background:#FFFAEB;border-color:#FDE68A;}
+#pdfFrame .pdf-risk-item.rl{background:#ECFDF3;border-color:#A7F3D0;}
+#pdfFrame .pdf-risk-label{font-size:8px;font-weight:800;text-transform:uppercase;margin-bottom:3px;}
+#pdfFrame .pdf-risk-item.rh .pdf-risk-label{color:#B42318;}
+#pdfFrame .pdf-risk-item.rm .pdf-risk-label{color:#B54708;}
+#pdfFrame .pdf-risk-item.rl .pdf-risk-label{color:#027A48;}
+#pdfFrame .pdf-risk-names{font-size:9.5px;color:#344054;line-height:1.6;}
+
+/* Alert items */
+#pdfFrame .pdf-alert{display:flex;gap:7px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #E4E7EC;}
+#pdfFrame .pdf-alert:last-child{border-bottom:none;}
+#pdfFrame .pdf-alert-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;}
+#pdfFrame .pdf-alert-title{font-size:10px;font-weight:700;color:#101828;margin-bottom:1px;}
+#pdfFrame .pdf-alert-body{font-size:9px;color:#667085;}
+
+/* Heatmap */
+#pdfFrame .pdf-hm-months{display:flex;gap:2px;padding-left:70px;margin-bottom:2px;}
+#pdfFrame .pdf-hm-month{width:20px;font-size:7.5px;font-weight:700;color:#667085;text-align:center;}
+#pdfFrame .pdf-hm-row{display:flex;gap:2px;align-items:center;margin-bottom:2px;}
+#pdfFrame .pdf-hm-label{font-size:8.5px;font-weight:700;color:#667085;width:66px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#pdfFrame .pdf-hm-cell{width:20px;height:17px;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;}
+
+/* Page footer */
+#pdfFrame .pdf-footer{margin-top:10px;padding:8px 12px;background:#fff;border:1px solid #E4E7EC;border-radius:6px;display:flex;justify-content:space-between;font-size:9px;color:#667085;}
+#pdfFrame .pdf-footer strong{color:#C0392B;}
+#pdfFrame .pdf-page-num{font-size:9px;color:#98A2B3;text-align:right;margin-top:4px;}
 </style>
 </head>
 <body>
 
-<div id="pdfOverlay"><div class="pdf-spin"></div><div class="pdf-msg">กำลังสร้าง PDF รายงาน…</div></div>
+<div id="pdfOverlay">
+  <div class="pdf-spin"></div>
+  <div class="pdf-msg" id="pdfMsg">กำลังเตรียมข้อมูล…</div>
+  <div class="pdf-progress"><div class="pdf-progress-bar" id="pdfBar" style="width:0%"></div></div>
+</div>
+<!-- Hidden A4 frame — rendered off-screen at 794px width for perfect A4 fit -->
+<div id="pdfFrame"></div>
 
 <!-- NAV -->
 <nav class="topnav">
@@ -504,6 +668,7 @@ tbody tr:hover td{background:var(--surface-2);}
         <div class="card-title"><i class="fas fa-percent"></i> Absence Rate รายแผนก</div>
         <span class="card-tag">Risk Indicator</span>
       </div>
+      <div id="absFormulaBox"></div>
       <div id="absRateWrap"></div>
       <div class="card-note">⚠️ เกณฑ์แนะนำ: Absence Rate ไม่ควรเกิน <strong>3%</strong> ของวันทำงานทั้งหมด</div>
     </div>
@@ -930,6 +1095,58 @@ function renderNewWidgets(){
   // ── Absence Rate per Dept ──
   const dArr=Object.entries(p.depts).sort((a,b)=>b[1].d-a[1].d);
   const totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+  const empCount=Object.keys(p.emps).length;
+  const totalWDAll=totalWD*empCount; // total possible working days across all employees
+
+  // ── Formula Box (dynamic numbers) ──
+  const overallRate=(p.days/totalWDAll*100);
+  document.getElementById('absFormulaBox').innerHTML=`
+    <div class="formula-box">
+      <div class="formula-box-title">
+        <i class="fas fa-function"></i> สูตรการคำนวณ Absence Rate
+      </div>
+
+      <div class="formula-eq">
+        <div class="fe-block">
+          <div class="fe-val">${p.days.toFixed(1)}</div>
+          <div class="fe-lbl">รวมวันลา (วัน)</div>
+        </div>
+        <div class="fe-op">÷</div>
+        <div class="fe-block">
+          <div class="fe-val">${totalWDAll.toLocaleString()}</div>
+          <div class="fe-lbl">วันทำงานทั้งหมด</div>
+        </div>
+        <div class="fe-op">×</div>
+        <div class="fe-block">
+          <div class="fe-val">100</div>
+          <div class="fe-lbl">&nbsp;</div>
+        </div>
+        <div class="fe-op">=</div>
+        <div class="fe-result">
+          <div class="fe-val">${overallRate.toFixed(2)}%</div>
+          <div class="fe-lbl">Absence Rate รวม</div>
+        </div>
+      </div>
+
+      <div class="formula-chips">
+        <div class="fchip"><i class="fas fa-users"></i> พนักงาน <strong>${empCount} คน</strong></div>
+        <div class="fchip"><i class="fas fa-calendar-days"></i> จำนวนเดือน <strong>${mKeys.length} เดือน</strong></div>
+        <div class="fchip"><i class="fas fa-briefcase"></i> วันทำงาน/เดือน <strong>${WORK_DAYS_PER_MONTH} วัน</strong></div>
+        <div class="fchip"><i class="fas fa-calculator"></i> วันทำงานรวม <strong>${empCount} × ${mKeys.length} × ${WORK_DAYS_PER_MONTH} = ${totalWDAll.toLocaleString()} วัน</strong></div>
+      </div>
+
+      <div style="font-size:11px;color:var(--on-dark-m);margin-bottom:8px;line-height:1.6;">
+        <strong style="color:var(--on-dark-h)">วันทำงานทั้งหมด</strong> คำนวณจาก จำนวนพนักงาน × จำนวนเดือนในข้อมูล × ${WORK_DAYS_PER_MONTH} วัน/เดือน (มาตรฐาน)<br>
+        <strong style="color:var(--on-dark-h)">Absence Rate รายแผนก</strong> ใช้วันทำงาน = ${mKeys.length} เดือน × ${WORK_DAYS_PER_MONTH} วัน = <strong style="color:var(--on-dark-h)">${totalWD} วัน</strong> (ไม่ได้หารตามจำนวนคนในแผนก)
+      </div>
+
+      <div class="formula-legend">
+        <div class="fl-item"><div class="fl-dot" style="background:#F04438"></div> ≥ 3% — ความเสี่ยงสูง ต้องติดตาม</div>
+        <div class="fl-item"><div class="fl-dot" style="background:#F79009"></div> 1.5–3% — ความเสี่ยงปานกลาง</div>
+        <div class="fl-item"><div class="fl-dot" style="background:#12B76A"></div> &lt; 1.5% — อยู่ในเกณฑ์ดี</div>
+      </div>
+    </div>`;
+
   const maxAbs=Math.max(...dArr.map(d=>d[1].d/totalWD*100),1);
   let absHtml='';
   dArr.slice(0,8).forEach(([dept,v])=>{
@@ -1121,31 +1338,399 @@ function renderAlerts(){
     </div>`).join('');
 }
 
-/* ─── PDF ─── */
+/* ═══════════════════════════════════════════════════════════
+   PDF EXPORT — A4-NATIVE APPROACH
+   ─────────────────────────────────────────────────────────
+   แทนที่จะ capture หน้าจอแล้วบีบลง A4 (ทำให้ข้อมูลล้น/ตัด)
+   เราสร้าง pdfFrame ที่กว้าง 794px (= A4 @ 96dpi) แยกต่างหาก
+   วาง content ใหม่ด้วย font/spacing เล็กลงสำหรับพิมพ์
+   แล้ว capture ทีละหน้า (1122px = A4 height @ 96dpi)
+   ════════════════════════════════════════════════════════ */
 async function exportPDF(){
   const ov=document.getElementById('pdfOverlay');
+  const msgEl=document.getElementById('pdfMsg');
+  const barEl=document.getElementById('pdfBar');
+  const setP=(pct,msg)=>{barEl.style.width=pct+'%';if(msg)msgEl.textContent=msg;};
+
   ov.classList.add('show');
-  await new Promise(r=>setTimeout(r,200));
+  setP(5,'กำลังเตรียม layout…');
+  await new Promise(r=>setTimeout(r,100));
+
   try{
     const{jsPDF}=window.jspdf;
-    const root=document.getElementById('reportRoot');
-    const canvas=await html2canvas(root,{scale:2,useCORS:true,logging:false,backgroundColor:'#F0F2F5',scrollX:0,scrollY:-window.scrollY,windowWidth:root.scrollWidth,windowHeight:root.scrollHeight});
-    const margin=10,pw=210,ph=297,printW=pw-margin*2,printH=ph-margin*2;
-    const ratio=printW/canvas.width;
-    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    let srcY=0,first=true;
-    while(srcY<canvas.height){
-      if(!first)pdf.addPage();first=false;
-      const slH=Math.ceil(printH/ratio);
-      const sc=document.createElement('canvas');sc.width=canvas.width;sc.height=Math.min(slH,canvas.height-srcY);
-      sc.getContext('2d').drawImage(canvas,0,srcY,sc.width,sc.height,0,0,sc.width,sc.height);
-      pdf.addImage(sc.toDataURL('image/jpeg',.92),'JPEG',margin,margin,printW,sc.height*ratio);
-      srcY+=sc.height;
+    const p=processedState;
+    const empCount=Object.keys(p.emps).length;
+    const mKeys=Object.keys(p.months).filter(k=>k!=='Unknown').sort();
+    const totalWD=mKeys.length*WORK_DAYS_PER_MONTH||1;
+    const dArr=Object.entries(p.depts).sort((a,b)=>b[1].c-a[1].c);
+    const empArr=Object.entries(p.emps).sort((a,b)=>b[1].c-a[1].c);
+    const tArr=Object.entries(p.types).sort((a,b)=>b[1].c-a[1].c);
+
+    /* ── A4 constants ──
+       A4 = 210×297mm. At 96dpi: 794×1122px.
+       We use scale=2 so canvas = 1588×2244px → crisp output.
+       Printable area: width=754px (794-20px padding), height per page=1082px (1122-40px margin) */
+    const A4W=794, A4H=1122, MARGIN=20;
+    const PRINT_W=A4W-MARGIN*2;   // 754px
+    const PRINT_H=A4H-MARGIN*2;   // 1082px
+
+    // Build HTML for the pdfFrame
+    const now=new Date(), thY=now.getFullYear()+543;
+    const genDateStr=`${now.getDate()} ${TH_MF[now.getMonth()]} ${thY}`;
+    const genTimeStr=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+    const absRate=((p.days/totalWD/empCount)*100||0).toFixed(2);
+    const freq=empCount?(p.total/empCount).toFixed(1):'0';
+    const highRisk=Object.values(p.emps).filter(e=>e.d>=8).length;
+    const mfPct=p.total?((p.dow[1]+p.dow[5])/p.total*100).toFixed(1):'0';
+
+    /* helper: mini badge */
+    const bdg=(cls,txt)=>`<span class="pdf-badge ${cls}">${txt}</span>`;
+    const rkCls=(i)=>i===0?'rk-1':i===1?'rk-2':i===2?'rk-3':'rk-n';
+
+    /* ── COVER / HEADER BLOCK ── */
+    const coverHTML=`
+    <div class="pdf-cover">
+      <div class="pfc-left">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#C0392B;margin-bottom:4px;">Nigiwai Group · HR Analytics · 2026</div>
+        <h1>รายงานสถิติการลาพนักงาน</h1>
+        <p>Human Resources · ประจำปี 2569 · ข้อมูลจากระบบ HumanOS</p>
+        <div class="pfc-period" id="pdfPeriod">ช่วงข้อมูล: ${document.getElementById('datePeriod').textContent}</div>
+      </div>
+      <div class="pfc-right">
+        <div class="pfc-label">Generated</div>
+        <div class="pfc-val">${genDateStr}</div>
+        <div style="font-size:10px;color:#8899AA">${genTimeStr}</div>
+        <div style="height:1px;background:#1C2431;margin:8px 0"></div>
+        <div class="pfc-label">Source</div>
+        <div class="pfc-val" style="font-size:12px;">HumanOS</div>
+        <div class="pfc-conf">INTERNAL USE ONLY</div>
+      </div>
+    </div>
+
+    <div class="pdf-ins">
+      <div class="pdf-ins-item"><div class="pdf-ins-label">รวมครั้งที่ลา</div><div class="pdf-ins-val">${p.total.toLocaleString()}</div><div class="pdf-ins-sub">รายการทั้งหมด</div></div>
+      <div class="pdf-ins-item"><div class="pdf-ins-label">รวมวันลาทั้งสิ้น</div><div class="pdf-ins-val">${p.days.toFixed(1)}</div><div class="pdf-ins-sub">วันทำงาน</div></div>
+      <div class="pdf-ins-item"><div class="pdf-ins-label">เฉลี่ยวัน / คน</div><div class="pdf-ins-val">${empCount?(p.days/empCount).toFixed(1):'0'}</div><div class="pdf-ins-sub">วันต่อพนักงาน 1 คน</div></div>
+    </div>
+
+    <div class="pdf-section">Core KPIs</div>
+    <div class="pdf-kpi-row">
+      <div class="pdf-kpi kb"><div class="pdf-kpi-label">จำนวนครั้ง</div><div class="pdf-kpi-val">${p.total.toLocaleString()}</div><div class="pdf-kpi-note">รายการ</div></div>
+      <div class="pdf-kpi ka"><div class="pdf-kpi-label">รวมวันลา</div><div class="pdf-kpi-val">${p.days.toFixed(1)}</div><div class="pdf-kpi-note">วัน</div></div>
+      <div class="pdf-kpi kg"><div class="pdf-kpi-label">พนักงานที่ลา</div><div class="pdf-kpi-val">${empCount}</div><div class="pdf-kpi-note">คน</div></div>
+      <div class="pdf-kpi kr"><div class="pdf-kpi-label">แผนก</div><div class="pdf-kpi-val">${Object.keys(p.depts).length}</div><div class="pdf-kpi-note">แผนก</div></div>
+    </div>
+    <div class="pdf-section">HR Expert Metrics</div>
+    <div class="pdf-kpi-row">
+      <div class="pdf-kpi kb"><div class="pdf-kpi-label">Absence Rate</div><div class="pdf-kpi-val">${absRate}%</div><div class="pdf-kpi-note">% วันลา/วันทำงาน</div></div>
+      <div class="pdf-kpi ka"><div class="pdf-kpi-label">Leave Frequency</div><div class="pdf-kpi-val">${freq}</div><div class="pdf-kpi-note">ครั้ง/คน</div></div>
+      <div class="pdf-kpi kr"><div class="pdf-kpi-label">High-Risk Empl.</div><div class="pdf-kpi-val">${highRisk}</div><div class="pdf-kpi-note">คน (≥ 8 วัน)</div></div>
+      <div class="pdf-kpi kp"><div class="pdf-kpi-label">Mon/Fri Leave</div><div class="pdf-kpi-val">${mfPct}%</div><div class="pdf-kpi-note">Bridge Day Risk</div></div>
+    </div>`;
+
+    /* ── DEPT + TYPE charts placeholder ──
+       Charts require canvas — we capture them from the live page instead */
+    const liveMonthChart=document.getElementById('cMonth');
+    const liveTypeChart =document.getElementById('cType');
+    const liveDeptChart =document.getElementById('cDeptBar');
+    const liveDowChart  =document.getElementById('cDow');
+    const liveStackChart=document.getElementById('cStacked');
+
+    function chartDataUrl(el,w,h){
+      // scale-copy live chart to a new canvas of target size
+      const sc=document.createElement('canvas');
+      sc.width=w;sc.height=h;
+      sc.getContext('2d').drawImage(el,0,0,w,h);
+      return sc.toDataURL('image/png');
     }
+
+    const CH_HALF=`width:${PRINT_W/2-4}px;height:150px;`;
+    const CH_FULL=`width:${PRINT_W}px;height:160px;`;
+
+    const chartsHTML=`
+    <div class="pdf-section">แนวโน้มและประเภทการลา</div>
+    <div class="pdf-row c2">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-chart-line"></i> สถิติรายเดือน</div>
+        <img src="${chartDataUrl(liveMonthChart,Math.round(PRINT_W/2-4)*2,300)}" style="${CH_HALF}" alt="">
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-tags"></i> ประเภทการลา</div>
+        <img src="${chartDataUrl(liveTypeChart,Math.round(PRINT_W/2-4)*2,300)}" style="${CH_HALF}" alt="">
+      </div>
+    </div>
+    <div class="pdf-section">ภาพรวมแผนก &amp; Day of Week Pattern</div>
+    <div class="pdf-row c2">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-chart-area"></i> จำนวนครั้งรายแผนก</div>
+        <img src="${chartDataUrl(liveDeptChart,Math.round(PRINT_W/2-4)*2,300)}" style="${CH_HALF}" alt="">
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-calendar-week"></i> Pattern วันในสัปดาห์</div>
+        <img src="${chartDataUrl(liveDowChart,Math.round(PRINT_W/2-4)*2,300)}" style="${CH_HALF}" alt="">
+      </div>
+    </div>
+    <div class="pdf-section">ประเภทการลาแยกตามแผนก (Stacked)</div>
+    <div class="pdf-row c1">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-layer-group"></i> Stacked Breakdown</div>
+        <img src="${chartDataUrl(liveStackChart,PRINT_W*2,320)}" style="${CH_FULL}" alt="">
+      </div>
+    </div>`;
+
+    /* ── TOP 10 table ── */
+    const top10=empArr.slice(0,10);
+    const top10Rows=top10.map(([name,v],i)=>{
+      const bc=i<3?'br':i<6?'ba':'bk';
+      return`<tr>
+        <td style="text-align:center;font-weight:800">${i+1}</td>
+        <td style="font-weight:700;color:#101828">${i<3?'⚠ ':''}${name}</td>
+        <td>${bdg('bk',v.dept)}</td>
+        <td style="text-align:center">${bdg(bc,v.c)}</td>
+        <td style="text-align:center;font-weight:700">${v.d.toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+
+    /* ── Dept summary table ── */
+    const maxC=Math.max(...dArr.map(d=>d[1].c),1);
+    const deptRows=dArr.map(([dept,v])=>{
+      const pct=Math.round((v.c/maxC)*100);
+      const bc=pct>75?'br':pct>40?'ba':'bb';
+      return`<tr>
+        <td style="font-weight:700;color:#101828">${dept}</td>
+        <td style="text-align:center">${bdg(bc,v.c)}</td>
+        <td style="text-align:center">${v.d.toFixed(1)}</td>
+        <td style="text-align:center;color:#667085">${(v.d/v.c).toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+
+    const tablesHTML=`
+    <div class="pdf-section">รายบุคคลและสรุปรายแผนก</div>
+    <div class="pdf-row c2">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-trophy"></i> Top 10 พนักงานลามากที่สุด</div>
+        <table>
+          <thead><tr><th style="text-align:center">#</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th></tr></thead>
+          <tbody>${top10Rows}</tbody>
+        </table>
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-table"></i> สรุปรายแผนก</div>
+        <table>
+          <thead><tr><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th><th style="text-align:center">เฉลี่ย/ครั้ง</th></tr></thead>
+          <tbody>${deptRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+
+    /* ── Absence Rate bars ── */
+    const absRows=dArr.slice(0,8).map(([dept,v])=>{
+      const rate=(v.d/totalWD*100);
+      const maxAbs=Math.max(...dArr.map(d=>d[1].d/totalWD*100),1);
+      const barW=Math.min((rate/maxAbs)*100,100);
+      const col=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
+      const tc=rate>=3?'#B42318':rate>=1.5?'#B54708':'#027A48';
+      return`<div class="pdf-absrow">
+        <div class="pdf-abs-dept" title="${dept}">${dept}</div>
+        <div class="pdf-abs-bar"><div class="pdf-abs-fill" style="width:${barW}%;background:${col}"></div></div>
+        <div class="pdf-abs-pct" style="color:${tc}">${rate.toFixed(2)}%</div>
+      </div>`;
+    }).join('');
+
+    /* ── Risk segmentation ── */
+    const allEmps=Object.entries(p.emps).map(([n,v])=>({n,d:v.d,dept:v.dept}));
+    const highR=allEmps.filter(e=>e.d>=8).sort((a,b)=>b.d-a.d).slice(0,4);
+    const midR =allEmps.filter(e=>e.d>=4&&e.d<8).sort((a,b)=>b.d-a.d).slice(0,4);
+    const lowR =allEmps.filter(e=>e.d<4);
+    const riskHTML=`
+    <div class="pdf-risk-grid">
+      <div class="pdf-risk-item rh">
+        <div class="pdf-risk-label">⚠ High Risk (${allEmps.filter(e=>e.d>=8).length} คน)</div>
+        <div class="pdf-risk-names">${highR.length?highR.map(e=>`${e.n} <span style="color:#B42318;font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
+      </div>
+      <div class="pdf-risk-item rm">
+        <div class="pdf-risk-label">— Medium Risk (${allEmps.filter(e=>e.d>=4&&e.d<8).length} คน)</div>
+        <div class="pdf-risk-names">${midR.length?midR.map(e=>`${e.n} <span style="color:#B54708;font-weight:700">${e.d.toFixed(1)}วัน</span>`).join('<br>'):'—'}</div>
+      </div>
+      <div class="pdf-risk-item rl">
+        <div class="pdf-risk-label">✓ Normal (${lowR.length} คน)</div>
+        <div class="pdf-risk-names" style="color:#027A48">ลาน้อยกว่า 4 วัน/ปี<br><strong>${lowR.length}</strong> คน</div>
+      </div>
+    </div>`;
+
+    const analyticsHTML=`
+    <div class="pdf-section">Absence Rate &amp; Risk Segmentation</div>
+    <div class="pdf-row c2">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-percent"></i> Absence Rate รายแผนก</div>
+        ${absRows}
+        <div style="font-size:8.5px;color:#667085;margin-top:6px;padding-top:6px;border-top:1px dashed #E4E7EC;">⚠️ เกณฑ์: Absence Rate ไม่ควรเกิน 3%</div>
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-shield-halved"></i> Risk Segmentation</div>
+        ${riskHTML}
+      </div>
+    </div>`;
+
+    /* ── Heatmap ── */
+    const mF=document.getElementById('monthFilter').value;
+    const dF=document.getElementById('deptFilter').value;
+    const tF=document.getElementById('leaveTypeFilter').value;
+    const filteredForHM=originalData.filter(r=>(!mF||r.monthKey===mF)&&(!dF||r.แผนก===dF)&&(!tF||r.ประเภท===tF));
+    const hmDepts=dArr.slice(0,8).map(d=>d[0]);
+    const hmMat={};
+    filteredForHM.forEach(r=>{const d=r.แผนก,mk=r.monthKey;if(!hmMat[d])hmMat[d]={};hmMat[d][mk]=(hmMat[d][mk]||0)+1;});
+    const allHMV=Object.values(hmMat).flatMap(row=>Object.values(row));
+    const hmMax=Math.max(...allHMV,1);
+    function hmCol(v){if(!v)return{bg:'#F1F5F9',fg:'#98A2B3'};const t=v/hmMax;if(t<.25)return{bg:`rgba(46,144,250,${.2+t*2})`,fg:'#175CD3'};if(t<.55)return{bg:`rgba(247,144,9,${.25+t})`,fg:'#7A3B00'};return{bg:`rgba(192,57,43,${.35+t*.65})`,fg:'#fff'};}
+    let hmHTML='<div class="pdf-hm-months">';
+    mKeys.forEach(k=>{const[,m]=k.split('-');hmHTML+=`<div class="pdf-hm-month">${TH_M[+m-1]}</div>`;});
+    hmHTML+='</div>';
+    hmDepts.forEach(dept=>{
+      hmHTML+=`<div class="pdf-hm-row"><div class="pdf-hm-label" title="${dept}">${dept.length>9?dept.slice(0,9)+'…':dept}</div>`;
+      mKeys.forEach(mk=>{const v=(hmMat[dept]&&hmMat[dept][mk])||0;const{bg,fg}=hmCol(v);hmHTML+=`<div class="pdf-hm-cell" style="background:${bg};color:${fg}">${v||''}</div>`;});
+      hmHTML+='</div>';
+    });
+
+    /* ── Alerts ── */
+    const alertsEl=document.getElementById('alertList');
+    const alertItems=[...alertsEl.querySelectorAll('.alert-item')].map(el=>{
+      const icon=el.querySelector('.alert-icon i');
+      const titleEl=el.querySelector('.alert-title');
+      const bodyEl=el.querySelector('.alert-body');
+      const iconStyle=el.querySelector('.alert-icon').style;
+      return`<div class="pdf-alert">
+        <div class="pdf-alert-icon" style="background:${iconStyle.background};color:${iconStyle.color}"><i class="${icon.className}"></i></div>
+        <div><div class="pdf-alert-title">${titleEl.textContent}</div><div class="pdf-alert-body">${bodyEl.textContent}</div></div>
+      </div>`;
+    }).join('');
+
+    const alertsHTML=`
+    <div class="pdf-section">สัญญาณเตือนและข้อแนะนำ HR</div>
+    <div class="pdf-row c1"><div class="pdf-card">${alertItems}</div></div>`;
+
+    const heatmapHTML=`
+    <div class="pdf-section">Heatmap แผนก × เดือน</div>
+    <div class="pdf-row c1"><div class="pdf-card">
+      <div class="pdf-card-title"><i class="fas fa-th"></i> ความเข้มการลาแยกตามแผนก × ช่วงเวลา</div>
+      ${hmHTML}
+    </div></div>`;
+
+    /* ── Sick leave top ── */
+    const sickArr=Object.entries(p.sickLeave||{}).sort((a,b)=>b[1].c-a[1].c).slice(0,8);
+    const sickRows=sickArr.length?sickArr.map(([name,v],i)=>{
+      const bc=i<3?'br':i<6?'ba':'bk';
+      return`<tr><td style="text-align:center">${i+1}</td><td style="font-weight:700;color:#101828">${name}</td><td>${bdg('bk',v.dept)}</td><td style="text-align:center">${bdg(bc,v.c)}</td><td style="text-align:center">${v.d.toFixed(1)}</td></tr>`;
+    }).join(''):'<tr><td colspan="5" style="text-align:center;color:#667085;padding:8px">ไม่พบข้อมูลลาป่วย</td></tr>';
+
+    /* ── Leave type days doughnut (capture from live) ── */
+    const liveDoughnut=document.getElementById('cTypeDays');
+    const doughnutSrc=chartDataUrl(liveDoughnut,500,300);
+
+    const sickHTML=`
+    <div class="pdf-section">Sick Leave Analysis &amp; สัดส่วนประเภทการลา (วัน)</div>
+    <div class="pdf-row c2">
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-stethoscope"></i> Top พนักงานลาป่วยบ่อย</div>
+        <table>
+          <thead><tr><th style="text-align:center">#</th><th>ชื่อ</th><th>แผนก</th><th style="text-align:center">ครั้ง</th><th style="text-align:center">วัน</th></tr></thead>
+          <tbody>${sickRows}</tbody>
+        </table>
+        <div style="font-size:8.5px;color:#667085;margin-top:6px;padding-top:5px;border-top:1px dashed #E4E7EC;">💡 ลาป่วย ≥ 3 ครั้ง/ปี ควรส่งเสริม Wellness</div>
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-card-title"><i class="fas fa-chart-pie"></i> สัดส่วนประเภทการลา (วัน)</div>
+        <img src="${doughnutSrc}" style="width:${PRINT_W/2-24}px;height:140px;display:block;margin:0 auto;" alt="">
+      </div>
+    </div>`;
+
+    /* ── Page footer ── */
+    const footerHTML=(pageNum,totalPages)=>`
+    <div class="pdf-footer">
+      <div>รายงานจัดทำโดย HR Analytics · <strong>Nigiwai Group</strong> · ข้อมูลจาก HumanOS</div>
+      <div>พิมพ์เมื่อ ${genDateStr} ${genTimeStr} &nbsp;|&nbsp; หน้า ${pageNum}/${totalPages}</div>
+    </div>`;
+
+    /* ══ DEFINE PAGES ══
+       Each page is a self-contained HTML block that fits within PRINT_H (1082px).
+       We measure by rendering a hidden test and using scrollHeight — but for
+       reliability we define logical page breaks manually based on content size. */
+    const pages=[
+      coverHTML + chartsHTML,        // Page 1: KPIs + charts
+      tablesHTML + analyticsHTML,    // Page 2: tables + absence rate + risk
+      heatmapHTML + sickHTML,        // Page 3: heatmap + sick leave + doughnut
+      alertsHTML                     // Page 4: alerts
+    ];
+    const totalPages=pages.length;
+
+    /* ── Render each page into pdfFrame, capture, add to PDF ── */
+    const frame=document.getElementById('pdfFrame');
+    frame.style.width=A4W+'px';
+    frame.style.minHeight=A4H+'px';
+
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const MM_W=210, MM_H=297, MM_MARGIN=10;
+    const MM_PRINT_W=MM_W-MM_MARGIN*2;
+    const MM_PRINT_H=MM_H-MM_MARGIN*2;
+
+    for(let i=0;i<pages.length;i++){
+      setP(Math.round(10+i*(80/pages.length)), `กำลังสร้างหน้า ${i+1}/${pages.length}…`);
+      if(i>0) pdf.addPage();
+
+      // Render this page's HTML into the frame
+      frame.innerHTML=`<div class="pdf-page">${pages[i]}${footerHTML(i+1,totalPages)}</div>`;
+      await new Promise(r=>setTimeout(r,120)); // let layout settle
+
+      // Capture at scale=2 for retina quality
+      const canvas=await html2canvas(frame,{
+        scale:2,
+        useCORS:true,
+        logging:false,
+        backgroundColor:'#F0F2F5',
+        width:A4W,
+        windowWidth:A4W
+      });
+
+      // Scale canvas to MM: canvas px → mm
+      const canvasW=canvas.width;   // A4W*2
+      const canvasH=canvas.height;  // whatever height rendered
+      const scale=MM_PRINT_W/canvasW;
+      const renderedH=canvasH*scale;
+
+      // If content fits in one A4 page → single image
+      if(renderedH<=MM_PRINT_H){
+        pdf.addImage(canvas.toDataURL('image/jpeg',.92),'JPEG',MM_MARGIN,MM_MARGIN,MM_PRINT_W,renderedH);
+      } else {
+        // Slice vertically to fit multiple A4 pages
+        const pxPerPage=Math.floor(MM_PRINT_H/scale);
+        let srcY=0;let subPage=0;
+        while(srcY<canvasH){
+          if(subPage>0){pdf.addPage();}
+          const sliceH=Math.min(pxPerPage,canvasH-srcY);
+          const sc=document.createElement('canvas');
+          sc.width=canvasW;sc.height=sliceH;
+          sc.getContext('2d').drawImage(canvas,0,srcY,canvasW,sliceH,0,0,canvasW,sliceH);
+          pdf.addImage(sc.toDataURL('image/jpeg',.92),'JPEG',MM_MARGIN,MM_MARGIN,MM_PRINT_W,sliceH*scale);
+          srcY+=sliceH;subPage++;
+        }
+      }
+    }
+
+    // Cleanup
+    frame.innerHTML='';
+    setP(100,'กำลัง save…');
+    await new Promise(r=>setTimeout(r,100));
+
     const n=new Date();
     pdf.save(`Nigiwai_Leave_Report_${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}.pdf`);
-  }catch(err){alert('เกิดข้อผิดพลาด: '+err.message);}
-  finally{ov.classList.remove('show');}
+
+  }catch(err){
+    console.error(err);
+    alert('เกิดข้อผิดพลาดในการสร้าง PDF:\n'+err.message);
+  }finally{
+    ov.classList.remove('show');
+    setP(0,'');
+  }
 }
 </script>
 </body>
