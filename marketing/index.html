@@ -407,6 +407,66 @@ select option{background:#fff;color:#1a1a2e}
 .user-tab.tab-pending.active .tab-count{background:#d97706;color:#fff}
 
 /* ══════════════════════════════════
+   CONDITIONS POPUP
+══════════════════════════════════ */
+.cond-overlay{
+  display:none;position:fixed;inset:0;z-index:150;
+  background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:16px;
+}
+.cond-overlay.open{display:flex}
+.cond-popup{
+  background:#fff;border-radius:20px;
+  width:100%;max-width:520px;max-height:85vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  overflow:hidden;
+}
+.cond-popup-hdr{
+  padding:18px 22px 14px;
+  border-bottom:1px solid #f0f0f0;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  flex-shrink:0;
+}
+.cond-popup-hdr-left{}
+.cond-popup-eyebrow{
+  font-size:.68rem;font-weight:700;color:#4158d0;
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;
+}
+.cond-popup-title{font-size:1rem;font-weight:700;color:#1a1a2e;line-height:1.3}
+.cond-popup-x{
+  background:none;border:none;color:#aaa;cursor:pointer;
+  font-size:1.1rem;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.cond-popup-x:hover{background:#f0f0f0;color:#333}
+.cond-popup-body{
+  padding:20px 22px;overflow-y:auto;
+  font-size:.85rem;color:#444;line-height:1.85;white-space:pre-wrap;
+}
+.cond-popup-footer{
+  padding:14px 22px;border-top:1px solid #f0f0f0;
+  flex-shrink:0;
+}
+.cond-close-btn{
+  width:100%;padding:10px;border-radius:10px;border:1.5px solid #e8e8e8;
+  background:transparent;color:#666;cursor:pointer;font-size:.86rem;
+  font-family:var(--font);font-weight:600;transition:all .15s;
+}
+.cond-close-btn:hover{border-color:#4158d0;color:#4158d0;background:#eef0fb}
+
+/* Read-more link in info val */
+.read-more-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  color:#4158d0;font-size:.75rem;font-weight:600;
+  cursor:pointer;border:none;background:none;
+  font-family:var(--font);padding:0;margin-top:4px;
+  transition:color .15s;text-decoration:none;
+}
+.read-more-btn:hover{color:#c850c0;text-decoration:underline}
+
+/* ══════════════════════════════════
    TOAST
 ══════════════════════════════════ */
 .toast{position:fixed;top:20px;right:20px;z-index:500;padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:600;opacity:0;transform:translateY(-12px);transition:all .3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.15);display:flex;align-items:center;gap:8px}
@@ -585,6 +645,23 @@ select option{background:#fff;color:#1a1a2e}
   </div>
 </div>
 
+<!-- CONDITIONS POPUP -->
+<div class="cond-overlay" id="cond-overlay" onclick="if(event.target===this)closeCond()">
+  <div class="cond-popup">
+    <div class="cond-popup-hdr">
+      <div class="cond-popup-hdr-left">
+        <div class="cond-popup-eyebrow">📋 เงื่อนไขสำคัญ</div>
+        <div class="cond-popup-title" id="cond-popup-title"></div>
+      </div>
+      <button class="cond-popup-x" onclick="closeCond()">✕</button>
+    </div>
+    <div class="cond-popup-body" id="cond-popup-body"></div>
+    <div class="cond-popup-footer">
+      <button class="cond-close-btn" onclick="closeCond()">ปิด</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════
    SUPABASE
@@ -682,6 +759,20 @@ function updateTopBadges(){
   const codes=promos.filter(p=>p.promo_code&&p.status).length
   document.getElementById('tb-codes').textContent=codes+' Codes'
 }
+
+/* ══════════════════════════════
+   CONDITIONS POPUP
+══════════════════════════════ */
+function openCond(id){
+  const p=promos.find(x=>x.id===id)
+  if(!p||!p.conditions)return
+  document.getElementById('cond-popup-title').textContent=p.title
+  document.getElementById('cond-popup-body').textContent=p.conditions
+  document.getElementById('cond-overlay').classList.add('open')
+}
+function closeCond(){
+  document.getElementById('cond-overlay').classList.remove('open')
+}
 function getTagColor(i){return TAG_COLORS[i%TAG_COLORS.length]}
 function getGrad(i){return GRADS[i%GRADS.length]}
 function tagTextColor(i){
@@ -753,7 +844,8 @@ function renderCards(){
           <div class="info-icon">📋</div>
           <div>
             <div class="info-label">เงื่อนไขสำคัญ</div>
-            <div class="info-val">${p.conditions.substring(0,120)}${p.conditions.length>120?'...':''}</div>
+            <div class="info-val">${p.conditions.substring(0,100)}${p.conditions.length>100?'...':''}</div>
+            ${p.conditions.length>100?`<button class="read-more-btn" onclick="openCond('${p.id}')">อ่านทั้งหมด →</button>`:''}
           </div>
         </div>`:''}
       </div>`
