@@ -1,318 +1,582 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promo Master Pro | Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .loader { border-top-color: #4f46e5; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NIGIBEN – Promotion Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#dc2626;--red-dark:#991b1b;--red-deep:#7f1d1d;
+  --gold:#d97706;--bg:#080808;--surface:#0f0f0f;--card:#141414;
+  --border:rgba(255,255,255,0.07);--text:rgba(255,255,255,0.85);
+  --muted:rgba(255,255,255,0.4);--dim:rgba(255,255,255,0.18);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+
+/* ── TABS ── */
+.tab-bar{position:sticky;top:0;z-index:50;background:rgba(8,8,8,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px}
+.brand{font-size:1.15rem;font-weight:900;letter-spacing:-0.02em}
+.brand span{color:var(--red)}
+.tabs{display:flex;gap:4px}
+.tab{padding:6px 16px;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;color:var(--muted);background:transparent;font-family:inherit}
+.tab.active{background:var(--red);color:#fff}
+.tab:not(.active):hover{background:rgba(255,255,255,0.05);color:var(--text)}
+
+/* ── PAGES ── */
+.page{display:none}.page.active{display:block}
+
+/* ══ USER PAGE ══ */
+.hero{position:relative;overflow:hidden;background:linear-gradient(to bottom,rgba(127,29,29,0.5),transparent);padding:48px 20px 60px;text-align:center}
+.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:24px 24px;pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.3);border-radius:999px;padding:5px 14px;font-size:.75rem;color:rgba(252,165,165,0.9);margin-bottom:12px}
+.hero h1{font-size:clamp(2.2rem,6vw,3.2rem);font-weight:900;letter-spacing:-0.03em;line-height:1}
+.hero h1 span{color:var(--red)}
+.hero p{color:var(--muted);margin-top:8px;font-size:.9rem}
+.search-box{margin:20px auto 0;max-width:340px;position:relative}
+.search-box input{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:11px 16px 11px 40px;font-size:.85rem;color:#fff;outline:none;transition:border .2s;font-family:inherit}
+.search-box input:focus{border-color:rgba(220,38,38,0.5)}
+.search-box::before{content:'🔍';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.75rem;pointer-events:none}
+::placeholder{color:rgba(255,255,255,0.22)}
+
+.promo-grid{max-width:1100px;margin:-28px auto 0;padding:0 16px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.promo-card{border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:transform .25s,box-shadow .25s}
+.promo-card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(127,29,29,0.25)}
+.card-thumb{height:160px;display:flex;align-items:center;justify-content:center;font-size:4.5rem;position:relative}
+.card-thumb-0{background:linear-gradient(135deg,#450a0a,#7f1d1d)}
+.card-thumb-1{background:linear-gradient(135deg,#1c1917,#292524)}
+.card-thumb-2{background:linear-gradient(135deg,#1c1917,#44403c)}
+.card-thumb-3{background:linear-gradient(135deg,#450a0a,#9f1239)}
+.card-thumb-4{background:linear-gradient(135deg,#78350f,#92400e)}
+.card-thumb-5{background:linear-gradient(135deg,#14532d,#166534)}
+.card-thumb-6{background:linear-gradient(135deg,#1e1b4b,#312e81)}
+.card-badge{position:absolute;top:10px;right:10px;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;backdrop-filter:blur(4px)}
+.badge-public{background:rgba(220,38,38,0.6);color:#fff}
+.badge-staff{background:rgba(30,30,30,0.7);color:#d4d4d4;border:1px solid rgba(255,255,255,0.15)}
+.badge-partner{background:rgba(180,83,9,0.6);color:#fed7aa}
+.card-body{background:var(--card);padding:18px}
+.card-body h3{font-size:.95rem;font-weight:700;color:#fff;line-height:1.3;margin-bottom:6px}
+.card-body p{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.meta-tag{font-size:.7rem;color:var(--dim)}
+.card-code{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:2px 9px;font-family:monospace;font-size:.72rem;color:var(--muted);margin-bottom:10px}
+.card-expand{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;border-top:1px solid var(--border);color:var(--dim);font-size:.75rem;padding:10px 0 0;cursor:pointer;transition:color .2s;font-family:inherit}
+.card-expand:hover{color:var(--text)}
+.card-detail{padding-top:12px;font-size:.75rem;color:rgba(255,255,255,0.5);line-height:1.7;display:none}
+.card-detail.open{display:block;animation:fadeIn .2s ease}
+.detail-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:3px;margin-top:8px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ ADMIN PAGE ══ */
+.admin-wrap{max-width:1200px;margin:0 auto;padding:24px 16px 60px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:16px}
+.stat-card .slabel{font-size:.7rem;color:var(--muted);margin-bottom:4px}
+.stat-card .svalue{font-size:2.2rem;font-weight:900}
+.svalue.green{color:#34d399}.svalue.amber{color:#fbbf24}.svalue.white{color:#fff}
+
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-search{flex:1;min-width:200px;position:relative}
+.filter-search input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:9px 14px 9px 36px;font-size:.82rem;color:#fff;outline:none;font-family:inherit}
+.filter-search input:focus{border-color:rgba(220,38,38,0.4)}
+.filter-search::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.75rem}
+.filter-btns{display:flex;gap:6px}
+.filter-btn{padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--muted);transition:all .15s;font-family:inherit}
+.filter-btn.active,.filter-btn:hover{background:var(--red);color:#fff;border-color:transparent}
+.btn-add{display:flex;align-items:center;gap:6px;background:var(--red);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s;font-family:inherit}
+.btn-add:hover{background:#b91c1c}
+
+.table-wrap{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead tr{background:rgba(255,255,255,0.025)}
+th{text-align:left;padding:11px 16px;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;white-space:nowrap}
+tbody tr{border-top:1px solid rgba(255,255,255,0.04);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,0.02)}
+td{padding:12px 16px;vertical-align:middle}
+.td-title{font-weight:600;color:#fff;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td-sub{font-size:.72rem;color:var(--muted);margin-top:2px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.code-tag{display:inline-flex;align-items:center;background:rgba(255,255,255,0.06);border-radius:6px;padding:2px 8px;font-family:monospace;font-size:.7rem;color:var(--muted)}
+
+.status-badge{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
+.s-active{background:rgba(16,185,129,0.1);color:#34d399;border-color:rgba(16,185,129,0.25)}
+.s-pending{background:rgba(245,158,11,0.1);color:#fbbf24;border-color:rgba(245,158,11,0.25)}
+.s-inactive{background:rgba(100,116,139,0.1);color:#94a3b8;border-color:rgba(100,116,139,0.2)}
+
+.toggle-btn{background:none;border:none;cursor:pointer;font-size:1.4rem;line-height:1;transition:opacity .15s;padding:2px}
+.toggle-btn:hover{opacity:.7}
+.action-btn{background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:8px;transition:all .15s;color:var(--dim);font-size:.9rem}
+.action-btn:hover.edit{background:rgba(255,255,255,0.08);color:#fff}
+.action-btn:hover.del{background:rgba(220,38,38,0.1);color:#f87171}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+.modal-header h2{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.3rem;line-height:1;transition:color .15s;font-family:inherit}
+.modal-close:hover{color:#fff}
+.modal-body{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:.82rem;color:#fff;outline:none;transition:border .2s;font-family:inherit;resize:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(220,38,38,0.5)}
+select option{background:#111;color:#fff}
+.modal-footer{padding:0 22px 22px;display:flex;gap:10px}
+.btn-cancel{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;font-family:inherit;transition:all .15s}
+.btn-cancel:hover{color:#fff;border-color:rgba(255,255,255,0.2)}
+.btn-save{flex:1;padding:10px;border-radius:12px;border:none;background:var(--red);color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-save:hover{background:#b91c1c}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:16px;right:16px;z-index:200;padding:11px 18px;border-radius:12px;font-size:.82rem;font-weight:600;color:#fff;opacity:0;transform:translateY(-8px);transition:all .3s;pointer-events:none;min-width:200px}
+.toast.show{opacity:1;transform:none}
+.toast.success{background:#059669}
+.toast.error{background:#dc2626}
+
+/* ── LOADING / EMPTY ── */
+.skeleton{height:280px;border-radius:18px;background:rgba(255,255,255,0.04);animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%,100%{opacity:.4}50%{opacity:.8}}
+.empty-state{text-align:center;padding:60px 16px;color:var(--muted)}
+.empty-state .ei{font-size:3rem;margin-bottom:10px}
+.spin{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{position:fixed;inset:0;background:rgba(8,8,8,0.7);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.loading-box{background:#111;border:1px solid var(--border);border-radius:16px;padding:24px 32px;text-align:center;font-size:.9rem;color:var(--muted)}
+</style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body>
 
-    <div id="login-section" class="flex-grow flex items-center justify-center p-4 bg-slate-100">
-        <div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200">
-            <div class="text-center mb-10">
-                <div class="bg-indigo-600 w-16 h-16 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
-                    <span class="text-white text-3xl font-bold">P</span>
-                </div>
-                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Login</h1>
-                <p class="text-slate-500 mt-2">Manage your business promotions</p>
-            </div>
-            <form id="login-form" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
-                    <input type="email" id="login-email" placeholder="admin@example.com" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
-                </div>
-                <button type="submit" id="btn-login" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all shadow-indigo-200 shadow-lg active:scale-95">
-                    Sign In to System
-                </button>
-                <div id="login-error" class="hidden bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium text-center border border-red-100"></div>
-            </form>
+<!-- Loading overlay -->
+<div class="loading-overlay" id="init-loader">
+  <div class="loading-box">
+    <div class="spin" style="font-size:1.5rem;margin-bottom:8px">⟳</div><br/>
+    กำลังเชื่อมต่อ Supabase...
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Nav -->
+<div class="tab-bar">
+  <div class="brand">NIGI<span>BEN</span> <span style="color:var(--muted);font-weight:300;font-size:.8rem">Promotions</span></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchPage('user')">🏠 หน้าหลัก</button>
+    <button class="tab" onclick="switchPage('admin')">⚙️ Admin</button>
+  </div>
+</div>
+
+<!-- ══ USER PAGE ══ -->
+<div class="page active" id="page-user">
+  <div class="hero">
+    <div class="hero-badge">⭐ โปรโมชั่นพิเศษจาก NIGIBEN</div>
+    <h1>NIGI<span>BEN</span></h1>
+    <p>โปรโมชั่นและสิทธิพิเศษที่กำลังดำเนินอยู่ · สาขาดอนเมือง</p>
+    <div class="search-box">
+      <input type="text" placeholder="ค้นหาโปรโมชั่น..." id="user-search" oninput="filterCards()"/>
+    </div>
+  </div>
+  <div id="promo-count" style="text-align:center;color:var(--dim);font-size:.75rem;margin-top:-16px;margin-bottom:8px"></div>
+  <div class="promo-grid" id="promo-grid">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PAGE ══ -->
+<div class="page" id="page-admin">
+  <div class="admin-wrap">
+    <div class="stat-row">
+      <div class="stat-card"><div class="slabel">โปรทั้งหมด</div><div class="svalue white" id="st-total">–</div></div>
+      <div class="stat-card"><div class="slabel">กำลังใช้งาน</div><div class="svalue green" id="st-active">–</div></div>
+      <div class="stat-card"><div class="slabel">รออนุมัติ</div><div class="svalue amber" id="st-pending">–</div></div>
+    </div>
+    <div class="filter-row">
+      <div class="filter-search"><input type="text" id="admin-search" placeholder="ค้นหาชื่อโปร หรือ Promo Code…" oninput="renderTable()"/></div>
+      <div class="filter-btns">
+        <button class="filter-btn active" data-f="all" onclick="setFilter(this)">ทั้งหมด</button>
+        <button class="filter-btn" data-f="active" onclick="setFilter(this)">Active</button>
+        <button class="filter-btn" data-f="inactive" onclick="setFilter(this)">Inactive</button>
+      </div>
+      <button class="btn-add" onclick="openModal()">＋ เพิ่มโปร</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ชื่อโปรโมชั่น</th>
+            <th>กลุ่ม</th>
+            <th>รหัส</th>
+            <th>ระยะเวลา</th>
+            <th>สถานะ</th>
+            <th>Active</th>
+            <th style="text-align:center">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody">
+          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)"><span class="spin">⟳</span> กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p id="table-count" style="text-align:center;color:var(--dim);font-size:.72rem;margin-top:10px"></p>
+  </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">เพิ่มโปรโมชั่นใหม่</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id"/>
+      <div class="field full">
+        <label>ชื่อโปรโมชั่น *</label>
+        <input type="text" id="f-title" placeholder="เช่น Snap & Share – Get Free Daifuku"/>
+      </div>
+      <div class="field">
+        <label>กลุ่มเป้าหมาย</label>
+        <select id="f-target">
+          <option>ลูกค้าทั่วไป</option>
+          <option>Partner</option>
+          <option>Staff</option>
+          <option>Partner & Staff</option>
+        </select>
+      </div>
+      <div class="field"><label>Promo Code</label><input type="text" id="f-code" placeholder="เช่น 2600852"/></div>
+      <div class="field full"><label>คำอธิบาย</label><textarea id="f-desc" rows="2" placeholder="สั้นๆ ใช้แสดงบนหน้าหลัก"></textarea></div>
+      <div class="field full"><label>Mechanic (วิธีรับสิทธิ์)</label><textarea id="f-mech" rows="3" placeholder="ขั้นตอนการรับสิทธิ์โดยละเอียด"></textarea></div>
+      <div class="field full"><label>เงื่อนไข</label><textarea id="f-cond" rows="3" placeholder="ข้อกำหนดและเงื่อนไข"></textarea></div>
+      <div class="field full"><label>Image URL (ถ้ามี)</label><input type="text" id="f-img" placeholder="https://..."/></div>
+      <div class="field"><label>วันเริ่ม</label><input type="date" id="f-start"/></div>
+      <div class="field"><label>วันสิ้นสุด</label><input type="date" id="f-end"/></div>
+      <div class="field">
+        <label>สถานะการตรวจสอบ</label>
+        <select id="f-rstatus">
+          <option value="ใช้งานอยู่">ใช้งานอยู่</option>
+          <option value="รออนุมัติ">รออนุมัติ</option>
+          <option value="หยุดใช้งาน">หยุดใช้งาน</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Active (แสดงหน้าหลัก)</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+          <div id="f-toggle-track" onclick="toggleStatus()"
+            style="width:48px;height:26px;border-radius:13px;cursor:pointer;position:relative;transition:background .2s;background:var(--red)">
+            <div id="f-toggle-knob"
+              style="position:absolute;width:20px;height:20px;background:#fff;border-radius:10px;top:3px;right:3px;transition:right .2s;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>
+          </div>
+          <span id="f-status-lbl" style="font-size:.82rem;color:var(--muted)">เปิด</span>
+          <input type="hidden" id="f-status" value="1"/>
         </div>
+      </div>
     </div>
-
-    <div id="dashboard-section" class="hidden flex-grow flex flex-col">
-        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-indigo-600 p-1.5 rounded-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">PROMO<span class="text-indigo-600">MASTER</span></h1>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="hidden sm:flex flex-col items-end">
-                        <span id="user-email" class="text-sm font-bold text-slate-700"></span>
-                        <span class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Administrator</span>
-                    </div>
-                    <button onclick="handleLogout()" class="bg-slate-100 text-slate-600 p-2.5 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all border border-slate-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <main class="container mx-auto p-6 max-w-7xl flex-grow space-y-8">
-            
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 border-b border-slate-200 px-8 py-5 flex justify-between items-center">
-                    <h2 id="form-title" class="text-lg font-bold text-slate-800">Create New Promotion</h2>
-                    <span class="text-xs text-slate-400 font-medium tracking-tighter">ID: Auto-generated</span>
-                </div>
-                <form id="promo-form" class="p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <input type="hidden" id="promo-id">
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Promotion Title</label>
-                        <input type="text" id="title" placeholder="เช่น ลดล้างสต็อก 50%" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
-                    </div>
-                    
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Discount Code</label>
-                        <input type="text" id="discount_code" placeholder="เช่น SUMMER50" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-mono uppercase tracking-widest text-indigo-600">
-                    </div>
-
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Date</label>
-                        <input type="date" id="start_date" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none">
-                    </div>
-                    
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Date</label>
-                        <input type="date" id="end_date" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none">
-                    </div>
-
-                    <div class="md:col-span-2 flex items-center pt-6 px-2">
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="checkbox" id="is_active" class="sr-only peer" checked>
-                            <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500 relative shadow-inner"></div>
-                            <span class="ml-4 text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">เปิดใช้งานโปรโมชันนี้</span>
-                        </label>
-                    </div>
-
-                    <div class="md:col-span-4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description / Details</label>
-                        <textarea id="description" rows="3" placeholder="ระบุเงื่อนไขหรือรายละเอียดเพิ่มเติม..." class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none"></textarea>
-                    </div>
-
-                    <div class="md:col-span-4 flex gap-4 pt-4 border-t border-slate-100">
-                       <button type="submit" id="btn-save" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-100 active:scale-95">
-                           บันทึกข้อมูล
-                       </button>
-                       <button type="button" onclick="resetForm()" class="bg-white border border-slate-200 text-slate-500 px-6 py-4 rounded-2xl hover:bg-slate-50 hover:text-slate-800 transition-all font-medium">
-                           ยกเลิก / ล้างค่า
-                       </button>
-                    </div>
-                </form>
-            </section>
-
-            <section>
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Active Promotions</h2>
-                        <p class="text-slate-500 text-sm">รายการโปรโมชันทั้งหมดในระบบ</p>
-                    </div>
-                    <button onclick="fetchPromotions()" class="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    </button>
-                </div>
-                
-                <div id="loading" class="hidden flex flex-col items-center justify-center py-20 gap-4">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-12 w-12"></div>
-                    <p class="text-slate-400 font-medium animate-pulse">กำลังเรียกข้อมูล...</p>
-                </div>
-                
-                <div id="promo-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    </div>
-            </section>
-        </main>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-save" id="btn-save" onclick="savePromo()">💾 บันทึก</button>
     </div>
+  </div>
+</div>
 
-    <script>
-        // ================= JS CONFIG: แก้ไข 2 บรรทัดนี้เท่านั้น =================
-        const CONFIG_URL = 'https://lujvjowaywkyvixlyvst.supabase.co'; // เปลี่ยนเป็น URL ของคุณ
-        const CONFIG_KEY = 'YOUR_SUPABASE_ANON_KEY'; // เปลี่ยนเป็น ANON KEY ของคุณ
-        
-        // ใช้ชื่อ 'supa' เพื่อไม่ให้ชนกับชื่อ Library 'supabase'
-        const supa = supabase.createClient(CONFIG_URL, CONFIG_KEY);
+<script>
+// ══════════════════════════════════════════════
+// SUPABASE CONFIG
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'https://mwmcsmoshekavcspsyzt.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNzbW9zaGVrYXZjc3BzeXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjU3MzQsImV4cCI6MjA5MDAwMTczNH0.j6yCsqoZ1wAT1iw2DC2eBCE_Fuia3MNR6gvVLopQ7UI'
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY
+}
 
-        // UI Selectors
-        const loginSection = document.getElementById('login-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
-        const promoForm = document.getElementById('promo-form');
-        const promoGrid = document.getElementById('promo-grid');
-        const loadingDiv = document.getElementById('loading');
-        const userEmailSpan = document.getElementById('user-email');
-        const formTitle = document.getElementById('form-title');
+// ══════════════════════════════════════════════
+// API HELPERS
+// ══════════════════════════════════════════════
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: { ...HEADERS, 'Prefer': 'return=representation', ...(opts.headers || {}) },
+    ...opts
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.message || err.details || 'Request failed')
+  }
+  const text = await res.text()
+  return text ? JSON.parse(text) : []
+}
 
-        // 1. AUTH LOGIC: ตรวจสอบสถานะการเข้าสู่ระบบ
-        supa.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                loginSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-                userEmailSpan.innerText = session.user.email;
-                fetchPromotions();
-            } else {
-                loginSection.classList.remove('hidden');
-                dashboardSection.classList.add('hidden');
-            }
-        });
+async function getActive()  { return sbFetch('promotions?status=eq.true&order=created_at.desc') }
+async function getAll()     { return sbFetch('promotions?order=status.desc,created_at.desc') }
+async function insertPromo(d){ return sbFetch('promotions', { method:'POST', body: JSON.stringify(d) }) }
+async function updatePromo(id, d){ return sbFetch(`promotions?id=eq.${id}`, { method:'PATCH', body: JSON.stringify(d) }) }
+async function deletePromo(id)  { return sbFetch(`promotions?id=eq.${id}`, { method:'DELETE', headers:{'Prefer':''} }) }
 
-        // 2. SIGN IN: จัดการการล็อกอิน
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const btn = document.getElementById('btn-login');
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let allPromos = []
+let filterMode = 'all'
 
-            btn.disabled = true;
-            btn.innerText = "Processing...";
-            loginError.classList.add('hidden');
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+async function init() {
+  try {
+    allPromos = await getAll()
+    renderCards()
+    renderTable()
+  } catch(e) {
+    showToast('เชื่อมต่อ Supabase ไม่สำเร็จ: ' + e.message, 'error')
+    document.getElementById('promo-grid').innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1"><div class="ei">⚠️</div><p>ไม่สามารถโหลดข้อมูลได้<br/><small>' + e.message + '</small></p></div>'
+  } finally {
+    document.getElementById('init-loader').style.display = 'none'
+  }
+}
 
-            const { data, error } = await supa.auth.signInWithPassword({ email, password });
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function fmtDate(d) {
+  if (!d) return '–'
+  return new Date(d).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
+}
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = 'toast ' + type + ' show'
+  setTimeout(() => t.className = 'toast', 3000)
+}
+function badgeCls(target) {
+  if (target === 'Partner') return 'badge-partner'
+  if (target === 'Staff' || target === 'Partner & Staff') return 'badge-staff'
+  return 'badge-public'
+}
+function thumbIdx(i) { return i % 7 }
 
-            if (error) {
-                loginError.innerText = "ล็อกอินไม่สำเร็จ: " + error.message;
-                loginError.classList.remove('hidden');
-                btn.disabled = false;
-                btn.innerText = "Sign In to System";
-            }
-        });
+// ══════════════════════════════════════════════
+// USER PAGE
+// ══════════════════════════════════════════════
+function renderCards() {
+  const active = allPromos.filter(p => p.status)
+  const grid = document.getElementById('promo-grid')
+  document.getElementById('promo-count').textContent = active.length + ' โปรโมชั่นที่ใช้งานอยู่'
 
-        // 3. LOGOUT: ออกจากระบบ
-        async function handleLogout() {
-            await supa.auth.signOut();
-            window.location.reload();
-        }
+  if (!active.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">🍱</div><p>ยังไม่มีโปรโมชั่นที่เปิดใช้งาน</p></div>'
+    return
+  }
+  grid.innerHTML = active.map((p, i) => `
+    <div class="promo-card" data-title="${(p.title||'').toLowerCase()}" data-desc="${(p.description||'').toLowerCase()}">
+      <div class="card-thumb card-thumb-${thumbIdx(i)}">
+        <span>${p.icon || '🏷️'}</span>
+        <span class="card-badge ${badgeCls(p.target)}">${p.target || 'ลูกค้าทั่วไป'}</span>
+      </div>
+      <div class="card-body">
+        <h3>${p.title}</h3>
+        <p>${p.description || ''}</p>
+        <div class="card-meta">
+          <span class="meta-tag">🗓 ${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</span>
+        </div>
+        ${p.promo_code ? `<div><span class="card-code">🏷 ${p.promo_code}</span></div>` : ''}
+        <button class="card-expand" onclick="toggleDetail(this)">
+          <span>รายละเอียดเพิ่มเติม</span><span class="arr">›</span>
+        </button>
+        <div class="card-detail">
+          ${p.mechanic ? `<div class="detail-label">วิธีรับสิทธิ์</div><p>${p.mechanic}</p>` : ''}
+          ${p.conditions ? `<div class="detail-label">เงื่อนไข</div><p>${p.conditions}</p>` : ''}
+        </div>
+      </div>
+    </div>`).join('')
+}
 
-        // 4. READ: ดึงข้อมูลโปรโมชัน
-        async function fetchPromotions() {
-            loadingDiv.classList.remove('hidden');
-            promoGrid.innerHTML = '';
-            
-            const { data, error } = await supa
-                .from('promotions')
-                .select('*')
-                .order('created_at', { ascending: false });
+function filterCards() {
+  const q = document.getElementById('user-search').value.toLowerCase()
+  document.querySelectorAll('.promo-card').forEach(c => {
+    c.style.display = (c.dataset.title.includes(q) || c.dataset.desc.includes(q)) ? '' : 'none'
+  })
+}
 
-            loadingDiv.classList.add('hidden');
-            if (error) return alert('เกิดข้อผิดพลาด: ' + error.message);
+function toggleDetail(btn) {
+  const d = btn.nextElementSibling
+  const open = d.classList.toggle('open')
+  btn.querySelector('.arr').style.cssText = `transition:transform .2s;transform:rotate(${open?90:0}deg);display:inline-block`
+}
 
-            data.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col";
-                
-                const statusBadge = item.is_active 
-                    ? '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Active</span>'
-                    : '<span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Inactive</span>';
+// ══════════════════════════════════════════════
+// ADMIN TABLE
+// ══════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('st-total').textContent = allPromos.length
+  document.getElementById('st-active').textContent = allPromos.filter(p => p.status).length
+  document.getElementById('st-pending').textContent = allPromos.filter(p => p.review_status === 'รออนุมัติ').length
+}
 
-                card.innerHTML = `
-                    <div class="p-6 flex-grow">
-                        <div class="flex justify-between items-start mb-4">
-                            ${statusBadge}
-                            <div class="flex gap-2">
-                                <button onclick="editPromo('${item.id}')" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button onclick="deletePromo('${item.id}')" class="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="font-bold text-slate-900 text-xl mb-2 leading-tight">${item.title}</h3>
-                        ${item.discount_code ? `<p class="font-mono text-indigo-600 font-black text-sm mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-lg">${item.discount_code}</p>` : ''}
-                        <p class="text-slate-500 text-sm line-clamp-3 leading-relaxed mb-4">${item.description || 'ไม่มีรายละเอียด...'}</p>
-                    </div>
-                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
-                        <div>📅 ${item.start_date || 'N/A'}</div>
-                        <div>🏁 ${item.end_date || 'N/A'}</div>
-                    </div>
-                `;
-                promoGrid.appendChild(card);
-            });
-        }
+function setFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  filterMode = btn.dataset.f
+  renderTable()
+}
 
-        // 5. CREATE & UPDATE: บันทึกข้อมูล
-        promoForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-save');
-            const id = document.getElementById('promo-id').value;
-            
-            const payload = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                discount_code: document.getElementById('discount_code').value.toUpperCase(),
-                start_date: document.getElementById('start_date').value || null,
-                end_date: document.getElementById('end_date').value || null,
-                is_active: document.getElementById('is_active').checked
-            };
+function statusBadge(r) {
+  if (r === 'ใช้งานอยู่') return `<span class="status-badge s-active">✓ ใช้งานอยู่</span>`
+  if (r === 'รออนุมัติ')  return `<span class="status-badge s-pending">⏳ รออนุมัติ</span>`
+  return `<span class="status-badge s-inactive">⊘ หยุดใช้งาน</span>`
+}
 
-            btn.disabled = true;
-            btn.innerText = "กำลังบันทึก...";
+function renderTable() {
+  updateStats()
+  const q = (document.getElementById('admin-search').value || '').toLowerCase()
+  const rows = allPromos.filter(p => {
+    const ms = (p.title||'').toLowerCase().includes(q) || (p.promo_code||'').includes(q)
+    const mf = filterMode === 'all' || (filterMode === 'active' && p.status) || (filterMode === 'inactive' && !p.status)
+    return ms && mf
+  })
+  const tbody = document.getElementById('admin-tbody')
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="ei">🍱</div><p>ไม่พบโปรโมชั่น</p></div></td></tr>`
+    document.getElementById('table-count').textContent = ''; return
+  }
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td><div class="td-title">${p.title}</div><div class="td-sub">${p.description||''}</div></td>
+      <td style="color:var(--muted);font-size:.75rem;white-space:nowrap">${p.target||'–'}</td>
+      <td>${p.promo_code ? `<span class="code-tag">${p.promo_code}</span>` : '<span style="color:var(--dim)">—</span>'}</td>
+      <td style="font-size:.72rem;color:var(--muted);white-space:nowrap">${fmtDate(p.start_date)}<br/><span style="color:var(--dim)">→ ${fmtDate(p.end_date)}</span></td>
+      <td>${statusBadge(p.review_status)}</td>
+      <td>
+        <button class="toggle-btn" onclick="toggleActive('${p.id}',${p.status})" title="${p.status?'ปิดใช้งาน':'เปิดใช้งาน'}">
+          ${p.status ? '🟢' : '⚫'}
+        </button>
+      </td>
+      <td style="text-align:center">
+        <button class="action-btn edit" onclick="openModal('${p.id}')" title="แก้ไข">✏️</button>
+        <button class="action-btn del" onclick="confirmDel('${p.id}','${p.title.replace(/'/g,"\\'")}')">🗑️</button>
+      </td>
+    </tr>`).join('')
+  document.getElementById('table-count').textContent = `แสดง ${rows.length} จาก ${allPromos.length} รายการ`
+}
 
-            let result;
-            if (id) {
-                // UPDATE (SQL: update promotions where id = id)
-                result = await supa.from('promotions').update(payload).eq('id', id);
-            } else {
-                // INSERT (SQL: insert into promotions)
-                result = await supa.from('promotions').insert([payload]);
-            }
+async function toggleActive(id, current) {
+  try {
+    await updatePromo(id, { status: !current })
+    const p = allPromos.find(x => x.id === id)
+    if (p) p.status = !current
+    renderCards(); renderTable()
+    showToast(`${!current ? '✅ เปิดใช้งาน' : '⛔ ปิดใช้งาน'} แล้ว`)
+  } catch(e) { showToast('Error: ' + e.message, 'error') }
+}
 
-            if (result.error) {
-                alert('บันทึกผิดพลาด: ' + result.error.message);
-            } else {
-                resetForm();
-                fetchPromotions();
-            }
-            btn.disabled = false;
-            btn.innerText = "บันทึกข้อมูล";
-        });
+async function confirmDel(id, title) {
+  if (!confirm(`ต้องการลบ "${title}" ใช่หรือไม่?\nการลบไม่สามารถย้อนกลับได้`)) return
+  try {
+    await deletePromo(id)
+    allPromos = allPromos.filter(p => p.id !== id)
+    renderCards(); renderTable()
+    showToast('🗑️ ลบเรียบร้อยแล้ว')
+  } catch(e) { showToast('Error: ' + e.message, 'error') }
+}
 
-        // 6. DELETE: ลบข้อมูล
-        async function deletePromo(id) {
-            if (!confirm('คุณต้องการลบโปรโมชันนี้ใช่หรือไม่? ข้อมูลจะหายถาวร')) return;
-            const { error } = await supa.from('promotions').delete().eq('id', id);
-            if (error) alert('ลบผิดพลาด: ' + error.message);
-            else fetchPromotions();
-        }
+// ══════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════
+function openModal(id) {
+  const p = id ? allPromos.find(x => x.id === id) : null
+  document.getElementById('modal-title').textContent = p ? 'แก้ไขโปรโมชั่น' : 'เพิ่มโปรโมชั่นใหม่'
+  document.getElementById('f-id').value      = p?.id || ''
+  document.getElementById('f-title').value   = p?.title || ''
+  document.getElementById('f-target').value  = p?.target || 'ลูกค้าทั่วไป'
+  document.getElementById('f-code').value    = p?.promo_code || ''
+  document.getElementById('f-desc').value    = p?.description || ''
+  document.getElementById('f-mech').value    = p?.mechanic || ''
+  document.getElementById('f-cond').value    = p?.conditions || ''
+  document.getElementById('f-img').value     = p?.image_url || ''
+  document.getElementById('f-start').value   = p?.start_date || ''
+  document.getElementById('f-end').value     = p?.end_date || ''
+  document.getElementById('f-rstatus').value = p?.review_status || 'ใช้งานอยู่'
+  setToggleUI(p ? p.status : true)
+  document.getElementById('modal-overlay').classList.add('open')
+  setTimeout(() => document.getElementById('f-title').focus(), 100)
+}
 
-        // 7. EDIT: ดึงข้อมูลขึ้นฟอร์มเพื่อแก้ไข
-        async function editPromo(id) {
-            const { data, error } = await supa.from('promotions').select('*').eq('id', id).single();
-            if (data) {
-                document.getElementById('promo-id').value = data.id;
-                document.getElementById('title').value = data.title;
-                document.getElementById('description').value = data.description;
-                document.getElementById('discount_code').value = data.discount_code;
-                document.getElementById('start_date').value = data.start_date;
-                document.getElementById('end_date').value = data.end_date;
-                document.getElementById('is_active').checked = data.is_active;
-                
-                formTitle.innerText = "Editing Promotion: " + data.title;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open') }
 
-        function resetForm() {
-            promoForm.reset();
-            document.getElementById('promo-id').value = '';
-            document.getElementById('is_active').checked = true;
-            formTitle.innerText = "Create New Promotion";
-        }
-    </script>
+function setToggleUI(on) {
+  document.getElementById('f-status').value = on ? '1' : '0'
+  document.getElementById('f-toggle-track').style.background = on ? 'var(--red)' : 'rgba(255,255,255,0.12)'
+  document.getElementById('f-toggle-knob').style.right = on ? '3px' : '25px'
+  document.getElementById('f-status-lbl').textContent = on ? 'เปิด' : 'ปิด'
+}
+
+function toggleStatus() { setToggleUI(document.getElementById('f-status').value !== '1') }
+
+async function savePromo() {
+  const title = document.getElementById('f-title').value.trim()
+  if (!title) { showToast('กรุณากรอกชื่อโปรโมชั่น', 'error'); return }
+
+  const btn = document.getElementById('btn-save')
+  btn.disabled = true; btn.innerHTML = '<span class="spin">⟳</span> กำลังบันทึก...'
+
+  const id = document.getElementById('f-id').value
+  const payload = {
+    title,
+    target:        document.getElementById('f-target').value,
+    promo_code:    document.getElementById('f-code').value || null,
+    description:   document.getElementById('f-desc').value || null,
+    mechanic:      document.getElementById('f-mech').value || null,
+    conditions:    document.getElementById('f-cond').value || null,
+    image_url:     document.getElementById('f-img').value || null,
+    start_date:    document.getElementById('f-start').value || null,
+    end_date:      document.getElementById('f-end').value || null,
+    review_status: document.getElementById('f-rstatus').value,
+    status:        document.getElementById('f-status').value === '1'
+  }
+
+  try {
+    if (id) {
+      const updated = await updatePromo(id, payload)
+      const idx = allPromos.findIndex(p => p.id === id)
+      if (idx !== -1) allPromos[idx] = { ...allPromos[idx], ...payload }
+      showToast('✅ อัพเดทเรียบร้อย')
+    } else {
+      const created = await insertPromo(payload)
+      allPromos = [created[0] || { id: Date.now(), ...payload }, ...allPromos]
+      showToast('✅ เพิ่มโปรโมชั่นใหม่แล้ว')
+    }
+    closeModal(); renderCards(); renderTable()
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error')
+  } finally {
+    btn.disabled = false; btn.innerHTML = '💾 บันทึก'
+  }
+}
+
+// ══════════════════════════════════════════════
+// PAGE SWITCH
+// ══════════════════════════════════════════════
+function switchPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'))
+  document.getElementById('page-' + p).classList.add('active')
+  document.querySelector(`.tab[onclick*="${p}"]`).classList.add('active')
+}
+
+// Close modal on backdrop click
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal()
+})
+
+// Start
+init()
+</script>
 </body>
 </html>
