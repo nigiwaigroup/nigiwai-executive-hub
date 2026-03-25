@@ -1079,8 +1079,9 @@ function calcStats(data){
   data.forEach(function(r){
     s.days+=r.ลา_วัน;
     var dept=r.แผนก, type=r.ประเภท;
-    if(!s.depts[dept]) s.depts[dept]={c:0,d:0};
+    if(!s.depts[dept]) s.depts[dept]={c:0,d:0,emps:new Set()};
     s.depts[dept].c++; s.depts[dept].d+=r.ลา_วัน;
+    s.depts[dept].emps.add(r.ชื่อ); // track unique employees per dept
     if(!s.types[type]) s.types[type]={c:0,d:0};
     s.types[type].c++; s.types[type].d+=r.ลา_วัน;
     if(!s.emps[r.ชื่อ]) s.emps[r.ชื่อ]={c:0,d:0,dept:dept};
@@ -1102,6 +1103,11 @@ function calcStats(data){
       if(!s.sickLeave[r.ชื่อ]) s.sickLeave[r.ชื่อ]={c:0,d:0,dept:dept};
       s.sickLeave[r.ชื่อ].c++; s.sickLeave[r.ชื่อ].d+=r.ลา_วัน;
     }
+  });
+  // convert Set to count for serialization
+  Object.keys(s.depts).forEach(function(dept){
+    s.depts[dept].empCount = s.depts[dept].emps.size;
+    delete s.depts[dept].emps;
   });
   processedState=s;
 }
@@ -1236,20 +1242,60 @@ function renderNewWidgets(){
   document.getElementById('momWrap').innerHTML=momHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
 
   var dArr=Object.entries(p.depts).sort(function(a,b){return b[1].d-a[1].d;});
-  var maxAbs=Math.max.apply(null,dArr.map(function(d){return d[1].d/totalWD*100;}).concat([0.01]));
 
-  /* Formula box */
+  /* ── Overall Absence Rate (ใช้จำนวนพนักงานทั้งหมด) ── */
   var overallRate=(p.days/totalWDAll*100);
-  document.getElementById('absFormulaBox').innerHTML='<div class="formula-box"><div class="formula-box-title"><i class="fas fa-function"></i> สูตรการคำนวณ Absence Rate</div><div class="formula-eq"><div class="fe-block"><div class="fe-val">'+p.days.toFixed(1)+'</div><div class="fe-lbl">รวมวันลา (วัน)</div></div><div class="fe-op">÷</div><div class="fe-block"><div class="fe-val">'+totalWDAll.toLocaleString()+'</div><div class="fe-lbl">วันทำงานทั้งหมด</div></div><div class="fe-op">×</div><div class="fe-block"><div class="fe-val">100</div><div class="fe-lbl">&nbsp;</div></div><div class="fe-op">=</div><div class="fe-result"><div class="fe-val">'+overallRate.toFixed(2)+'%</div><div class="fe-lbl">Absence Rate รวม</div></div></div><div class="formula-chips"><div class="fchip"><i class="fas fa-users"></i> พนักงาน <strong>'+empCount+' คน</strong></div><div class="fchip"><i class="fas fa-calendar-days"></i> จำนวนเดือน <strong>'+mKeys.length+' เดือน</strong></div><div class="fchip"><i class="fas fa-briefcase"></i> วันทำงาน/เดือน <strong>'+WORK_DAYS_PER_MONTH+' วัน</strong></div><div class="fchip"><i class="fas fa-calculator"></i> วันทำงานรวม <strong>'+empCount+' × '+mKeys.length+' × '+WORK_DAYS_PER_MONTH+' = '+totalWDAll.toLocaleString()+' วัน</strong></div></div><div style="font-size:11px;color:var(--on-dark-m);margin-bottom:8px;line-height:1.6;"><strong style="color:var(--on-dark-h)">วันทำงานทั้งหมด</strong> คำนวณจาก จำนวนพนักงาน × จำนวนเดือนในข้อมูล × '+WORK_DAYS_PER_MONTH+' วัน/เดือน (มาตรฐาน)<br><strong style="color:var(--on-dark-h)">Absence Rate รายแผนก</strong> ใช้วันทำงาน = '+mKeys.length+' เดือน × '+WORK_DAYS_PER_MONTH+' วัน = <strong style="color:var(--on-dark-h)">'+totalWD+' วัน</strong></div><div class="formula-legend"><div class="fl-item"><div class="fl-dot" style="background:#F04438"></div> ≥ 3% — ความเสี่ยงสูง</div><div class="fl-item"><div class="fl-dot" style="background:#F79009"></div> 1.5–3% — ความเสี่ยงปานกลาง</div><div class="fl-item"><div class="fl-dot" style="background:#12B76A"></div> &lt; 1.5% — อยู่ในเกณฑ์ดี</div></div></div>';
 
-  var absHtml='';
-  dArr.slice(0,8).forEach(function(entry){
+  /* ── Per-dept rate: วันลาแผนก / (จำนวนคนในแผนก × เดือน × 22) × 100 ── */
+  var deptRates=dArr.map(function(entry){
     var dept=entry[0], v=entry[1];
-    var rate=(v.d/totalWD*100);
-    var barW=Math.min((rate/maxAbs)*100,100);
-    var barColor=rate>=3?'#F04438':rate>=1.5?'#F79009':'#12B76A';
-    var pctColor=rate>=3?'var(--sem-red)':rate>=1.5?'var(--sem-amber)':'var(--sem-green)';
-    absHtml+='<div class="absrate-row"><div class="absrate-dept">'+dept+'</div><div class="absrate-bar-wrap"><div class="absrate-bar" style="width:'+barW+'%;background:'+barColor+'"></div></div><div class="absrate-pct" style="color:'+pctColor+'">'+rate.toFixed(2)+'%</div></div>';
+    var deptEmpCount=v.empCount||1;
+    var deptWorkDays=deptEmpCount*mKeys.length*WORK_DAYS_PER_MONTH||1;
+    var rate=(v.d/deptWorkDays*100);
+    return{dept:dept,v:v,rate:rate,deptEmpCount:deptEmpCount,deptWorkDays:deptWorkDays};
+  });
+  var maxAbsRate=Math.max.apply(null,deptRates.map(function(r){return r.rate;}).concat([0.01]));
+
+  /* Formula box — แสดงสูตรองค์กรรวม */
+  document.getElementById('absFormulaBox').innerHTML='<div class="formula-box">'
+    +'<div class="formula-box-title"><i class="fas fa-function"></i> สูตรการคำนวณ Absence Rate</div>'
+    +'<div class="formula-eq">'
+      +'<div class="fe-block"><div class="fe-val">'+p.days.toFixed(1)+'</div><div class="fe-lbl">รวมวันลา (วัน)</div></div>'
+      +'<div class="fe-op">÷</div>'
+      +'<div class="fe-block"><div class="fe-val">'+totalWDAll.toLocaleString()+'</div><div class="fe-lbl">วันทำงานรวมทุกคน</div></div>'
+      +'<div class="fe-op">× 100 =</div>'
+      +'<div class="fe-result"><div class="fe-val">'+overallRate.toFixed(2)+'%</div><div class="fe-lbl">Absence Rate รวม</div></div>'
+    +'</div>'
+    +'<div class="formula-chips">'
+      +'<div class="fchip"><i class="fas fa-users"></i> พนักงาน <strong>'+empCount+' คน</strong></div>'
+      +'<div class="fchip"><i class="fas fa-calendar-days"></i> จำนวนเดือน <strong>'+mKeys.length+' เดือน</strong></div>'
+      +'<div class="fchip"><i class="fas fa-briefcase"></i> วันทำงาน/เดือน <strong>'+WORK_DAYS_PER_MONTH+' วัน</strong></div>'
+      +'<div class="fchip"><i class="fas fa-calculator"></i> วันทำงานรวม <strong>'+empCount+' × '+mKeys.length+' × '+WORK_DAYS_PER_MONTH+' = '+totalWDAll.toLocaleString()+' วัน</strong></div>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--on-dark-m);margin-bottom:8px;line-height:1.6;">'
+      +'<strong style="color:var(--on-dark-h)">Absence Rate รายแผนก</strong> = วันลาแผนก ÷ (คนในแผนก × '+mKeys.length+' เดือน × '+WORK_DAYS_PER_MONTH+' วัน) × 100'
+      +'<br><span style="color:#8899AA">ใช้จำนวนพนักงานจริงของแต่ละแผนก — ทำให้ค่าไม่เกิน 100%</span>'
+    +'</div>'
+    +'<div class="formula-legend">'
+      +'<div class="fl-item"><div class="fl-dot" style="background:#F04438"></div> ≥ 3% — ความเสี่ยงสูง</div>'
+      +'<div class="fl-item"><div class="fl-dot" style="background:#F79009"></div> 1.5–3% — ความเสี่ยงปานกลาง</div>'
+      +'<div class="fl-item"><div class="fl-dot" style="background:#12B76A"></div> &lt; 1.5% — อยู่ในเกณฑ์ดี</div>'
+    +'</div>'
+  +'</div>';
+
+  /* Absence Rate bars — per-dept correct formula */
+  var absHtml='';
+  deptRates.slice(0,8).forEach(function(r){
+    var barW=Math.min((r.rate/maxAbsRate)*100,100);
+    var barColor=r.rate>=3?'#F04438':r.rate>=1.5?'#F79009':'#12B76A';
+    var pctColor=r.rate>=3?'var(--sem-red)':r.rate>=1.5?'var(--sem-amber)':'var(--sem-green)';
+    var tooltip=r.dept+': '+r.v.d.toFixed(1)+'วัน ÷ ('+r.deptEmpCount+'คน × '+mKeys.length+'เดือน × '+WORK_DAYS_PER_MONTH+'วัน = '+r.deptWorkDays+'วัน)';
+    absHtml+='<div class="absrate-row" title="'+tooltip+'">'
+      +'<div class="absrate-dept">'+r.dept+'</div>'
+      +'<div style="font-size:10px;color:var(--on-light-x);margin-right:6px;flex-shrink:0;">'+r.deptEmpCount+'คน</div>'
+      +'<div class="absrate-bar-wrap"><div class="absrate-bar" style="width:'+barW+'%;background:'+barColor+'"></div></div>'
+      +'<div class="absrate-pct" style="color:'+pctColor+'">'+r.rate.toFixed(2)+'%</div>'
+    +'</div>';
   });
   document.getElementById('absRateWrap').innerHTML=absHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
 
@@ -1455,7 +1501,10 @@ function buildPrintLayout(){
   var highR=allEmps.filter(function(e){return e.d>=8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
   var midR=allEmps.filter(function(e){return e.d>=4&&e.d<8;}).sort(function(a,b){return b.d-a.d;}).slice(0,5);
   var lowR=allEmps.filter(function(e){return e.d<4;});
-  var maxAbs=Math.max.apply(null,dArr.map(function(d){return d[1].d/totalWD*100;}).concat([0.01]));
+  var maxAbs=Math.max.apply(null,dArr.map(function(d){
+    var ec=d[1].empCount||1;
+    return d[1].d/(ec*mKeys.length*WORK_DAYS_PER_MONTH)*100;
+  }).concat([0.01]));
   var mF=document.getElementById('monthFilter').value;
   var dF=document.getElementById('deptFilter').value;
   var tF=document.getElementById('leaveTypeFilter').value;
@@ -1487,11 +1536,18 @@ function buildPrintLayout(){
   }).join('');
   var absRowsH=dArr.slice(0,8).map(function(entry){
     var dept=entry[0],v=entry[1];
-    var rate=(v.d/totalWD*100);
+    var ec=v.empCount||1;
+    var deptWD=ec*mKeys.length*WORK_DAYS_PER_MONTH||1;
+    var rate=(v.d/deptWD*100);
     var barW=Math.min((rate/maxAbs)*100,100);
     var col=rate>=3?'#f04438':rate>=1.5?'#f79009':'#12b76a';
     var tc=rate>=3?'#b42318':rate>=1.5?'#b54708':'#027a48';
-    return '<div style="display:flex;align-items:center;gap:4pt;padding:2pt 0;border-bottom:1px solid #f5f5f5"><div style="font-size:8pt;font-weight:600;color:#101828;width:55pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(dept.length>9?dept.slice(0,9)+'…':dept)+'</div><div style="flex:1;height:5pt;background:#e4e7ec;border-radius:3pt;overflow:hidden"><div style="width:'+barW+'%;height:100%;background:'+col+';border-radius:3pt"></div></div><div style="font-size:8pt;font-weight:700;color:'+tc+';min-width:36pt;text-align:right">'+rate.toFixed(2)+'%</div></div>';
+    return '<div style="display:flex;align-items:center;gap:4pt;padding:2pt 0;border-bottom:1px solid #f5f5f5">'
+      +'<div style="font-size:8pt;font-weight:600;color:#101828;width:52pt;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(dept.length>9?dept.slice(0,9)+String.fromCharCode(8230):dept)+'</div>'
+      +'<div style="font-size:7pt;color:#8899aa;width:20pt;flex-shrink:0;text-align:center">'+ec+'\u0e04\u0e19</div>'
+      +'<div style="flex:1;height:5pt;background:#e4e7ec;border-radius:3pt;overflow:hidden"><div style="width:'+barW+'%;height:100%;background:'+col+';border-radius:3pt"></div></div>'
+      +'<div style="font-size:8pt;font-weight:700;color:'+tc+';min-width:36pt;text-align:right">'+rate.toFixed(2)+'%</div>'
+    +'</div>';
   }).join('');
 
   var pg3='<div class="print-page">';
