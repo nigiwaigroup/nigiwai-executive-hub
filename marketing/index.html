@@ -159,16 +159,7 @@ body{font-family:var(--font);background:var(--bg);color:#1a1a2e;min-height:100vh
 .card-header{
   padding:18px 22px;position:relative;
   display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
-  background-size:cover;background-position:center;background-repeat:no-repeat;
-  min-height:100px;
 }
-.card-header.has-img::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.30) 100%);
-  border-radius:0;pointer-events:none;
-}
-.card-header.has-img .card-header-left,
-.card-header.has-img .card-code-box{position:relative;z-index:1}
 .card-header-left{display:flex;flex-direction:column;gap:10px}
 .card-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .tag-pro{
@@ -249,6 +240,25 @@ body{font-family:var(--font);background:var(--bg);color:#1a1a2e;min-height:100vh
 .discount-num{font-size:2.5rem;font-weight:800;color:#4158d0;line-height:1}
 .discount-detail{font-size:.82rem;color:#555;line-height:1.7}
 .discount-detail b{color:#4158d0}
+
+/* Promo Image */
+.card-promo-img{
+  border-top:1px solid #f0f0f0;
+  padding:16px 22px 20px;
+  background:#fafafa;
+}
+.card-promo-img-label{
+  font-size:.72rem;font-weight:600;color:#999;
+  text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:12px;
+}
+.card-promo-img img{
+  display:block;width:100%;max-width:100%;
+  border-radius:10px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.10);
+  object-fit:contain;
+  background:#fff;
+}
 
 /* Condition list */
 .cond-list{font-size:.8rem;color:#555;line-height:1.9;padding-left:0;list-style:none}
@@ -723,15 +733,10 @@ function renderCards(){
       </div>`
     }
 
-    // Build header style — image overrides gradient
-    const headerStyle = p.image_url
-      ? `background-image:url('${p.image_url}');background-color:#1a1a2e;`
-      : `background:${grad};`
-    const hasImgClass = p.image_url ? ' has-img' : ''
-
+    // Header always uses gradient
     return `
     <div class="promo-card" data-title="${(p.title||'').toLowerCase()}" data-desc="${(p.description||'').toLowerCase()}">
-      <div class="card-header${hasImgClass}" style="${headerStyle}">
+      <div class="card-header" style="background:${grad}">
         <div class="card-header-left">
           <div class="card-tags">
             <span class="tag-pro">${proNum}</span>
@@ -749,6 +754,13 @@ function renderCards(){
         <div>${mechanicHTML}</div>
         <div>${infoHTML}</div>
       </div>
+      ${p.image_url?`
+      <div class="card-promo-img">
+        <div class="card-promo-img-label">🖼 สื่อประชาสัมพันธ์</div>
+        <img src="${p.image_url}" alt="${p.title}" 
+          onerror="this.parentElement.style.display='none'"
+          loading="lazy"/>
+      </div>`:''}
     </div>`
   }).join('')
 }
