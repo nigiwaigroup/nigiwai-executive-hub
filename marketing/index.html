@@ -3,242 +3,558 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>NIGIBEN – Promotion Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<title>NIGIBEN – Promotions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
 <style>
+/* ════════════════════════════════════════
+   RESET & TOKENS
+════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#16a34a;--green-light:#22c55e;--green-dark:#14532d;
-  --green-glow:rgba(34,197,94,0.15);--green-border:rgba(34,197,94,0.25);
-  --bg:#050a06;--surface:#0a110b;--card:#0d160e;--card2:#111a12;
-  --border:rgba(255,255,255,0.06);--text:rgba(255,255,255,0.88);
-  --muted:rgba(255,255,255,0.42);--dim:rgba(255,255,255,0.18);
+  /* Palette — warm white editorial */
+  --cream:    #faf8f5;
+  --cream2:   #f4f1ec;
+  --cream3:   #ede9e2;
+  --stone:    #e8e3da;
+  --ink:      #1a1714;
+  --ink2:     #3d3830;
+  --ink3:     #6b6458;
+  --ink4:     #9e9488;
+  --rule:     #ddd8d0;
+
+  /* Accent — muted sage green (NIGIBEN brand touch) */
+  --sage:     #4a7c59;
+  --sage-lt:  #6a9e79;
+  --sage-bg:  #eef4f0;
+  --sage-bd:  #c4dcc9;
+
+  /* Danger */
+  --rose:     #c0392b;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Noto Sans Thai', system-ui, sans-serif;
+
+  /* Spacing */
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+
+  /* Shadow */
+  --sh-sm: 0 1px 4px rgba(26,23,20,0.06);
+  --sh-md: 0 4px 20px rgba(26,23,20,0.08);
+  --sh-lg: 0 12px 40px rgba(26,23,20,0.10);
 }
+
 html{scroll-behavior:smooth}
-body{font-family:'Noto Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(34,197,94,0.2);border-radius:3px}
-::placeholder{color:rgba(255,255,255,0.2)}
+body{
+  font-family:var(--font-body);
+  background:var(--cream);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.6;
+}
+::placeholder{color:var(--ink4)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--cream2)}
+::-webkit-scrollbar-thumb{background:var(--stone);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink4)}
 
-/* ════ LOGIN ════ */
-.login-page{display:none;position:fixed;inset:0;z-index:200;background:var(--bg);align-items:center;justify-content:center}
+/* ════════════════════════════════════════
+   INIT LOADER
+════════════════════════════════════════ */
+.init-loader{
+  position:fixed;inset:0;z-index:999;
+  background:var(--cream);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
+}
+.loader-logo{font-family:var(--font-display);font-size:2rem;color:var(--ink);letter-spacing:0.04em}
+.loader-dots{display:flex;gap:6px}
+.loader-dots span{
+  width:6px;height:6px;border-radius:50%;background:var(--sage);
+  animation:dotpulse 1.2s ease-in-out infinite;
+}
+.loader-dots span:nth-child(2){animation-delay:.2s}
+.loader-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotpulse{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* ════════════════════════════════════════
+   LOGIN
+════════════════════════════════════════ */
+.login-page{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(250,248,245,0.92);backdrop-filter:blur(12px);
+  align-items:center;justify-content:center;
+}
 .login-page.show{display:flex}
-.login-box{background:var(--card);border:1px solid var(--green-border);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 0 60px rgba(34,197,94,0.07)}
-.login-logo{text-align:center;margin-bottom:28px}
-.login-logo .lbrand{font-size:2.4rem;font-weight:900;letter-spacing:-0.04em;color:var(--green-light)}
-.login-logo p{color:var(--muted);font-size:.8rem;margin-top:4px}
-.lfield{margin-bottom:14px}
-.lfield label{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.lfield input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:.9rem;color:#fff;outline:none;transition:border .2s;font-family:inherit}
-.lfield input:focus{border-color:var(--green-border)}
-.lerr{color:#f87171;font-size:.78rem;margin-bottom:10px;min-height:18px}
-.lbtn{width:100%;padding:12px;border-radius:12px;border:none;background:var(--green);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit;transition:background .2s;margin-top:4px}
-.lbtn:hover{background:var(--green-light)}
+.login-card{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-xl);
+  padding:44px 40px;width:100%;max-width:380px;
+  box-shadow:var(--sh-lg);
+}
+.login-brand{font-family:var(--font-display);font-size:2rem;color:var(--ink);text-align:center;letter-spacing:0.04em;margin-bottom:4px}
+.login-sub{text-align:center;color:var(--ink4);font-size:.8rem;margin-bottom:30px}
+.lf-label{display:block;font-size:.7rem;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.lf-input{
+  width:100%;background:var(--cream2);border:1px solid var(--rule);
+  border-radius:var(--r-md);padding:11px 14px;font-size:.9rem;
+  color:var(--ink);outline:none;transition:border .2s;font-family:var(--font-body);
+  margin-bottom:14px;
+}
+.lf-input:focus{border-color:var(--sage-bd);background:#fff;box-shadow:0 0 0 3px var(--sage-bg)}
+.l-err{color:var(--rose);font-size:.78rem;min-height:20px;margin-bottom:8px}
+.l-btn{
+  width:100%;padding:12px;border-radius:var(--r-md);
+  border:none;background:var(--ink);color:#fff;
+  font-weight:700;font-size:.9rem;cursor:pointer;
+  font-family:var(--font-body);transition:background .2s;
+}
+.l-btn:hover{background:var(--ink2)}
 
-/* ════ NAVBAR ════ */
-.navbar{position:sticky;top:0;z-index:50;background:rgba(5,10,6,0.96);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:58px}
-.brand{font-size:1.2rem;font-weight:900;letter-spacing:-0.03em;color:var(--green-light)}
-.tabs{display:flex;gap:4px}
-.tab{padding:7px 18px;border-radius:10px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;color:var(--muted);background:transparent;font-family:inherit}
-.tab.active{background:var(--green);color:#fff}
-.tab:not(.active):hover{background:rgba(34,197,94,0.08);color:var(--green-light)}
-.logout-btn{font-size:.75rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;transition:all .2s;display:none}
-.logout-btn:hover{color:#fff;border-color:rgba(255,255,255,0.2)}
+/* ════════════════════════════════════════
+   NAVBAR
+════════════════════════════════════════ */
+.navbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,248,245,0.96);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:60px;
+}
+.nav-brand{font-family:var(--font-display);font-size:1.35rem;color:var(--ink);letter-spacing:0.04em;cursor:pointer}
+.nav-center{display:flex;gap:2px}
+.nav-tab{
+  padding:7px 18px;border-radius:var(--r-sm);font-size:.82rem;font-weight:600;
+  cursor:pointer;border:none;transition:all .2s;color:var(--ink3);background:transparent;
+  font-family:var(--font-body);letter-spacing:.01em;
+}
+.nav-tab.active{background:var(--ink);color:#fff}
+.nav-tab:not(.active):hover{background:var(--cream3);color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.logout-btn{
+  font-size:.75rem;color:var(--ink3);background:none;
+  border:1px solid var(--rule);border-radius:var(--r-sm);
+  padding:5px 14px;cursor:pointer;font-family:var(--font-body);
+  transition:all .2s;display:none;
+}
+.logout-btn:hover{border-color:var(--ink3);color:var(--ink)}
 .logout-btn.show{display:block}
 
-/* ════ PAGES ════ */
-.page{display:none}.page.active{display:block}
+/* ════════════════════════════════════════
+   PAGES
+════════════════════════════════════════ */
+.page{display:none;animation:fadeup .4s ease}
+.page.active{display:block}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ════ HERO ════ */
-.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(20,83,45,0.4) 0%,transparent 100%);padding:52px 20px 64px;text-align:center}
-.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(34,197,94,0.04) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
-.hero::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,rgba(34,197,94,0.3),transparent)}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:999px;padding:5px 16px;font-size:.75rem;color:rgba(134,239,172,0.9);margin-bottom:14px}
-.hero h1{font-size:clamp(2.4rem,7vw,3.5rem);font-weight:900;letter-spacing:-0.04em;line-height:1;color:var(--green-light);text-shadow:0 0 40px rgba(34,197,94,0.25)}
-.hero p{color:var(--muted);margin-top:10px;font-size:.9rem}
-.search-wrap{margin:22px auto 0;max-width:420px;position:relative}
-.search-wrap input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:12px 18px 12px 44px;font-size:.88rem;color:#fff;outline:none;transition:all .2s;font-family:inherit}
-.search-wrap input:focus{border-color:rgba(34,197,94,0.5);box-shadow:0 0 0 3px rgba(34,197,94,0.08)}
-.search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none}
+/* ════════════════════════════════════════
+   HERO — USER PAGE
+════════════════════════════════════════ */
+.hero{
+  background:var(--cream);
+  border-bottom:1px solid var(--rule);
+  padding:56px 28px 52px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-40px;left:50%;
+  transform:translateX(-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(74,124,89,0.06) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--sage-bg);border:1px solid var(--sage-bd);
+  border-radius:999px;padding:5px 16px;
+  font-size:.72rem;font-weight:600;color:var(--sage);
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.8rem,7vw,4.5rem);
+  color:var(--ink);
+  letter-spacing:0.05em;
+  line-height:1;
+  margin-bottom:12px;
+}
+.hero-sub{color:var(--ink3);font-size:.92rem;max-width:380px;margin:0 auto 28px}
+.search-wrap{max-width:440px;margin:0 auto;position:relative}
+.search-input{
+  width:100%;background:#fff;
+  border:1.5px solid var(--stone);border-radius:var(--r-lg);
+  padding:13px 18px 13px 46px;font-size:.88rem;color:var(--ink);
+  outline:none;transition:all .25s;font-family:var(--font-body);
+  box-shadow:var(--sh-sm);
+}
+.search-input:focus{border-color:var(--sage);box-shadow:0 0 0 4px var(--sage-bg)}
+.search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink4);font-size:.9rem}
 
-/* ════ PROMO LIST — 1 PER ROW ════ */
-.promo-list{max-width:760px;margin:-32px auto 0;padding:0 16px 60px}
-.count-bar{display:flex;align-items:center;margin-bottom:16px}
-.count-bar span{font-size:.75rem;color:var(--muted)}
+/* ════════════════════════════════════════
+   PROMO LIST — 1 PER ROW
+════════════════════════════════════════ */
+.promo-wrap{max-width:720px;margin:0 auto;padding:36px 24px 60px}
+.list-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:14px;
+  border-bottom:1px solid var(--rule);
+}
+.list-header .count{font-size:.78rem;color:var(--ink4);font-weight:500}
+.list-header .label{font-size:.7rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
 
-.promo-card{display:flex;border-radius:16px;overflow:hidden;border:1px solid rgba(34,197,94,0.1);background:var(--card);margin-bottom:14px;transition:all .25s}
-.promo-card:hover{border-color:rgba(34,197,94,0.3);box-shadow:0 4px 24px rgba(34,197,94,0.07);transform:translateY(-1px)}
+/* Card */
+.pcard{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-xl);
+  display:flex;gap:0;overflow:hidden;margin-bottom:16px;
+  box-shadow:var(--sh-sm);transition:all .25s;
+}
+.pcard:hover{box-shadow:var(--sh-md);border-color:var(--stone);transform:translateY(-1px)}
 
-.icon-col{width:86px;min-width:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px 10px;background:linear-gradient(180deg,rgba(34,197,94,0.07),rgba(34,197,94,0.02))}
-.icon-col .cicon{font-size:2.2rem;line-height:1}
-.tbadge{font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;text-align:center}
-.b-public{background:rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.25)}
-.b-partner{background:rgba(234,179,8,0.12);color:#fde68a;border:1px solid rgba(234,179,8,0.2)}
-.b-staff{background:rgba(99,102,241,0.12);color:#c7d2fe;border:1px solid rgba(99,102,241,0.2)}
+.pcard-accent{
+  width:5px;min-width:5px;
+  background:linear-gradient(180deg,var(--sage) 0%,var(--sage-lt) 100%);
+}
 
-.card-body{flex:1;padding:18px 20px;min-width:0}
-.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px}
-.card-title{font-size:.98rem;font-weight:700;color:#fff;line-height:1.35}
-.card-code{font-family:monospace;font-size:.68rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#86efac;padding:2px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
-.card-desc{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:8px}
-.card-date{font-size:.7rem;color:var(--dim);margin-bottom:10px}
-.expand-btn{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(34,197,94,0.55);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;transition:color .2s}
-.expand-btn:hover{color:var(--green-light)}
-.expand-btn .arr{transition:transform .2s;display:inline-block}
-.expand-btn.open .arr{transform:rotate(90deg)}
-.card-detail{max-height:0;overflow:hidden;transition:max-height .35s ease;font-size:.78rem;color:rgba(255,255,255,0.5);line-height:1.75}
-.card-detail.open{max-height:500px}
-.detail-inner{padding-top:12px;margin-top:12px;border-top:1px solid rgba(34,197,94,0.07)}
-.dlabel{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:rgba(34,197,94,0.45);margin-bottom:4px;margin-top:10px}
+.pcard-icon{
+  width:80px;min-width:80px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;padding:20px 0;background:var(--cream);
+  border-right:1px solid var(--rule);
+}
+.pcard-icon .ic{font-size:2rem;line-height:1}
+.target-pill{
+  font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:999px;
+  letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;
+}
+.tp-public{background:var(--sage-bg);color:var(--sage);border:1px solid var(--sage-bd)}
+.tp-partner{background:#fef9ec;color:#92600a;border:1px solid #f5d87a}
+.tp-staff{background:#f0f0ff;color:#4338ca;border:1px solid #c7d2fe}
+
+.pcard-body{flex:1;padding:20px 24px;min-width:0}
+.pcard-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
+.pcard-title{font-size:1rem;font-weight:700;color:var(--ink);line-height:1.35}
+.pcard-code{
+  font-family:monospace;font-size:.7rem;font-weight:600;
+  background:var(--cream2);border:1px solid var(--stone);
+  color:var(--ink3);padding:3px 9px;border-radius:var(--r-sm);
+  white-space:nowrap;flex-shrink:0;
+}
+.pcard-desc{font-size:.82rem;color:var(--ink3);line-height:1.65;margin-bottom:10px}
+.pcard-date{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.72rem;color:var(--ink4);
+  background:var(--cream2);border:1px solid var(--rule);
+  border-radius:999px;padding:3px 12px;margin-bottom:14px;
+}
+
+.expand-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.76rem;font-weight:600;color:var(--sage);
+  background:none;border:none;cursor:pointer;
+  padding:0;font-family:var(--font-body);
+  transition:color .2s;
+}
+.expand-btn:hover{color:var(--sage-lt)}
+.exp-arr{transition:transform .25s;display:inline-block;font-style:normal}
+.expand-btn.open .exp-arr{transform:rotate(90deg)}
+
+.card-detail{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.card-detail.open{max-height:600px}
+.detail-inner{
+  padding-top:16px;margin-top:14px;
+  border-top:1px solid var(--cream3);
+}
+.dlabel{
+  font-size:.65rem;font-weight:700;color:var(--sage);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:5px;margin-top:12px;
+}
 .dlabel:first-child{margin-top:0}
+.dtext{font-size:.8rem;color:var(--ink3);line-height:1.7}
 
-/* ════ SKELETON ════ */
-.skel{height:96px;border-radius:16px;background:rgba(34,197,94,0.04);margin-bottom:14px;animation:shimmer 1.5s infinite}
-@keyframes shimmer{0%,100%{opacity:.35}50%{opacity:.7}}
-.empty-state{text-align:center;padding:64px 20px;color:var(--muted)}
-.empty-state .ei{font-size:3rem;margin-bottom:10px}
+/* Skeleton */
+.skel{
+  height:100px;border-radius:var(--r-xl);
+  background:linear-gradient(90deg,var(--cream2) 25%,var(--cream3) 50%,var(--cream2) 75%);
+  background-size:200% 100%;
+  animation:skelshine 1.6s ease infinite;
+  margin-bottom:16px;
+}
+@keyframes skelshine{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* ════ ADMIN ════ */
-.admin-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
-.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
-.scard{background:var(--card);border:1px solid rgba(34,197,94,0.1);border-radius:14px;padding:16px 20px}
-.slabel{font-size:.7rem;color:var(--muted);margin-bottom:4px}
-.sval{font-size:2.4rem;font-weight:900}
-.sv-w{color:#fff}.sv-g{color:var(--green-light)}.sv-a{color:#fbbf24}
+.empty-state{text-align:center;padding:72px 20px;color:var(--ink4)}
+.empty-state .ei{font-size:3rem;margin-bottom:12px;opacity:.5}
+.empty-state p{font-size:.88rem}
 
-.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+/* ════════════════════════════════════════
+   ADMIN PAGE
+════════════════════════════════════════ */
+.admin-wrap{max-width:1100px;margin:0 auto;padding:32px 24px 60px}
+
+.admin-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--rule);
+}
+.admin-header h1{font-family:var(--font-display);font-size:1.5rem;color:var(--ink)}
+.admin-header p{font-size:.78rem;color:var(--ink4);margin-top:2px}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
+.stat-card{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-xl);
+  padding:20px 24px;box-shadow:var(--sh-sm);
+}
+.stat-card .slabel{font-size:.68rem;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-card .sval{font-size:2.6rem;font-weight:800;line-height:1}
+.sv-ink{color:var(--ink)}.sv-sage{color:var(--sage)}.sv-amber{color:#b45309}
+
+.filter-bar{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-lg);
+  padding:14px 18px;display:flex;gap:12px;align-items:center;
+  flex-wrap:wrap;margin-bottom:16px;box-shadow:var(--sh-sm);
+}
 .fsearch{flex:1;min-width:200px;position:relative}
-.fsearch input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:9px 14px 9px 36px;font-size:.82rem;color:#fff;outline:none;font-family:inherit;transition:border .2s}
-.fsearch input:focus{border-color:var(--green-border)}
+.fsearch input{
+  width:100%;background:var(--cream2);border:1px solid var(--rule);
+  border-radius:var(--r-md);padding:9px 14px 9px 36px;
+  font-size:.82rem;color:var(--ink);outline:none;
+  font-family:var(--font-body);transition:border .2s;
+}
+.fsearch input:focus{border-color:var(--sage);background:#fff}
 .fsearch::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.75rem}
-.fbtns{display:flex;gap:5px}
-.fbtn{padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);transition:all .15s;font-family:inherit}
-.fbtn.active,.fbtn:hover{background:var(--green);color:#fff;border-color:transparent}
-.add-btn{display:flex;align-items:center;gap:6px;background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
-.add-btn:hover{background:var(--green-light)}
+.fbtns{display:flex;gap:6px}
+.fbtn{
+  padding:8px 16px;border-radius:var(--r-sm);font-size:.78rem;font-weight:600;
+  cursor:pointer;border:1.5px solid var(--rule);background:transparent;
+  color:var(--ink3);transition:all .15s;font-family:var(--font-body);
+}
+.fbtn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fbtn:not(.active):hover{background:var(--cream2);border-color:var(--stone)}
+.add-btn{
+  display:flex;align-items:center;gap:7px;
+  background:var(--sage);color:#fff;border:none;border-radius:var(--r-sm);
+  padding:9px 18px;font-size:.82rem;font-weight:700;cursor:pointer;
+  font-family:var(--font-body);transition:background .15s;white-space:nowrap;
+}
+.add-btn:hover{background:var(--sage-lt)}
 
-.table-wrap{background:var(--card);border-radius:16px;border:1px solid rgba(34,197,94,0.1);overflow:hidden}
+/* Table */
+.table-card{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-xl);
+  overflow:hidden;box-shadow:var(--sh-sm);
+}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead tr{background:rgba(34,197,94,0.04)}
-th{text-align:left;padding:11px 16px;font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:rgba(34,197,94,0.45);font-weight:600;white-space:nowrap;border-bottom:1px solid rgba(34,197,94,0.08)}
-tbody tr{border-top:1px solid rgba(255,255,255,0.04);transition:background .15s}
-tbody tr:hover{background:rgba(34,197,94,0.025)}
-td{padding:12px 16px;vertical-align:middle}
-.ttitle{font-weight:600;color:#fff;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tsub{font-size:.7rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
-.cpill{display:inline-block;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.18);border-radius:6px;padding:2px 8px;font-family:monospace;font-size:.7rem;color:#86efac}
-.sbadge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
-.sb-on{background:rgba(34,197,94,0.1);color:#86efac;border-color:rgba(34,197,94,0.25)}
-.sb-pend{background:rgba(251,191,36,0.1);color:#fde68a;border-color:rgba(251,191,36,0.25)}
-.sb-off{background:rgba(100,116,139,0.1);color:#94a3b8;border-color:rgba(100,116,139,0.2)}
-.toggle-btn{background:none;border:none;cursor:pointer;font-size:1.3rem;line-height:1;padding:2px;transition:opacity .15s}
+thead tr{background:var(--cream2);border-bottom:1px solid var(--rule)}
+th{
+  text-align:left;padding:12px 18px;font-size:.63rem;
+  text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink4);font-weight:700;white-space:nowrap;
+}
+tbody tr{border-top:1px solid var(--cream3);transition:background .15s}
+tbody tr:hover{background:var(--cream)}
+td{padding:14px 18px;vertical-align:middle;color:var(--ink2)}
+.td-name{font-weight:600;color:var(--ink);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td-sub{font-size:.72rem;color:var(--ink4);margin-top:2px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpill{
+  display:inline-block;background:var(--cream2);border:1px solid var(--stone);
+  border-radius:var(--r-sm);padding:2px 9px;font-family:monospace;
+  font-size:.7rem;color:var(--ink3);font-weight:600;
+}
+.sbadge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.68rem;font-weight:600;padding:4px 10px;
+  border-radius:999px;border:1px solid;white-space:nowrap;
+}
+.sb-on  {background:var(--sage-bg);color:var(--sage);border-color:var(--sage-bd)}
+.sb-pend{background:#fef9ec;color:#92600a;border-color:#f5d87a}
+.sb-off {background:var(--cream2);color:var(--ink4);border-color:var(--stone)}
+
+.toggle-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:1.2rem;padding:3px;border-radius:6px;
+  transition:opacity .15s;
+}
 .toggle-btn:hover{opacity:.65}
-.act-btn{background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:8px;transition:all .15s;color:var(--dim);font-size:.9rem}
-.act-btn:hover{background:rgba(34,197,94,0.08);color:var(--green-light)}
-.act-btn.del:hover{background:rgba(239,68,68,0.08);color:#f87171}
+.act-btn{
+  background:none;border:none;cursor:pointer;
+  padding:6px 8px;border-radius:var(--r-sm);
+  font-size:.88rem;color:var(--ink4);transition:all .15s;
+}
+.act-btn:hover{background:var(--cream3);color:var(--ink)}
+.act-btn.del:hover{background:#fff0f0;color:var(--rose)}
 
-/* ════ MODAL ════ */
-.overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px}
+/* ════════════════════════════════════════
+   MODAL
+════════════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(26,23,20,0.35);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;padding:16px;
+}
 .overlay.open{display:flex}
-.modal{background:var(--card2);border:1px solid rgba(34,197,94,0.15);border-radius:20px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(34,197,94,0.1)}
-.modal-hdr h2{font-size:1rem;font-weight:700;color:#fff}
-.modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;line-height:1;transition:color .15s}
-.modal-x:hover{color:#fff}
-.modal-body{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.mf{display:flex;flex-direction:column;gap:5px}
-.mf.full{grid-column:1/-1}
-.mf label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.mf input,.mf select,.mf textarea{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:.82rem;color:#fff;outline:none;transition:border .2s;font-family:inherit;resize:none}
-.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--green-border)}
-select option{background:#0d160e;color:#fff}
-.modal-ftr{padding:0 22px 22px;display:flex;gap:10px}
-.btn-cancel{flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:.85rem;font-family:inherit;transition:all .15s}
-.btn-cancel:hover{color:#fff;border-color:rgba(255,255,255,0.2)}
-.btn-save{flex:1;padding:10px;border-radius:12px;border:none;background:var(--green);color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-save:hover{background:var(--green-light)}
-.btn-save:disabled{opacity:.5;cursor:not-allowed}
-.sw-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
-.sw-track{width:48px;height:26px;border-radius:13px;cursor:pointer;position:relative;transition:background .2s}
-.sw-knob{position:absolute;width:20px;height:20px;background:#fff;border-radius:10px;top:3px;transition:right .2s;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
-.sw-lbl{font-size:.82rem;color:var(--muted)}
+.modal{
+  background:#fff;border:1px solid var(--rule);border-radius:var(--r-xl);
+  width:100%;max-width:580px;max-height:90vh;overflow-y:auto;
+  box-shadow:var(--sh-lg);
+}
+.modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 26px;border-bottom:1px solid var(--rule);
+}
+.modal-hdr h2{font-family:var(--font-display);font-size:1.1rem;color:var(--ink)}
+.modal-x{
+  background:none;border:none;color:var(--ink4);
+  cursor:pointer;font-size:1.1rem;width:32px;height:32px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-x:hover{background:var(--cream2);color:var(--ink)}
 
-/* ════ TOAST / LOADER ════ */
-.toast{position:fixed;top:16px;right:16px;z-index:300;padding:11px 20px;border-radius:12px;font-size:.82rem;font-weight:600;color:#fff;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
-.toast.show{opacity:1;transform:none}
-.toast.success{background:#16a34a}.toast.error{background:#dc2626}
+.modal-body{padding:24px 26px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mf{display:flex;flex-direction:column;gap:6px}
+.mf.full{grid-column:1/-1}
+.mf label{font-size:.68rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em}
+.mf input,.mf select,.mf textarea{
+  background:var(--cream2);border:1.5px solid var(--rule);
+  border-radius:var(--r-md);padding:10px 13px;font-size:.84rem;
+  color:var(--ink);outline:none;transition:all .2s;
+  font-family:var(--font-body);resize:none;
+}
+.mf input:focus,.mf select:focus,.mf textarea:focus{
+  border-color:var(--sage);background:#fff;
+  box-shadow:0 0 0 3px var(--sage-bg);
+}
+select option{background:#fff;color:var(--ink)}
+
+.modal-ftr{padding:0 26px 24px;display:flex;gap:10px}
+.btn-cancel{
+  flex:1;padding:11px;border-radius:var(--r-md);
+  border:1.5px solid var(--rule);background:transparent;
+  color:var(--ink3);cursor:pointer;font-size:.86rem;
+  font-family:var(--font-body);font-weight:600;transition:all .15s;
+}
+.btn-cancel:hover{border-color:var(--ink3);color:var(--ink);background:var(--cream2)}
+.btn-save{
+  flex:1;padding:11px;border-radius:var(--r-md);
+  border:none;background:var(--ink);color:#fff;
+  font-weight:700;cursor:pointer;font-size:.86rem;
+  font-family:var(--font-body);transition:background .15s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn-save:hover{background:var(--ink2)}
+.btn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* Switch */
+.sw-wrap{display:flex;align-items:center;gap:10px;margin-top:6px}
+.sw-track{
+  width:46px;height:25px;border-radius:13px;cursor:pointer;
+  position:relative;transition:background .2s;border:1.5px solid var(--rule);
+}
+.sw-knob{
+  position:absolute;width:18px;height:18px;background:#fff;
+  border-radius:9px;top:2px;transition:left .2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.sw-lbl{font-size:.8rem;color:var(--ink3);font-weight:500}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+.toast{
+  position:fixed;top:20px;right:20px;z-index:500;
+  padding:12px 20px;border-radius:var(--r-md);
+  font-size:.82rem;font-weight:600;
+  opacity:0;transform:translateY(-12px) scale(0.96);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;box-shadow:var(--sh-lg);
+  display:flex;align-items:center;gap:8px;
+  max-width:320px;
+}
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
+.toast.success{background:var(--ink);color:#fff}
+.toast.error{background:var(--rose);color:#fff}
 .spin{display:inline-block;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.init-overlay{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
-.init-overlay .spin{font-size:2rem;color:var(--green-light)}
-.init-overlay p{color:var(--muted);font-size:.85rem}
 
-@media(max-width:520px){
-  .icon-col{width:70px;min-width:70px}
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media(max-width:580px){
+  .navbar{padding:0 16px}
+  .hero{padding:40px 16px 44px}
+  .promo-wrap{padding:24px 12px 48px}
+  .pcard-icon{width:64px;min-width:64px}
+  .pcard-body{padding:16px 16px}
   .modal-body{grid-template-columns:1fr}
   .mf.full{grid-column:1}
-  .stat-row{gap:8px}
-  .sval{font-size:1.8rem}
+  .stat-row{gap:10px}
+  .sval{font-size:2rem !important}
+  .admin-header h1{font-size:1.2rem}
+  .admin-wrap{padding:20px 12px 48px}
+  .filter-bar{padding:10px 14px;gap:8px}
 }
 </style>
 </head>
 <body>
 
-<!-- Init loader -->
-<div class="init-overlay" id="init-overlay">
-  <span class="spin">⟳</span>
-  <p>กำลังเชื่อมต่อฐานข้อมูล...</p>
+<!-- INIT LOADER -->
+<div class="init-loader" id="init-loader">
+  <div class="loader-logo">NIGIBEN</div>
+  <div class="loader-dots"><span></span><span></span><span></span></div>
 </div>
 
-<!-- Toast -->
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ════ LOGIN PAGE ════ -->
+<!-- ════ LOGIN ════ -->
 <div class="login-page" id="login-page">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="lbrand">NIGIBEN</div>
-      <p>Admin Panel · กรุณาเข้าสู่ระบบ</p>
-    </div>
-    <div class="lfield">
-      <label>Username</label>
-      <input type="text" id="l-user" placeholder="admin" autocomplete="username"/>
-    </div>
-    <div class="lfield">
-      <label>Password</label>
-      <input type="password" id="l-pass" placeholder="••••••••••" autocomplete="current-password"
-        onkeydown="if(event.key==='Enter')doLogin()"/>
-    </div>
-    <div class="lerr" id="l-err"></div>
-    <button class="lbtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+  <div class="login-card">
+    <div class="login-brand">NIGIBEN</div>
+    <div class="login-sub">Admin Panel · กรุณาเข้าสู่ระบบ</div>
+    <label class="lf-label">Username</label>
+    <input class="lf-input" type="text" id="l-user" placeholder="admin" autocomplete="username"/>
+    <label class="lf-label">Password</label>
+    <input class="lf-input" type="password" id="l-pass" placeholder="••••••••••"
+      autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="l-err" id="l-err"></div>
+    <button class="l-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
   </div>
 </div>
 
 <!-- ════ NAVBAR ════ -->
 <div class="navbar">
-  <div class="brand">NIGIBEN</div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchPage('user')">🏠 โปรโมชั่น</button>
-    <button class="tab" onclick="requireLogin()">⚙️ Admin</button>
+  <div class="nav-brand" onclick="switchPage('user')">NIGIBEN</div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="switchPage('user')">โปรโมชั่น</button>
+    <button class="nav-tab" onclick="requireLogin()">Admin</button>
   </div>
-  <button class="logout-btn" id="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+  <div class="nav-right">
+    <button class="logout-btn" id="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+  </div>
 </div>
 
 <!-- ════ USER PAGE ════ -->
 <div class="page active" id="page-user">
   <div class="hero">
-    <div class="hero-badge">🌿 โปรโมชั่นพิเศษจาก NIGIBEN</div>
-    <h1>NIGIBEN</h1>
-    <p>โปรโมชั่นและสิทธิพิเศษที่กำลังดำเนินอยู่ · สาขาดอนเมือง</p>
+    <div class="hero-eyebrow">🌿 โปรโมชั่นพิเศษ</div>
+    <h1 class="hero-title">NIGIBEN</h1>
+    <p class="hero-sub">โปรโมชั่นและสิทธิพิเศษที่กำลังดำเนินอยู่<br/>สาขาดอนเมือง</p>
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" placeholder="ค้นหาโปรโมชั่น..." id="user-search" oninput="filterCards()"/>
+      <input class="search-input" type="text" id="user-search" placeholder="ค้นหาโปรโมชั่น..." oninput="filterCards()"/>
     </div>
   </div>
 
-  <div class="promo-list">
-    <div class="count-bar"><span id="count-lbl"></span></div>
-    <div id="promo-list-inner">
+  <div class="promo-wrap">
+    <div class="list-header">
+      <span class="label">รายการโปรโมชั่น</span>
+      <span class="count" id="count-lbl"></span>
+    </div>
+    <div id="promo-list">
       <div class="skel"></div>
       <div class="skel"></div>
       <div class="skel"></div>
@@ -249,12 +565,20 @@ select option{background:#0d160e;color:#fff}
 <!-- ════ ADMIN PAGE ════ -->
 <div class="page" id="page-admin">
   <div class="admin-wrap">
-    <div class="stat-row">
-      <div class="scard"><div class="slabel">โปรทั้งหมด</div><div class="sval sv-w" id="st-total">–</div></div>
-      <div class="scard"><div class="slabel">กำลังใช้งาน</div><div class="sval sv-g" id="st-active">–</div></div>
-      <div class="scard"><div class="slabel">รออนุมัติ</div><div class="sval sv-a" id="st-pending">–</div></div>
+    <div class="admin-header">
+      <div>
+        <h1>จัดการโปรโมชั่น</h1>
+        <p>NIGIBEN · Admin Dashboard</p>
+      </div>
     </div>
-    <div class="filter-row">
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="slabel">โปรทั้งหมด</div><div class="sval sv-ink" id="st-total">–</div></div>
+      <div class="stat-card"><div class="slabel">กำลังใช้งาน</div><div class="sval sv-sage" id="st-active">–</div></div>
+      <div class="stat-card"><div class="slabel">รออนุมัติ</div><div class="sval sv-amber" id="st-pending">–</div></div>
+    </div>
+
+    <div class="filter-bar">
       <div class="fsearch"><input type="text" id="admin-search" placeholder="ค้นหาชื่อโปร หรือ Promo Code…" oninput="renderTable()"/></div>
       <div class="fbtns">
         <button class="fbtn active" data-f="all" onclick="setFilter(this)">ทั้งหมด</button>
@@ -263,7 +587,8 @@ select option{background:#0d160e;color:#fff}
       </div>
       <button class="add-btn" onclick="openModal()">＋ เพิ่มโปร</button>
     </div>
-    <div class="table-wrap">
+
+    <div class="table-card">
       <table>
         <thead>
           <tr>
@@ -273,11 +598,11 @@ select option{background:#0d160e;color:#fff}
           </tr>
         </thead>
         <tbody id="admin-tbody">
-          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)"><span class="spin">⟳</span></td></tr>
+          <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ink4)"><span class="spin">⟳</span></td></tr>
         </tbody>
       </table>
     </div>
-    <p id="table-count" style="text-align:center;color:var(--dim);font-size:.72rem;margin-top:10px"></p>
+    <p id="table-count" style="text-align:center;color:var(--ink4);font-size:.72rem;margin-top:12px"></p>
   </div>
 </div>
 
@@ -290,20 +615,22 @@ select option{background:#0d160e;color:#fff}
     </div>
     <div class="modal-body">
       <input type="hidden" id="f-id"/>
-      <div class="mf full"><label>ชื่อโปรโมชั่น *</label><input type="text" id="f-title" placeholder="ชื่อโปรโมชั่น"/></div>
-      <div class="mf"><label>กลุ่มเป้าหมาย</label>
+      <div class="mf full"><label>ชื่อโปรโมชั่น *</label><input type="text" id="f-title" placeholder="เช่น Snap & Share – Get Free Daifuku"/></div>
+      <div class="mf">
+        <label>กลุ่มเป้าหมาย</label>
         <select id="f-target">
           <option>ลูกค้าทั่วไป</option><option>Partner</option><option>Staff</option><option>Partner & Staff</option>
         </select>
       </div>
       <div class="mf"><label>Promo Code</label><input type="text" id="f-code" placeholder="เช่น 2600852"/></div>
-      <div class="mf full"><label>คำอธิบาย</label><textarea id="f-desc" rows="2" placeholder="สรุปสั้นๆ"></textarea></div>
-      <div class="mf full"><label>Mechanic (วิธีรับสิทธิ์)</label><textarea id="f-mech" rows="3" placeholder="รายละเอียดขั้นตอน"></textarea></div>
+      <div class="mf full"><label>คำอธิบาย</label><textarea id="f-desc" rows="2" placeholder="สรุปสั้นๆ สำหรับแสดงบนหน้าหลัก"></textarea></div>
+      <div class="mf full"><label>Mechanic (วิธีรับสิทธิ์)</label><textarea id="f-mech" rows="3" placeholder="ขั้นตอนและรายละเอียด"></textarea></div>
       <div class="mf full"><label>เงื่อนไข</label><textarea id="f-cond" rows="3" placeholder="ข้อกำหนดและเงื่อนไข"></textarea></div>
       <div class="mf full"><label>Image URL (ถ้ามี)</label><input type="text" id="f-img" placeholder="https://..."/></div>
       <div class="mf"><label>วันเริ่ม</label><input type="date" id="f-start"/></div>
       <div class="mf"><label>วันสิ้นสุด</label><input type="date" id="f-end"/></div>
-      <div class="mf"><label>สถานะการตรวจสอบ</label>
+      <div class="mf">
+        <label>สถานะการตรวจสอบ</label>
         <select id="f-rstatus">
           <option value="ใช้งานอยู่">ใช้งานอยู่</option>
           <option value="รออนุมัติ">รออนุมัติ</option>
@@ -313,8 +640,8 @@ select option{background:#0d160e;color:#fff}
       <div class="mf">
         <label>แสดงหน้าหลัก (Active)</label>
         <div class="sw-wrap">
-          <div class="sw-track" id="sw-track" onclick="toggleSw()" style="background:var(--green)">
-            <div class="sw-knob" id="sw-knob" style="right:3px"></div>
+          <div class="sw-track" id="sw-track" onclick="toggleSw()">
+            <div class="sw-knob" id="sw-knob"></div>
           </div>
           <span class="sw-lbl" id="sw-lbl">เปิด</span>
           <input type="hidden" id="f-status" value="1"/>
@@ -323,259 +650,250 @@ select option{background:#0d160e;color:#fff}
     </div>
     <div class="modal-ftr">
       <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
-      <button class="btn-save" id="btn-save" onclick="savePromo()">💾 บันทึก</button>
+      <button class="btn-save" id="btn-save" onclick="savePromo()">บันทึก</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════
-// SUPABASE CONFIG
-// ═══════════════════════════════════
+// ══════════════════════════
+// SUPABASE
+// ══════════════════════════
 const SB_URL = 'https://mwmcsmoshekavcspsyzt.supabase.co'
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNzbW9zaGVrYXZjc3BzeXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjU3MzQsImV4cCI6MjA5MDAwMTczNH0.j6yCsqoZ1wAT1iw2DC2eBCE_Fuia3MNR6gvVLopQ7UI'
-const HDR = { 'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation' }
+const H = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'}
 
-async function sbFetch(path, opts={}) {
-  const res = await fetch(SB_URL+'/rest/v1/'+path, { headers:{...HDR,...(opts.headers||{})}, ...opts })
-  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.message||e.details||'HTTP '+res.status) }
-  const t = await res.text(); return t ? JSON.parse(t) : []
+async function sb(path,opts={}){
+  const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{...H,...(opts.headers||{})}, ...opts})
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||e.details||'HTTP '+r.status)}
+  const t=await r.text();return t?JSON.parse(t):[]
 }
-const sbGet    = ()     => sbFetch('promotions?order=status.desc,created_at.desc')
-const sbInsert = d      => sbFetch('promotions', {method:'POST', body:JSON.stringify(d)})
-const sbUpdate = (id,d) => sbFetch(`promotions?id=eq.${id}`, {method:'PATCH', body:JSON.stringify(d)})
-const sbDelete = id     => sbFetch(`promotions?id=eq.${id}`, {method:'DELETE', headers:{'Prefer':''}})
+const sbGet    = ()     => sb('promotions?order=status.desc,created_at.desc')
+const sbIns    = d      => sb('promotions',{method:'POST',body:JSON.stringify(d)})
+const sbUpd    = (id,d) => sb(`promotions?id=eq.${id}`,{method:'PATCH',body:JSON.stringify(d)})
+const sbDel    = id     => sb(`promotions?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':''}})
 
-// ═══════════════════════════════════
-// AUTH — hardcode
-// ═══════════════════════════════════
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = '1122334455'
-let isLoggedIn = false
-
-function doLogin() {
-  const u = document.getElementById('l-user').value.trim()
-  const p = document.getElementById('l-pass').value
-  const err = document.getElementById('l-err')
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    isLoggedIn = true
+// ══════════════════════════
+// AUTH
+// ══════════════════════════
+let loggedIn = false
+function doLogin(){
+  const u=document.getElementById('l-user').value.trim()
+  const p=document.getElementById('l-pass').value
+  const err=document.getElementById('l-err')
+  if(u==='admin'&&p==='1122334455'){
+    loggedIn=true
     document.getElementById('login-page').classList.remove('show')
     document.getElementById('logout-btn').classList.add('show')
-    switchPage('admin')
-    err.textContent = ''
+    switchPage('admin'); err.textContent=''
   } else {
-    err.textContent = '❌ Username หรือ Password ไม่ถูกต้อง'
-    document.getElementById('l-pass').value = ''
+    err.textContent='❌ Username หรือ Password ไม่ถูกต้อง'
+    document.getElementById('l-pass').value=''
     document.getElementById('l-pass').focus()
   }
 }
-
-function doLogout() {
-  isLoggedIn = false
+function doLogout(){
+  loggedIn=false
   document.getElementById('logout-btn').classList.remove('show')
   switchPage('user')
 }
+function requireLogin(){
+  if(loggedIn){switchPage('admin');return}
+  const lp=document.getElementById('login-page')
+  lp.classList.add('show')
+  document.getElementById('l-user').value=''
+  document.getElementById('l-pass').value=''
+  document.getElementById('l-err').textContent=''
+  setTimeout(()=>document.getElementById('l-user').focus(),150)
+}
 
-function requireLogin() {
-  if (isLoggedIn) { switchPage('admin') }
-  else {
-    const lp = document.getElementById('login-page')
-    lp.classList.add('show')
-    document.getElementById('l-user').value = ''
-    document.getElementById('l-pass').value = ''
-    document.getElementById('l-err').textContent = ''
-    setTimeout(() => document.getElementById('l-user').focus(), 150)
+// ══════════════════════════
+// STATE
+// ══════════════════════════
+let promos=[], filterMode='all'
+
+async function init(){
+  try{
+    promos=await sbGet()
+    renderCards(); renderTable()
+  }catch(e){
+    document.getElementById('promo-list').innerHTML=
+      `<div class="empty-state"><div class="ei">⚠️</div><p>โหลดข้อมูลไม่สำเร็จ<br/><small>${e.message}</small></p></div>`
+    showToast('เชื่อมต่อไม่สำเร็จ','error')
+  }finally{
+    document.getElementById('init-loader').style.display='none'
   }
 }
 
-// ═══════════════════════════════════
-// STATE & INIT
-// ═══════════════════════════════════
-let allPromos = []
-let filterMode = 'all'
-
-async function init() {
-  try {
-    allPromos = await sbGet()
-    renderCards()
-    renderTable()
-  } catch(e) {
-    document.getElementById('promo-list-inner').innerHTML =
-      `<div class="empty-state"><div class="ei">⚠️</div><p>โหลดข้อมูลไม่สำเร็จ<br/><small style="color:var(--dim)">${e.message}</small></p></div>`
-    showToast('เชื่อมต่อไม่สำเร็จ: '+e.message,'error')
-  } finally {
-    document.getElementById('init-overlay').style.display = 'none'
-  }
-}
-
-// ═══════════════════════════════════
+// ══════════════════════════
 // HELPERS
-// ═══════════════════════════════════
-function fmtDate(d) {
-  if (!d) return '–'
-  return new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})
-}
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast')
-  t.textContent=msg; t.className='toast '+type+' show'
+// ══════════════════════════
+function fmt(d){if(!d)return'–';return new Date(d).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast')
+  t.textContent=msg;t.className='toast '+type+' show'
   setTimeout(()=>t.className='toast',3000)
 }
-function targetBadge(target) {
-  if (target==='Partner') return 'b-partner'
-  if (target==='Staff'||target==='Partner & Staff') return 'b-staff'
-  return 'b-public'
+function tpill(target){
+  if(target==='Partner')return'tp-partner'
+  if(target==='Staff'||target==='Partner & Staff')return'tp-staff'
+  return'tp-public'
 }
 
-// ═══════════════════════════════════
-// USER PAGE
-// ═══════════════════════════════════
-function renderCards() {
-  const active = allPromos.filter(p => p.status)
-  document.getElementById('count-lbl').textContent = active.length + ' โปรโมชั่นที่ใช้งานอยู่'
-  const container = document.getElementById('promo-list-inner')
-  if (!active.length) {
-    container.innerHTML = '<div class="empty-state"><div class="ei">🌿</div><p>ยังไม่มีโปรโมชั่นที่เปิดใช้งาน</p></div>'
+// ══════════════════════════
+// USER — CARDS
+// ══════════════════════════
+function renderCards(){
+  const active=promos.filter(p=>p.status)
+  document.getElementById('count-lbl').textContent=active.length+' รายการ'
+  const el=document.getElementById('promo-list')
+  if(!active.length){
+    el.innerHTML='<div class="empty-state"><div class="ei">🍱</div><p>ยังไม่มีโปรโมชั่นที่เปิดใช้งาน</p></div>'
     return
   }
-  container.innerHTML = active.map(p => `
-    <div class="promo-card" data-title="${(p.title||'').toLowerCase()}" data-desc="${(p.description||'').toLowerCase()}">
-      <div class="icon-col">
-        <div class="cicon">${p.icon||'🏷️'}</div>
-        <span class="tbadge ${targetBadge(p.target)}">${p.target||'ทั่วไป'}</span>
+  el.innerHTML=active.map(p=>`
+    <div class="pcard" data-title="${(p.title||'').toLowerCase()}" data-desc="${(p.description||'').toLowerCase()}">
+      <div class="pcard-accent"></div>
+      <div class="pcard-icon">
+        <div class="ic">${p.icon||'🏷️'}</div>
+        <span class="target-pill ${tpill(p.target)}">${p.target==='ลูกค้าทั่วไป'?'ทั่วไป':p.target}</span>
       </div>
-      <div class="card-body">
-        <div class="card-top">
-          <div class="card-title">${p.title}</div>
-          ${p.promo_code ? `<span class="card-code">${p.promo_code}</span>` : ''}
+      <div class="pcard-body">
+        <div class="pcard-row1">
+          <div class="pcard-title">${p.title}</div>
+          ${p.promo_code?`<span class="pcard-code">${p.promo_code}</span>`:''}
         </div>
-        <div class="card-desc">${p.description||''}</div>
-        <div class="card-date">🗓 ${fmtDate(p.start_date)} – ${fmtDate(p.end_date)}</div>
-        ${(p.mechanic||p.conditions) ? `
+        <div class="pcard-desc">${p.description||''}</div>
+        <div class="pcard-date">🗓 ${fmt(p.start_date)} – ${fmt(p.end_date)}</div>
+        ${(p.mechanic||p.conditions)?`
           <button class="expand-btn" onclick="toggleExpand(this)">
-            <span class="arr">›</span> รายละเอียดเพิ่มเติม
+            <i class="exp-arr">›</i> ดูรายละเอียดเพิ่มเติม
           </button>
           <div class="card-detail">
             <div class="detail-inner">
-              ${p.mechanic ? `<div class="dlabel">วิธีรับสิทธิ์</div><div>${p.mechanic}</div>` : ''}
-              ${p.conditions ? `<div class="dlabel">เงื่อนไข</div><div>${p.conditions}</div>` : ''}
+              ${p.mechanic?`<div class="dlabel">วิธีรับสิทธิ์</div><div class="dtext">${p.mechanic}</div>`:''}
+              ${p.conditions?`<div class="dlabel">เงื่อนไข</div><div class="dtext">${p.conditions}</div>`:''}
             </div>
-          </div>` : ''}
+          </div>`:''
+        }
       </div>
     </div>`).join('')
 }
 
-function filterCards() {
-  const q = document.getElementById('user-search').value.toLowerCase()
-  document.querySelectorAll('.promo-card').forEach(c => {
-    c.style.display = (!q || c.dataset.title.includes(q) || c.dataset.desc.includes(q)) ? '' : 'none'
+function filterCards(){
+  const q=document.getElementById('user-search').value.toLowerCase()
+  document.querySelectorAll('.pcard').forEach(c=>{
+    c.style.display=(!q||c.dataset.title.includes(q)||c.dataset.desc.includes(q))?'':'none'
   })
 }
 
-function toggleExpand(btn) {
-  const detail = btn.nextElementSibling
-  const open = detail.classList.toggle('open')
-  btn.classList.toggle('open', open)
+function toggleExpand(btn){
+  const d=btn.nextElementSibling
+  const open=d.classList.toggle('open')
+  btn.classList.toggle('open',open)
 }
 
-// ═══════════════════════════════════
+// ══════════════════════════
 // ADMIN TABLE
-// ═══════════════════════════════════
-function updateStats() {
-  document.getElementById('st-total').textContent   = allPromos.length
-  document.getElementById('st-active').textContent  = allPromos.filter(p=>p.status).length
-  document.getElementById('st-pending').textContent = allPromos.filter(p=>p.review_status==='รออนุมัติ').length
+// ══════════════════════════
+function updateStats(){
+  document.getElementById('st-total').textContent=promos.length
+  document.getElementById('st-active').textContent=promos.filter(p=>p.status).length
+  document.getElementById('st-pending').textContent=promos.filter(p=>p.review_status==='รออนุมัติ').length
 }
-function setFilter(btn) {
+function setFilter(btn){
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'))
-  btn.classList.add('active'); filterMode=btn.dataset.f; renderTable()
+  btn.classList.add('active');filterMode=btn.dataset.f;renderTable()
 }
-function sbadge(r) {
-  if (r==='ใช้งานอยู่') return `<span class="sbadge sb-on">✓ ใช้งานอยู่</span>`
-  if (r==='รออนุมัติ')  return `<span class="sbadge sb-pend">⏳ รออนุมัติ</span>`
-  return `<span class="sbadge sb-off">⊘ หยุดใช้งาน</span>`
+function sBadge(r){
+  if(r==='ใช้งานอยู่')return`<span class="sbadge sb-on">● ใช้งานอยู่</span>`
+  if(r==='รออนุมัติ') return`<span class="sbadge sb-pend">◐ รออนุมัติ</span>`
+  return`<span class="sbadge sb-off">○ หยุดใช้งาน</span>`
 }
-function renderTable() {
+function renderTable(){
   updateStats()
-  const q = (document.getElementById('admin-search').value||'').toLowerCase()
-  const rows = allPromos.filter(p => {
-    const ms = (p.title||'').toLowerCase().includes(q)||(p.promo_code||'').includes(q)
-    const mf = filterMode==='all'||(filterMode==='active'&&p.status)||(filterMode==='inactive'&&!p.status)
-    return ms && mf
+  const q=(document.getElementById('admin-search').value||'').toLowerCase()
+  const rows=promos.filter(p=>{
+    const ms=(p.title||'').toLowerCase().includes(q)||(p.promo_code||'').includes(q)
+    const mf=filterMode==='all'||(filterMode==='active'&&p.status)||(filterMode==='inactive'&&!p.status)
+    return ms&&mf
   })
-  const tbody = document.getElementById('admin-tbody')
-  if (!rows.length) {
-    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="ei">🌿</div><p>ไม่พบโปรโมชั่น</p></div></td></tr>`
-    document.getElementById('table-count').textContent=''; return
+  const tbody=document.getElementById('admin-tbody')
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><div class="ei">🍱</div><p>ไม่พบโปรโมชั่น</p></div></td></tr>`
+    document.getElementById('table-count').textContent='';return
   }
-  tbody.innerHTML = rows.map(p=>`
+  tbody.innerHTML=rows.map(p=>`
     <tr>
-      <td><div class="ttitle">${p.title}</div><div class="tsub">${p.description||''}</div></td>
-      <td style="color:var(--muted);font-size:.75rem;white-space:nowrap">${p.target||'–'}</td>
-      <td>${p.promo_code?`<span class="cpill">${p.promo_code}</span>`:'<span style="color:var(--dim)">—</span>'}</td>
-      <td style="font-size:.72rem;color:var(--muted);white-space:nowrap">${fmtDate(p.start_date)}<br/><span style="color:var(--dim)">→ ${fmtDate(p.end_date)}</span></td>
-      <td>${sbadge(p.review_status)}</td>
-      <td><button class="toggle-btn" onclick="doToggle('${p.id}',${p.status})">${p.status?'🟢':'⚫'}</button></td>
+      <td><div class="td-name">${p.title}</div><div class="td-sub">${p.description||''}</div></td>
+      <td style="font-size:.75rem;color:var(--ink3);white-space:nowrap">${p.target||'–'}</td>
+      <td>${p.promo_code?`<span class="cpill">${p.promo_code}</span>`:'<span style="color:var(--ink4)">—</span>'}</td>
+      <td style="font-size:.72rem;color:var(--ink3);white-space:nowrap">${fmt(p.start_date)}<br/><span style="color:var(--ink4)">→ ${fmt(p.end_date)}</span></td>
+      <td>${sBadge(p.review_status)}</td>
+      <td><button class="toggle-btn" onclick="doToggle('${p.id}',${p.status})" title="${p.status?'ปิดใช้งาน':'เปิดใช้งาน'}">${p.status?'🟢':'⚪'}</button></td>
       <td style="text-align:center">
         <button class="act-btn" onclick="openModal('${p.id}')" title="แก้ไข">✏️</button>
         <button class="act-btn del" onclick="confirmDel('${p.id}','${(p.title||'').replace(/'/g,"\\'")}')">🗑️</button>
       </td>
     </tr>`).join('')
-  document.getElementById('table-count').textContent=`แสดง ${rows.length} จาก ${allPromos.length} รายการ`
+  document.getElementById('table-count').textContent=`แสดง ${rows.length} จาก ${promos.length} รายการ`
 }
 
-async function doToggle(id, cur) {
-  try {
-    await sbUpdate(id,{status:!cur})
-    const p=allPromos.find(x=>x.id===id); if(p) p.status=!cur
-    renderCards(); renderTable()
-    showToast(!cur?'✅ เปิดใช้งานแล้ว':'⛔ ปิดใช้งานแล้ว')
-  } catch(e){showToast('Error: '+e.message,'error')}
+async function doToggle(id,cur){
+  try{
+    await sbUpd(id,{status:!cur})
+    const p=promos.find(x=>x.id===id);if(p)p.status=!cur
+    renderCards();renderTable()
+    showToast(!cur?'✅ เปิดใช้งานแล้ว':'โปรโมชั่นถูกปิดใช้งาน')
+  }catch(e){showToast('Error: '+e.message,'error')}
+}
+async function confirmDel(id,title){
+  if(!confirm(`ต้องการลบ "${title}" ใช่หรือไม่?`))return
+  try{
+    await sbDel(id);promos=promos.filter(p=>p.id!==id)
+    renderCards();renderTable();showToast('ลบเรียบร้อยแล้ว')
+  }catch(e){showToast('Error: '+e.message,'error')}
 }
 
-async function confirmDel(id,title) {
-  if (!confirm(`ต้องการลบ "${title}" ใช่หรือไม่?`)) return
-  try {
-    await sbDelete(id)
-    allPromos=allPromos.filter(p=>p.id!==id)
-    renderCards(); renderTable(); showToast('🗑️ ลบเรียบร้อย')
-  } catch(e){showToast('Error: '+e.message,'error')}
-}
-
-// ═══════════════════════════════════
+// ══════════════════════════
 // MODAL
-// ═══════════════════════════════════
-function openModal(id) {
-  const p = id ? allPromos.find(x=>x.id===id) : null
-  document.getElementById('modal-title').textContent = p?'แก้ไขโปรโมชั่น':'เพิ่มโปรโมชั่นใหม่'
-  document.getElementById('f-id').value      = p?.id||''
-  document.getElementById('f-title').value   = p?.title||''
-  document.getElementById('f-target').value  = p?.target||'ลูกค้าทั่วไป'
-  document.getElementById('f-code').value    = p?.promo_code||''
-  document.getElementById('f-desc').value    = p?.description||''
-  document.getElementById('f-mech').value    = p?.mechanic||''
-  document.getElementById('f-cond').value    = p?.conditions||''
-  document.getElementById('f-img').value     = p?.image_url||''
-  document.getElementById('f-start').value   = p?.start_date||''
-  document.getElementById('f-end').value     = p?.end_date||''
-  document.getElementById('f-rstatus').value = p?.review_status||'ใช้งานอยู่'
-  setSwitch(p ? p.status : true)
+// ══════════════════════════
+function openModal(id){
+  const p=id?promos.find(x=>x.id===id):null
+  document.getElementById('modal-title').textContent=p?'แก้ไขโปรโมชั่น':'เพิ่มโปรโมชั่นใหม่'
+  document.getElementById('f-id').value     =p?.id||''
+  document.getElementById('f-title').value  =p?.title||''
+  document.getElementById('f-target').value =p?.target||'ลูกค้าทั่วไป'
+  document.getElementById('f-code').value   =p?.promo_code||''
+  document.getElementById('f-desc').value   =p?.description||''
+  document.getElementById('f-mech').value   =p?.mechanic||''
+  document.getElementById('f-cond').value   =p?.conditions||''
+  document.getElementById('f-img').value    =p?.image_url||''
+  document.getElementById('f-start').value  =p?.start_date||''
+  document.getElementById('f-end').value    =p?.end_date||''
+  document.getElementById('f-rstatus').value=p?.review_status||'ใช้งานอยู่'
+  setSw(p?p.status:true)
   document.getElementById('modal-overlay').classList.add('open')
   setTimeout(()=>document.getElementById('f-title').focus(),100)
 }
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
-function setSwitch(on){
-  document.getElementById('f-status').value = on?'1':'0'
-  document.getElementById('sw-track').style.background = on?'var(--green)':'rgba(255,255,255,0.12)'
-  document.getElementById('sw-knob').style.right = on?'3px':'25px'
-  document.getElementById('sw-lbl').textContent = on?'เปิด':'ปิด'
-}
-function toggleSw(){setSwitch(document.getElementById('f-status').value!=='1')}
 
-async function savePromo() {
+function setSw(on){
+  document.getElementById('f-status').value=on?'1':'0'
+  const track=document.getElementById('sw-track')
+  const knob=document.getElementById('sw-knob')
+  track.style.background=on?'var(--sage)':'var(--stone)'
+  track.style.borderColor=on?'var(--sage)':'var(--stone)'
+  knob.style.left=on?'23px':'3px'
+  document.getElementById('sw-lbl').textContent=on?'เปิด':'ปิด'
+}
+function toggleSw(){setSw(document.getElementById('f-status').value!=='1')}
+
+async function savePromo(){
   const title=document.getElementById('f-title').value.trim()
-  if (!title){showToast('กรุณากรอกชื่อโปรโมชั่น','error');return}
+  if(!title){showToast('กรุณากรอกชื่อโปรโมชั่น','error');return}
   const btn=document.getElementById('btn-save')
-  btn.disabled=true; btn.innerHTML='<span class="spin">⟳</span> บันทึก...'
+  btn.disabled=true;btn.innerHTML='<span class="spin">⟳</span> กำลังบันทึก...'
   const id=document.getElementById('f-id').value
   const payload={
     title,
@@ -590,34 +908,32 @@ async function savePromo() {
     review_status: document.getElementById('f-rstatus').value,
     status:        document.getElementById('f-status').value==='1'
   }
-  try {
+  try{
     if(id){
-      await sbUpdate(id,payload)
-      const idx=allPromos.findIndex(p=>p.id===id)
-      if(idx!==-1) allPromos[idx]={...allPromos[idx],...payload}
+      await sbUpd(id,payload)
+      const idx=promos.findIndex(p=>p.id===id)
+      if(idx!==-1)promos[idx]={...promos[idx],...payload}
       showToast('✅ อัพเดทเรียบร้อย')
-    } else {
-      const res=await sbInsert(payload)
-      allPromos=[res[0]||{id:Date.now(),...payload},...allPromos]
+    }else{
+      const res=await sbIns(payload)
+      promos=[res[0]||{id:Date.now(),...payload},...promos]
       showToast('✅ เพิ่มโปรโมชั่นใหม่แล้ว')
     }
-    closeModal(); renderCards(); renderTable()
-  } catch(e){showToast('Error: '+e.message,'error')}
-  finally{btn.disabled=false; btn.innerHTML='💾 บันทึก'}
+    closeModal();renderCards();renderTable()
+  }catch(e){showToast('Error: '+e.message,'error')}
+  finally{btn.disabled=false;btn.innerHTML='บันทึก'}
 }
 
-// ═══════════════════════════════════
+// ══════════════════════════
 // PAGE SWITCH
-// ═══════════════════════════════════
+// ══════════════════════════
 function switchPage(p){
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'))
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'))
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'))
   document.getElementById('page-'+p).classList.add('active')
-  if(p==='user') document.querySelectorAll('.tab')[0].classList.add('active')
-  else document.querySelectorAll('.tab')[1].classList.add('active')
+  document.querySelectorAll('.nav-tab')[p==='user'?0:1].classList.add('active')
 }
 
-// close modal/login on backdrop
 document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()})
 document.getElementById('login-page').addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById('login-page').classList.remove('show')})
 
