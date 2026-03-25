@@ -3,225 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promo Master | Admin Portal</title>
+    <title>Promo Master Pro | Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .loader { border-top-color: #4f46e5; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <div id="login-section" class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-indigo-600 tracking-tight">PROMO<span class="text-gray-800">MASTER</span></h1>
-                <p class="text-sm text-gray-500 mt-2">Sign in to manage your promotions</p>
+    <div id="login-section" class="flex-grow flex items-center justify-center p-4 bg-slate-100">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200">
+            <div class="text-center mb-10">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+                    <span class="text-white text-3xl font-bold">P</span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Admin Login</h1>
+                <p class="text-slate-500 mt-2">Manage your business promotions</p>
             </div>
-            <form id="login-form" class="space-y-5">
+            <form id="login-form" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="login-email" class="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                    <input type="email" id="login-email" placeholder="admin@example.com" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" class="w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition shadow-md hover:shadow-lg">
-                    Sign In to Dashboard
+                <button type="submit" id="btn-login" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all shadow-indigo-200 shadow-lg active:scale-95">
+                    Sign In to System
                 </button>
-                <p id="login-error" class="text-red-500 text-sm text-center hidden"></p>
+                <div id="login-error" class="hidden bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium text-center border border-red-100"></div>
             </form>
         </div>
     </div>
 
     <div id="dashboard-section" class="hidden flex-grow flex flex-col">
-        <nav class="bg-indigo-700 text-white shadow-md sticky top-0 z-10">
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold tracking-tight">PROMO<span class="font-light text-indigo-300">MASTER</span></h1>
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 p-1.5 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">PROMO<span class="text-indigo-600">MASTER</span></h1>
+                </div>
                 <div class="flex items-center gap-4">
-                    <span id="user-email" class="text-sm font-medium hidden md:block bg-indigo-800 px-3 py-1 rounded-full"></span>
-                    <button onclick="handleLogout()" class="text-sm font-semibold bg-white text-indigo-700 px-4 py-1.5 rounded-lg hover:bg-gray-100 transition shadow-sm">Logout</button>
+                    <div class="hidden sm:flex flex-col items-end">
+                        <span id="user-email" class="text-sm font-bold text-slate-700"></span>
+                        <span class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Administrator</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-slate-100 text-slate-600 p-2.5 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all border border-slate-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
                 </div>
             </div>
         </nav>
 
-        <main class="container mx-auto p-6 max-w-7xl flex-grow">
+        <main class="container mx-auto p-6 max-w-7xl flex-grow space-y-8">
             
-            <section class="glass-panel rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-                <h2 class="text-xl font-bold mb-6 flex items-center text-gray-800">
-                    <span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3 shadow-inner">⚡</span> 
-                    <span id="form-title">Create New Promotion</span>
-                </h2>
-                <form id="promo-form" class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 border-b border-slate-200 px-8 py-5 flex justify-between items-center">
+                    <h2 id="form-title" class="text-lg font-bold text-slate-800">Create New Promotion</h2>
+                    <span class="text-xs text-slate-400 font-medium tracking-tighter">ID: Auto-generated</span>
+                </div>
+                <form id="promo-form" class="p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
                     <input type="hidden" id="promo-id">
                     
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Promotion Title *</label>
-                        <input type="text" id="title" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" required>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Promotion Title</label>
+                        <input type="text" id="title" placeholder="เช่น ลดล้างสต็อก 50%" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all" required>
                     </div>
                     
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Discount Code</label>
-                        <input type="text" id="discount_code" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono uppercase">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Discount Code</label>
+                        <input type="text" id="discount_code" placeholder="เช่น SUMMER50" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none font-mono uppercase tracking-widest text-indigo-600">
                     </div>
 
                     <div class="md:col-span-1">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Start Date</label>
-                        <input type="date" id="start_date" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Date</label>
+                        <input type="date" id="start_date" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none">
                     </div>
                     
                     <div class="md:col-span-1">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">End Date</label>
-                        <input type="date" id="end_date" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Date</label>
+                        <input type="date" id="end_date" class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none">
                     </div>
 
-                    <div class="md:col-span-2 flex items-center mt-6">
-                        <label class="flex items-center cursor-pointer">
+                    <div class="md:col-span-2 flex items-center pt-6 px-2">
+                        <label class="flex items-center cursor-pointer group">
                             <input type="checkbox" id="is_active" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500 relative"></div>
-                            <span class="ml-3 text-sm font-medium text-gray-700">Active Status (เปิดใช้งาน)</span>
+                            <div class="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500 relative shadow-inner"></div>
+                            <span class="ml-4 text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">เปิดใช้งานโปรโมชันนี้</span>
                         </label>
                     </div>
 
                     <div class="md:col-span-4">
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description</label>
-                        <textarea id="description" rows="2" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description / Details</label>
+                        <textarea id="description" rows="3" placeholder="ระบุเงื่อนไขหรือรายละเอียดเพิ่มเติม..." class="w-full border border-slate-200 bg-slate-50 px-4 py-3 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 outline-none"></textarea>
                     </div>
 
-                    <div class="md:col-span-4 flex gap-3 pt-2">
-                       <button type="submit" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 transition font-semibold shadow-md">Save Promotion</button>
-                       <button type="button" onclick="resetForm()" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-50 transition font-medium">Cancel</button>
+                    <div class="md:col-span-4 flex gap-4 pt-4 border-t border-slate-100">
+                       <button type="submit" id="btn-save" class="bg-indigo-600 text-white px-10 py-4 rounded-2xl hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-100 active:scale-95">
+                           บันทึกข้อมูล
+                       </button>
+                       <button type="button" onclick="resetForm()" class="bg-white border border-slate-200 text-slate-500 px-6 py-4 rounded-2xl hover:bg-slate-50 hover:text-slate-800 transition-all font-medium">
+                           ยกเลิก / ล้างค่า
+                       </button>
                     </div>
                 </form>
             </section>
 
             <section>
-                <div class="flex justify-between items-center mb-6 border-b pb-3">
-                    <h2 class="text-2xl font-bold text-gray-800">All Promotions</h2>
-                    <button onclick="fetchPromotions()" class="text-sm font-medium text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded hover:bg-indigo-100 transition">↻ Refresh</button>
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Active Promotions</h2>
+                        <p class="text-slate-500 text-sm">รายการโปรโมชันทั้งหมดในระบบ</p>
+                    </div>
+                    <button onclick="fetchPromotions()" class="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-all shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
                 </div>
                 
-                <div id="loading" class="text-center py-12 text-gray-500 font-medium">Loading data...</div>
+                <div id="loading" class="hidden flex flex-col items-center justify-center py-20 gap-4">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-200 h-12 w-12"></div>
+                    <p class="text-slate-400 font-medium animate-pulse">กำลังเรียกข้อมูล...</p>
+                </div>
                 
-                <div id="promo-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="promo-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     </div>
             </section>
         </main>
     </div>
 
     <script>
-        // ================= CONFIGURATION =================
-        // ⚠️ เปลี่ยน 2 ค่านี้เป็นของคุณ ⚠️
-        const SUPABASE_URL = 'https://mwmcsmoshekavcspsyzt.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13bWNzbW9zaGVrYXZjc3BzeXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjU3MzQsImV4cCI6MjA5MDAwMTczNH0.j6yCsqoZ1wAT1iw2DC2eBCE_Fuia3MNR6gvVLopQ7UI';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ================= JS CONFIG: แก้ไข 2 บรรทัดนี้เท่านั้น =================
+        const CONFIG_URL = 'https://lujvjowaywkyvixlyvst.supabase.co'; // เปลี่ยนเป็น URL ของคุณ
+        const CONFIG_KEY = 'YOUR_SUPABASE_ANON_KEY'; // เปลี่ยนเป็น ANON KEY ของคุณ
+        
+        // ใช้ชื่อ 'supa' เพื่อไม่ให้ชนกับชื่อ Library 'supabase'
+        const supa = supabase.createClient(CONFIG_URL, CONFIG_KEY);
 
-        // ================= DOM ELEMENTS =================
+        // UI Selectors
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
         const promoForm = document.getElementById('promo-form');
         const promoGrid = document.getElementById('promo-grid');
-        const loading = document.getElementById('loading');
+        const loadingDiv = document.getElementById('loading');
         const userEmailSpan = document.getElementById('user-email');
         const formTitle = document.getElementById('form-title');
 
-        // ================= AUTHENTICATION =================
-        // เช็คสถานะ Login ทุกครั้งที่เปิดเว็บ
-        supabase.auth.onAuthStateChange((event, session) => {
+        // 1. AUTH LOGIC: ตรวจสอบสถานะการเข้าสู่ระบบ
+        supa.auth.onAuthStateChange((event, session) => {
             if (session) {
                 loginSection.classList.add('hidden');
                 dashboardSection.classList.remove('hidden');
                 userEmailSpan.innerText = session.user.email;
-                fetchPromotions(); // ดึงข้อมูลเมื่อ Login ผ่าน
+                fetchPromotions();
             } else {
                 loginSection.classList.remove('hidden');
                 dashboardSection.classList.add('hidden');
             }
         });
 
-        // จัดการการ Login
+        // 2. SIGN IN: จัดการการล็อกอิน
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            
+            const btn = document.getElementById('btn-login');
+
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            loginError.classList.add('hidden');
+
+            const { data, error } = await supa.auth.signInWithPassword({ email, password });
+
             if (error) {
-                loginError.innerText = error.message;
+                loginError.innerText = "ล็อกอินไม่สำเร็จ: " + error.message;
                 loginError.classList.remove('hidden');
-            } else {
-                loginError.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerText = "Sign In to System";
             }
         });
 
-        // จัดการการ Logout
+        // 3. LOGOUT: ออกจากระบบ
         async function handleLogout() {
-            await supabase.auth.signOut();
-            promoGrid.innerHTML = ''; // ล้างข้อมูลหน้าจอ
+            await supa.auth.signOut();
+            window.location.reload();
         }
 
-        // ================= CRUD OPERATIONS =================
+        // 4. READ: ดึงข้อมูลโปรโมชัน
         async function fetchPromotions() {
-            loading.classList.remove('hidden');
+            loadingDiv.classList.remove('hidden');
             promoGrid.innerHTML = '';
             
-            const { data, error } = await supabase
+            const { data, error } = await supa
                 .from('promotions')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            loading.classList.add('hidden');
-            
-            if (error) {
-                alert('Error fetching data: ' + error.message);
-                return;
-            }
-
-            if (data.length === 0) {
-                promoGrid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">No promotions found. Create one above!</div>`;
-                return;
-            }
+            loadingDiv.classList.add('hidden');
+            if (error) return alert('เกิดข้อผิดพลาด: ' + error.message);
 
             data.forEach(item => {
-                const statusColor = item.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500';
-                const statusText = item.is_active ? 'Active' : 'Inactive';
-                const codeDisplay = item.discount_code ? `<span class="bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded font-mono font-bold">${item.discount_code}</span>` : '';
-
                 const card = document.createElement('div');
-                card.className = "bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition duration-200 flex flex-col h-full";
+                card.className = "bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col";
+                
+                const statusBadge = item.is_active 
+                    ? '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Active</span>'
+                    : '<span class="bg-slate-100 text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Inactive</span>';
+
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <span class="${statusColor} text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">${statusText}</span>
-                        <div class="flex gap-3">
-                            <button onclick="editPromo('${item.id}')" class="text-blue-500 hover:text-blue-700 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </button>
-                            <button onclick="deletePromo('${item.id}')" class="text-red-400 hover:text-red-600 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
+                    <div class="p-6 flex-grow">
+                        <div class="flex justify-between items-start mb-4">
+                            ${statusBadge}
+                            <div class="flex gap-2">
+                                <button onclick="editPromo('${item.id}')" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button onclick="deletePromo('${item.id}')" class="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
                         </div>
+                        <h3 class="font-bold text-slate-900 text-xl mb-2 leading-tight">${item.title}</h3>
+                        ${item.discount_code ? `<p class="font-mono text-indigo-600 font-black text-sm mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-lg">${item.discount_code}</p>` : ''}
+                        <p class="text-slate-500 text-sm line-clamp-3 leading-relaxed mb-4">${item.description || 'ไม่มีรายละเอียด...'}</p>
                     </div>
-                    <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-2">${item.title}</h3>
-                    <div class="mb-3">${codeDisplay}</div>
-                    <p class="text-gray-500 text-sm mb-4 line-clamp-3 flex-grow">${item.description || 'No description provided.'}</p>
-                    <div class="border-t border-gray-100 pt-3 flex justify-between items-center text-xs font-medium text-gray-500">
-                        <span class="bg-gray-50 px-2 py-1 rounded">Start: ${item.start_date || '-'}</span>
-                        <span class="bg-gray-50 px-2 py-1 rounded">End: ${item.end_date || '-'}</span>
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
+                        <div>📅 ${item.start_date || 'N/A'}</div>
+                        <div>🏁 ${item.end_date || 'N/A'}</div>
                     </div>
                 `;
                 promoGrid.appendChild(card);
             });
         }
 
+        // 5. CREATE & UPDATE: บันทึกข้อมูล
         promoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btn-save');
             const id = document.getElementById('promo-id').value;
+            
             const payload = {
                 title: document.getElementById('title').value,
                 description: document.getElementById('description').value,
@@ -231,33 +260,39 @@
                 is_active: document.getElementById('is_active').checked
             };
 
-            const btn = e.target.querySelector('button[type="submit"]');
             btn.disabled = true;
-            btn.innerText = "Saving...";
+            btn.innerText = "กำลังบันทึก...";
 
+            let result;
             if (id) {
-                const { error } = await supabase.from('promotions').update(payload).eq('id', id);
-                if (error) alert('Update Failed: ' + error.message);
+                // UPDATE (SQL: update promotions where id = id)
+                result = await supa.from('promotions').update(payload).eq('id', id);
             } else {
-                const { error } = await supabase.from('promotions').insert([payload]);
-                if (error) alert('Insert Failed: ' + error.message);
+                // INSERT (SQL: insert into promotions)
+                result = await supa.from('promotions').insert([payload]);
             }
 
+            if (result.error) {
+                alert('บันทึกผิดพลาด: ' + result.error.message);
+            } else {
+                resetForm();
+                fetchPromotions();
+            }
             btn.disabled = false;
-            btn.innerText = "Save Promotion";
-            resetForm();
-            fetchPromotions();
+            btn.innerText = "บันทึกข้อมูล";
         });
 
+        // 6. DELETE: ลบข้อมูล
         async function deletePromo(id) {
-            if (!confirm('Are you sure you want to delete this promotion? This cannot be undone.')) return;
-            const { error } = await supabase.from('promotions').delete().eq('id', id);
-            if (error) alert('Delete Failed: ' + error.message);
-            fetchPromotions();
+            if (!confirm('คุณต้องการลบโปรโมชันนี้ใช่หรือไม่? ข้อมูลจะหายถาวร')) return;
+            const { error } = await supa.from('promotions').delete().eq('id', id);
+            if (error) alert('ลบผิดพลาด: ' + error.message);
+            else fetchPromotions();
         }
 
+        // 7. EDIT: ดึงข้อมูลขึ้นฟอร์มเพื่อแก้ไข
         async function editPromo(id) {
-            const { data, error } = await supabase.from('promotions').select('*').eq('id', id).single();
+            const { data, error } = await supa.from('promotions').select('*').eq('id', id).single();
             if (data) {
                 document.getElementById('promo-id').value = data.id;
                 document.getElementById('title').value = data.title;
@@ -267,7 +302,7 @@
                 document.getElementById('end_date').value = data.end_date;
                 document.getElementById('is_active').checked = data.is_active;
                 
-                formTitle.innerText = "Edit Promotion";
+                formTitle.innerText = "Editing Promotion: " + data.title;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
