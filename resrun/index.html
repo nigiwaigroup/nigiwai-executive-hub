@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resrun POS — ServiceRun </title>
+<title>Resrun CRM — Nigiwai Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -447,6 +447,46 @@ body.light .kpi{box-shadow:0 1px 4px rgba(0,0,0,.06)}
       </div>
     </div>
 
+    <!-- CONNECTION PANEL -->
+    <div id="conn-panel" class="cbox" style="margin-bottom:18px;border:1px solid var(--b2)">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:3px">🗄️ Supabase Connection</div>
+          <div style="font-size:12px;color:var(--t3)" id="conn-detail">
+            <span>URL: </span><code style="color:var(--blu);font-size:11px">qktqbiurepifkmsggehf.supabase.co</code>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="test-conn-btn" onclick="testConnection()" style="padding:9px 18px;background:var(--s3);border:1px solid var(--blu);border-radius:8px;color:var(--blu);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(96,165,250,.15)'" onmouseout="this.style.background='var(--s3)'">
+            🔌 Test Connection
+          </button>
+          <button id="import-btn" onclick="importSeedData()" style="padding:9px 18px;background:var(--s3);border:1px solid var(--gold);border-radius:8px;color:var(--gold);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(240,180,41,.15)'" onmouseout="this.style.background='var(--s3)'">
+            📥 Import 106 สาขา
+          </button>
+          <button onclick="connectSupabase()" style="padding:9px 18px;background:var(--s3);border:1px solid var(--grn);border-radius:8px;color:var(--grn);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(52,211,153,.15)'" onmouseout="this.style.background='var(--s3)'">
+            🔄 Reconnect
+          </button>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:var(--bg);border-radius:8px;padding:12px 14px;border:1px solid var(--b1)">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:8px;letter-spacing:.5px">⚡ ถ้าเชื่อมไม่ได้ — ทำตามนี้ก่อน:</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="font-size:12px;padding:8px 10px;background:var(--s2);border-radius:6px;border-left:3px solid var(--blu)">
+            <strong style="color:var(--blu)">Step 1</strong><br>
+            <span style="color:var(--t2)">Supabase → SQL Editor → รัน SQL สร้าง Table</span>
+          </div>
+          <div style="font-size:12px;padding:8px 10px;background:var(--s2);border-radius:6px;border-left:3px solid var(--gold)">
+            <strong style="color:var(--gold)">Step 2</strong><br>
+            <span style="color:var(--t2)">กด "Test Connection" เพื่อเช็คว่า Table พร้อม</span>
+          </div>
+          <div style="font-size:12px;padding:8px 10px;background:var(--s2);border-radius:6px;border-left:3px solid var(--grn)">
+            <strong style="color:var(--grn)">Step 3</strong><br>
+            <span style="color:var(--t2)">กด "Import 106 สาขา" เพื่อนำข้อมูลเข้า Database</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- KPI CARDS -->
     <div class="kpi-grid" id="kpi-grid"></div>
 
@@ -880,26 +920,154 @@ window.addEventListener('DOMContentLoaded', async () => {
    ═══════════════════════════════════════════════════════════ */
 async function connectSupabase() {
   setSyncStatus('loading', 'กำลังเชื่อมต่อ Supabase…');
+  showConnBanner('loading', 'กำลังเชื่อมต่อ Supabase…');
   try {
     const { createClient } = supabase;
     SB = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Step 1: Test ping
+    const { error: pingErr } = await SB.from('customers').select('id', { count: 'exact', head: true });
+    if (pingErr) throw new Error('Table ไม่พบ หรือ RLS บล็อก: ' + pingErr.message);
+
+    // Step 2: Load data
     const { data, error } = await SB.from('customers').select('*').order('no');
     if (error) throw error;
-    DATA = data.length > 0 ? data : SEED;
+
     if (data.length === 0) {
-      // Auto-seed on first connect
-      await SB.from('customers').insert(SEED);
-      DATA = SEED;
-      toast('นำเข้าข้อมูลเริ่มต้น 106 สาขาสำเร็จ! 🎉', 'success');
+      // Auto-seed
+      showConnBanner('loading', `เชื่อมต่อสำเร็จ ✅ — กำลัง Import ข้อมูล ${SEED.length} สาขา…`);
+      const chunks = [];
+      for (let i = 0; i < SEED.length; i += 50) chunks.push(SEED.slice(i, i + 50));
+      for (const chunk of chunks) {
+        const { error: insErr } = await SB.from('customers').insert(chunk);
+        if (insErr) throw new Error('Insert failed: ' + insErr.message);
+      }
+      const { data: fresh } = await SB.from('customers').select('*').order('no');
+      DATA = fresh || SEED;
+      toast(`🎉 Import ${DATA.length} สาขาสำเร็จ!`, 'success');
+    } else {
+      DATA = data;
     }
-    setSyncStatus('ok', `Supabase · ${DATA.length} สาขา · sync แล้ว`);
+
+    setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
+    showConnBanner('ok', `✅ เชื่อมต่อ Supabase สำเร็จ · ${DATA.length} สาขา · ${new Date().toLocaleTimeString('th-TH')}`);
     renderAll();
   } catch(e) {
-    setSyncStatus('err', 'เชื่อม Supabase ไม่สำเร็จ — ใช้ข้อมูล Local');
+    const msg = e.message || String(e);
+    setSyncStatus('err', '❌ เชื่อม Supabase ไม่สำเร็จ');
+    showConnBanner('err', '❌ เชื่อมต่อ Supabase ไม่สำเร็จ: ' + msg);
     DATA = SEED.filter(r => r.restaurant_name && r.restaurant_name.trim());
     renderAll();
-    toast('ไม่สามารถเชื่อม Supabase ได้: ' + e.message, 'error');
+    toast('❌ ' + msg, 'error');
+    console.error('[Supabase Error]', e);
   }
+}
+
+/* ─── CONNECTION BANNER ─────────────────────────────────── */
+function showConnBanner(type, msg) {
+  let banner = document.getElementById('conn-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'conn-banner';
+    banner.style.cssText = `
+      position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      z-index:500;border-radius:12px;padding:12px 20px;
+      font-family:Prompt,Noto Sans Thai,sans-serif;font-size:13px;font-weight:600;
+      display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);
+      max-width:90vw;transition:all .3s;border:1px solid;
+    `;
+    document.body.appendChild(banner);
+  }
+  const styles = {
+    loading: { bg:'#1e3a5f', border:'#3b82f6', color:'#93c5fd', icon:'⏳' },
+    ok:      { bg:'#064e3b', border:'#10b981', color:'#6ee7b7', icon:'✅' },
+    err:     { bg:'#450a0a', border:'#f05252', color:'#fca5a5', icon:'❌' },
+  };
+  const s = styles[type] || styles.loading;
+  banner.style.background = s.bg;
+  banner.style.borderColor = s.border;
+  banner.style.color = s.color;
+  banner.innerHTML = `<span style="font-size:16px">${s.icon}</span><span>${msg}</span>`;
+  if (type === 'ok') setTimeout(() => banner?.remove(), 5000);
+}
+
+/* ─── TEST CONNECTION ────────────────────────────────────── */
+async function testConnection() {
+  const btn = document.getElementById('test-conn-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังทดสอบ…'; }
+  showConnBanner('loading', 'กำลังทดสอบการเชื่อมต่อ Supabase…');
+  try {
+    const { createClient } = supabase;
+    const testSB = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const start = Date.now();
+    const { data, error, count } = await testSB.from('customers').select('id', { count: 'exact', head: true });
+    const ms = Date.now() - start;
+    if (error) throw new Error(error.message);
+    const msg = `✅ เชื่อมต่อสำเร็จ! (${ms}ms) — Table customers พร้อมใช้งาน`;
+    showConnBanner('ok', msg);
+    toast(msg, 'success');
+    // Check row count
+    const { data: rows } = await testSB.from('customers').select('id', { count: 'exact' });
+    const rowCount = rows?.length || 0;
+    if (rowCount === 0) {
+      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ — แต่ Table ว่าง (0 rows) กด "Import 106 สาขา" ด้านล่าง`);
+      toast('⚠️ Table ว่าง — กด Import Data ด้านล่างเพื่อนำข้อมูลเข้า', 'info');
+    }
+  } catch(e) {
+    const msg = diagError(e.message);
+    showConnBanner('err', '❌ ' + msg);
+    toast('❌ ' + msg, 'error');
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '🔌 Test Connection'; }
+}
+
+/* ─── IMPORT DATA MANUALLY ──────────────────────────────── */
+async function importSeedData() {
+  const btn = document.getElementById('import-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลัง Import…'; }
+  showConnBanner('loading', `กำลัง Import ${SEED.length} สาขาเข้า Supabase…`);
+  try {
+    const { createClient } = supabase;
+    if (!SB) SB = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Clear existing first
+    await SB.from('customers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    // Insert in chunks of 50
+    let imported = 0;
+    const chunks = [];
+    for (let i = 0; i < SEED.length; i += 50) chunks.push(SEED.slice(i, i + 50));
+    for (const chunk of chunks) {
+      const { error } = await SB.from('customers').insert(chunk);
+      if (error) throw new Error(error.message);
+      imported += chunk.length;
+      if (btn) btn.textContent = `⏳ ${imported}/${SEED.length}…`;
+      showConnBanner('loading', `กำลัง Import… ${imported}/${SEED.length} สาขา`);
+    }
+
+    const { data } = await SB.from('customers').select('*').order('no');
+    DATA = data || SEED;
+    setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
+    showConnBanner('ok', `✅ Import สำเร็จ! ${DATA.length} สาขา พร้อมใช้งาน`);
+    toast(`🎉 Import ${DATA.length} สาขาสำเร็จ!`, 'success');
+    renderAll();
+  } catch(e) {
+    const msg = diagError(e.message);
+    showConnBanner('err', '❌ Import ล้มเหลว: ' + msg);
+    toast('❌ ' + msg, 'error');
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '📥 Import 106 สาขา'; }
+}
+
+/* ─── ERROR DIAGNOSIS ───────────────────────────────────── */
+function diagError(msg) {
+  if (!msg) return 'Unknown error';
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return 'Network Error — ตรวจสอบ Internet หรือ Supabase URL';
+  if (msg.includes('JWT') || msg.includes('invalid') || msg.includes('token')) return 'API Key ไม่ถูกต้อง — ตรวจสอบ Anon Key';
+  if (msg.includes('relation') || msg.includes('does not exist')) return 'Table "customers" ไม่มี — รัน SQL สร้าง Table ก่อน';
+  if (msg.includes('permission') || msg.includes('policy') || msg.includes('RLS')) return 'RLS Policy บล็อก — ตรวจสอบ Policy ใน Supabase';
+  if (msg.includes('CORS')) return 'CORS Error — ต้องเปิดจาก HTTPS ไม่ใช่ file://';
+  return msg;
 }
 
 function setSyncStatus(type, msg) {
