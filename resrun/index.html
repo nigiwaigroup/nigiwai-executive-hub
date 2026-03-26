@@ -520,9 +520,11 @@ body.light .md-stat{background:#fff;border-color:var(--b1)}
       <div class="page-sub">ข้อมูลลูกค้าทั้งหมดจาก Supabase · เรียลไทม์</div>
     </div>
     <div class="toolbar">
-      <input type="text" class="searchbox" id="br-search" placeholder="🔍 ค้นหาชื่อร้าน…" oninput="renderBranches()">
+      <input type="text" class="searchbox" id="br-search" placeholder="🔍 ค้นหาชื่อร้าน / หมายเหตุ / ติดต่อ…" oninput="renderBranches()">
       <div class="pkg-filters">
         <button class="pfbtn active" data-f="all" onclick="setBrFilter(this)">ทั้งหมด</button>
+        <button class="pfbtn" data-f="active-only" onclick="setBrFilter(this)" style="border-color:rgba(52,211,153,.5);color:var(--grn)">✅ Active</button>
+        <button class="pfbtn" data-f="deact-only" onclick="setBrFilter(this)" style="border-color:rgba(240,82,82,.5);color:var(--red)">⛔ DeActive</button>
         <button class="pfbtn p-smart" data-f="Smart" onclick="setBrFilter(this)">Smart</button>
         <button class="pfbtn p-adv" data-f="Advance" onclick="setBrFilter(this)">Advance</button>
         <button class="pfbtn p-advp" data-f="Advance Plus" onclick="setBrFilter(this)">Advance Plus</button>
@@ -1537,22 +1539,12 @@ function selectMonth(mi) {
 
 function renderMonthDetail(mi) {
   const all = activeData();
-  const y = new Date().getFullYear();
   const MONTHS_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
-  // ค้นหาใน year ปัจจุบัน + ปีถัดไป เผื่อข้อมูลข้ามปี
   const monthRows = all.filter(r=>{
     if(!r.renew_date) return false;
-    const d=new Date(r.renew_date);
-    return d.getMonth()===mi;
+    return new Date(r.renew_date).getMonth()===mi;
   });
-
-  const totalVal = monthRows.reduce((a,r)=>a+(r.price||0),0);
-  const paidRows = monthRows.filter(r=>r.payment_status==='Paid'||r.payment_status==='Working');
-  const unpaidRows = monthRows.filter(r=>r.payment_status!=='Paid'&&r.payment_status!=='Working');
-  const paidVal = paidRows.reduce((a,r)=>a+(r.price||0),0);
-  const unpaidVal = unpaidRows.reduce((a,r)=>a+(r.price||0),0);
-  const rate = totalVal>0 ? Math.round((paidVal/totalVal)*100) : 0;
 
   const panel = document.getElementById('monthly-detail-panel');
   if (monthRows.length === 0) {
@@ -1560,51 +1552,108 @@ function renderMonthDetail(mi) {
     return;
   }
 
+  // แยก Active vs DeActive ก่อน
+  const activeRows   = monthRows.filter(r => r.status !== 'DeActivate');
+  const deactRows    = monthRows.filter(r => r.status === 'DeActivate');
+
+  // แยก 3 Section จาก Active เท่านั้น (DeActive ไม่ต้องติดตาม)
+  const secOverdue  = activeRows.filter(r => r.payment_status === 'Overdue');
+  const secFollow   = activeRows.filter(r => r.payment_status === 'Follow to Renew' || r.payment_status === 'Working' || r.payment_status === 'Free trial');
+  const secPaid     = activeRows.filter(r => r.payment_status === 'Paid');
+
+  const totalVal   = activeRows.reduce((a,r)=>a+(r.price||0),0);
+  const paidVal    = secPaid.reduce((a,r)=>a+(r.price||0),0);
+  const followVal  = secFollow.reduce((a,r)=>a+(r.price||0),0);
+  const overdueVal = secOverdue.reduce((a,r)=>a+(r.price||0),0);
+  const rate = totalVal>0 ? Math.round((paidVal/totalVal)*100) : 0;
   const rateColor = rate>=80?'var(--grn)':rate>=50?'var(--ylw)':'var(--red)';
+
+  function buildRows(rows, showDeact=false) {
+    if (!rows.length) return `<tr><td colspan="8" style="text-align:center;padding:14px;color:var(--t3);font-size:12px">ไม่มีรายการ</td></tr>`;
+    return rows.sort((a,b)=>new Date(a.renew_date)-new Date(b.renew_date)).map(r=>{
+      const rid = (r.id||r.no)?.toString();
+      const deactOpacity = r.status==='DeActivate' ? 'opacity:.55' : '';
+      return `<tr style="cursor:pointer;${deactOpacity}" onclick="openShopDetail('${rid}')">
+        <td style="color:var(--t3);font-size:12px">${r.no}</td>
+        <td><strong class="name-link">${r.restaurant_name}</strong></td>
+        <td>${pkgTag(r.package)}</td>
+        <td>${fmtMoney(r.price,'gold-money')}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td style="font-size:12px">${fmtD(r.renew_date)}</td>
+        <td>${payBadge(r.payment_status)}</td>
+        <td style="color:var(--t2);font-size:12px;font-weight:600">${r.owner||'-'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function sectionHeader(icon, label, count, val, borderColor, bgColor) {
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px 8px 0 0;background:${bgColor};border-left:4px solid ${borderColor};border-bottom:1px solid ${borderColor}40">
+      <span style="font-size:16px">${icon}</span>
+      <span style="font-weight:800;font-size:14px;color:${borderColor}">${label}</span>
+      <span style="background:${borderColor}22;color:${borderColor};font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px">${count} สาขา</span>
+      <span style="margin-left:auto;font-weight:900;font-size:14px;color:${borderColor}">${Number(val).toLocaleString('th-TH')} บาท</span>
+    </div>`;
+  }
+
+  const tblHead = `<thead><tr>
+    <th>#</th><th>ชื่อสาขา</th><th>Package</th><th>ราคา</th>
+    <th>Status</th><th>วันหมดอายุ</th><th>Payment</th><th>ผู้ดูแล</th>
+  </tr></thead>`;
+
   panel.innerHTML = `
-    <div class="md-stats">
+    <!-- Summary Stats — เฉพาะ Active -->
+    <div class="md-stats" style="margin-bottom:16px">
       <div class="md-stat">
-        <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openKpiDetailFull('thismonth',${mi})">${monthRows.length}</div>
-        <div class="md-stat-lbl">สาขาครบกำหนด${MONTHS_FULL[mi]}</div>
-        <div class="md-stat-sub" style="color:#ffe066;text-shadow:0 0 12px rgba(255,224,102,.4)">฿${fmt(totalVal)}</div>
+        <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openKpiDetailFull('thismonth',${mi})">${activeRows.length}</div>
+        <div class="md-stat-lbl">Active ${MONTHS_FULL[mi]}</div>
+        <div class="md-stat-sub" style="color:#ffe066;text-shadow:0 0 12px rgba(255,224,102,.4)">${Number(totalVal).toLocaleString('th-TH')} บาท</div>
       </div>
       <div class="md-stat">
-        <div class="md-stat-val kpi-val-link" style="color:var(--grn)" onclick="openMonthPayDetail('paid',${mi})">${paidRows.length}</div>
-        <div class="md-stat-lbl">จ่ายแล้ว / Working</div>
-        <div class="md-stat-sub" style="color:#4fffb0;text-shadow:0 0 12px rgba(52,211,153,.35)">฿${fmt(paidVal)}</div>
+        <div class="md-stat-val kpi-val-link" style="color:var(--grn)" onclick="openMonthPayDetail('paid',${mi})">${secPaid.length}</div>
+        <div class="md-stat-lbl">ชำระแล้ว (Paid)</div>
+        <div class="md-stat-sub" style="color:#4fffb0;text-shadow:0 0 12px rgba(52,211,153,.35)">${Number(paidVal).toLocaleString('th-TH')} บาท</div>
       </div>
       <div class="md-stat">
-        <div class="md-stat-val kpi-val-link" style="color:var(--red)" onclick="openMonthPayDetail('unpaid',${mi})">${unpaidRows.length}</div>
-        <div class="md-stat-lbl">ค้างจ่าย / ติดตาม</div>
-        <div class="md-stat-sub" style="color:#ff6b6b;text-shadow:0 0 12px rgba(240,82,82,.35)">฿${fmt(unpaidVal)}</div>
+        <div class="md-stat-val kpi-val-link" style="color:var(--red)" onclick="openMonthPayDetail('unpaid',${mi})">${secOverdue.length}</div>
+        <div class="md-stat-lbl">ค้างจ่าย (Overdue)</div>
+        <div class="md-stat-sub" style="color:#ff6b6b;text-shadow:0 0 12px rgba(240,82,82,.35)">${Number(overdueVal).toLocaleString('th-TH')} บาท</div>
       </div>
     </div>
-    <div class="rate-bar-wrap">
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:3px">
-        <span>Collection Rate</span><span style="color:${rateColor};font-weight:700">${rate}%</span>
+
+    <!-- Collection Rate Bar -->
+    <div class="rate-bar-wrap" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:4px">
+        <span>Collection Rate (Paid / Active Total) — ไม่นับ DeActive</span>
+        <span style="color:${rateColor};font-weight:800;font-size:13px">${rate}%</span>
       </div>
       <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:${rate}%;background:${rateColor}"></div></div>
     </div>
-    <div style="margin-top:14px;overflow-x:auto">
-      <table class="md-tbl">
-        <thead><tr>
-          <th>#</th><th>ชื่อสาขา</th><th>Package</th><th>ราคา</th>
-          <th>วันหมดอายุ</th><th>Payment Status</th><th>ผู้ดูแล</th>
-        </tr></thead>
-        <tbody>${monthRows.sort((a,b)=>(new Date(a.renew_date))-(new Date(b.renew_date))).map(r=>{
-          const isPaid = r.payment_status==='Paid'||r.payment_status==='Working';
-          return `<tr style="${isPaid?'':'background:rgba(240,82,82,.04)'}">
-            <td style="color:var(--t3)">${r.no}</td>
-            <td><strong>${r.restaurant_name}</strong></td>
-            <td>${pkgTag(r.package)}</td>
-            <td>฿${fmt(r.price)}</td>
-            <td style="font-size:11px">${fmtD(r.renew_date)}</td>
-            <td>${payBadge(r.payment_status)}</td>
-            <td style="color:var(--t3);font-size:11px">${r.owner||'-'}</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>
-    </div>`;
+
+    <!-- SECTION 1: OVERDUE (Active only) -->
+    ${sectionHeader('🔴','ค้างจ่าย — Overdue (Active)',secOverdue.length,overdueVal,'#f05252','rgba(240,82,82,.06)')}
+    <div style="overflow-x:auto;margin-bottom:16px;border:1px solid rgba(240,82,82,.2);border-top:none;border-radius:0 0 8px 8px">
+      <table class="md-tbl" style="background:rgba(240,82,82,.02)">${tblHead}<tbody>${buildRows(secOverdue)}</tbody></table>
+    </div>
+
+    <!-- SECTION 2: FOLLOW / WORKING (Active only) -->
+    ${sectionHeader('🟡','รอติดตาม — Follow to Renew / Working (Active)',secFollow.length,followVal,'#fbbf24','rgba(251,191,36,.06)')}
+    <div style="overflow-x:auto;margin-bottom:16px;border:1px solid rgba(251,191,36,.2);border-top:none;border-radius:0 0 8px 8px">
+      <table class="md-tbl" style="background:rgba(251,191,36,.02)">${tblHead}<tbody>${buildRows(secFollow)}</tbody></table>
+    </div>
+
+    <!-- SECTION 3: PAID (Active only) -->
+    ${sectionHeader('🟢','ชำระแล้ว — Paid (Active)',secPaid.length,paidVal,'#34d399','rgba(52,211,153,.06)')}
+    <div style="overflow-x:auto;margin-bottom:16px;border:1px solid rgba(52,211,153,.2);border-top:none;border-radius:0 0 8px 8px">
+      <table class="md-tbl" style="background:rgba(52,211,153,.02)">${tblHead}<tbody>${buildRows(secPaid)}</tbody></table>
+    </div>
+
+    <!-- SECTION 4: DEACTIVATE (ไม่ต้องติดตาม) -->
+    ${deactRows.length > 0 ? `
+    ${sectionHeader('⚫','DeActivate — ไม่ต้องติดตาม',deactRows.length,deactRows.reduce((a,r)=>a+(r.price||0),0),'#4a5268','rgba(74,82,104,.06)')}
+    <div style="overflow-x:auto;margin-bottom:4px;border:1px solid rgba(74,82,104,.3);border-top:none;border-radius:0 0 8px 8px">
+      <table class="md-tbl" style="background:rgba(74,82,104,.02);opacity:.7">${tblHead}<tbody>${buildRows(deactRows,true)}</tbody></table>
+    </div>` : ''}
+  `;
 }
 
 function openMonthPayDetail(type, mi) {
@@ -2255,18 +2304,26 @@ renderBranches = function() {
   if (q) rows = rows.filter(r => r.restaurant_name.toLowerCase().includes(q)
     || (r.remark||'').toLowerCase().includes(q)
     || (r.contact||'').toLowerCase().includes(q));
-  if (brFilter !== 'all') {
-    if (brFilter === 'Overdue') rows = rows.filter(r => r.payment_status === 'Overdue');
-    else rows = rows.filter(r => r.package === brFilter);
-  }
+
+  if (brFilter === 'active-only')  rows = rows.filter(r => r.status === 'Active');
+  else if (brFilter === 'deact-only') rows = rows.filter(r => r.status === 'DeActivate');
+  else if (brFilter === 'Overdue') rows = rows.filter(r => r.payment_status === 'Overdue');
+  else if (brFilter !== 'all')     rows = rows.filter(r => r.package === brFilter);
+
   rows = applySortToRows(rows, 'br');
   const tbody = document.getElementById('br-tbody');
   if (!tbody) return;
+
+  // Count summary for header
+  const activeCount = rows.filter(r=>r.status==='Active').length;
+  const deactCount  = rows.filter(r=>r.status==='DeActivate').length;
+
   tbody.innerHTML = rows.length === 0
     ? `<tr><td colspan="13"><div class="no-data">ไม่พบข้อมูล</div></td></tr>`
     : rows.map(r => {
         const d = daysLeft(r.renew_date);
         const rid = (r.id||r.no)?.toString();
+        const isDeact = r.status === 'DeActivate';
         const editDel = IS_ADMIN
           ? `<td><button class="act-btn" onclick="openRecordModal('${rid}')">✏️</button><button class="act-btn del" onclick="deleteRec('${rid}')">🗑</button></td>`
           : '';
@@ -2276,7 +2333,7 @@ renderBranches = function() {
         const contactCell = r.contact
           ? `<td style="font-size:11px;color:var(--blu);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.contact}">${r.contact}</td>`
           : `<td style="color:var(--t3)">—</td>`;
-        return `<tr class="${rowCls(r)}">
+        return `<tr class="${rowCls(r)}" style="${isDeact?'opacity:.6':''}">
           <td style="color:var(--t3);font-size:12px">${r.no}</td>
           <td><strong class="name-link" onclick="openShopDetail('${rid}')" style="font-size:14px">${r.restaurant_name}</strong></td>
           <td>${pkgTag(r.package)}</td>
@@ -2292,7 +2349,12 @@ renderBranches = function() {
           ${editDel}
         </tr>`;
       }).join('');
-  document.getElementById('br-count').textContent = `แสดง ${rows.length} จาก ${activeData().length} สาขา`;
+
+  const total = rows.length;
+  const countTxt = brFilter==='all'
+    ? `แสดง ${total} สาขา (✅ Active ${activeCount} · ⛔ DeActive ${deactCount})`
+    : `แสดง ${total} จาก ${activeData().length} สาขา`;
+  document.getElementById('br-count').textContent = countTxt;
   document.getElementById('action-col').style.display = IS_ADMIN ? '' : 'none';
   document.getElementById('add-btn').style.display = IS_ADMIN ? '' : 'none';
 };
