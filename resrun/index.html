@@ -109,8 +109,10 @@ body{background:var(--bg);color:var(--txt);font-family:'Prompt','Noto Sans Thai'
 .kpi-ico{font-size:22px;margin-bottom:10px;display:block}
 .kpi-val{font-size:36px;font-weight:800;line-height:1;margin-bottom:6px;letter-spacing:-1px}
 .kpi-val.gold{color:var(--gold);text-shadow:0 0 20px rgba(240,180,41,.3)}
-.kpi-val.red{color:var(--red);text-shadow:0 0 20px rgba(240,82,82,.25)}
-.kpi-val.grn{color:var(--grn);text-shadow:0 0 20px rgba(52,211,153,.25)}
+.kpi-val.red{color:var(--red);text-shadow:none}
+.kpi-val.grn{color:var(--grn);text-shadow:none}
+body:not(.light) .kpi-val.red{text-shadow:0 0 20px rgba(240,82,82,.25)}
+body:not(.light) .kpi-val.grn{text-shadow:0 0 20px rgba(52,211,153,.25)}
 .kpi-val.blu{color:var(--blu);text-shadow:0 0 20px rgba(96,165,250,.25)}
 .kpi-val.ylw{color:var(--ylw);text-shadow:0 0 20px rgba(251,191,36,.25)}
 .kpi-lbl{font-size:12px;color:var(--t3);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
@@ -353,11 +355,57 @@ body.light{
   --bg:#f0f2f7;--s1:#ffffff;--s2:#f4f6fb;--s3:#e8ecf4;
   --b1:#d8dde8;--b2:#c5ccd8;
   --txt:#1a1d2e;--t2:#4a5268;--t3:#8892a4;
+  --red:#c0392b; --grn:#1a7a4a; --blu:#1a5fa8; --ylw:#9a6500; --gold:#9a6500;
 }
 body.light .topbar{background:rgba(240,242,247,.96);border-bottom-color:var(--b1)}
 body.light .cbox{box-shadow:0 1px 4px rgba(0,0,0,.06)}
 body.light .kpi{box-shadow:0 1px 4px rgba(0,0,0,.06)}
 body.light .md-stat{background:#fff;border-color:var(--b1)}
+/* Badges — readable on white background */
+body.light .b-active {background:rgba(26,122,74,.1); color:#1a7a4a}
+body.light .b-deact  {background:rgba(192,57,43,.1);  color:#c0392b}
+body.light .b-impl   {background:rgba(26,95,168,.1);  color:#1a5fa8}
+body.light .b-paid   {background:rgba(26,122,74,.1);  color:#1a7a4a}
+body.light .b-overdue{background:rgba(192,57,43,.1);  color:#c0392b}
+body.light .b-working{background:rgba(26,95,168,.1);  color:#1a5fa8}
+body.light .b-follow {background:rgba(154,101,0,.1);  color:#9a6500}
+body.light .b-free   {background:rgba(100,80,180,.1); color:#5b47c5}
+/* Package tags */
+body.light .pt-smart   {background:#dbeafe;color:#1e40af}
+body.light .pt-adv     {background:#ede9fe;color:#5b21b6}
+body.light .pt-advp    {background:#fff7d6;color:#92400e}
+body.light .pt-fr      {background:#dcfce7;color:#15803d}
+/* Day chips */
+body.light .chip-red{background:rgba(192,57,43,.1);color:#c0392b;border-color:rgba(192,57,43,.3)}
+body.light .chip-ylw{background:rgba(154,101,0,.1); color:#9a6500; border-color:rgba(154,101,0,.3)}
+body.light .chip-grn{background:rgba(26,122,74,.1); color:#1a7a4a; border-color:rgba(26,122,74,.3)}
+body.light .chip-blu{background:rgba(26,95,168,.1); color:#1a5fa8; border-color:rgba(26,95,168,.3)}
+body.light .days-chip.ok    {background:rgba(26,122,74,.1);  color:#1a7a4a}
+body.light .days-chip.warn  {background:rgba(154,101,0,.1);  color:#9a6500}
+body.light .days-chip.danger{background:rgba(192,57,43,.1);  color:#c0392b}
+body.light .days-chip.exp   {background:rgba(192,57,43,.12); color:#c0392b}
+body.light .link-btn{background:rgba(26,95,168,.08);border-color:rgba(26,95,168,.25);color:#1a5fa8}
+/* Table rows */
+body.light tbody tr.r-red{background:rgba(192,57,43,.04)}
+body.light tbody tr.r-ylw{background:rgba(154,101,0,.04)}
+body.light tbody tr.r-red:hover{background:rgba(192,57,43,.08)}
+body.light tbody tr.r-ylw:hover{background:rgba(154,101,0,.07)}
+/* KPI card color accents */
+body.light .c-gold{border-color:rgba(154,101,0,.25);background:rgba(154,101,0,.04)}
+body.light .c-red {border-color:rgba(192,57,43,.25); background:rgba(192,57,43,.04)}
+body.light .c-grn {border-color:rgba(26,122,74,.25);  background:rgba(26,122,74,.04)}
+body.light .c-ylw {border-color:rgba(154,101,0,.25);  background:rgba(154,101,0,.04)}
+body.light .c-blu {border-color:rgba(26,95,168,.25);  background:rgba(26,95,168,.04)}
+body.light .kpi-val.gold{color:#9a6500}
+body.light .kpi-val.blu {color:#1a5fa8}
+body.light .kpi-val.ylw {color:#9a6500}
+/* Heatmap Q labels */
+body.light .hm-q-label.q1{background:rgba(99,102,241,.1); color:#4338ca}
+body.light .hm-q-label.q2{background:rgba(16,185,129,.1); color:#059669}
+body.light .hm-q-label.q3{background:rgba(245,158,11,.1); color:#d97706}
+body.light .hm-q-label.q4{background:rgba(236,72,153,.1); color:#be185d}
+/* Loading overlay */
+body.light #loading-overlay{background:rgba(240,242,247,.92)}
 /* ─── THEME TOGGLE ───────────────────────────────────────── */
 .theme-toggle{
   display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;
@@ -425,18 +473,33 @@ body.light .md-stat{background:#fff;border-color:var(--b1)}
 .shop-field{background:var(--s2);border-radius:8px;padding:10px 12px;border:1px solid var(--b1)}
 .shop-field label{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px}
 .shop-field .val{font-size:13px;font-weight:600;color:var(--txt)}
-.shop-field .val.money{font-size:16px;font-weight:900;color:#ffe066;text-shadow:0 0 10px rgba(255,224,102,.35)}
+.shop-field .val.money{font-size:16px;font-weight:900;color:var(--money-gold)}
 .shop-field .val.remark{font-size:12px;color:var(--t2);line-height:1.5}
 .shop-field .val.contact{font-size:12px;color:var(--blu)}
 /* Clickable restaurant name */
 .name-link{cursor:pointer;transition:color .15s;display:inline}
 .name-link:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
 /* Money format — no ฿, use บาท suffix, bold contrasting */
+/* ─── MONEY VALUES — adaptive to theme ──────────────────── */
+:root{
+  --money-gold: #c47f00;
+  --money-grn:  #1a8a5a;
+  --money-red:  #c0392b;
+  --money-ylw:  #b07800;
+  --money-shadow: none;
+}
+body:not(.light){
+  --money-gold: #ffe066;
+  --money-grn:  #4fffb0;
+  --money-red:  #ff6b6b;
+  --money-ylw:  #ffd93d;
+  --money-shadow: 0 0 8px rgba(0,0,0,.2);
+}
 .money-val{font-weight:900;letter-spacing:-.5px}
-.money-val.gold-money{color:#ffe066;text-shadow:0 0 8px rgba(255,224,102,.3)}
-.money-val.grn-money{color:#4fffb0;text-shadow:0 0 8px rgba(52,211,153,.3)}
-.money-val.red-money{color:#ff6b6b;text-shadow:0 0 8px rgba(240,82,82,.3)}
-.money-val.ylw-money{color:#ffd93d;text-shadow:0 0 8px rgba(255,217,61,.3)}
+.money-val.gold-money{color:var(--money-gold);text-shadow:var(--money-shadow)}
+.money-val.grn-money {color:var(--money-grn); text-shadow:var(--money-shadow)}
+.money-val.red-money {color:var(--money-red); text-shadow:var(--money-shadow)}
+.money-val.ylw-money {color:var(--money-ylw); text-shadow:var(--money-shadow)}
 /* ─── COLLECTION RATE BAR ────────────────────────────────── */
 .rate-bar-wrap{margin-top:6px}
 .rate-bar-bg{background:var(--s3);border-radius:10px;height:8px;overflow:hidden;margin:4px 0}
@@ -1728,16 +1791,16 @@ function renderMonthDetail(mi) {
       <div class="md-stat">
         <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openKpiDetailFull('thismonth',${mi})">${activeRows.length}</div>
         <div class="md-stat-lbl">Active ${MONTHS_FULL[mi]}</div>
-        <div class="md-stat-sub" style="color:#ffe066;text-shadow:0 0 12px rgba(255,224,102,.4)">${Number(totalVal).toLocaleString('th-TH')} บาท</div>
+        <div class="md-stat-sub" style="color:var(--money-gold)">${Number(totalVal).toLocaleString('th-TH')} บาท</div>
       </div>      <div class="md-stat">
         <div class="md-stat-val kpi-val-link" style="color:var(--grn)" onclick="openMonthPayDetail('paid',${mi})">${secPaid.length}</div>
         <div class="md-stat-lbl">ชำระแล้ว (Paid)</div>
-        <div class="md-stat-sub" style="color:#4fffb0;text-shadow:0 0 12px rgba(52,211,153,.35)">${Number(paidVal).toLocaleString('th-TH')} บาท</div>
+        <div class="md-stat-sub" style="color:var(--money-grn)">${Number(paidVal).toLocaleString('th-TH')} บาท</div>
       </div>
       <div class="md-stat">
         <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openMonthPayDetail('follow',${mi})">${secFollow.length}</div>
         <div class="md-stat-lbl">รอติดตาม (Follow)</div>
-        <div class="md-stat-sub" style="color:#ffd93d;text-shadow:0 0 12px rgba(251,191,36,.35)">${Number(followVal).toLocaleString('th-TH')} บาท</div>
+        <div class="md-stat-sub" style="color:var(--money-ylw)">${Number(followVal).toLocaleString('th-TH')} บาท</div>
       </div>
     </div>
 
