@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resrun CRM — Nigiwai Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root{
+  --bg:#07090e;
+  --s1:#0f1117;
+  --s2:#161920;
+  --s3:#1e2130;
+  --b1:#252a38;
+  --b2:#2e3548;
+  --txt:#eef0f5;
+  --t2:#8892a4;
+  --t3:#4a5268;
+  --gold:#f0b429;
+  --gold2:#c8901a;
+  --red:#f05252;
+  --red2:#c0392b;
+  --grn:#34d399;
+  --grn2:#10b981;
+  --blu:#60a5fa;
+  --blu2:#3b82f6;
+  --ylw:#fbbf24;
+  --r:12px;
+  --sh:0 8px 32px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-serif;min-height:100vh;font-size:14px}
+
+/* ─── TOPBAR ─────────────────────────────────────────────── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,9,14,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;gap:0;padding:0 24px;
+  height:56px;
+}
+.topbar-brand{display:flex;align-items:center;gap:10px;margin-right:32px}
+.topbar-brand .logo{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;color:#1a0f00;letter-spacing:-.5px;
+}
+.topbar-brand .name{font-size:15px;font-weight:700;color:var(--txt)}
+.topbar-brand .sub{font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.tabs{display:flex;gap:2px;flex:1}
+.tab{
+  padding:0 18px;height:56px;display:flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
+}
+.tab:hover{color:var(--txt)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab .ticon{font-size:15px}
+.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.sync-status{font-size:11px;display:flex;align-items:center;gap:5px}
+.sync-dot{width:7px;height:7px;border-radius:50%}
+.sync-dot.green{background:var(--grn);box-shadow:0 0 6px var(--grn)}
+.sync-dot.red{background:var(--red)}
+.sync-dot.yellow{background:var(--ylw);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ─── ADMIN FLOATING BUTTON ──────────────────────────────── */
+.admin-fab{
+  position:fixed;top:12px;right:24px;z-index:200;
+  display:flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:20px;
+  background:var(--s3);border:1px solid var(--b2);
+  color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .2s;letter-spacing:.3px;
+  box-shadow:var(--sh);
+}
+.admin-fab:hover{background:var(--b2);color:var(--txt);border-color:var(--gold)}
+.admin-fab.logged{background:rgba(240,180,41,.1);border-color:var(--gold);color:var(--gold)}
+.admin-fab .dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+.admin-fab.logged .dot{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+
+/* ─── LAYOUT ─────────────────────────────────────────────── */
+.main{padding:24px 28px;max-width:1440px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:22px}
+.page-title{font-size:20px;font-weight:700;margin-bottom:2px}
+.page-sub{font-size:12px;color:var(--t3)}
+
+/* ─── KPI CARDS ──────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.kpi{
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);padding:18px 20px;
+  position:relative;overflow:hidden;
+}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.kpi.c-gold::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.kpi.c-red::after{background:linear-gradient(90deg,var(--red),transparent)}
+.kpi.c-grn::after{background:linear-gradient(90deg,var(--grn),transparent)}
+.kpi.c-blu::after{background:linear-gradient(90deg,var(--blu),transparent)}
+.kpi.c-ylw::after{background:linear-gradient(90deg,var(--ylw),transparent)}
+.kpi-ico{font-size:20px;margin-bottom:10px;display:block}
+.kpi-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:5px}
+.kpi-val.gold{color:var(--gold)}.kpi-val.red{color:var(--red)}
+.kpi-val.grn{color:var(--grn)}.kpi-val.blu{color:var(--blu)}.kpi-val.ylw{color:var(--ylw)}
+.kpi-lbl{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--t3)}
+.kpi-trend{font-size:11px;margin-top:4px}
+.kpi-trend.up{color:var(--grn)}.kpi-trend.dn{color:var(--red)}
+
+/* ─── CHART GRID ─────────────────────────────────────────── */
+.chart-row{display:grid;gap:16px;margin-bottom:18px}
+.chart-row.r-3-2{grid-template-columns:3fr 2fr}
+.chart-row.r-1-1{grid-template-columns:1fr 1fr}
+.chart-row.r-full{grid-template-columns:1fr}
+.cbox{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
+.cbox-title{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:14px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.cbox-title span{color:var(--txt)}
+.cbox-title .badge-sm{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(240,180,41,.12);color:var(--gold);margin-left:auto;
+}
+
+/* ─── HEATMAP ────────────────────────────────────────────── */
+.hm-wrap{margin-top:6px}
+.hm-labels{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-bottom:3px}
+.hm-labels span{font-size:10px;color:var(--t3);text-align:center}
+.hm-cells{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.hm-cell{
+  aspect-ratio:1.4;border-radius:5px;cursor:default;
+  position:relative;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;transition:transform .12s;
+}
+.hm-cell:hover{transform:scale(1.15);z-index:5}
+.hm-cell .tt{
+  display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);
+  background:var(--s3);border:1px solid var(--b2);border-radius:6px;
+  padding:6px 10px;font-size:11px;white-space:nowrap;z-index:20;pointer-events:none;
+}
+.hm-cell:hover .tt{display:block}
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:8px}
+.hm-legend span{font-size:10px;color:var(--t3)}
+.hm-steps{display:flex;gap:3px}
+.hm-step{width:14px;height:14px;border-radius:3px}
+
+/* ─── TOP10 LIST ─────────────────────────────────────────── */
+.top10{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.top10-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:8px;
+  background:var(--s2);border:1px solid transparent;
+  transition:border-color .15s;cursor:default;
+}
+.top10-item:hover{border-color:var(--b2)}
+.top10-item.urgent{background:rgba(240,82,82,.07);border-color:rgba(240,82,82,.2)!important}
+.top10-item.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.15)!important}
+.top10-rank{font-size:11px;color:var(--t3);font-weight:700;width:18px;text-align:center;flex-shrink:0}
+.top10-name{flex:1;font-size:12px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.top10-pkg{font-size:10px;color:var(--t3);flex-shrink:0}
+.days-chip{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;
+}
+.days-chip.ok{background:rgba(52,211,153,.12);color:var(--grn)}
+.days-chip.warn{background:rgba(251,191,36,.15);color:var(--ylw)}
+.days-chip.danger{background:rgba(240,82,82,.15);color:var(--red)}
+.days-chip.exp{background:rgba(240,82,82,.2);color:var(--red)}
+
+/* ─── BRANCHES TABLE ─────────────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.searchbox{
+  background:var(--s2);border:1px solid var(--b2);border-radius:8px;
+  padding:9px 14px;color:var(--txt);font-size:13px;font-family:inherit;
+  flex:1;min-width:180px;transition:border-color .2s;
+}
+.searchbox:focus{outline:none;border-color:var(--gold)}
+.pkg-filters{display:flex;gap:5px;flex-wrap:wrap}
+.pfbtn{
+  padding:6px 13px;border-radius:20px;border:1px solid var(--b2);
+  background:transparent;color:var(--t2);font-size:11px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;
+}
+.pfbtn:hover{background:var(--s3);color:var(--txt)}
+.pfbtn.active{background:var(--gold);border-color:var(--gold);color:#1a0f00}
+.pfbtn.p-smart.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.pfbtn.p-adv.active{background:#8b5cf6;border-color:#8b5cf6;color:#fff}
+.pfbtn.p-advp.active{background:#f59e0b;border-color:#f59e0b;color:#1a0f00}
+.pfbtn.p-fr.active{background:#10b981;border-color:#10b981;color:#fff}
+.pfbtn.p-ov.active{background:var(--red);border-color:var(--red);color:#fff}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  background:var(--s2);color:var(--t3);font-size:10px;font-weight:700;
+  letter-spacing:.7px;text-transform:uppercase;padding:10px 12px;
+  text-align:left;border-bottom:1px solid var(--b2);white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid rgba(37,42,56,.6);transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody tr.r-red{background:rgba(240,82,82,.06)}
+tbody tr.r-ylw{background:rgba(251,191,36,.05)}
+tbody tr.r-red:hover{background:rgba(240,82,82,.1)}
+tbody tr.r-ylw:hover{background:rgba(251,191,36,.08)}
+tbody td{padding:10px 12px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;gap:4px}
+.b-active{background:rgba(52,211,153,.12);color:var(--grn)}
+.b-deact{background:rgba(240,82,82,.12);color:var(--red)}
+.b-impl{background:rgba(96,165,250,.12);color:var(--blu)}
+.b-new{background:rgba(167,139,250,.12);color:#a78bfa}
+.b-paid{background:rgba(52,211,153,.1);color:var(--grn)}
+.b-overdue{background:rgba(240,82,82,.15);color:var(--red)}
+.b-working{background:rgba(96,165,250,.1);color:var(--blu)}
+.b-follow{background:rgba(251,191,36,.12);color:var(--ylw)}
+.b-free{background:rgba(167,139,250,.1);color:#a78bfa}
+.pkg-tag{
+  display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;
+}
+.pt-smart{background:#1e3a5f;color:#60a5fa}
+.pt-adv{background:#2d1b69;color:#a78bfa}
+.pt-advp{background:#3d2d0a;color:#f59e0b}
+.pt-fr{background:#064e3b;color:#34d399}
+.link-btn{color:var(--blu);text-decoration:none;font-size:11px;opacity:.7}
+.link-btn:hover{opacity:1}
+.act-btn{
+  padding:4px 9px;border-radius:5px;border:1px solid var(--b2);
+  background:transparent;color:var(--t2);font-size:11px;cursor:pointer;
+  font-family:inherit;transition:all .15s;margin-right:3px;
+}
+.act-btn:hover{background:var(--s3);color:var(--txt)}
+.act-btn.del:hover{border-color:var(--red);color:var(--red)}
+.no-data{text-align:center;padding:48px;color:var(--t3);font-size:13px}
+.tbl-footer{margin-top:10px;font-size:11px;color:var(--t3);display:flex;justify-content:space-between;align-items:center}
+
+/* ─── MODALS ─────────────────────────────────────────────── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  z-index:300;display:flex;align-items:center;justify-content:center;
+}
+.modal{
+  background:var(--s1);border:1px solid var(--b2);border-radius:16px;
+  padding:28px 32px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;
+  box-shadow:var(--sh);position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:6px;
+  background:var(--s3);border:none;color:var(--t2);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.modal-close:hover{background:var(--b2);color:var(--txt)}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:20px;padding-right:32px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.frow.full{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+.fg input,.fg select{
+  background:var(--bg);border:1px solid var(--b2);border-radius:7px;
+  padding:9px 12px;color:var(--txt);font-size:13px;font-family:inherit;transition:border-color .2s;
+}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg select option{background:var(--s1)}
+.mbtn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.mbtn-cancel{
+  padding:9px 18px;border:1px solid var(--b2);border-radius:8px;
+  background:transparent;color:var(--t2);cursor:pointer;font-family:inherit;font-size:13px;transition:all .15s;
+}
+.mbtn-cancel:hover{border-color:var(--b2);color:var(--txt)}
+.mbtn-save{
+  padding:9px 22px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;border-radius:8px;color:#1a0f00;font-weight:700;font-size:13px;
+  cursor:pointer;font-family:inherit;transition:opacity .2s;
+}
+.mbtn-save:hover{opacity:.9}
+.mbtn-save:disabled{opacity:.5;cursor:not-allowed}
+
+/* Admin Login modal specific */
+.login-modal{max-width:360px;padding:32px}
+.login-modal .lm-logo{text-align:center;margin-bottom:24px}
+.login-modal .lm-brand{font-size:18px;font-weight:700;color:var(--gold)}
+.login-modal .lm-sub{font-size:10px;color:var(--t3);letter-spacing:2px;margin-top:3px;text-transform:uppercase}
+.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none}
+
+/* Setup modal */
+.setup-modal{max-width:580px}
+.code-block{
+  background:var(--bg);border:1px solid var(--b2);border-radius:8px;
+  padding:14px 16px;font-size:11px;line-height:1.8;color:#93b4d4;
+  font-family:'Courier New',monospace;margin:10px 0;overflow-x:auto;
+}
+.kw{color:#c084fc}.ty{color:#fbbf24}.st{color:#86efac}.cm{color:#4b5563;font-style:italic}
+.step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;background:var(--gold);
+  color:#1a0f00;font-size:11px;font-weight:800;margin-right:6px;flex-shrink:0;
+}
+.step-row{display:flex;align-items:flex-start;gap:2px;margin:14px 0 6px}
+.step-row p{font-size:13px;font-weight:600;margin-top:2px}
+
+/* ─── TOASTS ─────────────────────────────────────────────── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{
+  padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;
+  box-shadow:var(--sh);animation:slideIn .25s ease;border:1px solid;
+}
+.toast.success{background:#064e3b;border-color:#10b981;color:#6ee7b7}
+.toast.error{background:#450a0a;border-color:var(--red);color:#fca5a5}
+.toast.info{background:#1e3a5f;border-color:var(--blu);color:#93c5fd}
+@keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ─── LOADING ────────────────────────────────────────────── */
+.spinner{
+  display:inline-block;width:16px;height:16px;border:2px solid var(--b2);
+  border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row td{padding:40px;text-align:center;color:var(--t3)}
+
+/* ─── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+@media(max-width:768px){
+  .topbar{padding:0 12px}.topbar-brand .sub{display:none}
+  .tab{padding:0 10px;font-size:12px}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .chart-row.r-3-2{grid-template-columns:1fr}
+  .chart-row.r-1-1{grid-template-columns:1fr}
+  .main{padding:14px}
+  .frow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">RS</div>
+    <div>
+      <div class="name">Resrun CRM</div>
+      <div class="sub">Nigiwai Group</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <div class="tab active" onclick="switchTab('dashboard',this)">
+      <span class="ticon">📊</span> Dashboard
+    </div>
+    <div class="tab" onclick="switchTab('branches',this)">
+      <span class="ticon">🏪</span> สาขาทั้งหมด
+    </div>
+    <div class="tab" onclick="switchTab('renewals',this)">
+      <span class="ticon">🔔</span> ต่อสัญญา
+    </div>
+    <div class="tab" onclick="switchTab('cashflow',this)">
+      <span class="ticon">💰</span> Cash Flow
+    </div>
+  </nav>
+  <div class="topbar-right">
+    <div class="sync-status" id="sync-status">
+      <div class="sync-dot yellow" id="sync-dot"></div>
+      <span id="sync-txt" style="color:var(--t3)">กำลังโหลด…</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══ ADMIN FAB ════════════════════════════════════════════ -->
+<button class="admin-fab" id="admin-fab" onclick="openAdminModal()">
+  <div class="dot" id="admin-dot"></div>
+  <span id="admin-label">🔐 Admin</span>
+</button>
+
+<!-- ══ MAIN ════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- PAGE: Dashboard -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div class="page-title">Executive Dashboard</div>
+      <div class="page-sub" id="dash-sub">กำลังโหลดข้อมูลจาก Supabase…</div>
+    </div>
+    <div class="kpi-grid" id="kpi-grid">
+      <!-- filled by JS -->
+    </div>
+    <div class="chart-row r-3-2">
+      <div class="cbox">
+        <div class="cbox-title"><span>Monthly Revenue Forecast</span> <span style="color:var(--t3)">— ลูกค้าที่ครบกำหนดต่อสัญญารายเดือน</span></div>
+        <canvas id="monthly-chart" height="180"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>Top 10</span> ใกล้หมดอายุ <div class="badge-sm" id="top10-badge">loading…</div></div>
+        <div class="top10" id="top10-list"></div>
+      </div>
+    </div>
+    <div class="chart-row r-1-1">
+      <div class="cbox">
+        <div class="cbox-title"><span>Revenue Heatmap</span> — ความหนาแน่นรายได้ที่คาดว่าจะเก็บได้รายเดือน</div>
+        <div class="hm-wrap">
+          <div class="hm-labels" id="hm-labels"></div>
+          <div class="hm-cells" id="hm-cells"></div>
+          <div class="hm-legend">
+            <span>น้อย</span>
+            <div class="hm-steps">
+              <div class="hm-step" style="background:#111827"></div>
+              <div class="hm-step" style="background:#1e3a5f"></div>
+              <div class="hm-step" style="background:#1d4ed8"></div>
+              <div class="hm-step" style="background:#0ea5e9"></div>
+              <div class="hm-step" style="background:#f0b429"></div>
+            </div>
+            <span>มาก</span>
+          </div>
+        </div>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>Package Distribution</span> & Payment Overview</div>
+        <canvas id="pkg-chart" height="180"></canvas>
+      </div>
+    </div>
+    <div class="chart-row r-full">
+      <div class="cbox">
+        <div class="cbox-title"><span>Payment Status Breakdown</span></div>
+        <canvas id="pay-chart" height="70"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: Branches -->
+  <div id="page-branches" class="page">
+    <div class="page-header">
+      <div class="page-title">สาขาทั้งหมด</div>
+      <div class="page-sub">ข้อมูลลูกค้าทั้งหมดจาก Supabase · เรียลไทม์</div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="searchbox" id="br-search" placeholder="🔍 ค้นหาชื่อร้าน…" oninput="renderBranches()">
+      <div class="pkg-filters">
+        <button class="pfbtn active" data-f="all" onclick="setBrFilter(this)">ทั้งหมด</button>
+        <button class="pfbtn p-smart" data-f="Smart" onclick="setBrFilter(this)">Smart</button>
+        <button class="pfbtn p-adv" data-f="Advance" onclick="setBrFilter(this)">Advance</button>
+        <button class="pfbtn p-advp" data-f="Advance Plus" onclick="setBrFilter(this)">Advance Plus</button>
+        <button class="pfbtn p-fr" data-f="Franchise" onclick="setBrFilter(this)">Franchise</button>
+        <button class="pfbtn p-ov" data-f="Overdue" onclick="setBrFilter(this)">⚠ Overdue</button>
+      </div>
+      <button id="add-btn" style="display:none;padding:8px 16px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:8px;color:#1a0f00;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap" onclick="openRecordModal()">
+        + เพิ่มสาขา
+      </button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ชื่อสาขา</th>
+            <th>Package</th>
+            <th>ราคา/ปี</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>วันหมดอายุ</th>
+            <th>เหลือ</th>
+            <th>ผู้ดูแล</th>
+            <th>ระบบ</th>
+            <th>URL</th>
+            <th id="action-col" style="display:none">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="br-tbody">
+          <tr class="loading-row"><td colspan="12"><div class="spinner"></div> กำลังโหลด…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-footer">
+      <span id="br-count"></span>
+      <span style="color:var(--t3)">🔴 หมดอายุ · 🟡 เหลือ &lt;30 วัน</span>
+    </div>
+  </div>
+
+  <!-- PAGE: Renewals -->
+  <div id="page-renewals" class="page">
+    <div class="page-header">
+      <div class="page-title">ติดตามการต่อสัญญา</div>
+      <div class="page-sub">เรียงตามความเร่งด่วน — Sorted by Days Remaining</div>
+    </div>
+    <div class="toolbar">
+      <input type="text" class="searchbox" id="rn-search" placeholder="🔍 ค้นหา…" oninput="renderRenewals()">
+      <div class="pkg-filters">
+        <button class="pfbtn active" data-f="all" onclick="setRnFilter(this)">ทั้งหมด</button>
+        <button class="pfbtn p-ov" data-f="expired" onclick="setRnFilter(this)">🔴 หมดอายุแล้ว</button>
+        <button class="pfbtn p-advp" data-f="soon" onclick="setRnFilter(this)">🟡 &lt;30 วัน</button>
+        <button class="pfbtn p-adv" data-f="follow" onclick="setRnFilter(this)">Follow to Renew</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>ชื่อสาขา</th>
+            <th>Package</th>
+            <th>ราคา</th>
+            <th>วันหมดอายุ</th>
+            <th>เหลือ</th>
+            <th>Payment</th>
+            <th>ผู้ดูแล</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="rn-tbody"></tbody>
+      </table>
+    </div>
+    <div class="tbl-footer"><span id="rn-count"></span></div>
+  </div>
+
+  <!-- PAGE: Cash Flow -->
+  <div id="page-cashflow" class="page">
+    <div class="page-header">
+      <div class="page-title">Cash Flow Forecast</div>
+      <div class="page-sub">วางแผนกระแสเงินสด Nigiwai Group</div>
+    </div>
+    <div class="kpi-grid" id="cf-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div class="chart-row r-3-2">
+      <div class="cbox">
+        <div class="cbox-title"><span>12-Month Revenue Forecast</span></div>
+        <canvas id="cf-chart" height="180"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>ARR by Package</span></div>
+        <canvas id="arr-chart" height="180"></canvas>
+      </div>
+    </div>
+    <div class="chart-row r-full">
+      <div class="cbox">
+        <div class="cbox-title"><span>Owner Performance</span> — สัดส่วนพอร์ตแต่ละทีม</div>
+        <canvas id="owner-chart" height="70"></canvas>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ MODAL: Admin Login ═══════════════════════════════════ -->
+<div class="overlay" id="m-login" style="display:none">
+  <div class="modal login-modal">
+    <button class="modal-close" onclick="closeModal('m-login')">✕</button>
+    <div class="lm-logo">
+      <div class="lm-brand">ADMIN ACCESS</div>
+      <div class="lm-sub">Resrun CRM · Nigiwai</div>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>USERNAME</label>
+      <input id="l-user" placeholder="Admin" autocomplete="username">
+    </div>
+    <div class="fg" style="margin-bottom:16px">
+      <label>PASSWORD</label>
+      <input id="l-pass" type="password" placeholder="••••••••••" autocomplete="current-password">
+    </div>
+    <button class="mbtn-save" style="width:100%;padding:11px" onclick="doLogin()">เข้าสู่ระบบ Admin</button>
+    <div class="login-err" id="l-err">Username หรือ Password ไม่ถูกต้อง</div>
+    <div id="admin-logout-row" style="display:none;margin-top:14px;text-align:center">
+      <button onclick="doLogout()" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:13px;font-family:inherit">
+        ↩ ออกจากระบบ Admin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Supabase Setup ════════════════════════════════ -->
+<div class="overlay" id="m-setup" style="display:none">
+  <div class="modal setup-modal">
+    <button class="modal-close" onclick="closeModal('m-setup')">✕</button>
+    <h3>⚙️ ตั้งค่า Supabase Connection</h3>
+    <div class="step-row"><span class="step-num">1</span><p>สร้างโปรเจกต์บน <a href="https://supabase.com" target="_blank" style="color:var(--blu)">supabase.com</a> แล้ว Copy URL และ Anon Key</p></div>
+    <div class="frow full" style="margin-bottom:8px">
+      <div class="fg">
+        <label>SUPABASE URL</label>
+        <input id="cfg-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
+      </div>
+    </div>
+    <div class="frow full" style="margin-bottom:12px">
+      <div class="fg">
+        <label>SUPABASE ANON KEY</label>
+        <input id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+    </div>
+    <div class="step-row"><span class="step-num">2</span><p>รัน SQL นี้ใน Supabase → SQL Editor</p></div>
+    <div class="code-block"><span class="cm">-- วาง SQL ทั้งหมดนี้ใน Supabase SQL Editor แล้วกด RUN</span>
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> customers (
+  id             <span class="ty">uuid</span>        <span class="kw">DEFAULT</span> gen_random_uuid() <span class="kw">PRIMARY KEY</span>,
+  no             <span class="ty">integer</span>,
+  restaurant_name <span class="ty">text</span>       <span class="kw">NOT NULL</span>,
+  package        <span class="ty">text</span>,
+  price          <span class="ty">numeric</span>     <span class="kw">DEFAULT</span> <span class="st">0</span>,
+  status         <span class="ty">text</span>        <span class="kw">DEFAULT</span> <span class="st">'Active'</span>,
+  payment_status <span class="ty">text</span>        <span class="kw">DEFAULT</span> <span class="st">'Working'</span>,
+  start_date     <span class="ty">date</span>,
+  renew_date     <span class="ty">date</span>,
+  url            <span class="ty">text</span>,
+  owner          <span class="ty">text</span>,
+  type           <span class="ty">text</span>,
+  created_at     <span class="ty">timestamptz</span> <span class="kw">DEFAULT</span> now(),
+  updated_at     <span class="ty">timestamptz</span> <span class="kw">DEFAULT</span> now()
+);
+
+<span class="cm">-- Auto-update timestamp</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> _set_updated()
+<span class="kw">RETURNS TRIGGER AS</span> $$ <span class="kw">BEGIN</span>
+  NEW.updated_at = now(); <span class="kw">RETURN</span> NEW;
+<span class="kw">END</span>; $$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">DROP TRIGGER IF EXISTS</span> trg_updated <span class="kw">ON</span> customers;
+<span class="kw">CREATE TRIGGER</span> trg_updated <span class="kw">BEFORE UPDATE ON</span> customers
+  <span class="kw">FOR EACH ROW EXECUTE PROCEDURE</span> _set_updated();
+
+<span class="cm">-- RLS: เปิดให้ anon อ่านได้ (ปรับตามต้องการ)</span>
+<span class="kw">ALTER TABLE</span> customers <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> <span class="st">"public_read"</span> <span class="kw">ON</span> customers <span class="kw">FOR SELECT USING</span> (true);
+<span class="kw">CREATE POLICY</span> <span class="st">"anon_all"</span> <span class="kw">ON</span> customers <span class="kw">FOR ALL TO</span> anon <span class="kw">USING</span> (true) <span class="kw">WITH CHECK</span> (true);</div>
+    <div class="step-row"><span class="step-num">3</span><p>กด Import ข้อมูลจาก Excel ที่อัปโหลดไว้</p></div>
+    <div class="mbtn-row">
+      <button class="mbtn-cancel" onclick="closeModal('m-setup')">ยกเลิก</button>
+      <button class="mbtn-save" onclick="saveConfig()">💾 บันทึกและเชื่อมต่อ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Add / Edit Record ═════════════════════════════ -->
+<div class="overlay" id="m-record" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('m-record')">✕</button>
+    <h3 id="rec-title">เพิ่มสาขาใหม่</h3>
+    <div class="frow full"><div class="fg">
+      <label>ชื่อสาขา / ร้านอาหาร</label>
+      <input id="f-name" placeholder="เช่น Nigiwai Sushi สาขาสยาม">
+    </div></div>
+    <div class="frow">
+      <div class="fg"><label>Package</label>
+        <select id="f-pkg">
+          <option>Smart</option><option>Advance</option>
+          <option>Advance Plus</option><option>Franchise</option><option>-</option>
+        </select></div>
+      <div class="fg"><label>ราคา (฿/ปี)</label>
+        <input id="f-price" type="number" placeholder="8280"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Status</label>
+        <select id="f-status">
+          <option>Active</option><option>DeActivate</option>
+          <option>Implement</option><option>New Branch</option>
+        </select></div>
+      <div class="fg"><label>Payment Status</label>
+        <select id="f-pay">
+          <option>Paid</option><option>Working</option>
+          <option>Overdue</option><option>Follow to Renew</option><option>Free trial</option>
+        </select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>วันเริ่มสัญญา</label>
+        <input id="f-start" type="date"></div>
+      <div class="fg"><label>วันหมดอายุ</label>
+        <input id="f-renew" type="date"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>URL ระบบ</label>
+        <input id="f-url" placeholder="https://...resrun-pos.com"></div>
+      <div class="fg"><label>ผู้ดูแล</label>
+        <input id="f-owner" placeholder="PP / PRANG / KEN"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>App / Web</label>
+        <select id="f-type"><option>Web</option><option>App</option><option>Web ( Mac )</option></select></div>
+      <div class="fg"><label>No.</label>
+        <input id="f-no" type="number" placeholder="ลำดับ"></div>
+    </div>
+    <div class="mbtn-row">
+      <button class="mbtn-cancel" onclick="closeModal('m-record')">ยกเลิก</button>
+      <button class="mbtn-save" id="rec-save-btn" onclick="saveRecord()">💾 บันทึกลง Supabase</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ════════════════════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — พี่ใส่ค่าเหล่านี้จาก Supabase Dashboard
+   ═══════════════════════════════════════════════════════════ */
+let SUPABASE_URL  = localStorage.getItem('sb_url')  || '';
+let SUPABASE_KEY  = localStorage.getItem('sb_key')  || '';
+
+/* ─── Embedded seed data (106 records from Excel) ─────── */
+const SEED = [{"no":1,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เดอะแบร์ ชาบู สาขาเมกะบางนา (แฟรนไชส์)","package":"Advance Plus","price":23880,"start_date":"2023-07-04","renew_date":"2024-07-04","url":"https://thebearmaga.resrun-pos.com","type":"Web","owner":"-"},{"no":2,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขา 304","package":"Advance Plus","price":23880,"start_date":"2022-07-01","renew_date":"2026-01-01","url":"https://therockshabuthecorner304.resrun-pos.com","type":"Web","owner":"-"},{"no":3,"status":"Active","payment_status":"Paid","restaurant_name":"เดอะแบร์ ชาบู สาขานครศรีธรรมราช (แฟรนไชส์)","package":"Advance Plus","price":23880,"start_date":"2023-02-01","renew_date":"2026-03-03","url":"https://thebearnts.resrun-pos.com","type":"Web","owner":"PP"},{"no":4,"status":"Active","payment_status":"Free trial","restaurant_name":"ไทร แอนด์ เลควิว (Sai and Lake View)","package":"Smart","price":0,"start_date":"2022-11-01","renew_date":null,"url":"https://saiandlakeview.resrun-pos.com","type":"Web","owner":"PP"},{"no":5,"status":"Active","payment_status":"Working","restaurant_name":"นิกิวาอิชูชิแอนด์คินมัทฉะ","package":"Smart","price":8280,"start_date":"2024-04-24","renew_date":"2026-04-24","url":"https://ngsxkinrayong.resrun-pos.com","type":"App","owner":"PP"},{"no":6,"status":"Active","payment_status":"Paid","restaurant_name":"Freedom","package":"Advance","price":14280,"start_date":"2023-05-04","renew_date":"2026-06-13","url":"https://freedomss.resrun-pos.com","type":"Web","owner":"PRANG"},{"no":7,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เดอะร็อคชาบู สาขาสุขอนันต์ ปาร์ค สระบุรี","package":"Advance Plus","price":23880,"start_date":"2023-05-15","renew_date":"2025-05-15","url":"https://therockshabusukanan.resrun-pos.com","type":"Web","owner":"-"},{"no":8,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขาเมโทร","package":"Advance Plus","price":23880,"start_date":"2022-11-16","renew_date":"2026-01-01","url":"https://therockshabuklongrang.resrun-pos.com","type":"Web","owner":"-"},{"no":9,"status":"Active","payment_status":"Paid","restaurant_name":"Shade","package":"Advance","price":14280,"start_date":"2024-05-16","renew_date":"2026-06-06","url":"https://shadekhonkaen.resrun-pos.com/web-admin","type":"App","owner":"PRANG"},{"no":10,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขาอยุธยา","package":"Advance Plus","price":23880,"start_date":"2022-11-18","renew_date":"2026-01-01","url":"https://therockshabuayuthya.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":11,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"แซ่บยโส 2 (ไม่ต่อ)","package":"Advance","price":14280,"start_date":"2023-05-18","renew_date":"2025-05-18","url":"https://zappyaso2.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":12,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็นซีฟู้ด สาขาปิ่นเกล้า","package":"Advance Plus","price":23880,"start_date":"2024-06-01","renew_date":"2025-06-01","url":"https://penpenn.resrun-pos.com/web-admin","type":"Web","owner":"ISSUE"},{"no":13,"status":"Active","payment_status":"Free trial","restaurant_name":"แก่น","package":"Smart","price":0,"start_date":"2024-06-16","renew_date":null,"url":"","type":"Web","owner":"PP"},{"no":14,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"ขนมหวาย (ไม่ต่อ)","package":"Advance","price":14280,"start_date":"2024-06-18","renew_date":"2025-06-18","url":"https://kanomwaii.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":15,"status":"Active","payment_status":"Paid","restaurant_name":"สุขใดไหนเล่า ณ กัลปพฤกษ์","package":"Franchise","price":35880,"start_date":"2024-05-20","renew_date":"2026-06-20","url":"https://sookdainailao.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":16,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวต้นกล้วย","package":"Advance","price":14280,"start_date":"2024-06-27","renew_date":"2026-06-27","url":"https://kruatonkluay.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":17,"status":"Active","payment_status":"Paid","restaurant_name":"Bonus Shabu","package":"Advance Plus","price":23880,"start_date":"2023-07-01","renew_date":"2026-07-01","url":"https://bonusshabu.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":18,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE SIR","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeeram.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":19,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE Event 1","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeepha.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":20,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE Event 2","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeecul.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":21,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Antika's Cafe สาขาอยุธยา","package":"Smart","price":8280,"start_date":"2023-03-03","renew_date":"2025-07-03","url":"https://antikacafe.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":22,"status":"Active","payment_status":"Free trial","restaurant_name":"KKBS Cafe","package":"Smart","price":0,"start_date":"2023-07-03","renew_date":null,"url":"https://kkbscafe.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":23,"status":"Active","payment_status":"Paid","restaurant_name":"พรีมพรีมคาเฟ่แอนด์เรสเตอร์รองท์","package":"Advance","price":14280,"start_date":"2024-04-05","renew_date":"2027-03-25","url":"https://primprimbeach.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":24,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Coffee by farida ali","package":"Advance","price":14280,"start_date":"2023-07-11","renew_date":"2025-07-11","url":"https://farida786.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":25,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"ชาบูมิก","package":"Smart","price":8280,"start_date":"2024-07-13","renew_date":"2025-07-13","url":"https://shabumix.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":26,"status":"Active","payment_status":"Paid","restaurant_name":"Summore day","package":"Smart","price":8280,"start_date":"2023-01-14","renew_date":"2026-07-14","url":"https://summoreday.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":27,"status":"Active","payment_status":"Paid","restaurant_name":"นำซิง","package":"Advance Plus","price":19470,"start_date":"2024-01-15","renew_date":"2025-07-15","url":"https://namsingrestaurant.resrun-pos.com/web-admin","type":"Web ( Mac )","owner":"PP"},{"no":28,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Seoul Garden สาขาฟิวเจอร์ปาร์ค","package":"Advance Plus","price":23880,"start_date":"2024-03-14","renew_date":"2025-07-15","url":"https://seoulgardenfpm.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":29,"status":"Active","payment_status":"Paid","restaurant_name":"Feeling Bar","package":"Franchise","price":35880,"start_date":"2023-07-21","renew_date":"2026-01-20","url":"https://feelingbartpr.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":30,"status":"Active","payment_status":"Paid","restaurant_name":"Ultimate Shabu & Grill","package":"Advance","price":8280,"start_date":"2023-01-24","renew_date":"2026-07-24","url":"https://ultimate.resrun-pos.com/web-admin","type":"Web ( Mac )","owner":"PRANG"},{"no":31,"status":"Active","payment_status":"Paid","restaurant_name":"ปลาวาฬใจดี ชัยภูมิ","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2026-08-01","url":"https://whalejaideecpm.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":32,"status":"Active","payment_status":"Paid","restaurant_name":"ก๋วยเตี๋ยวแม่ศรีนวล","package":"Smart","price":4140,"start_date":"2022-11-01","renew_date":"2026-06-01","url":"https://maesrinuannoodlekhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":33,"status":"Active","payment_status":"Paid","restaurant_name":"ประไพร สนามบินขอนแก่น","package":"Advance","price":14280,"start_date":"2023-05-01","renew_date":"2026-08-01","url":"https://papaisnambin.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":34,"status":"Active","payment_status":"Paid","restaurant_name":"สวนอาหารเรือนทอง","package":"Advance","price":14280,"start_date":"2023-08-02","renew_date":"2026-08-01","url":"https://reuanthong2014.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":35,"status":"Active","payment_status":"Paid","restaurant_name":"ไอเก่งหมูกระทะ","package":"Advance","price":14280,"start_date":"2023-08-04","renew_date":"2026-08-04","url":"https://ikengmookata.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":36,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Antika's Cafe สาขาเชียงใหม่","package":"Smart","price":8280,"start_date":"2022-09-09","renew_date":"2025-07-09","url":"https://antikabankramchalet.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":37,"status":"Active","payment_status":"Paid","restaurant_name":"กินชาบู","package":"Advance Plus","price":23880,"start_date":"2024-08-19","renew_date":"2026-08-25","url":"https://kinshabu.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":38,"status":"Active","payment_status":"Paid","restaurant_name":"Crocodile Rock Pub","package":"Smart","price":8280,"start_date":"2023-08-22","renew_date":"2026-08-22","url":"https://crocodilerock.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":39,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Eagle (ไม่ต่อ)","package":"Smart","price":8280,"start_date":"2023-08-22","renew_date":"2025-08-24","url":"https://eagle2023.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":40,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวชะพลู (ชมคลื่น)","package":"Smart","price":8280,"start_date":"2023-06-01","renew_date":"2026-09-01","url":"https://chaplu.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":41,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Evergreen","package":"Smart","price":8280,"start_date":"2024-09-04","renew_date":"2025-09-04","url":"https://evergreencoffeeandfood.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":42,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"มิกเนื้อย่างบุฟเฟต์บุรีรัมย์","package":"Advance Plus","price":23880,"start_date":"2024-09-04","renew_date":"2025-09-04","url":"https://mixbuffetburiram.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":43,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็น สาขาเลียบด่วน","package":"Advance Plus","price":23880,"start_date":"2024-09-12","renew_date":"2025-09-12","url":"https://penpenliabduay.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":44,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็น สาขาพระราม 9","package":"Advance Plus","price":23880,"start_date":"2024-09-12","renew_date":"2025-09-12","url":"https://penpennrama9.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":45,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Phangan","package":"Smart","price":8280,"start_date":"2024-09-16","renew_date":"2026-09-16","url":"https://lionrollingcircus.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":46,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เจ้าปัญญา","package":"Smart","price":8280,"start_date":"2024-09-19","renew_date":"2025-09-19","url":"https://jaopanyagelato.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":47,"status":"Active","payment_status":"Paid","restaurant_name":"สะแม๋","package":"Advance","price":14280,"start_date":"2024-09-20","renew_date":"2026-09-20","url":"https://samae.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":48,"status":"Active","payment_status":"Paid","restaurant_name":"ซันจิ หมูกระทะ&นมสด","package":"Advance Plus","price":21492,"start_date":"2024-09-20","renew_date":"2026-09-20","url":"https://sanjimookrata.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":49,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"BillionHair HomeClub","package":"Smart","price":8280,"start_date":"2024-09-26","renew_date":"2025-09-26","url":"https://billionhairhomeclub.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":50,"status":"Active","payment_status":"Paid","restaurant_name":"สวนขนาบคลอง","package":"Advance","price":14280,"start_date":"2023-10-01","renew_date":"2026-11-01","url":"https://suankhanabklong.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":51,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เสวนา Food&Drink","package":"Advance","price":14280,"start_date":"2024-10-01","renew_date":"2025-10-01","url":"https://sewwana.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":52,"status":"Implement","payment_status":"Working","restaurant_name":"ฟ้าไทยฟาร์ม","package":"Advance","price":14280,"start_date":"2024-10-01","renew_date":"2025-10-01","url":"https://fathaifarm.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":53,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Asian HOTPOT ร้อยเอ็ด","package":"Advance","price":14280,"start_date":"2024-10-10","renew_date":"2025-10-10","url":"https://asianhotpotroiet.resrun-pos.com/web-admin","type":"App","owner":"-"},{"no":54,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Clear85 Shabu & Yakiniku","package":"Advance Plus","price":23880,"start_date":"2023-07-12","renew_date":"2025-10-12","url":"https://c85rt.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":55,"status":"Active","payment_status":"Paid","restaurant_name":"บางจัมโบ้ 90's","package":"Advance","price":7140,"start_date":"2023-07-14","renew_date":"2026-04-14","url":"https://bangjumbo90s.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":56,"status":"Active","payment_status":"Paid","restaurant_name":"ข้าวเปียกลานชัย","package":"Advance Plus","price":23880,"start_date":"2023-06-14","renew_date":"2026-10-14","url":"https://lanchai.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":57,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Samui","package":"Smart","price":8280,"start_date":"2024-10-29","renew_date":"2026-10-29","url":"https://lionrollingcircussamui.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":58,"status":"Active","payment_status":"Paid","restaurant_name":"Stratus2 Glamping Boutique Resort","package":"Advance","price":14280,"start_date":"2023-11-09","renew_date":"2026-11-09","url":"https://glampingrestaurant.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":59,"status":"Active","payment_status":"Paid","restaurant_name":"ฟาร์มปลูกสุข","package":"Advance","price":14280,"start_date":"2024-11-15","renew_date":"2026-12-15","url":"https://farmplooksook.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":60,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Meat U","package":"Advance Plus","price":23880,"start_date":"2024-11-18","renew_date":"2025-11-18","url":"https://meatu.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":61,"status":"Active","payment_status":"Paid","restaurant_name":"โรงพยาบาลเวชธานี","package":"Smart","price":8280,"start_date":"2024-12-05","renew_date":"2025-12-05","url":"https://diet.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":62,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Sea you (BB Seafood)","package":"Advance Plus","price":23880,"start_date":"2023-01-14","renew_date":"2025-12-14","url":"https://seayou.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":63,"status":"Active","payment_status":"Paid","restaurant_name":"G-Coffee Event3","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee2.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":64,"status":"Active","payment_status":"Paid","restaurant_name":"StreetCoffee3 (STSIR)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee3.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":65,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTSukhumvit","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gcoffeesuk.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":66,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"STREET2 (คลังสินค้า FB)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee1.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":67,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTPHRARAM","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gcoffeesir.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":68,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTPhahonyothin","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gevent1.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":69,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTThailandCulturalCentre","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gevent2.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":70,"status":"Active","payment_status":"Paid","restaurant_name":"BMNMilkTea2 (GCoffee)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://bmnmilktea2.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":71,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Phuket","package":"Advance","price":14280,"start_date":"2024-12-16","renew_date":"2026-12-16","url":"https://lionrollingcircuspatong.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":72,"status":"Active","payment_status":"Paid","restaurant_name":"นิกิวาอิเอ็กซ์เพลส สาขาจอมเทียนพัทยา","package":"Smart","price":8280,"start_date":"2024-12-20","renew_date":"2027-12-20","url":"https://ngejmt.resrun-pos.com/web-admin","type":"App","owner":"PRANG"},{"no":73,"status":"Active","payment_status":"Paid","restaurant_name":"ไดโนคาเฟ่","package":"Advance Plus","price":23880,"start_date":"2023-12-25","renew_date":"2026-12-25","url":"https://dinocafe.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":74,"status":"Active","payment_status":"Paid","restaurant_name":"To the sea","package":"Advance","price":14280,"start_date":"2023-09-30","renew_date":"2026-12-30","url":"https://tothesea.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":75,"status":"Active","payment_status":"Paid","restaurant_name":"เจจูไอส์แลนด์ บาร์บีคิว","package":"Advance Plus","price":23880,"start_date":"2023-11-04","renew_date":null,"url":"https://jejuislandbbq.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":76,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"อาหารบ้านสวน","package":"Advance","price":14280,"start_date":"2024-01-11","renew_date":"2027-01-11","url":"https://bansaun47.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":77,"status":"Active","payment_status":"Overdue","restaurant_name":"SOS Shabu","package":"Smart","price":8280,"start_date":"2025-01-24","renew_date":"2026-01-24","url":"https://sosbangchak.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":78,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"มาสเตอร์บุฟเฟ่ต์ หมูกระทะ","package":"Advance Plus","price":23880,"start_date":"2024-01-25","renew_date":"2027-01-25","url":"https://masterbbq.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":79,"status":"Active","payment_status":"Paid","restaurant_name":"Vacca","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2027-02-01","url":"https://vaccaitalian.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":80,"status":"Active","payment_status":"Overdue","restaurant_name":"Ditto","package":"Smart","price":8280,"start_date":"2024-01-10","renew_date":"2026-02-10","url":"https://ditto.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":81,"status":"Active","payment_status":"Paid","restaurant_name":"เตี๋ยวเรือต่อชาม","package":"Smart","price":8280,"start_date":"2024-02-24","renew_date":"2027-02-24","url":"https://torharmoodle.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":82,"status":"Active","payment_status":"Overdue","restaurant_name":"ป้านีบรรทัดทอง","package":"Advance","price":14280,"start_date":"2025-02-25","renew_date":"2026-02-24","url":"https://paneekungchaenamplabantadthong.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":83,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวริมน้ำ","package":"Advance","price":14280,"start_date":"2022-11-01","renew_date":"2027-03-01","url":"https://kruarimnam.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":84,"status":"Active","payment_status":"Overdue","restaurant_name":"ราชาเป็ดย่าง","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2026-03-01","url":"https://kingduckkhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":85,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"บ้านณเล","package":"Advance","price":14280,"start_date":"2025-03-05","renew_date":"2026-03-05","url":"https://baannaley.resrun-pos.com/web-admin","type":"Web","owner":"KEN"},{"no":86,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เซนเซ - สาขา 2","package":"Advance Plus","price":23880,"start_date":"2024-01-10","renew_date":"2026-03-10","url":"https://senseirayong2.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":87,"status":"Active","payment_status":"Paid","restaurant_name":"ก๊อก ก๊อก ชาบู สาขา 2","package":"Advance","price":14280,"start_date":"2023-07-11","renew_date":"2027-03-11","url":"https://knockknockhabupremiumalacarte.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":88,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ถึงขอนแก่น","package":"Smart","price":8280,"start_date":"2023-03-12","renew_date":"2026-03-12","url":"https://thuengkhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":89,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Dragon Grill, MHK","package":"Advance Plus","price":11940,"start_date":"2023-03-06","renew_date":"2026-03-12","url":"https://dragongrillmhk.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":90,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ตำปากเปิด","package":"Advance","price":14280,"start_date":"2024-02-20","renew_date":"2026-03-20","url":"https://ruaymairurueang2022.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":91,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ABOVE HDY","package":"Smart","price":8280,"start_date":"2024-03-24","renew_date":"2026-03-24","url":"https://abovebarhatyai.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":92,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ชมจันทร์","package":"Smart","price":8280,"start_date":"2023-04-23","renew_date":"2026-04-23","url":"https://chomchan.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":93,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Gusto","package":"Smart","price":8280,"start_date":"2024-04-26","renew_date":"2026-04-26","url":"https://gusto.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":94,"status":"Active","payment_status":"Working","restaurant_name":"Lion Rolling Circus Old Town","package":"Advance","price":14280,"start_date":"2025-05-07","renew_date":"2026-05-07","url":"https://lionrollingcircusoldtown.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":95,"status":"Active","payment_status":"Working","restaurant_name":"Tender House","package":"Smart","price":8280,"start_date":"2025-03-23","renew_date":"2026-05-09","url":"https://tenderhouse.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":96,"status":"Active","payment_status":"Working","restaurant_name":"the barn parnoramic bar","package":"Smart","price":8280,"start_date":"2025-05-06","renew_date":"2026-05-29","url":"https://barnparnoramic.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":97,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ขนมจีนต้นก้ามปูนวลจันทร์","package":"Advance","price":14280,"start_date":"2023-09-27","renew_date":"2026-09-13","url":"https://kampunuanchan.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":98,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Udon Tattoo","package":"Smart","price":8280,"start_date":"2024-02-01","renew_date":"2026-06-06","url":"https://udontattoo.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":99,"status":"Implement","payment_status":"Paid","restaurant_name":"ริมคลอง","package":"Smart","price":8280,"start_date":null,"renew_date":null,"url":"","type":"---","owner":"PP"},{"no":100,"status":"Active","payment_status":"Working","restaurant_name":"ก้ามปูทองสาย1","package":"Advance","price":14280,"start_date":"2025-06-04","renew_date":"2026-06-11","url":"https://karmpootongsai1.resrun-pos.com/web-admin/dashboard","type":"App","owner":"PP"},{"no":101,"status":"Active","payment_status":"Paid","restaurant_name":"ventisirestaurant Centrala","package":"Advance","price":13134,"start_date":"2025-06-18","renew_date":"2026-06-19","url":"https://ventisirestaurant.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PP"},{"no":102,"status":"Active","payment_status":"Working","restaurant_name":"Puripai","package":"Smart","price":8280,"start_date":"2025-08-05","renew_date":"2026-08-13","url":"https://puripai.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":103,"status":"Active","payment_status":"Working","restaurant_name":"mae cuisine","package":"Advance","price":12852,"start_date":"2026-10-01","renew_date":"2026-10-01","url":"https://maecuisine.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":104,"status":"Active","payment_status":"Working","restaurant_name":"มิกกิบุฟเฟ่ต์มหาสารคาม","package":"Advance","price":12852,"start_date":"2025-10-09","renew_date":"2026-10-15","url":"https://mixkibuffet.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":105,"status":"Active","payment_status":"Working","restaurant_name":"Mirage (proud)","package":"Advance","price":12852,"start_date":"2025-10-29","renew_date":"2026-10-29","url":"https://mirageindigo.resrun-pos.com/web-admi","type":"Web","owner":"PP"},{"no":106,"status":"Active","payment_status":"Working","restaurant_name":"indigo (proud)","package":"Advance","price":12852,"start_date":"2025-10-29","renew_date":"2026-10-29","url":"https://indigo.resrun-pos.com/web-admin","type":"Web","owner":"PP"}];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+let SB = null;
+let DATA = [];
+let IS_ADMIN = localStorage.getItem('crm_admin') === '1';
+let editRecordId = null;
+let brFilter = 'all';
+let rnFilter = 'all';
+let chartMonthly, chartPkg, chartPay, chartCF, chartARR, chartOwner;
+const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  updateAdminUI();
+  if (SUPABASE_URL && SUPABASE_KEY) {
+    await connectSupabase();
+  } else {
+    // Fallback: use embedded seed data
+    DATA = SEED.filter(r => r.restaurant_name && r.restaurant_name.trim());
+    setSyncStatus('local', `ข้อมูล Local (${DATA.length} สาขา) — ยังไม่ได้เชื่อม Supabase`);
+    renderAll();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   SUPABASE
+   ═══════════════════════════════════════════════════════════ */
+async function connectSupabase() {
+  setSyncStatus('loading', 'กำลังเชื่อมต่อ Supabase…');
+  try {
+    const { createClient } = supabase;
+    SB = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await SB.from('customers').select('*').order('no');
+    if (error) throw error;
+    DATA = data.length > 0 ? data : SEED;
+    if (data.length === 0) {
+      // Auto-seed on first connect
+      await SB.from('customers').insert(SEED);
+      DATA = SEED;
+      toast('นำเข้าข้อมูลเริ่มต้น 106 สาขาสำเร็จ! 🎉', 'success');
+    }
+    setSyncStatus('ok', `Supabase · ${DATA.length} สาขา · sync แล้ว`);
+    renderAll();
+  } catch(e) {
+    setSyncStatus('err', 'เชื่อม Supabase ไม่สำเร็จ — ใช้ข้อมูล Local');
+    DATA = SEED.filter(r => r.restaurant_name && r.restaurant_name.trim());
+    renderAll();
+    toast('ไม่สามารถเชื่อม Supabase ได้: ' + e.message, 'error');
+  }
+}
+
+function setSyncStatus(type, msg) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-txt');
+  dot.className = 'sync-dot';
+  txt.style.color = 'var(--t3)';
+  if (type === 'ok') { dot.classList.add('green'); txt.style.color = 'var(--grn)'; }
+  else if (type === 'err') { dot.classList.add('red'); txt.style.color = 'var(--red)'; }
+  else if (type === 'loading') { dot.classList.add('yellow'); }
+  else { dot.classList.add('yellow'); }
+  txt.textContent = msg;
+}
+
+async function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) { toast('กรุณากรอก URL และ Key', 'error'); return; }
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  SUPABASE_URL = url; SUPABASE_KEY = key;
+  closeModal('m-setup');
+  await connectSupabase();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════ */
+function daysLeft(d) {
+  if (!d) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dt = new Date(d); dt.setHours(0,0,0,0);
+  return Math.round((dt - now) / 86400000);
+}
+function fmt(n) { return n?.toLocaleString('th-TH') || '-'; }
+function fmtD(s) { return s ? s.toString().slice(0,10) : '-'; }
+function activeData() { return DATA.filter(r => r.restaurant_name && r.restaurant_name.trim() && r.status !== 'New Branch'); }
+
+function dayChip(days) {
+  if (days === null) return '<span style="color:var(--t3);font-size:11px">-</span>';
+  if (days < 0)   return `<span class="days-chip exp">หมดแล้ว ${Math.abs(days)} วัน</span>`;
+  if (days <= 7)  return `<span class="days-chip danger">⚠ ${days} วัน</span>`;
+  if (days <= 30) return `<span class="days-chip warn">🟡 ${days} วัน</span>`;
+  return `<span class="days-chip ok">${days} วัน</span>`;
+}
+function rowCls(r) {
+  const d = daysLeft(r.renew_date);
+  if ((d !== null && d < 0) || r.payment_status === 'Overdue') return 'r-red';
+  if (d !== null && d <= 30) return 'r-ylw';
+  return '';
+}
+function statusBadge(s) {
+  const m = {Active:'b-active',DeActivate:'b-deact',Implement:'b-impl','New Branch':'b-new'};
+  return `<span class="badge ${m[s]||'b-impl'}">${s}</span>`;
+}
+function payBadge(p) {
+  const m = {Paid:'b-paid',Overdue:'b-overdue',Working:'b-working','Follow to Renew':'b-follow','Free trial':'b-free'};
+  return `<span class="badge ${m[p]||'b-working'}">${p}</span>`;
+}
+function pkgTag(p) {
+  const m = {Smart:'pt-smart',Advance:'pt-adv','Advance Plus':'pt-advp',Franchise:'pt-fr'};
+  return `<span class="pkg-tag ${m[p]||''}">${p}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER ALL
+   ═══════════════════════════════════════════════════════════ */
+function renderAll() {
+  renderDashboard();
+  renderBranches();
+  renderRenewals();
+  renderCashflow();
+}
+
+/* ─── DASHBOARD ─────────────────────────────────────────── */
+function renderDashboard() {
+  const all = activeData();
+  const now = new Date();
+  const m = now.getMonth(), y = now.getFullYear();
+  const arr = all.reduce((a,r) => a+(r.price||0), 0);
+  const overdue = all.filter(r => r.payment_status === 'Overdue');
+  const overdueVal = overdue.reduce((a,r) => a+(r.price||0), 0);
+  const thisMonth = all.filter(r => {
+    if(!r.renew_date) return false;
+    const d = new Date(r.renew_date);
+    return d.getMonth()===m && d.getFullYear()===y;
+  });
+  const thisMonthVal = thisMonth.reduce((a,r)=>a+(r.price||0),0);
+  const follow = all.filter(r => r.payment_status === 'Follow to Renew');
+  const paid = all.filter(r => r.payment_status === 'Paid');
+  const activeCount = all.filter(r => r.status === 'Active').length;
+
+  // Update sub
+  document.getElementById('dash-sub').textContent =
+    `${now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} · ${all.length} สาขา Active`;
+
+  // KPI
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi c-gold">
+      <span class="kpi-ico">💰</span>
+      <div class="kpi-lbl">Total ARR</div>
+      <div class="kpi-val gold">฿${fmt(arr)}</div>
+      <div class="kpi-sub">Annual Recurring Revenue</div>
+    </div>
+    <div class="kpi c-red">
+      <span class="kpi-ico">⚠️</span>
+      <div class="kpi-lbl">Overdue</div>
+      <div class="kpi-val red">${overdue.length}</div>
+      <div class="kpi-sub">฿${fmt(overdueVal)} · ค้างชำระ</div>
+      <div class="kpi-trend dn">🔴 ต้องติดตามด่วน</div>
+    </div>
+    <div class="kpi c-ylw">
+      <span class="kpi-ico">🔔</span>
+      <div class="kpi-lbl">ต่อสัญญาเดือนนี้</div>
+      <div class="kpi-val ylw">${thisMonth.length}</div>
+      <div class="kpi-sub">฿${fmt(thisMonthVal)}</div>
+    </div>
+    <div class="kpi c-grn">
+      <span class="kpi-ico">✅</span>
+      <div class="kpi-lbl">Active / Paid</div>
+      <div class="kpi-val grn">${paid.length}</div>
+      <div class="kpi-sub">${activeCount} สาขา Active</div>
+    </div>
+    <div class="kpi c-blu">
+      <span class="kpi-ico">📋</span>
+      <div class="kpi-lbl">Follow to Renew</div>
+      <div class="kpi-val blu">${follow.length}</div>
+      <div class="kpi-sub">รอการติดตาม</div>
+    </div>`;
+
+  // Monthly data
+  const mCounts = Array(12).fill(0), mVals = Array(12).fill(0);
+  all.forEach(r => {
+    if(!r.renew_date) return;
+    const mi = new Date(r.renew_date).getMonth();
+    mCounts[mi]++; mVals[mi] += r.price||0;
+  });
+
+  // Monthly chart
+  const cOpts = { responsive:true, plugins:{legend:{labels:{color:'#8892a4',font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
+  if(chartMonthly) chartMonthly.destroy();
+  chartMonthly = new Chart(document.getElementById('monthly-chart'), {
+    type:'bar',
+    data:{
+      labels:MONTHS,
+      datasets:[
+        {label:'Revenue (฿)',data:mVals,backgroundColor:mVals.map((_,i)=>i===m?'rgba(240,180,41,.9)':'rgba(240,180,41,.4)'),borderRadius:6,yAxisID:'y'},
+        {label:'จำนวนราย',data:mCounts,type:'line',borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,yAxisID:'y1',pointRadius:4,pointBackgroundColor:'#60a5fa'}
+      ]
+    },
+    options:{...cOpts,scales:{
+      y:{ticks:{color:'#4a5268',callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#161920'}},
+      y1:{ticks:{color:'#60a5fa'},grid:{display:false},position:'right'}
+    }}
+  });
+
+  // Top 10
+  const urgentList = all.filter(r=>r.renew_date).map(r=>({...r,days:daysLeft(r.renew_date)}))
+    .sort((a,b)=>a.days-b.days).slice(0,10);
+  const urgentCount = urgentList.filter(r=>r.days!==null&&r.days<30).length;
+  document.getElementById('top10-badge').textContent = urgentCount > 0 ? `${urgentCount} รายด่วน` : 'ปกติ';
+  document.getElementById('top10-list').innerHTML = urgentList.map((r,i)=>{
+    const cls = r.days < 0 ? 'urgent' : r.days <= 30 ? 'warn' : '';
+    return `<div class="top10-item ${cls}">
+      <span class="top10-rank">${i+1}</span>
+      <span class="top10-name" title="${r.restaurant_name}">${r.restaurant_name}</span>
+      <span class="top10-pkg">${r.package||'-'}</span>
+      ${dayChip(r.days)}
+    </div>`;
+  }).join('');
+
+  // Heatmap
+  const hmax = Math.max(...mVals, 1);
+  const hColors = ['#111827','#1e3a5f','#1d4ed8','#0ea5e9','#f0b429'];
+  document.getElementById('hm-labels').innerHTML = MONTHS.map(m=>`<span>${m}</span>`).join('');
+  document.getElementById('hm-cells').innerHTML = mVals.map((v,i)=>{
+    const lvl = v===0?0:Math.min(4,Math.ceil((v/hmax)*4));
+    return `<div class="hm-cell" style="background:${hColors[lvl]};color:${lvl>=3?'#1a1200':'#8892a4'}">
+      ${lvl>=2?(v>=1000?Math.round(v/1000)+'k':''):''}
+      <div class="tt">${MONTHS[i]}<br>฿${fmt(v)}<br>${mCounts[i]} ราย</div>
+    </div>`;
+  }).join('');
+
+  // Package donut
+  const pkgs = {};
+  all.forEach(r=>{ if(r.package&&r.package!=='-') pkgs[r.package]=(pkgs[r.package]||0)+1; });
+  if(chartPkg) chartPkg.destroy();
+  chartPkg = new Chart(document.getElementById('pkg-chart'),{
+    type:'doughnut',
+    data:{labels:Object.keys(pkgs),datasets:[{data:Object.values(pkgs),
+      backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#10b981','#f05252'],
+      borderColor:'#0f1117',borderWidth:2}]},
+    options:{...cOpts,cutout:'62%'}
+  });
+
+  // Payment bar
+  const payMap = {Paid:0,Working:0,Overdue:0,'Follow to Renew':0,'Free trial':0};
+  all.forEach(r=>{ if(r.payment_status in payMap) payMap[r.payment_status]++; });
+  if(chartPay) chartPay.destroy();
+  chartPay = new Chart(document.getElementById('pay-chart'),{
+    type:'bar',
+    data:{labels:Object.keys(payMap),datasets:[{data:Object.values(payMap),
+      backgroundColor:['#10b981','#3b82f6','#f05252','#fbbf24','#8b5cf6'],borderRadius:6}]},
+    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#4a5268'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
+    }
+  });
+}
+
+/* ─── BRANCHES TABLE ────────────────────────────────────── */
+function setBrFilter(btn) {
+  document.querySelectorAll('.pkg-filters .pfbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  brFilter = btn.dataset.f;
+  renderBranches();
+}
+
+function renderBranches() {
+  const q = (document.getElementById('br-search')?.value||'').toLowerCase();
+  let rows = activeData();
+  if (q) rows = rows.filter(r => r.restaurant_name.toLowerCase().includes(q));
+  if (brFilter !== 'all') {
+    if (brFilter === 'Overdue') rows = rows.filter(r => r.payment_status === 'Overdue');
+    else rows = rows.filter(r => r.package === brFilter);
+  }
+  const tbody = document.getElementById('br-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="12"><div class="no-data">ไม่พบข้อมูล</div></td></tr>`
+    : rows.map(r => {
+        const d = daysLeft(r.renew_date);
+        const editDel = IS_ADMIN
+          ? `<td><button class="act-btn" onclick="openRecordModal('${r.id||r.no}')">✏️</button><button class="act-btn del" onclick="deleteRec('${r.id||r.no}')">🗑</button></td>`
+          : '';
+        return `<tr class="${rowCls(r)}">
+          <td style="color:var(--t3);font-size:11px">${r.no}</td>
+          <td><strong style="font-size:13px">${r.restaurant_name}</strong></td>
+          <td>${pkgTag(r.package)}</td>
+          <td>฿${fmt(r.price)}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td>${payBadge(r.payment_status)}</td>
+          <td style="font-size:12px">${fmtD(r.renew_date)}</td>
+          <td>${dayChip(d)}</td>
+          <td style="color:var(--t3);font-size:11px">${r.owner||'-'}</td>
+          <td style="font-size:11px;color:var(--t3)">${r.type||'-'}</td>
+          <td>${r.url?`<a href="${r.url}" target="_blank" class="link-btn">🔗 เปิด</a>`:'-'}</td>
+          ${editDel}
+        </tr>`;
+      }).join('');
+  document.getElementById('br-count').textContent = `แสดง ${rows.length} จาก ${activeData().length} สาขา`;
+  // Show/hide action column header
+  document.getElementById('action-col').style.display = IS_ADMIN ? '' : 'none';
+  document.getElementById('add-btn').style.display = IS_ADMIN ? '' : 'none';
+}
+
+/* ─── RENEWALS ──────────────────────────────────────────── */
+function setRnFilter(btn) {
+  document.querySelectorAll('#page-renewals .pkg-filters .pfbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  rnFilter = btn.dataset.f;
+  renderRenewals();
+}
+
+function renderRenewals() {
+  const q = (document.getElementById('rn-search')?.value||'').toLowerCase();
+  let rows = activeData().filter(r => r.renew_date || r.payment_status === 'Overdue');
+  if (q) rows = rows.filter(r => r.restaurant_name.toLowerCase().includes(q));
+  if (rnFilter === 'expired') rows = rows.filter(r=>{ const d=daysLeft(r.renew_date); return d!==null&&d<0; });
+  else if (rnFilter === 'soon') rows = rows.filter(r=>{ const d=daysLeft(r.renew_date); return d!==null&&d>=0&&d<=30; });
+  else if (rnFilter === 'follow') rows = rows.filter(r=>r.payment_status==='Follow to Renew');
+  rows.sort((a,b) => (daysLeft(a.renew_date)??9999) - (daysLeft(b.renew_date)??9999));
+  const tbody = document.getElementById('rn-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="9"><div class="no-data">✅ ไม่มีรายการด่วน</div></td></tr>`
+    : rows.map((r,i) => {
+        const d = daysLeft(r.renew_date);
+        const prio = d===null?'-':d<0?'🔴 ด่วนมาก':d<=7?'🔴 ด่วน':d<=30?'🟡 ติดตาม':'🟢 ปกติ';
+        return `<tr class="${rowCls(r)}">
+          <td>${prio}</td>
+          <td><strong>${r.restaurant_name}</strong></td>
+          <td>${pkgTag(r.package)}</td>
+          <td>฿${fmt(r.price)}</td>
+          <td style="font-size:12px">${fmtD(r.renew_date)}</td>
+          <td>${dayChip(d)}</td>
+          <td>${payBadge(r.payment_status)}</td>
+          <td style="color:var(--t3);font-size:11px">${r.owner||'-'}</td>
+          <td>${r.url?`<a href="${r.url}" target="_blank" class="link-btn">🔗</a>`:'-'}</td>
+        </tr>`;
+      }).join('');
+  document.getElementById('rn-count').textContent = `แสดง ${rows.length} รายการ`;
+}
+
+/* ─── CASH FLOW ─────────────────────────────────────────── */
+function renderCashflow() {
+  const all = activeData();
+  const arr = all.reduce((a,r)=>a+(r.price||0),0);
+  const paid = all.filter(r=>r.payment_status==='Paid').reduce((a,r)=>a+(r.price||0),0);
+  const overdue = all.filter(r=>r.payment_status==='Overdue').reduce((a,r)=>a+(r.price||0),0);
+  const follow = all.filter(r=>r.payment_status==='Follow to Renew').reduce((a,r)=>a+(r.price||0),0);
+
+  document.getElementById('cf-kpi').innerHTML = `
+    <div class="kpi c-gold"><span class="kpi-ico">📊</span><div class="kpi-lbl">Total ARR</div><div class="kpi-val gold">฿${fmt(arr)}</div><div class="kpi-sub">Annual Recurring</div></div>
+    <div class="kpi c-grn"><span class="kpi-ico">✅</span><div class="kpi-lbl">Confirmed</div><div class="kpi-val grn">฿${fmt(paid)}</div><div class="kpi-sub">Paid + Working</div></div>
+    <div class="kpi c-red"><span class="kpi-ico">⚠️</span><div class="kpi-lbl">Overdue</div><div class="kpi-val red">฿${fmt(overdue)}</div><div class="kpi-sub">ค้างชำระ</div></div>
+    <div class="kpi c-ylw"><span class="kpi-ico">🔔</span><div class="kpi-lbl">Follow to Renew</div><div class="kpi-val ylw">฿${fmt(follow)}</div><div class="kpi-sub">รอปิด</div></div>`;
+
+  const mVals = Array(12).fill(0), mCounts = Array(12).fill(0);
+  all.forEach(r=>{if(!r.renew_date)return;const mi=new Date(r.renew_date).getMonth();mVals[mi]+=r.price||0;mCounts[mi]++;});
+  const cOpts = {responsive:true,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
+  if(chartCF) chartCF.destroy();
+  chartCF = new Chart(document.getElementById('cf-chart'),{
+    type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'Forecast (฿)',data:mVals,backgroundColor:'rgba(240,180,41,.7)',borderRadius:6,yAxisID:'y'},
+      {label:'ราย',data:mCounts,type:'line',borderColor:'#60a5fa',fill:false,tension:.4,yAxisID:'y1',pointRadius:4,pointBackgroundColor:'#60a5fa'}
+    ]},
+    options:{...cOpts,scales:{
+      y:{ticks:{color:'#4a5268',callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#161920'}},
+      y1:{ticks:{color:'#60a5fa'},grid:{display:false},position:'right'}
+    }}
+  });
+
+  const pkgRev={};
+  all.forEach(r=>{if(r.package&&r.package!=='-') pkgRev[r.package]=(pkgRev[r.package]||0)+(r.price||0);});
+  if(chartARR) chartARR.destroy();
+  chartARR = new Chart(document.getElementById('arr-chart'),{
+    type:'bar',
+    data:{labels:Object.keys(pkgRev),datasets:[{label:'ARR (฿)',data:Object.values(pkgRev),
+      backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#10b981'],borderRadius:6}]},
+    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#4a5268',callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
+    }
+  });
+
+  const ownerRev={};
+  all.forEach(r=>{const o=r.owner||'-';ownerRev[o]=(ownerRev[o]||0)+(r.price||0);});
+  const ownerSorted = Object.entries(ownerRev).filter(([k])=>k!=='-').sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(chartOwner) chartOwner.destroy();
+  chartOwner = new Chart(document.getElementById('owner-chart'),{
+    type:'bar',
+    data:{labels:ownerSorted.map(x=>x[0]),datasets:[{label:'ARR (฿)',data:ownerSorted.map(x=>x[1]),
+      backgroundColor:['#f0b429','#60a5fa','#34d399','#a78bfa','#fb923c','#f472b6','#4ade80','#38bdf8'],borderRadius:6}]},
+    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#4a5268',callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAB NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+function switchTab(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+   ═══════════════════════════════════════════════════════════ */
+function openAdminModal() {
+  document.getElementById('l-err').style.display = 'none';
+  document.getElementById('admin-logout-row').style.display = IS_ADMIN ? 'block' : 'none';
+  if (!IS_ADMIN) {
+    document.getElementById('l-user').value = '';
+    document.getElementById('l-pass').value = '';
+  }
+  openModal('m-login');
+}
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value.trim();
+  if (u==='Admin' && p==='1122334455') {
+    IS_ADMIN = true;
+    localStorage.setItem('crm_admin','1');
+    updateAdminUI();
+    closeModal('m-login');
+    toast('เข้าสู่ระบบ Admin เรียบร้อย ✅', 'success');
+    renderBranches();
+  } else {
+    document.getElementById('l-err').style.display = 'block';
+  }
+}
+document.getElementById('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+function doLogout() {
+  IS_ADMIN = false;
+  localStorage.removeItem('crm_admin');
+  updateAdminUI();
+  closeModal('m-login');
+  toast('ออกจากระบบ Admin แล้ว', 'info');
+  renderBranches();
+}
+function updateAdminUI() {
+  const fab = document.getElementById('admin-fab');
+  const dot = document.getElementById('admin-dot');
+  const lbl = document.getElementById('admin-label');
+  if (IS_ADMIN) {
+    fab.classList.add('logged');
+    lbl.textContent = '🔓 Admin Mode';
+  } else {
+    fab.classList.remove('logged');
+    lbl.textContent = '🔐 Admin';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CRUD
+   ═══════════════════════════════════════════════════════════ */
+function openRecordModal(id) {
+  if (!IS_ADMIN) return;
+  editRecordId = id || null;
+  document.getElementById('rec-title').textContent = id ? 'แก้ไขข้อมูลสาขา' : 'เพิ่มสาขาใหม่';
+  if (id) {
+    const r = DATA.find(x => (x.id||x.no)?.toString() === id?.toString());
+    if (r) {
+      document.getElementById('f-name').value = r.restaurant_name||'';
+      document.getElementById('f-pkg').value = r.package||'Smart';
+      document.getElementById('f-price').value = r.price||'';
+      document.getElementById('f-status').value = r.status||'Active';
+      document.getElementById('f-pay').value = r.payment_status||'Working';
+      document.getElementById('f-start').value = r.start_date||'';
+      document.getElementById('f-renew').value = r.renew_date||'';
+      document.getElementById('f-url').value = r.url||'';
+      document.getElementById('f-owner').value = r.owner||'';
+      document.getElementById('f-type').value = r.type||'Web';
+      document.getElementById('f-no').value = r.no||'';
+    }
+  } else {
+    ['f-name','f-price','f-start','f-renew','f-url','f-owner','f-no'].forEach(x=>document.getElementById(x).value='');
+  }
+  openModal('m-record');
+}
+
+async function saveRecord() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('กรุณากรอกชื่อสาขา', 'error'); return; }
+  const btn = document.getElementById('rec-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ กำลังบันทึก…';
+
+  const rec = {
+    restaurant_name: name,
+    package: document.getElementById('f-pkg').value,
+    price: parseFloat(document.getElementById('f-price').value)||0,
+    status: document.getElementById('f-status').value,
+    payment_status: document.getElementById('f-pay').value,
+    start_date: document.getElementById('f-start').value||null,
+    renew_date: document.getElementById('f-renew').value||null,
+    url: document.getElementById('f-url').value,
+    owner: document.getElementById('f-owner').value||'-',
+    type: document.getElementById('f-type').value,
+    no: parseInt(document.getElementById('f-no').value)||null,
+  };
+
+  try {
+    if (SB) {
+      if (editRecordId) {
+        const r = DATA.find(x=>(x.id||x.no)?.toString()===editRecordId?.toString());
+        await SB.from('customers').update(rec).eq('id', r.id);
+      } else {
+        await SB.from('customers').insert([rec]);
+      }
+      // Reload
+      const {data} = await SB.from('customers').select('*').order('no');
+      DATA = data;
+    } else {
+      // Local fallback
+      if (editRecordId) {
+        const idx = DATA.findIndex(x=>(x.id||x.no)?.toString()===editRecordId?.toString());
+        if(idx!==-1) DATA[idx]={...DATA[idx],...rec};
+      } else {
+        DATA.push({...rec, id: Date.now(), no: DATA.length+1});
+      }
+    }
+    closeModal('m-record');
+    renderAll();
+    toast(editRecordId?'แก้ไขสำเร็จ ✅':'เพิ่มสาขาสำเร็จ ✅','success');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: '+e.message,'error');
+  }
+  btn.disabled = false; btn.textContent = '💾 บันทึกลง Supabase';
+}
+
+async function deleteRec(id) {
+  if (!IS_ADMIN || !confirm('ยืนยันการลบ?')) return;
+  try {
+    const r = DATA.find(x=>(x.id||x.no)?.toString()===id?.toString());
+    if (SB && r?.id) {
+      await SB.from('customers').delete().eq('id', r.id);
+      const {data} = await SB.from('customers').select('*').order('no');
+      DATA = data;
+    } else {
+      DATA = DATA.filter(x=>(x.id||x.no)?.toString()!==id?.toString());
+    }
+    renderAll();
+    toast('ลบสำเร็จ','success');
+  } catch(e) { toast('ลบไม่สำเร็จ: '+e.message,'error'); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL HELPERS
+   ═══════════════════════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).style.display='flex'; }
+function closeModal(id) { document.getElementById(id).style.display='none'; }
+
+// Click outside to close
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target===o) o.style.display='none'; });
+});
+
+// Admin: also show Supabase setup link
+document.getElementById('admin-fab').addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (IS_ADMIN) openModal('m-setup');
+});
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+</script>
+</body>
+</html>
