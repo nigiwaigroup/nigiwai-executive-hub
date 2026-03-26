@@ -1735,9 +1735,9 @@ function renderMonthDetail(mi) {
         <div class="md-stat-sub" style="color:#4fffb0;text-shadow:0 0 12px rgba(52,211,153,.35)">${Number(paidVal).toLocaleString('th-TH')} บาท</div>
       </div>
       <div class="md-stat">
-        <div class="md-stat-val kpi-val-link" style="color:var(--red)" onclick="openMonthPayDetail('unpaid',${mi})">${secOverdue.length}</div>
-        <div class="md-stat-lbl">ค้างจ่าย (Overdue)</div>
-        <div class="md-stat-sub" style="color:#ff6b6b;text-shadow:0 0 12px rgba(240,82,82,.35)">${Number(overdueVal).toLocaleString('th-TH')} บาท</div>
+        <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openMonthPayDetail('follow',${mi})">${secFollow.length}</div>
+        <div class="md-stat-lbl">รอติดตาม (Follow)</div>
+        <div class="md-stat-sub" style="color:#ffd93d;text-shadow:0 0 12px rgba(251,191,36,.35)">${Number(followVal).toLocaleString('th-TH')} บาท</div>
       </div>
     </div>
 
@@ -1768,12 +1768,21 @@ function openMonthPayDetail(type, mi) {
   const all = trackingData();
   const MONTHS_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   const monthRows = all.filter(r=>{ if(!r.renew_date) return false; return new Date(r.renew_date).getMonth()===mi; });
-  const rows = type==='paid'
-    ? monthRows.filter(r=>r.payment_status==='Paid'||r.payment_status==='Working')
-    : monthRows.filter(r=>r.payment_status!=='Paid'&&r.payment_status!=='Working');
-  const title = type==='paid' ? `✅ จ่ายแล้ว — ${MONTHS_FULL[mi]}` : `⚠️ ค้างจ่าย — ${MONTHS_FULL[mi]}`;
-  const mapped = rows.map(r=>({'#':r.no,'ชื่อสาขา':r.restaurant_name,'Package':r.package||'-','ราคา':'฿'+fmt(r.price),'วันหมด':fmtD(r.renew_date),'Payment':r.payment_status,'ผู้ดูแล':r.owner||'-'}));
-  openKpiDetail(title, `${rows.length} สาขา · ฿${fmt(rows.reduce((a,r)=>a+(r.price||0),0))}`, mapped, ['#','ชื่อสาขา','Package','ราคา','วันหมด','Payment','ผู้ดูแล']);
+
+  let rows, title;
+  if (type === 'paid') {
+    rows  = monthRows.filter(r => r.payment_status === 'Paid');
+    title = `✅ ชำระแล้ว (Paid) — ${MONTHS_FULL[mi]}`;
+  } else if (type === 'follow') {
+    rows  = monthRows.filter(r => r.payment_status === 'Follow to Renew' || r.payment_status === 'Working' || r.payment_status === 'Free trial');
+    title = `🟡 รอติดตาม (Follow/Working) — ${MONTHS_FULL[mi]}`;
+  } else {
+    rows  = monthRows.filter(r => r.payment_status === 'Overdue');
+    title = `🔴 ค้างจ่าย (Overdue) — ${MONTHS_FULL[mi]}`;
+  }
+
+  const mapped = rows.map(r=>({'#':r.no,'ชื่อสาขา':r.restaurant_name,'Package':r.package||'-','ราคา':Number(r.price).toLocaleString('th-TH')+' บาท','วันหมด':fmtD(r.renew_date),'Payment':r.payment_status,'ผู้ดูแล':r.owner||'-'}));
+  openKpiDetail(title, `${rows.length} สาขา · ${Number(rows.reduce((a,r)=>a+(r.price||0),0)).toLocaleString('th-TH')} บาท`, mapped, ['#','ชื่อสาขา','Package','ราคา','วันหมด','Payment','ผู้ดูแล']);
 }
 
 
