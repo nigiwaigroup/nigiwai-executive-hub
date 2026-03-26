@@ -2039,7 +2039,7 @@ function renderOwnerDashboard() {
     plugins:[{id:'oa',afterDatasetsDraw(c){const {ctx}=c;c.getDatasetMeta(0).data.forEach((bar,i)=>{
       const v=ownersSorted[i][1];ctx.save();ctx.fillStyle='rgba(240,180,41,.9)';ctx.font='bold 11px Prompt,sans-serif';
       ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText('฿'+(v/1000).toFixed(0)+'k',bar.x+5,bar.y);ctx.restore();
-    });}]
+    });}}]
   });
 
   const ovSorted = ownersSorted.map(([o])=>([o, ownerOV[o]||0]));
@@ -2053,7 +2053,7 @@ function renderOwnerDashboard() {
       const v=ovSorted[i][1];if(!v)return;ctx.save();ctx.fillStyle='rgba(240,82,82,.9)';
       ctx.font='bold 11px Prompt,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
       ctx.fillText(`${v} ราย`,bar.x+5,bar.y);ctx.restore();
-    });}]
+    });}}]
   });
 
   renderOwnerTable();
