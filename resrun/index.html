@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resrun CRM — Nigiwai Group</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Resrun POS — ServiceRun </title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -30,10 +30,11 @@
   --ylw:#fbbf24;
   --r:12px;
   --sh:0 8px 32px rgba(0,0,0,.45);
+  --fnum:800;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-serif;min-height:100vh;font-size:14px}
+body{background:var(--bg);color:var(--txt);font-family:'Prompt','Noto Sans Thai',sans-serif;min-height:100vh;font-size:15px}
 
 /* ─── TOPBAR ─────────────────────────────────────────────── */
 .topbar{
@@ -89,8 +90,8 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-ser
 .page{display:none}
 .page.active{display:block}
 .page-header{margin-bottom:22px}
-.page-title{font-size:20px;font-weight:700;margin-bottom:2px}
-.page-sub{font-size:12px;color:var(--t3)}
+.page-title{font-size:24px;font-weight:800;margin-bottom:2px;letter-spacing:-.3px}
+.page-sub{font-size:13px;color:var(--t3)}
 
 /* ─── KPI CARDS ──────────────────────────────────────────── */
 .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
@@ -105,13 +106,16 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-ser
 .kpi.c-grn::after{background:linear-gradient(90deg,var(--grn),transparent)}
 .kpi.c-blu::after{background:linear-gradient(90deg,var(--blu),transparent)}
 .kpi.c-ylw::after{background:linear-gradient(90deg,var(--ylw),transparent)}
-.kpi-ico{font-size:20px;margin-bottom:10px;display:block}
-.kpi-val{font-size:26px;font-weight:700;line-height:1;margin-bottom:5px}
-.kpi-val.gold{color:var(--gold)}.kpi-val.red{color:var(--red)}
-.kpi-val.grn{color:var(--grn)}.kpi-val.blu{color:var(--blu)}.kpi-val.ylw{color:var(--ylw)}
-.kpi-lbl{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
-.kpi-sub{font-size:11px;color:var(--t3)}
-.kpi-trend{font-size:11px;margin-top:4px}
+.kpi-ico{font-size:22px;margin-bottom:10px;display:block}
+.kpi-val{font-size:36px;font-weight:800;line-height:1;margin-bottom:6px;letter-spacing:-1px}
+.kpi-val.gold{color:var(--gold);text-shadow:0 0 20px rgba(240,180,41,.3)}
+.kpi-val.red{color:var(--red);text-shadow:0 0 20px rgba(240,82,82,.25)}
+.kpi-val.grn{color:var(--grn);text-shadow:0 0 20px rgba(52,211,153,.25)}
+.kpi-val.blu{color:var(--blu);text-shadow:0 0 20px rgba(96,165,250,.25)}
+.kpi-val.ylw{color:var(--ylw);text-shadow:0 0 20px rgba(251,191,36,.25)}
+.kpi-lbl{font-size:12px;color:var(--t3);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+.kpi-sub{font-size:13px;color:var(--t2);font-weight:500}
+.kpi-trend{font-size:12px;margin-top:4px}
 .kpi-trend.up{color:var(--grn)}.kpi-trend.dn{color:var(--red)}
 
 /* ─── CHART GRID ─────────────────────────────────────────── */
@@ -120,10 +124,10 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-ser
 .chart-row.r-1-1{grid-template-columns:1fr 1fr}
 .chart-row.r-full{grid-template-columns:1fr}
 .cbox{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
-.cbox-title{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:14px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
-.cbox-title span{color:var(--txt)}
+.cbox-title{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.cbox-title span{color:var(--txt);font-size:14px}
 .cbox-title .badge-sm{
-  font-size:10px;padding:2px 8px;border-radius:10px;
+  font-size:11px;padding:2px 8px;border-radius:10px;
   background:rgba(240,180,41,.12);color:var(--gold);margin-left:auto;
 }
 
@@ -195,17 +199,21 @@ body{background:var(--bg);color:var(--txt);font-family:'Noto Sans Thai',sans-ser
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{
-  background:var(--s2);color:var(--t3);font-size:10px;font-weight:700;
-  letter-spacing:.7px;text-transform:uppercase;padding:10px 12px;
+  background:var(--s2);color:var(--t2);font-size:12px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;padding:11px 12px;
   text-align:left;border-bottom:1px solid var(--b2);white-space:nowrap;
+  cursor:pointer;user-select:none;
 }
+thead th:hover{color:var(--txt);background:var(--s3)}
+thead th.sort-asc::after{content:' ↑';color:var(--gold);font-size:10px}
+thead th.sort-desc::after{content:' ↓';color:var(--gold);font-size:10px}
 tbody tr{border-bottom:1px solid rgba(37,42,56,.6);transition:background .1s}
 tbody tr:hover{background:rgba(255,255,255,.025)}
 tbody tr.r-red{background:rgba(240,82,82,.06)}
 tbody tr.r-ylw{background:rgba(251,191,36,.05)}
 tbody tr.r-red:hover{background:rgba(240,82,82,.1)}
 tbody tr.r-ylw:hover{background:rgba(251,191,36,.08)}
-tbody td{padding:10px 12px;vertical-align:middle}
+tbody td{padding:11px 12px;vertical-align:middle;font-size:14px}
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;gap:4px}
 .b-active{background:rgba(52,211,153,.12);color:var(--grn)}
 .b-deact{background:rgba(240,82,82,.12);color:var(--red)}
@@ -323,6 +331,56 @@ tbody td{padding:10px 12px;vertical-align:middle}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
 
+/* ─── LIGHT MODE ─────────────────────────────────────────── */
+body.light{
+  --bg:#f0f2f7;--s1:#ffffff;--s2:#f4f6fb;--s3:#e8ecf4;
+  --b1:#d8dde8;--b2:#c5ccd8;
+  --txt:#1a1d2e;--t2:#4a5268;--t3:#8892a4;
+}
+body.light .topbar{background:rgba(240,242,247,.96);border-bottom-color:var(--b1)}
+body.light .cbox{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+body.light .kpi{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+/* ─── THEME TOGGLE ───────────────────────────────────────── */
+.theme-toggle{
+  display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;
+  border:1px solid var(--b2);background:transparent;color:var(--t2);
+  font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;
+  white-space:nowrap;margin-right:4px;
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+/* ─── MONTH FILTER ───────────────────────────────────────── */
+.month-filter{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.month-filter .mf-label{font-size:11px;color:var(--t3);font-weight:600;margin-right:4px;white-space:nowrap}
+.mfbtn{
+  padding:5px 10px;border-radius:14px;border:1px solid var(--b2);
+  background:transparent;color:var(--t2);font-size:11px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;
+}
+.mfbtn:hover{background:var(--s3)}
+.mfbtn.active{background:var(--gold);border-color:var(--gold);color:#1a0f00}
+/* ─── MONTHLY DETAIL PANEL ───────────────────────────────── */
+.md-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.md-stat{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:12px 14px}
+.md-stat-val{font-size:28px;font-weight:800;margin-bottom:3px;letter-spacing:-1px}
+.md-stat-lbl{font-size:11px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.md-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.md-tbl thead th{background:var(--s2);color:var(--t3);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--b2)}
+.md-tbl tbody tr{border-bottom:1px solid var(--b1);transition:background .1s}
+.md-tbl tbody tr:hover{background:rgba(240,180,41,.04)}
+.md-tbl tbody td{padding:8px 10px;vertical-align:middle}
+/* ─── CLICKABLE KPI ──────────────────────────────────────── */
+.kpi-val-link{cursor:pointer;transition:opacity .15s;display:inline-block}
+.kpi-val-link:hover{opacity:.72;text-decoration:underline;text-underline-offset:4px}
+/* ─── DETAIL MODAL ───────────────────────────────────────── */
+.detail-modal{max-width:820px}
+.detail-modal h3{font-size:16px;margin-bottom:4px}
+.dm-sub{font-size:12px;color:var(--t3);margin-bottom:16px}
+.dm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+/* ─── COLLECTION RATE BAR ────────────────────────────────── */
+.rate-bar-wrap{margin-top:6px}
+.rate-bar-bg{background:var(--s3);border-radius:10px;height:8px;overflow:hidden;margin:4px 0}
+.rate-bar-fill{height:100%;border-radius:10px;transition:width .6s ease}
+
 @media(max-width:768px){
   .topbar{padding:0 12px}.topbar-brand .sub{display:none}
   .tab{padding:0 10px;font-size:12px}
@@ -358,8 +416,12 @@ tbody td{padding:10px 12px;vertical-align:middle}
     <div class="tab" onclick="switchTab('cashflow',this)">
       <span class="ticon">💰</span> Cash Flow
     </div>
+    <div class="tab" onclick="switchTab('owner',this)">
+      <span class="ticon">👥</span> Owner
+    </div>
   </nav>
   <div class="topbar-right">
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
     <div class="sync-status" id="sync-status">
       <div class="sync-dot yellow" id="sync-dot"></div>
       <span id="sync-txt" style="color:var(--t3)">กำลังโหลด…</span>
@@ -378,26 +440,31 @@ tbody td{padding:10px 12px;vertical-align:middle}
 
   <!-- PAGE: Dashboard -->
   <div id="page-dashboard" class="page active">
-    <div class="page-header">
-      <div class="page-title">Executive Dashboard</div>
-      <div class="page-sub" id="dash-sub">กำลังโหลดข้อมูลจาก Supabase…</div>
-    </div>
-    <div class="kpi-grid" id="kpi-grid">
-      <!-- filled by JS -->
-    </div>
-    <div class="chart-row r-3-2">
-      <div class="cbox">
-        <div class="cbox-title"><span>Monthly Revenue Forecast</span> <span style="color:var(--t3)">— ลูกค้าที่ครบกำหนดต่อสัญญารายเดือน</span></div>
-        <canvas id="monthly-chart" height="180"></canvas>
-      </div>
-      <div class="cbox">
-        <div class="cbox-title"><span>Top 10</span> ใกล้หมดอายุ <div class="badge-sm" id="top10-badge">loading…</div></div>
-        <div class="top10" id="top10-list"></div>
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="page-title">Executive Dashboard</div>
+        <div class="page-sub" id="dash-sub">กำลังโหลดข้อมูลจาก Supabase…</div>
       </div>
     </div>
-    <div class="chart-row r-1-1">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- MONTH FILTER -->
+    <div class="cbox" style="margin-bottom:18px">
+      <div class="cbox-title"><span>📅 สรุปรายเดือน</span> — เลือกเดือนเพื่อดูรายชื่อสาขาที่ครบกำหนดต่อ License</div>
+      <div class="month-filter" id="month-filter-bar"></div>
+      <div id="monthly-detail-panel"></div>
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <div class="chart-row r-1-1" style="margin-bottom:18px">
       <div class="cbox">
-        <div class="cbox-title"><span>Revenue Heatmap</span> — ความหนาแน่นรายได้ที่คาดว่าจะเก็บได้รายเดือน</div>
+        <div class="cbox-title"><span>Monthly Revenue Forecast</span> — สาขาที่ครบกำหนดรายเดือน (แท่งแนวนอน)</div>
+        <canvas id="monthly-chart" height="260"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>Revenue Heatmap</span> — ความหนาแน่นรายได้</div>
         <div class="hm-wrap">
           <div class="hm-labels" id="hm-labels"></div>
           <div class="hm-cells" id="hm-cells"></div>
@@ -414,15 +481,17 @@ tbody td{padding:10px 12px;vertical-align:middle}
           </div>
         </div>
       </div>
-      <div class="cbox">
-        <div class="cbox-title"><span>Package Distribution</span> & Payment Overview</div>
-        <canvas id="pkg-chart" height="180"></canvas>
-      </div>
     </div>
-    <div class="chart-row r-full">
+
+    <!-- CHARTS ROW 2 -->
+    <div class="chart-row r-1-1">
+      <div class="cbox">
+        <div class="cbox-title"><span>Package Distribution</span></div>
+        <canvas id="pkg-chart" height="200"></canvas>
+      </div>
       <div class="cbox">
         <div class="cbox-title"><span>Payment Status Breakdown</span></div>
-        <canvas id="pay-chart" height="70"></canvas>
+        <canvas id="pay-chart" height="200"></canvas>
       </div>
     </div>
   </div>
@@ -446,20 +515,22 @@ tbody td{padding:10px 12px;vertical-align:middle}
       <button id="add-btn" style="display:none;padding:8px 16px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:8px;color:#1a0f00;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap" onclick="openRecordModal()">
         + เพิ่มสาขา
       </button>
+      <button onclick="exportCSV()" style="padding:8px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:8px;color:var(--t2);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s" onmouseover="this.style.borderColor='var(--grn)';this.style.color='var(--grn)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--t2)'">📥 CSV</button>
+      <button onclick="exportExcel()" style="padding:8px 14px;background:var(--s3);border:1px solid var(--b2);border-radius:8px;color:var(--t2);font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s" onmouseover="this.style.borderColor='var(--blu)';this.style.color='var(--blu)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--t2)'">📊 Excel</button>
     </div>
     <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
-            <th>#</th>
-            <th>ชื่อสาขา</th>
-            <th>Package</th>
-            <th>ราคา/ปี</th>
-            <th>Status</th>
-            <th>Payment</th>
-            <th>วันหมดอายุ</th>
-            <th>เหลือ</th>
-            <th>ผู้ดูแล</th>
+            <th onclick="sortTable('br','no')">#</th>
+            <th onclick="sortTable('br','restaurant_name')">ชื่อสาขา</th>
+            <th onclick="sortTable('br','package')">Package</th>
+            <th onclick="sortTable('br','price')">ราคา/ปี</th>
+            <th onclick="sortTable('br','status')">Status</th>
+            <th onclick="sortTable('br','payment_status')">Payment</th>
+            <th onclick="sortTable('br','renew_date')">วันหมดอายุ</th>
+            <th onclick="sortTable('br','days')">เหลือ</th>
+            <th onclick="sortTable('br','owner')">ผู้ดูแล</th>
             <th>ระบบ</th>
             <th>URL</th>
             <th id="action-col" style="display:none">จัดการ</th>
@@ -492,17 +563,18 @@ tbody td{padding:10px 12px;vertical-align:middle}
       </div>
     </div>
     <div class="tbl-wrap">
-      <table>
+      <table id="rn-table">
         <thead>
           <tr>
-            <th>Priority</th>
-            <th>ชื่อสาขา</th>
-            <th>Package</th>
-            <th>ราคา</th>
-            <th>วันหมดอายุ</th>
-            <th>เหลือ</th>
-            <th>Payment</th>
-            <th>ผู้ดูแล</th>
+            <th onclick="sortTable('rn','priority')">Priority</th>
+            <th onclick="sortTable('rn','restaurant_name')">ชื่อสาขา</th>
+            <th onclick="sortTable('rn','package')">Package</th>
+            <th onclick="sortTable('rn','price')">ราคา</th>
+            <th onclick="sortTable('rn','renew_date')">วันหมดอายุ</th>
+            <th onclick="sortTable('rn','days')">เหลือ</th>
+            <th onclick="sortTable('rn','payment_status')">Payment</th>
+            <th onclick="sortTable('rn','status')">Status</th>
+            <th onclick="sortTable('rn','owner')">ผู้ดูแล</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -519,20 +591,88 @@ tbody td{padding:10px 12px;vertical-align:middle}
       <div class="page-sub">วางแผนกระแสเงินสด Nigiwai Group</div>
     </div>
     <div class="kpi-grid" id="cf-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
-    <div class="chart-row r-3-2">
+
+    <!-- 12-Month Full Row -->
+    <div class="chart-row r-full" style="margin-bottom:18px">
       <div class="cbox">
-        <div class="cbox-title"><span>12-Month Revenue Forecast</span></div>
-        <canvas id="cf-chart" height="180"></canvas>
-      </div>
-      <div class="cbox">
-        <div class="cbox-title"><span>ARR by Package</span></div>
-        <canvas id="arr-chart" height="180"></canvas>
+        <div class="cbox-title"><span>12-Month Revenue Forecast</span> — รายได้รายเดือน (กราฟแท่งแนวนอน)</div>
+        <canvas id="cf-chart" height="340"></canvas>
       </div>
     </div>
-    <div class="chart-row r-full">
+
+    <div class="chart-row r-1-1">
+      <div class="cbox">
+        <div class="cbox-title"><span>ARR by Package</span></div>
+        <canvas id="arr-chart" height="200"></canvas>
+      </div>
       <div class="cbox">
         <div class="cbox-title"><span>Owner Performance</span> — สัดส่วนพอร์ตแต่ละทีม</div>
-        <canvas id="owner-chart" height="70"></canvas>
+        <canvas id="owner-chart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+  <!-- PAGE: Owner Dashboard -->
+  <div id="page-owner" class="page">
+    <div class="page-header">
+      <div class="page-title">Owner Dashboard</div>
+      <div class="page-sub">สัดส่วนพอร์ตแยกตามผู้ดูแล — PP / PRANG / KEN</div>
+    </div>
+    <div class="kpi-grid" id="owner-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div class="chart-row r-1-1" style="margin-bottom:18px">
+      <div class="cbox">
+        <div class="cbox-title"><span>ARR by Owner</span></div>
+        <canvas id="owner-arr-chart" height="220"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>Overdue by Owner</span> — ค้างชำระแยกทีม</div>
+        <canvas id="owner-ov-chart" height="220"></canvas>
+      </div>
+    </div>
+    <div class="cbox" style="margin-bottom:18px">
+      <div class="cbox-title">
+        <span>รายชื่อสาขาแยกตาม Owner</span>
+        <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap" id="owner-filter-btns"></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="owner-table">
+          <thead><tr>
+            <th onclick="sortTable('owner','no')">#</th>
+            <th onclick="sortTable('owner','restaurant_name')">ชื่อสาขา</th>
+            <th onclick="sortTable('owner','package')">Package</th>
+            <th onclick="sortTable('owner','price')">ราคา</th>
+            <th onclick="sortTable('owner','status')">Status</th>
+            <th onclick="sortTable('owner','payment_status')">Payment</th>
+            <th onclick="sortTable('owner','renew_date')">วันหมดอายุ</th>
+            <th onclick="sortTable('owner','days')">เหลือ</th>
+            <th>Churn Risk</th>
+          </tr></thead>
+          <tbody id="owner-tbody"></tbody>
+        </table>
+      </div>
+      <div class="tbl-footer"><span id="owner-count"></span></div>
+    </div>
+    <!-- Line Notify Info -->
+    <div class="cbox">
+      <div class="cbox-title"><span>📱 Line Notify</span> — การตั้งค่าแจ้งเตือนอัตโนมัติ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <p style="font-size:13px;color:var(--t2);margin-bottom:12px">แจ้งเตือนอัตโนมัติเมื่อสาขาครบกำหนดต่อ License <strong>30 / 7 / 1 วัน</strong></p>
+          <div style="display:flex;flex-direction:column;gap:8px" id="notify-list"></div>
+        </div>
+        <div style="background:var(--s2);border-radius:8px;padding:16px;border:1px solid var(--b1)">
+          <p style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:10px">วิธี Setup Line Notify</p>
+          <ol style="font-size:12px;color:var(--t2);line-height:2;padding-left:16px">
+            <li>ไปที่ <a href="https://notify-bot.line.me" target="_blank" style="color:var(--blu)">notify-bot.line.me</a></li>
+            <li>Login → Generate Token</li>
+            <li>เลือก Group Chat ที่ต้องการรับแจ้งเตือน</li>
+            <li>Copy Token ใส่ในช่องด้านล่าง</li>
+            <li>Deploy บน GitHub Actions (Cron ทุกวัน 8:00 AM)</li>
+          </ol>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <input id="line-token" placeholder="Line Notify Token…" style="flex:1;background:var(--bg);border:1px solid var(--b2);border-radius:6px;padding:8px 10px;color:var(--txt);font-size:12px;font-family:inherit">
+            <button onclick="testLineNotify()" style="padding:8px 14px;background:var(--grn2);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;font-family:inherit">ทดสอบ</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -680,6 +820,20 @@ tbody td{padding:10px 12px;vertical-align:middle}
   </div>
 </div>
 
+<!-- ══ MODAL: KPI Detail ═════════════════════════════════════ -->
+<div class="overlay" id="m-detail" style="display:none">
+  <div class="modal detail-modal">
+    <button class="modal-close" onclick="closeModal('m-detail')">✕</button>
+    <h3 id="dm-title">รายละเอียด</h3>
+    <div class="dm-sub" id="dm-sub"></div>
+    <div class="dm-stats" id="dm-stats"></div>
+    <div style="overflow-x:auto"><table class="md-tbl">
+      <thead><tr id="dm-thead"></tr></thead>
+      <tbody id="dm-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
 <!-- ══ TOAST ════════════════════════════════════════════════ -->
 <div id="toast-container"></div>
 
@@ -687,8 +841,8 @@ tbody td{padding:10px 12px;vertical-align:middle}
 /* ═══════════════════════════════════════════════════════════
    CONFIG — พี่ใส่ค่าเหล่านี้จาก Supabase Dashboard
    ═══════════════════════════════════════════════════════════ */
-let SUPABASE_URL  = localStorage.getItem('sb_url')  || '';
-let SUPABASE_KEY  = localStorage.getItem('sb_key')  || '';
+let SUPABASE_URL  = localStorage.getItem('sb_url')  || 'https://qktqbiurepifkmsggehf.supabase.co';
+let SUPABASE_KEY  = localStorage.getItem('sb_key')  || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrdHFiaXVyZXBpZmttc2dnZWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzE5MTQsImV4cCI6MjA4OTU0NzkxNH0.5_BxRgdi4AvkqENmPf4T5mCM01DtVGL9XQwVhXxonpE';
 
 /* ─── Embedded seed data (106 records from Excel) ─────── */
 const SEED = [{"no":1,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เดอะแบร์ ชาบู สาขาเมกะบางนา (แฟรนไชส์)","package":"Advance Plus","price":23880,"start_date":"2023-07-04","renew_date":"2024-07-04","url":"https://thebearmaga.resrun-pos.com","type":"Web","owner":"-"},{"no":2,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขา 304","package":"Advance Plus","price":23880,"start_date":"2022-07-01","renew_date":"2026-01-01","url":"https://therockshabuthecorner304.resrun-pos.com","type":"Web","owner":"-"},{"no":3,"status":"Active","payment_status":"Paid","restaurant_name":"เดอะแบร์ ชาบู สาขานครศรีธรรมราช (แฟรนไชส์)","package":"Advance Plus","price":23880,"start_date":"2023-02-01","renew_date":"2026-03-03","url":"https://thebearnts.resrun-pos.com","type":"Web","owner":"PP"},{"no":4,"status":"Active","payment_status":"Free trial","restaurant_name":"ไทร แอนด์ เลควิว (Sai and Lake View)","package":"Smart","price":0,"start_date":"2022-11-01","renew_date":null,"url":"https://saiandlakeview.resrun-pos.com","type":"Web","owner":"PP"},{"no":5,"status":"Active","payment_status":"Working","restaurant_name":"นิกิวาอิชูชิแอนด์คินมัทฉะ","package":"Smart","price":8280,"start_date":"2024-04-24","renew_date":"2026-04-24","url":"https://ngsxkinrayong.resrun-pos.com","type":"App","owner":"PP"},{"no":6,"status":"Active","payment_status":"Paid","restaurant_name":"Freedom","package":"Advance","price":14280,"start_date":"2023-05-04","renew_date":"2026-06-13","url":"https://freedomss.resrun-pos.com","type":"Web","owner":"PRANG"},{"no":7,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เดอะร็อคชาบู สาขาสุขอนันต์ ปาร์ค สระบุรี","package":"Advance Plus","price":23880,"start_date":"2023-05-15","renew_date":"2025-05-15","url":"https://therockshabusukanan.resrun-pos.com","type":"Web","owner":"-"},{"no":8,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขาเมโทร","package":"Advance Plus","price":23880,"start_date":"2022-11-16","renew_date":"2026-01-01","url":"https://therockshabuklongrang.resrun-pos.com","type":"Web","owner":"-"},{"no":9,"status":"Active","payment_status":"Paid","restaurant_name":"Shade","package":"Advance","price":14280,"start_date":"2024-05-16","renew_date":"2026-06-06","url":"https://shadekhonkaen.resrun-pos.com/web-admin","type":"App","owner":"PRANG"},{"no":10,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เดอะร็อคชาบู สาขาอยุธยา","package":"Advance Plus","price":23880,"start_date":"2022-11-18","renew_date":"2026-01-01","url":"https://therockshabuayuthya.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":11,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"แซ่บยโส 2 (ไม่ต่อ)","package":"Advance","price":14280,"start_date":"2023-05-18","renew_date":"2025-05-18","url":"https://zappyaso2.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":12,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็นซีฟู้ด สาขาปิ่นเกล้า","package":"Advance Plus","price":23880,"start_date":"2024-06-01","renew_date":"2025-06-01","url":"https://penpenn.resrun-pos.com/web-admin","type":"Web","owner":"ISSUE"},{"no":13,"status":"Active","payment_status":"Free trial","restaurant_name":"แก่น","package":"Smart","price":0,"start_date":"2024-06-16","renew_date":null,"url":"","type":"Web","owner":"PP"},{"no":14,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"ขนมหวาย (ไม่ต่อ)","package":"Advance","price":14280,"start_date":"2024-06-18","renew_date":"2025-06-18","url":"https://kanomwaii.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":15,"status":"Active","payment_status":"Paid","restaurant_name":"สุขใดไหนเล่า ณ กัลปพฤกษ์","package":"Franchise","price":35880,"start_date":"2024-05-20","renew_date":"2026-06-20","url":"https://sookdainailao.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":16,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวต้นกล้วย","package":"Advance","price":14280,"start_date":"2024-06-27","renew_date":"2026-06-27","url":"https://kruatonkluay.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":17,"status":"Active","payment_status":"Paid","restaurant_name":"Bonus Shabu","package":"Advance Plus","price":23880,"start_date":"2023-07-01","renew_date":"2026-07-01","url":"https://bonusshabu.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":18,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE SIR","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeeram.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":19,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE Event 1","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeepha.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":20,"status":"Active","payment_status":"Paid","restaurant_name":"G COFFEE Event 2","package":"Smart","price":8280,"start_date":"2024-07-01","renew_date":"2027-01-01","url":"https://gcoffeecul.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":21,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Antika's Cafe สาขาอยุธยา","package":"Smart","price":8280,"start_date":"2023-03-03","renew_date":"2025-07-03","url":"https://antikacafe.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":22,"status":"Active","payment_status":"Free trial","restaurant_name":"KKBS Cafe","package":"Smart","price":0,"start_date":"2023-07-03","renew_date":null,"url":"https://kkbscafe.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":23,"status":"Active","payment_status":"Paid","restaurant_name":"พรีมพรีมคาเฟ่แอนด์เรสเตอร์รองท์","package":"Advance","price":14280,"start_date":"2024-04-05","renew_date":"2027-03-25","url":"https://primprimbeach.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":24,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Coffee by farida ali","package":"Advance","price":14280,"start_date":"2023-07-11","renew_date":"2025-07-11","url":"https://farida786.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":25,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"ชาบูมิก","package":"Smart","price":8280,"start_date":"2024-07-13","renew_date":"2025-07-13","url":"https://shabumix.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":26,"status":"Active","payment_status":"Paid","restaurant_name":"Summore day","package":"Smart","price":8280,"start_date":"2023-01-14","renew_date":"2026-07-14","url":"https://summoreday.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":27,"status":"Active","payment_status":"Paid","restaurant_name":"นำซิง","package":"Advance Plus","price":19470,"start_date":"2024-01-15","renew_date":"2025-07-15","url":"https://namsingrestaurant.resrun-pos.com/web-admin","type":"Web ( Mac )","owner":"PP"},{"no":28,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Seoul Garden สาขาฟิวเจอร์ปาร์ค","package":"Advance Plus","price":23880,"start_date":"2024-03-14","renew_date":"2025-07-15","url":"https://seoulgardenfpm.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":29,"status":"Active","payment_status":"Paid","restaurant_name":"Feeling Bar","package":"Franchise","price":35880,"start_date":"2023-07-21","renew_date":"2026-01-20","url":"https://feelingbartpr.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":30,"status":"Active","payment_status":"Paid","restaurant_name":"Ultimate Shabu & Grill","package":"Advance","price":8280,"start_date":"2023-01-24","renew_date":"2026-07-24","url":"https://ultimate.resrun-pos.com/web-admin","type":"Web ( Mac )","owner":"PRANG"},{"no":31,"status":"Active","payment_status":"Paid","restaurant_name":"ปลาวาฬใจดี ชัยภูมิ","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2026-08-01","url":"https://whalejaideecpm.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":32,"status":"Active","payment_status":"Paid","restaurant_name":"ก๋วยเตี๋ยวแม่ศรีนวล","package":"Smart","price":4140,"start_date":"2022-11-01","renew_date":"2026-06-01","url":"https://maesrinuannoodlekhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":33,"status":"Active","payment_status":"Paid","restaurant_name":"ประไพร สนามบินขอนแก่น","package":"Advance","price":14280,"start_date":"2023-05-01","renew_date":"2026-08-01","url":"https://papaisnambin.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":34,"status":"Active","payment_status":"Paid","restaurant_name":"สวนอาหารเรือนทอง","package":"Advance","price":14280,"start_date":"2023-08-02","renew_date":"2026-08-01","url":"https://reuanthong2014.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":35,"status":"Active","payment_status":"Paid","restaurant_name":"ไอเก่งหมูกระทะ","package":"Advance","price":14280,"start_date":"2023-08-04","renew_date":"2026-08-04","url":"https://ikengmookata.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":36,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Antika's Cafe สาขาเชียงใหม่","package":"Smart","price":8280,"start_date":"2022-09-09","renew_date":"2025-07-09","url":"https://antikabankramchalet.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":37,"status":"Active","payment_status":"Paid","restaurant_name":"กินชาบู","package":"Advance Plus","price":23880,"start_date":"2024-08-19","renew_date":"2026-08-25","url":"https://kinshabu.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":38,"status":"Active","payment_status":"Paid","restaurant_name":"Crocodile Rock Pub","package":"Smart","price":8280,"start_date":"2023-08-22","renew_date":"2026-08-22","url":"https://crocodilerock.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":39,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Eagle (ไม่ต่อ)","package":"Smart","price":8280,"start_date":"2023-08-22","renew_date":"2025-08-24","url":"https://eagle2023.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":40,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวชะพลู (ชมคลื่น)","package":"Smart","price":8280,"start_date":"2023-06-01","renew_date":"2026-09-01","url":"https://chaplu.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":41,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Evergreen","package":"Smart","price":8280,"start_date":"2024-09-04","renew_date":"2025-09-04","url":"https://evergreencoffeeandfood.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":42,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"มิกเนื้อย่างบุฟเฟต์บุรีรัมย์","package":"Advance Plus","price":23880,"start_date":"2024-09-04","renew_date":"2025-09-04","url":"https://mixbuffetburiram.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":43,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็น สาขาเลียบด่วน","package":"Advance Plus","price":23880,"start_date":"2024-09-12","renew_date":"2025-09-12","url":"https://penpenliabduay.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":44,"status":"Active","payment_status":"Overdue","restaurant_name":"เป็นเป็น สาขาพระราม 9","package":"Advance Plus","price":23880,"start_date":"2024-09-12","renew_date":"2025-09-12","url":"https://penpennrama9.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":45,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Phangan","package":"Smart","price":8280,"start_date":"2024-09-16","renew_date":"2026-09-16","url":"https://lionrollingcircus.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":46,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เจ้าปัญญา","package":"Smart","price":8280,"start_date":"2024-09-19","renew_date":"2025-09-19","url":"https://jaopanyagelato.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":47,"status":"Active","payment_status":"Paid","restaurant_name":"สะแม๋","package":"Advance","price":14280,"start_date":"2024-09-20","renew_date":"2026-09-20","url":"https://samae.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":48,"status":"Active","payment_status":"Paid","restaurant_name":"ซันจิ หมูกระทะ&นมสด","package":"Advance Plus","price":21492,"start_date":"2024-09-20","renew_date":"2026-09-20","url":"https://sanjimookrata.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":49,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"BillionHair HomeClub","package":"Smart","price":8280,"start_date":"2024-09-26","renew_date":"2025-09-26","url":"https://billionhairhomeclub.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":50,"status":"Active","payment_status":"Paid","restaurant_name":"สวนขนาบคลอง","package":"Advance","price":14280,"start_date":"2023-10-01","renew_date":"2026-11-01","url":"https://suankhanabklong.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":51,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"เสวนา Food&Drink","package":"Advance","price":14280,"start_date":"2024-10-01","renew_date":"2025-10-01","url":"https://sewwana.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":52,"status":"Implement","payment_status":"Working","restaurant_name":"ฟ้าไทยฟาร์ม","package":"Advance","price":14280,"start_date":"2024-10-01","renew_date":"2025-10-01","url":"https://fathaifarm.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":53,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Asian HOTPOT ร้อยเอ็ด","package":"Advance","price":14280,"start_date":"2024-10-10","renew_date":"2025-10-10","url":"https://asianhotpotroiet.resrun-pos.com/web-admin","type":"App","owner":"-"},{"no":54,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Clear85 Shabu & Yakiniku","package":"Advance Plus","price":23880,"start_date":"2023-07-12","renew_date":"2025-10-12","url":"https://c85rt.resrun-pos.com/web-admin","type":"Web","owner":"-"},{"no":55,"status":"Active","payment_status":"Paid","restaurant_name":"บางจัมโบ้ 90's","package":"Advance","price":7140,"start_date":"2023-07-14","renew_date":"2026-04-14","url":"https://bangjumbo90s.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":56,"status":"Active","payment_status":"Paid","restaurant_name":"ข้าวเปียกลานชัย","package":"Advance Plus","price":23880,"start_date":"2023-06-14","renew_date":"2026-10-14","url":"https://lanchai.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":57,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Samui","package":"Smart","price":8280,"start_date":"2024-10-29","renew_date":"2026-10-29","url":"https://lionrollingcircussamui.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":58,"status":"Active","payment_status":"Paid","restaurant_name":"Stratus2 Glamping Boutique Resort","package":"Advance","price":14280,"start_date":"2023-11-09","renew_date":"2026-11-09","url":"https://glampingrestaurant.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":59,"status":"Active","payment_status":"Paid","restaurant_name":"ฟาร์มปลูกสุข","package":"Advance","price":14280,"start_date":"2024-11-15","renew_date":"2026-12-15","url":"https://farmplooksook.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":60,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Meat U","package":"Advance Plus","price":23880,"start_date":"2024-11-18","renew_date":"2025-11-18","url":"https://meatu.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":61,"status":"Active","payment_status":"Paid","restaurant_name":"โรงพยาบาลเวชธานี","package":"Smart","price":8280,"start_date":"2024-12-05","renew_date":"2025-12-05","url":"https://diet.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":62,"status":"DeActivate","payment_status":"Overdue","restaurant_name":"Sea you (BB Seafood)","package":"Advance Plus","price":23880,"start_date":"2023-01-14","renew_date":"2025-12-14","url":"https://seayou.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":63,"status":"Active","payment_status":"Paid","restaurant_name":"G-Coffee Event3","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee2.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":64,"status":"Active","payment_status":"Paid","restaurant_name":"StreetCoffee3 (STSIR)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee3.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":65,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTSukhumvit","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gcoffeesuk.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":66,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"STREET2 (คลังสินค้า FB)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://streetcoffee1.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":67,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTPHRARAM","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gcoffeesir.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":68,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTPhahonyothin","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gevent1.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":69,"status":"Active","payment_status":"Paid","restaurant_name":"GCoffeeMRTThailandCulturalCentre","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://gevent2.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":70,"status":"Active","payment_status":"Paid","restaurant_name":"BMNMilkTea2 (GCoffee)","package":"Smart","price":8280,"start_date":"2023-11-14","renew_date":"2027-01-01","url":"https://bmnmilktea2.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PRANG"},{"no":71,"status":"Active","payment_status":"Paid","restaurant_name":"Lion Rolling Circus, Phuket","package":"Advance","price":14280,"start_date":"2024-12-16","renew_date":"2026-12-16","url":"https://lionrollingcircuspatong.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":72,"status":"Active","payment_status":"Paid","restaurant_name":"นิกิวาอิเอ็กซ์เพลส สาขาจอมเทียนพัทยา","package":"Smart","price":8280,"start_date":"2024-12-20","renew_date":"2027-12-20","url":"https://ngejmt.resrun-pos.com/web-admin","type":"App","owner":"PRANG"},{"no":73,"status":"Active","payment_status":"Paid","restaurant_name":"ไดโนคาเฟ่","package":"Advance Plus","price":23880,"start_date":"2023-12-25","renew_date":"2026-12-25","url":"https://dinocafe.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":74,"status":"Active","payment_status":"Paid","restaurant_name":"To the sea","package":"Advance","price":14280,"start_date":"2023-09-30","renew_date":"2026-12-30","url":"https://tothesea.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":75,"status":"Active","payment_status":"Paid","restaurant_name":"เจจูไอส์แลนด์ บาร์บีคิว","package":"Advance Plus","price":23880,"start_date":"2023-11-04","renew_date":null,"url":"https://jejuislandbbq.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":76,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"อาหารบ้านสวน","package":"Advance","price":14280,"start_date":"2024-01-11","renew_date":"2027-01-11","url":"https://bansaun47.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":77,"status":"Active","payment_status":"Overdue","restaurant_name":"SOS Shabu","package":"Smart","price":8280,"start_date":"2025-01-24","renew_date":"2026-01-24","url":"https://sosbangchak.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":78,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"มาสเตอร์บุฟเฟ่ต์ หมูกระทะ","package":"Advance Plus","price":23880,"start_date":"2024-01-25","renew_date":"2027-01-25","url":"https://masterbbq.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":79,"status":"Active","payment_status":"Paid","restaurant_name":"Vacca","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2027-02-01","url":"https://vaccaitalian.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":80,"status":"Active","payment_status":"Overdue","restaurant_name":"Ditto","package":"Smart","price":8280,"start_date":"2024-01-10","renew_date":"2026-02-10","url":"https://ditto.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":81,"status":"Active","payment_status":"Paid","restaurant_name":"เตี๋ยวเรือต่อชาม","package":"Smart","price":8280,"start_date":"2024-02-24","renew_date":"2027-02-24","url":"https://torharmoodle.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":82,"status":"Active","payment_status":"Overdue","restaurant_name":"ป้านีบรรทัดทอง","package":"Advance","price":14280,"start_date":"2025-02-25","renew_date":"2026-02-24","url":"https://paneekungchaenamplabantadthong.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":83,"status":"Active","payment_status":"Paid","restaurant_name":"ครัวริมน้ำ","package":"Advance","price":14280,"start_date":"2022-11-01","renew_date":"2027-03-01","url":"https://kruarimnam.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":84,"status":"Active","payment_status":"Overdue","restaurant_name":"ราชาเป็ดย่าง","package":"Smart","price":8280,"start_date":"2022-11-01","renew_date":"2026-03-01","url":"https://kingduckkhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":85,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"บ้านณเล","package":"Advance","price":14280,"start_date":"2025-03-05","renew_date":"2026-03-05","url":"https://baannaley.resrun-pos.com/web-admin","type":"Web","owner":"KEN"},{"no":86,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"เซนเซ - สาขา 2","package":"Advance Plus","price":23880,"start_date":"2024-01-10","renew_date":"2026-03-10","url":"https://senseirayong2.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":87,"status":"Active","payment_status":"Paid","restaurant_name":"ก๊อก ก๊อก ชาบู สาขา 2","package":"Advance","price":14280,"start_date":"2023-07-11","renew_date":"2027-03-11","url":"https://knockknockhabupremiumalacarte.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":88,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ถึงขอนแก่น","package":"Smart","price":8280,"start_date":"2023-03-12","renew_date":"2026-03-12","url":"https://thuengkhonkaen.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":89,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Dragon Grill, MHK","package":"Advance Plus","price":11940,"start_date":"2023-03-06","renew_date":"2026-03-12","url":"https://dragongrillmhk.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":90,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ตำปากเปิด","package":"Advance","price":14280,"start_date":"2024-02-20","renew_date":"2026-03-20","url":"https://ruaymairurueang2022.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":91,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ABOVE HDY","package":"Smart","price":8280,"start_date":"2024-03-24","renew_date":"2026-03-24","url":"https://abovebarhatyai.resrun-pos.com/web-admin","type":"Web","owner":"PRANG"},{"no":92,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ชมจันทร์","package":"Smart","price":8280,"start_date":"2023-04-23","renew_date":"2026-04-23","url":"https://chomchan.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":93,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Gusto","package":"Smart","price":8280,"start_date":"2024-04-26","renew_date":"2026-04-26","url":"https://gusto.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":94,"status":"Active","payment_status":"Working","restaurant_name":"Lion Rolling Circus Old Town","package":"Advance","price":14280,"start_date":"2025-05-07","renew_date":"2026-05-07","url":"https://lionrollingcircusoldtown.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":95,"status":"Active","payment_status":"Working","restaurant_name":"Tender House","package":"Smart","price":8280,"start_date":"2025-03-23","renew_date":"2026-05-09","url":"https://tenderhouse.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":96,"status":"Active","payment_status":"Working","restaurant_name":"the barn parnoramic bar","package":"Smart","price":8280,"start_date":"2025-05-06","renew_date":"2026-05-29","url":"https://barnparnoramic.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":97,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"ขนมจีนต้นก้ามปูนวลจันทร์","package":"Advance","price":14280,"start_date":"2023-09-27","renew_date":"2026-09-13","url":"https://kampunuanchan.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":98,"status":"Active","payment_status":"Follow to Renew","restaurant_name":"Udon Tattoo","package":"Smart","price":8280,"start_date":"2024-02-01","renew_date":"2026-06-06","url":"https://udontattoo.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":99,"status":"Implement","payment_status":"Paid","restaurant_name":"ริมคลอง","package":"Smart","price":8280,"start_date":null,"renew_date":null,"url":"","type":"---","owner":"PP"},{"no":100,"status":"Active","payment_status":"Working","restaurant_name":"ก้ามปูทองสาย1","package":"Advance","price":14280,"start_date":"2025-06-04","renew_date":"2026-06-11","url":"https://karmpootongsai1.resrun-pos.com/web-admin/dashboard","type":"App","owner":"PP"},{"no":101,"status":"Active","payment_status":"Paid","restaurant_name":"ventisirestaurant Centrala","package":"Advance","price":13134,"start_date":"2025-06-18","renew_date":"2026-06-19","url":"https://ventisirestaurant.resrun-pos.com/web-admin/auth/login","type":"Web","owner":"PP"},{"no":102,"status":"Active","payment_status":"Working","restaurant_name":"Puripai","package":"Smart","price":8280,"start_date":"2025-08-05","renew_date":"2026-08-13","url":"https://puripai.resrun-pos.com/web-admin","type":"App","owner":"PP"},{"no":103,"status":"Active","payment_status":"Working","restaurant_name":"mae cuisine","package":"Advance","price":12852,"start_date":"2026-10-01","renew_date":"2026-10-01","url":"https://maecuisine.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":104,"status":"Active","payment_status":"Working","restaurant_name":"มิกกิบุฟเฟ่ต์มหาสารคาม","package":"Advance","price":12852,"start_date":"2025-10-09","renew_date":"2026-10-15","url":"https://mixkibuffet.resrun-pos.com/web-admin","type":"Web","owner":"PP"},{"no":105,"status":"Active","payment_status":"Working","restaurant_name":"Mirage (proud)","package":"Advance","price":12852,"start_date":"2025-10-29","renew_date":"2026-10-29","url":"https://mirageindigo.resrun-pos.com/web-admi","type":"Web","owner":"PP"},{"no":106,"status":"Active","payment_status":"Working","restaurant_name":"indigo (proud)","package":"Advance","price":12852,"start_date":"2025-10-29","renew_date":"2026-10-29","url":"https://indigo.resrun-pos.com/web-admin","type":"Web","owner":"PP"}];
@@ -709,6 +863,7 @@ const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','�
    BOOT
    ═══════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  applyTheme();
   updateAdminUI();
   if (SUPABASE_URL && SUPABASE_KEY) {
     await connectSupabase();
@@ -819,63 +974,146 @@ function renderAll() {
   renderCashflow();
 }
 
+/* ─── THEME TOGGLE ──────────────────────────────────────── */
+let isDark = localStorage.getItem('crm_theme') !== 'light';
+function applyTheme() {
+  const btn = document.getElementById('theme-btn');
+  if (isDark) {
+    document.body.classList.remove('light');
+    if(btn) btn.textContent = '🌙 Dark';
+  } else {
+    document.body.classList.add('light');
+    if(btn) btn.textContent = '☀️ Light';
+  }
+  localStorage.setItem('crm_theme', isDark ? 'dark' : 'light');
+}
+function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+/* ─── KPI DETAIL MODAL ──────────────────────────────────── */
+function openKpiDetail(title, subtitle, rows, cols) {
+  document.getElementById('dm-title').textContent = title;
+  document.getElementById('dm-sub').textContent = subtitle;
+  document.getElementById('dm-stats').innerHTML = '';
+  document.getElementById('dm-thead').innerHTML = cols.map(c=>`<th>${c}</th>`).join('');
+  document.getElementById('dm-tbody').innerHTML = rows.length === 0
+    ? `<tr><td colspan="${cols.length}" style="text-align:center;padding:32px;color:var(--t3)">ไม่มีข้อมูล</td></tr>`
+    : rows.map(r => `<tr>${Object.values(r).map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');
+  openModal('m-detail');
+}
+
+function openKpiDetailFull(type, selectedMonth) {
+  const all = activeData();
+  const now = new Date();
+  const mi = selectedMonth !== undefined ? selectedMonth : now.getMonth();
+  const y = now.getFullYear();
+  const MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+  if (type === 'arr') {
+    const rows = all.filter(r=>r.price>0).sort((a,b)=>b.price-a.price).map(r=>({
+      '#': r.no, 'ชื่อสาขา': r.restaurant_name, 'Package': r.package||'-',
+      'ราคา/ปี': '฿'+fmt(r.price), 'Status': r.status, 'ผู้ดูแล': r.owner||'-'
+    }));
+    openKpiDetail('💰 Total ARR — รายชื่อสาขาทั้งหมด', `${rows.length} สาขา · รวม ฿${fmt(rows.reduce((a,r)=>a+parseInt((r['ราคา/ปี']||'').replace(/[฿,]/g,'')||0),0))}`, rows, ['#','ชื่อสาขา','Package','ราคา/ปี','Status','ผู้ดูแล']);
+  } else if (type === 'overdue') {
+    const ov = all.filter(r=>r.payment_status==='Overdue');
+    const rows = ov.map(r=>({ '#':r.no, 'ชื่อสาขา':r.restaurant_name, 'Package':r.package||'-',
+      'ราคา':' ฿'+fmt(r.price), 'วันหมด':fmtD(r.renew_date), 'เหลือ':daysLeft(r.renew_date)!==null?(daysLeft(r.renew_date)<0?`หมดแล้ว ${Math.abs(daysLeft(r.renew_date))} วัน`:daysLeft(r.renew_date)+' วัน'):'-', 'ผู้ดูแล':r.owner||'-' }));
+    openKpiDetail('⚠️ Overdue — รายชื่อค้างชำระ', `${rows.length} สาขา`, rows, ['#','ชื่อสาขา','Package','ราคา','วันหมด','เหลือ','ผู้ดูแล']);
+  } else if (type === 'thismonth') {
+    const tm = all.filter(r=>{ if(!r.renew_date) return false; const d=new Date(r.renew_date); return d.getMonth()===mi&&d.getFullYear()===y; });
+    const paid = tm.filter(r=>r.payment_status==='Paid').length;
+    const unpaid = tm.length - paid;
+    const rows = tm.map(r=>({ '#':r.no, 'ชื่อสาขา':r.restaurant_name, 'Package':r.package||'-',
+      'ราคา':'฿'+fmt(r.price), 'วันหมด':fmtD(r.renew_date), 'Payment':r.payment_status, 'ผู้ดูแล':r.owner||'-' }));
+    document.getElementById('dm-title').textContent = `🔔 ต่อสัญญา${MONTHS_FULL[mi]} — ${tm.length} สาขา`;
+    document.getElementById('dm-sub').textContent = `ยอดรวม ฿${fmt(tm.reduce((a,r)=>a+(r.price||0),0))} · ชำระแล้ว ${paid} สาขา · ยังไม่ชำระ ${unpaid} สาขา`;
+    document.getElementById('dm-stats').innerHTML = `
+      <div class="md-stat"><div class="md-stat-val" style="color:var(--ylw)">${tm.length}</div><div class="md-stat-lbl">ครบกำหนด</div></div>
+      <div class="md-stat"><div class="md-stat-val" style="color:var(--grn)">${paid}</div><div class="md-stat-lbl">ชำระแล้ว</div></div>
+      <div class="md-stat"><div class="md-stat-val" style="color:var(--red)">${unpaid}</div><div class="md-stat-lbl">ยังไม่ชำระ</div></div>`;
+    document.getElementById('dm-thead').innerHTML = ['#','ชื่อสาขา','Package','ราคา','วันหมด','Payment','ผู้ดูแล'].map(c=>`<th>${c}</th>`).join('');
+    document.getElementById('dm-tbody').innerHTML = rows.length===0
+      ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--t3)">ไม่มีสาขาในเดือนนี้</td></tr>`
+      : rows.map(r=>`<tr>${Object.values(r).map(v=>`<td>${v}</td>`).join('')}</tr>`).join('');
+    openModal('m-detail'); return;
+  } else if (type === 'paid') {
+    const rows = all.filter(r=>r.payment_status==='Paid').map(r=>({
+      '#':r.no,'ชื่อสาขา':r.restaurant_name,'Package':r.package||'-','ราคา':'฿'+fmt(r.price),'วันหมด':fmtD(r.renew_date),'ผู้ดูแล':r.owner||'-'
+    }));
+    openKpiDetail('✅ Paid — สาขาที่ชำระแล้ว', `${rows.length} สาขา`, rows, ['#','ชื่อสาขา','Package','ราคา','วันหมด','ผู้ดูแล']);
+  } else if (type === 'follow') {
+    const rows = all.filter(r=>r.payment_status==='Follow to Renew').map(r=>({
+      '#':r.no,'ชื่อสาขา':r.restaurant_name,'Package':r.package||'-','ราคา':'฿'+fmt(r.price),'วันหมด':fmtD(r.renew_date),'ผู้ดูแล':r.owner||'-'
+    }));
+    openKpiDetail('📋 Follow to Renew', `${rows.length} สาขา รอการติดตาม`, rows, ['#','ชื่อสาขา','Package','ราคา','วันหมด','ผู้ดูแล']);
+  }
+}
+
+/* ─── MONTH FILTER STATE ────────────────────────────────── */
+let selectedMonth = new Date().getMonth();
+
 /* ─── DASHBOARD ─────────────────────────────────────────── */
 function renderDashboard() {
   const all = activeData();
   const now = new Date();
-  const m = now.getMonth(), y = now.getFullYear();
+  const curM = now.getMonth(), curY = now.getFullYear();
   const arr = all.reduce((a,r) => a+(r.price||0), 0);
   const overdue = all.filter(r => r.payment_status === 'Overdue');
   const overdueVal = overdue.reduce((a,r) => a+(r.price||0), 0);
   const thisMonth = all.filter(r => {
     if(!r.renew_date) return false;
     const d = new Date(r.renew_date);
-    return d.getMonth()===m && d.getFullYear()===y;
+    return d.getMonth()===curM && d.getFullYear()===curY;
   });
   const thisMonthVal = thisMonth.reduce((a,r)=>a+(r.price||0),0);
   const follow = all.filter(r => r.payment_status === 'Follow to Renew');
   const paid = all.filter(r => r.payment_status === 'Paid');
   const activeCount = all.filter(r => r.status === 'Active').length;
 
-  // Update sub
   document.getElementById('dash-sub').textContent =
-    `${now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} · ${all.length} สาขา Active`;
+    `${now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})} · ${all.length} สาขา`;
 
-  // KPI
+  // ── KPI CARDS (clickable) ──
   document.getElementById('kpi-grid').innerHTML = `
     <div class="kpi c-gold">
       <span class="kpi-ico">💰</span>
       <div class="kpi-lbl">Total ARR</div>
-      <div class="kpi-val gold">฿${fmt(arr)}</div>
+      <div class="kpi-val gold kpi-val-link" onclick="openKpiDetailFull('arr')" title="คลิกดูรายละเอียด">฿${fmt(arr)}</div>
       <div class="kpi-sub">Annual Recurring Revenue</div>
     </div>
     <div class="kpi c-red">
       <span class="kpi-ico">⚠️</span>
-      <div class="kpi-lbl">Overdue</div>
-      <div class="kpi-val red">${overdue.length}</div>
-      <div class="kpi-sub">฿${fmt(overdueVal)} · ค้างชำระ</div>
-      <div class="kpi-trend dn">🔴 ต้องติดตามด่วน</div>
+      <div class="kpi-lbl">Overdue ค้างชำระ</div>
+      <div class="kpi-val red kpi-val-link" onclick="openKpiDetailFull('overdue')" title="คลิกดูรายละเอียด">${overdue.length}</div>
+      <div class="kpi-sub">฿${fmt(overdueVal)} · คลิกดูรายชื่อ</div>
     </div>
     <div class="kpi c-ylw">
       <span class="kpi-ico">🔔</span>
       <div class="kpi-lbl">ต่อสัญญาเดือนนี้</div>
-      <div class="kpi-val ylw">${thisMonth.length}</div>
-      <div class="kpi-sub">฿${fmt(thisMonthVal)}</div>
+      <div class="kpi-val ylw kpi-val-link" onclick="openKpiDetailFull('thismonth',${curM})" title="คลิกดูรายละเอียด">${thisMonth.length}</div>
+      <div class="kpi-sub">฿${fmt(thisMonthVal)} · คลิกดูรายชื่อ</div>
     </div>
     <div class="kpi c-grn">
       <span class="kpi-ico">✅</span>
-      <div class="kpi-lbl">Active / Paid</div>
-      <div class="kpi-val grn">${paid.length}</div>
+      <div class="kpi-lbl">Paid ชำระแล้ว</div>
+      <div class="kpi-val grn kpi-val-link" onclick="openKpiDetailFull('paid')" title="คลิกดูรายละเอียด">${paid.length}</div>
       <div class="kpi-sub">${activeCount} สาขา Active</div>
     </div>
     <div class="kpi c-blu">
       <span class="kpi-ico">📋</span>
       <div class="kpi-lbl">Follow to Renew</div>
-      <div class="kpi-val blu">${follow.length}</div>
-      <div class="kpi-sub">รอการติดตาม</div>
+      <div class="kpi-val blu kpi-val-link" onclick="openKpiDetailFull('follow')" title="คลิกดูรายละเอียด">${follow.length}</div>
+      <div class="kpi-sub">คลิกดูรายชื่อ</div>
     </div>`;
 
-  // Monthly data
+  // ── MONTH FILTER BAR ──
+  const bar = document.getElementById('month-filter-bar');
+  bar.innerHTML = `<span class="mf-label">📅 เลือกเดือน:</span>` +
+    MONTHS.map((m,i)=>`<button class="mfbtn${i===selectedMonth?' active':''}" onclick="selectMonth(${i})">${m}</button>`).join('');
+
+  renderMonthDetail(selectedMonth);
+
+  // ── MONTHLY DATA ──
   const mCounts = Array(12).fill(0), mVals = Array(12).fill(0);
   all.forEach(r => {
     if(!r.renew_date) return;
@@ -883,52 +1121,77 @@ function renderDashboard() {
     mCounts[mi]++; mVals[mi] += r.price||0;
   });
 
-  // Monthly chart
-  const cOpts = { responsive:true, plugins:{legend:{labels:{color:'#8892a4',font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
+  const isDarkMode = !document.body.classList.contains('light');
+  const gridColor = isDarkMode ? '#161920' : '#e8ecf4';
+  const tickColor = isDarkMode ? '#4a5268' : '#8892a4';
+  const lblColor  = isDarkMode ? '#8892a4' : '#4a5268';
+  const cOpts = {responsive:true,plugins:{legend:{labels:{color:lblColor,font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
+
+  // Monthly HORIZONTAL bar chart with value labels
   if(chartMonthly) chartMonthly.destroy();
   chartMonthly = new Chart(document.getElementById('monthly-chart'), {
     type:'bar',
     data:{
       labels:MONTHS,
       datasets:[
-        {label:'Revenue (฿)',data:mVals,backgroundColor:mVals.map((_,i)=>i===m?'rgba(240,180,41,.9)':'rgba(240,180,41,.4)'),borderRadius:6,yAxisID:'y'},
-        {label:'จำนวนราย',data:mCounts,type:'line',borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.08)',fill:true,tension:.4,yAxisID:'y1',pointRadius:4,pointBackgroundColor:'#60a5fa'}
+        {label:'Revenue (฿)',data:mVals,backgroundColor:mVals.map((_,i)=>i===curM?'rgba(240,180,41,.95)':'rgba(240,180,41,.45)'),borderRadius:4,xAxisID:'x',yAxisID:'y'},
+        {label:'จำนวนราย',data:mCounts,backgroundColor:mCounts.map((_,i)=>i===curM?'rgba(96,165,250,.9)':'rgba(96,165,250,.35)'),borderRadius:4,xAxisID:'x2',yAxisID:'y'}
       ]
     },
-    options:{...cOpts,scales:{
-      y:{ticks:{color:'#4a5268',callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#161920'}},
-      y1:{ticks:{color:'#60a5fa'},grid:{display:false},position:'right'}
-    }}
+    options:{
+      ...cOpts,
+      indexAxis:'y',
+      plugins:{
+        ...cOpts.plugins,
+        datalabels:{display:false},
+        tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?'฿'+fmt(ctx.raw):`${ctx.raw} ราย`}}
+      },
+      scales:{
+        y:{ticks:{color:lblColor,font:{size:11}},grid:{display:false}},
+        x:{ticks:{color:tickColor,callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:gridColor},position:'bottom'},
+        x2:{display:false,grid:{display:false}}
+      }
+    },
+    plugins:[{
+      id:'valueLabels',
+      afterDatasetsDraw(chart){
+        const {ctx}=chart;
+        chart.data.datasets.forEach((ds,di)=>{
+          const meta=chart.getDatasetMeta(di);
+          meta.data.forEach((bar,i)=>{
+            const val=ds.data[i];
+            if(!val) return;
+            const txt=di===0?'฿'+(val>=1000?(val/1000).toFixed(0)+'k':val):`${val}ร`;
+            ctx.save();
+            ctx.fillStyle=di===0?'rgba(240,180,41,.9)':'rgba(96,165,250,.9)';
+            ctx.font='bold 10px Noto Sans Thai,sans-serif';
+            ctx.textAlign='left';
+            ctx.textBaseline='middle';
+            const x=bar.x+4, y=bar.y;
+            ctx.fillText(txt,x,y);
+            ctx.restore();
+          });
+        });
+      }
+    }]
   });
 
-  // Top 10
-  const urgentList = all.filter(r=>r.renew_date).map(r=>({...r,days:daysLeft(r.renew_date)}))
-    .sort((a,b)=>a.days-b.days).slice(0,10);
-  const urgentCount = urgentList.filter(r=>r.days!==null&&r.days<30).length;
-  document.getElementById('top10-badge').textContent = urgentCount > 0 ? `${urgentCount} รายด่วน` : 'ปกติ';
-  document.getElementById('top10-list').innerHTML = urgentList.map((r,i)=>{
-    const cls = r.days < 0 ? 'urgent' : r.days <= 30 ? 'warn' : '';
-    return `<div class="top10-item ${cls}">
-      <span class="top10-rank">${i+1}</span>
-      <span class="top10-name" title="${r.restaurant_name}">${r.restaurant_name}</span>
-      <span class="top10-pkg">${r.package||'-'}</span>
-      ${dayChip(r.days)}
-    </div>`;
-  }).join('');
-
-  // Heatmap
+  // ── HEATMAP ──
   const hmax = Math.max(...mVals, 1);
-  const hColors = ['#111827','#1e3a5f','#1d4ed8','#0ea5e9','#f0b429'];
+  const hColors = isDarkMode
+    ? ['#111827','#1e3a5f','#1d4ed8','#0ea5e9','#f0b429']
+    : ['#e2e8f0','#bfdbfe','#93c5fd','#3b82f6','#f0b429'];
   document.getElementById('hm-labels').innerHTML = MONTHS.map(m=>`<span>${m}</span>`).join('');
   document.getElementById('hm-cells').innerHTML = mVals.map((v,i)=>{
     const lvl = v===0?0:Math.min(4,Math.ceil((v/hmax)*4));
-    return `<div class="hm-cell" style="background:${hColors[lvl]};color:${lvl>=3?'#1a1200':'#8892a4'}">
+    const txtCol = lvl>=3?(isDarkMode?'#1a1200':'#1a1200'):(isDarkMode?'#8892a4':'#4a5268');
+    return `<div class="hm-cell" style="background:${hColors[lvl]};color:${txtCol}">
       ${lvl>=2?(v>=1000?Math.round(v/1000)+'k':''):''}
-      <div class="tt">${MONTHS[i]}<br>฿${fmt(v)}<br>${mCounts[i]} ราย</div>
+      <div class="tt" style="color:var(--txt)">${MONTHS[i]}<br>฿${fmt(v)}<br>${mCounts[i]} ราย</div>
     </div>`;
   }).join('');
 
-  // Package donut
+  // ── PACKAGE DOUGHNUT ──
   const pkgs = {};
   all.forEach(r=>{ if(r.package&&r.package!=='-') pkgs[r.package]=(pkgs[r.package]||0)+1; });
   if(chartPkg) chartPkg.destroy();
@@ -936,11 +1199,11 @@ function renderDashboard() {
     type:'doughnut',
     data:{labels:Object.keys(pkgs),datasets:[{data:Object.values(pkgs),
       backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#10b981','#f05252'],
-      borderColor:'#0f1117',borderWidth:2}]},
+      borderColor:isDarkMode?'#0f1117':'#ffffff',borderWidth:2}]},
     options:{...cOpts,cutout:'62%'}
   });
 
-  // Payment bar
+  // ── PAYMENT STATUS HORIZONTAL BAR ──
   const payMap = {Paid:0,Working:0,Overdue:0,'Follow to Renew':0,'Free trial':0};
   all.forEach(r=>{ if(r.payment_status in payMap) payMap[r.payment_status]++; });
   if(chartPay) chartPay.destroy();
@@ -948,11 +1211,123 @@ function renderDashboard() {
     type:'bar',
     data:{labels:Object.keys(payMap),datasets:[{data:Object.values(payMap),
       backgroundColor:['#10b981','#3b82f6','#f05252','#fbbf24','#8b5cf6'],borderRadius:6}]},
-    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:'#4a5268'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
-    }
+    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.raw} สาขา`}}},
+      scales:{x:{ticks:{color:tickColor},grid:{color:gridColor}},y:{ticks:{color:lblColor},grid:{display:false}}}
+    },
+    plugins:[{
+      id:'payLabels',
+      afterDatasetsDraw(chart){
+        const {ctx}=chart;
+        chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+          const val=chart.data.datasets[0].data[i];
+          if(!val) return;
+          ctx.save();
+          ctx.fillStyle=isDarkMode?'#8892a4':'#4a5268';
+          ctx.font='bold 11px Noto Sans Thai,sans-serif';
+          ctx.textAlign='left';ctx.textBaseline='middle';
+          ctx.fillText(`${val} ราย`,bar.x+5,bar.y);
+          ctx.restore();
+        });
+      }
+    }]
   });
 }
+
+/* ─── MONTH DETAIL PANEL ────────────────────────────────── */
+function selectMonth(mi) {
+  selectedMonth = mi;
+  // update buttons
+  document.querySelectorAll('.mfbtn').forEach((b,i)=>{
+    b.classList.toggle('active', i===mi);
+  });
+  renderMonthDetail(mi);
+}
+
+function renderMonthDetail(mi) {
+  const all = activeData();
+  const y = new Date().getFullYear();
+  const MONTHS_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+  // ค้นหาใน year ปัจจุบัน + ปีถัดไป เผื่อข้อมูลข้ามปี
+  const monthRows = all.filter(r=>{
+    if(!r.renew_date) return false;
+    const d=new Date(r.renew_date);
+    return d.getMonth()===mi;
+  });
+
+  const totalVal = monthRows.reduce((a,r)=>a+(r.price||0),0);
+  const paidRows = monthRows.filter(r=>r.payment_status==='Paid'||r.payment_status==='Working');
+  const unpaidRows = monthRows.filter(r=>r.payment_status!=='Paid'&&r.payment_status!=='Working');
+  const paidVal = paidRows.reduce((a,r)=>a+(r.price||0),0);
+  const unpaidVal = unpaidRows.reduce((a,r)=>a+(r.price||0),0);
+  const rate = totalVal>0 ? Math.round((paidVal/totalVal)*100) : 0;
+
+  const panel = document.getElementById('monthly-detail-panel');
+  if (monthRows.length === 0) {
+    panel.innerHTML = `<div style="text-align:center;padding:24px;color:var(--t3);font-size:13px">ไม่มีสาขาครบกำหนดในเดือน${MONTHS_FULL[mi]}</div>`;
+    return;
+  }
+
+  const rateColor = rate>=80?'var(--grn)':rate>=50?'var(--ylw)':'var(--red)';
+  panel.innerHTML = `
+    <div class="md-stats">
+      <div class="md-stat">
+        <div class="md-stat-val kpi-val-link" style="color:var(--ylw)" onclick="openKpiDetailFull('thismonth',${mi})">${monthRows.length}</div>
+        <div class="md-stat-lbl">สาขาครบกำหนด${MONTHS_FULL[mi]}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px">฿${fmt(totalVal)}</div>
+      </div>
+      <div class="md-stat">
+        <div class="md-stat-val kpi-val-link" style="color:var(--grn)" onclick="openMonthPayDetail('paid',${mi})">${paidRows.length}</div>
+        <div class="md-stat-lbl">จ่ายแล้ว / Working</div>
+        <div style="font-size:11px;color:var(--grn);margin-top:4px">฿${fmt(paidVal)}</div>
+      </div>
+      <div class="md-stat">
+        <div class="md-stat-val kpi-val-link" style="color:var(--red)" onclick="openMonthPayDetail('unpaid',${mi})">${unpaidRows.length}</div>
+        <div class="md-stat-lbl">ค้างจ่าย / ติดตาม</div>
+        <div style="font-size:11px;color:var(--red);margin-top:4px">฿${fmt(unpaidVal)}</div>
+      </div>
+    </div>
+    <div class="rate-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:3px">
+        <span>Collection Rate</span><span style="color:${rateColor};font-weight:700">${rate}%</span>
+      </div>
+      <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:${rate}%;background:${rateColor}"></div></div>
+    </div>
+    <div style="margin-top:14px;overflow-x:auto">
+      <table class="md-tbl">
+        <thead><tr>
+          <th>#</th><th>ชื่อสาขา</th><th>Package</th><th>ราคา</th>
+          <th>วันหมดอายุ</th><th>Payment Status</th><th>ผู้ดูแล</th>
+        </tr></thead>
+        <tbody>${monthRows.sort((a,b)=>(new Date(a.renew_date))-(new Date(b.renew_date))).map(r=>{
+          const isPaid = r.payment_status==='Paid'||r.payment_status==='Working';
+          return `<tr style="${isPaid?'':'background:rgba(240,82,82,.04)'}">
+            <td style="color:var(--t3)">${r.no}</td>
+            <td><strong>${r.restaurant_name}</strong></td>
+            <td>${pkgTag(r.package)}</td>
+            <td>฿${fmt(r.price)}</td>
+            <td style="font-size:11px">${fmtD(r.renew_date)}</td>
+            <td>${payBadge(r.payment_status)}</td>
+            <td style="color:var(--t3);font-size:11px">${r.owner||'-'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function openMonthPayDetail(type, mi) {
+  const all = activeData();
+  const MONTHS_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const monthRows = all.filter(r=>{ if(!r.renew_date) return false; return new Date(r.renew_date).getMonth()===mi; });
+  const rows = type==='paid'
+    ? monthRows.filter(r=>r.payment_status==='Paid'||r.payment_status==='Working')
+    : monthRows.filter(r=>r.payment_status!=='Paid'&&r.payment_status!=='Working');
+  const title = type==='paid' ? `✅ จ่ายแล้ว — ${MONTHS_FULL[mi]}` : `⚠️ ค้างจ่าย — ${MONTHS_FULL[mi]}`;
+  const mapped = rows.map(r=>({'#':r.no,'ชื่อสาขา':r.restaurant_name,'Package':r.package||'-','ราคา':'฿'+fmt(r.price),'วันหมด':fmtD(r.renew_date),'Payment':r.payment_status,'ผู้ดูแล':r.owner||'-'}));
+  openKpiDetail(title, `${rows.length} สาขา · ฿${fmt(rows.reduce((a,r)=>a+(r.price||0),0))}`, mapped, ['#','ชื่อสาขา','Package','ราคา','วันหมด','Payment','ผู้ดูแล']);
+}
+
 
 /* ─── BRANCHES TABLE ────────────────────────────────────── */
 function setBrFilter(btn) {
@@ -1056,16 +1431,34 @@ function renderCashflow() {
   all.forEach(r=>{if(!r.renew_date)return;const mi=new Date(r.renew_date).getMonth();mVals[mi]+=r.price||0;mCounts[mi]++;});
   const cOpts = {responsive:true,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
   if(chartCF) chartCF.destroy();
+  const isDarkMode2 = !document.body.classList.contains('light');
+  const gc2 = isDarkMode2?'#161920':'#e8ecf4', tc2 = isDarkMode2?'#4a5268':'#8892a4', lc2 = isDarkMode2?'#8892a4':'#4a5268';
   chartCF = new Chart(document.getElementById('cf-chart'),{
     type:'bar',
     data:{labels:MONTHS,datasets:[
-      {label:'Forecast (฿)',data:mVals,backgroundColor:'rgba(240,180,41,.7)',borderRadius:6,yAxisID:'y'},
-      {label:'ราย',data:mCounts,type:'line',borderColor:'#60a5fa',fill:false,tension:.4,yAxisID:'y1',pointRadius:4,pointBackgroundColor:'#60a5fa'}
+      {label:'Forecast (฿)',data:mVals,backgroundColor:mVals.map((_,i)=>i===new Date().getMonth()?'rgba(240,180,41,.95)':'rgba(240,180,41,.45)'),borderRadius:4},
+      {label:'จำนวนราย',data:mCounts,backgroundColor:'rgba(96,165,250,.35)',borderRadius:4}
     ]},
-    options:{...cOpts,scales:{
-      y:{ticks:{color:'#4a5268',callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:'#161920'}},
-      y1:{ticks:{color:'#60a5fa'},grid:{display:false},position:'right'}
-    }}
+    options:{
+      responsive:true,indexAxis:'y',
+      plugins:{legend:{labels:{color:lc2,font:{family:'Noto Sans Thai',size:11}},position:'bottom'},
+        tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?'฿'+fmt(ctx.raw):`${ctx.raw} ราย`}}},
+      scales:{
+        y:{ticks:{color:lc2},grid:{display:false}},
+        x:{ticks:{color:tc2,callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:gc2}}
+      }
+    },
+    plugins:[{id:'cfLabels',afterDatasetsDraw(chart){
+      const {ctx}=chart;
+      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const val=mVals[i]; if(!val) return;
+        ctx.save();ctx.fillStyle='rgba(240,180,41,.85)';
+        ctx.font='bold 10px Noto Sans Thai,sans-serif';
+        ctx.textAlign='left';ctx.textBaseline='middle';
+        ctx.fillText('฿'+(val>=1000?(val/1000).toFixed(0)+'k':val),bar.x+4,bar.y);
+        ctx.restore();
+      });
+    }}]
   });
 
   const pkgRev={};
@@ -1272,6 +1665,395 @@ function toast(msg, type='info') {
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SORT TABLE
+   ═══════════════════════════════════════════════════════════ */
+const sortState = {};
+function sortTable(tableKey, col) {
+  if (!sortState[tableKey]) sortState[tableKey] = {col:null, dir:1};
+  const st = sortState[tableKey];
+  if (st.col === col) st.dir *= -1; else { st.col = col; st.dir = 1; }
+
+  // Update header styles
+  const tableId = tableKey === 'br' ? 'br-tbody' : tableKey === 'rn' ? 'rn-tbody' : tableKey === 'owner' ? 'owner-tbody' : null;
+  if (!tableId) return;
+  const tbl = document.getElementById(tableId)?.closest('table');
+  if (tbl) {
+    tbl.querySelectorAll('thead th').forEach(th => { th.classList.remove('sort-asc','sort-desc'); });
+    const ths = tbl.querySelectorAll('thead th');
+    const colMap = {br:['no','restaurant_name','package','price','status','payment_status','renew_date','days','owner'],
+                    rn:['priority','restaurant_name','package','price','renew_date','days','payment_status','status','owner'],
+                    owner:['no','restaurant_name','package','price','status','payment_status','renew_date','days','churn']};
+    const idx = (colMap[tableKey]||[]).indexOf(col);
+    if (idx >= 0 && ths[idx]) ths[idx].classList.add(st.dir === 1 ? 'sort-asc' : 'sort-desc');
+  }
+
+  if (tableKey === 'br') renderBranches();
+  else if (tableKey === 'rn') renderRenewals();
+  else if (tableKey === 'owner') renderOwnerTable();
+}
+
+function applySortToRows(rows, tableKey) {
+  const st = sortState[tableKey];
+  if (!st?.col) return rows;
+  return [...rows].sort((a,b) => {
+    let va, vb;
+    if (st.col === 'days') { va = daysLeft(a.renew_date)??9999; vb = daysLeft(b.renew_date)??9999; }
+    else if (st.col === 'price') { va = a.price||0; vb = b.price||0; }
+    else if (st.col === 'no') { va = a.no||0; vb = b.no||0; }
+    else if (st.col === 'churn') { va = churnScore(a); vb = churnScore(b); }
+    else { va = (a[st.col]||'').toString().toLowerCase(); vb = (b[st.col]||'').toString().toLowerCase(); }
+    if (va < vb) return -st.dir;
+    if (va > vb) return st.dir;
+    return 0;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHURN RISK SCORE 0–100
+   ═══════════════════════════════════════════════════════════ */
+function churnScore(r) {
+  let score = 0;
+  const d = daysLeft(r.renew_date);
+  // Days factor (max 50)
+  if (d === null) score += 20;
+  else if (d < 0) score += 50;
+  else if (d <= 7) score += 45;
+  else if (d <= 30) score += 35;
+  else if (d <= 60) score += 20;
+  else if (d <= 90) score += 10;
+  // Payment factor (max 35)
+  const pm = {Overdue:35,'Follow to Renew':20,'Free trial':15,Working:5,Paid:0};
+  score += pm[r.payment_status] || 0;
+  // Status factor (max 15)
+  if (r.status === 'DeActivate') score += 15;
+  else if (r.status === 'Implement') score += 5;
+  return Math.min(100, score);
+}
+
+function churnBadge(score) {
+  if (score >= 70) return `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:800;background:rgba(240,82,82,.15);color:var(--red)">🔴 ${score} HIGH</span>`;
+  if (score >= 40) return `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:800;background:rgba(251,191,36,.15);color:var(--ylw)">🟡 ${score} MED</span>`;
+  return `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:800;background:rgba(52,211,153,.12);color:var(--grn)">🟢 ${score} LOW</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT CSV
+   ═══════════════════════════════════════════════════════════ */
+function exportCSV() {
+  const rows = activeData();
+  const headers = ['No','ชื่อสาขา','Package','ราคา','Status','Payment Status','วันเริ่ม','วันหมดอายุ','เหลือ(วัน)','Owner','ประเภท','URL','Churn Score'];
+  const lines = [headers.join(',')];
+  rows.forEach(r => {
+    const d = daysLeft(r.renew_date);
+    lines.push([
+      r.no, `"${r.restaurant_name}"`, r.package, r.price,
+      r.status, r.payment_status, r.start_date||'', r.renew_date||'',
+      d!==null?d:'', r.owner||'', r.type||'', `"${r.url||''}"`, churnScore(r)
+    ].join(','));
+  });
+  const blob = new Blob(['\uFEFF'+lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `ResrunCRM_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Export CSV สำเร็จ ✅', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT EXCEL (HTML Table method — opens in Excel)
+   ═══════════════════════════════════════════════════════════ */
+function exportExcel() {
+  const rows = activeData();
+  const colStyle = 'border:1px solid #ccc;padding:6px 10px;font-family:Tahoma,sans-serif;font-size:12px';
+  const hdStyle = colStyle + ';background:#1a1d2e;color:#f0b429;font-weight:bold';
+  let html = `<html><head><meta charset="UTF-8"></head><body>
+  <table border="1" style="border-collapse:collapse">
+  <tr>
+    ${['#','ชื่อสาขา','Package','ราคา','Status','Payment','วันเริ่ม','วันหมดอายุ','เหลือ(วัน)','Owner','ประเภท','Churn Score']
+      .map(h=>`<th style="${hdStyle}">${h}</th>`).join('')}
+  </tr>`;
+  rows.forEach(r => {
+    const d = daysLeft(r.renew_date);
+    const bg = d!==null&&d<0?'#fff0f0':d!==null&&d<=30?'#fffbe6':'';
+    html += `<tr style="background:${bg}">
+      <td style="${colStyle}">${r.no}</td>
+      <td style="${colStyle}">${r.restaurant_name}</td>
+      <td style="${colStyle}">${r.package||'-'}</td>
+      <td style="${colStyle};text-align:right">฿${fmt(r.price)}</td>
+      <td style="${colStyle}">${r.status}</td>
+      <td style="${colStyle}">${r.payment_status}</td>
+      <td style="${colStyle}">${r.start_date||'-'}</td>
+      <td style="${colStyle}">${r.renew_date||'-'}</td>
+      <td style="${colStyle};text-align:right">${d!==null?d:'-'}</td>
+      <td style="${colStyle}">${r.owner||'-'}</td>
+      <td style="${colStyle}">${r.type||'-'}</td>
+      <td style="${colStyle};text-align:center">${churnScore(r)}</td>
+    </tr>`;
+  });
+  html += '</table></body></html>';
+  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `ResrunCRM_${new Date().toISOString().slice(0,10)}.xls`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Export Excel สำเร็จ ✅', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OWNER DASHBOARD
+   ═══════════════════════════════════════════════════════════ */
+let ownerFilter = 'all';
+let ownerChartARR, ownerChartOV;
+
+function renderOwnerDashboard() {
+  const all = activeData();
+  // build owner list
+  const owners = [...new Set(all.map(r=>r.owner||'-').filter(o=>o!=='-'))].sort();
+
+  // KPI per selected owner or all
+  const filtered = ownerFilter === 'all' ? all : all.filter(r=>(r.owner||'-')===ownerFilter);
+  const arr = filtered.reduce((a,r)=>a+(r.price||0),0);
+  const ov  = filtered.filter(r=>r.payment_status==='Overdue').length;
+  const act = filtered.filter(r=>r.status==='Active').length;
+  const high = filtered.filter(r=>churnScore(r)>=70).length;
+
+  document.getElementById('owner-kpi').innerHTML = `
+    <div class="kpi c-gold"><span class="kpi-ico">💼</span>
+      <div class="kpi-lbl">ARR (พอร์ต${ownerFilter==='all'?'ทั้งหมด':' '+ownerFilter})</div>
+      <div class="kpi-val gold">฿${fmt(arr)}</div>
+      <div class="kpi-sub">${filtered.length} สาขา</div></div>
+    <div class="kpi c-grn"><span class="kpi-ico">✅</span>
+      <div class="kpi-lbl">Active</div>
+      <div class="kpi-val grn">${act}</div>
+      <div class="kpi-sub">สาขา Active</div></div>
+    <div class="kpi c-red"><span class="kpi-ico">⚠️</span>
+      <div class="kpi-lbl">Overdue</div>
+      <div class="kpi-val red">${ov}</div>
+      <div class="kpi-sub">ค้างชำระ</div></div>
+    <div class="kpi c-ylw"><span class="kpi-ico">🔥</span>
+      <div class="kpi-lbl">Churn Risk HIGH</div>
+      <div class="kpi-val ylw">${high}</div>
+      <div class="kpi-sub">คะแนน ≥ 70</div></div>`;
+
+  // Owner filter buttons
+  const btnBar = document.getElementById('owner-filter-btns');
+  btnBar.innerHTML = `<button class="pfbtn${ownerFilter==='all'?' active':''}" onclick="setOwnerFilter('all')">ทั้งหมด</button>`
+    + owners.map(o=>`<button class="pfbtn${ownerFilter===o?' active':''}" onclick="setOwnerFilter('${o}')">${o}</button>`).join('');
+
+  // Charts
+  const isDarkMode = !document.body.classList.contains('light');
+  const gc = isDarkMode?'#161920':'#e8ecf4', lc = isDarkMode?'#8892a4':'#4a5268';
+  const cOpts = {responsive:true,plugins:{legend:{labels:{color:lc,font:{family:'Prompt,Noto Sans Thai',size:12}},position:'bottom'}}};
+
+  const ownerARR={}, ownerOV={};
+  all.forEach(r=>{ const o=r.owner||'-'; ownerARR[o]=(ownerARR[o]||0)+(r.price||0); });
+  all.filter(r=>r.payment_status==='Overdue').forEach(r=>{ const o=r.owner||'-'; ownerOV[o]=(ownerOV[o]||0)+1; });
+
+  const ownersSorted = Object.entries(ownerARR).filter(([k])=>k!=='-').sort((a,b)=>b[1]-a[1]);
+
+  if(ownerChartARR) ownerChartARR.destroy();
+  ownerChartARR = new Chart(document.getElementById('owner-arr-chart'),{
+    type:'bar', data:{labels:ownersSorted.map(x=>x[0]),
+      datasets:[{label:'ARR (฿)',data:ownersSorted.map(x=>x[1]),
+        backgroundColor:['#f0b429','#60a5fa','#34d399','#a78bfa','#fb923c','#f472b6'],borderRadius:6}]},
+    options:{...cOpts,indexAxis:'y',plugins:{...cOpts.plugins,legend:{display:false}},
+      scales:{x:{ticks:{color:lc,callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:gc}},y:{ticks:{color:lc},grid:{display:false}}}},
+    plugins:[{id:'oa',afterDatasetsDraw(c){const {ctx}=c;c.getDatasetMeta(0).data.forEach((bar,i)=>{
+      const v=ownersSorted[i][1];ctx.save();ctx.fillStyle='rgba(240,180,41,.9)';ctx.font='bold 11px Prompt,sans-serif';
+      ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText('฿'+(v/1000).toFixed(0)+'k',bar.x+5,bar.y);ctx.restore();
+    });}]
+  });
+
+  const ovSorted = ownersSorted.map(([o])=>([o, ownerOV[o]||0]));
+  if(ownerChartOV) ownerChartOV.destroy();
+  ownerChartOV = new Chart(document.getElementById('owner-ov-chart'),{
+    type:'bar', data:{labels:ovSorted.map(x=>x[0]),
+      datasets:[{label:'Overdue',data:ovSorted.map(x=>x[1]),backgroundColor:'rgba(240,82,82,.7)',borderRadius:6}]},
+    options:{...cOpts,indexAxis:'y',plugins:{...cOpts.plugins,legend:{display:false}},
+      scales:{x:{ticks:{color:lc},grid:{color:gc}},y:{ticks:{color:lc},grid:{display:false}}}},
+    plugins:[{id:'ovl',afterDatasetsDraw(c){const {ctx}=c;c.getDatasetMeta(0).data.forEach((bar,i)=>{
+      const v=ovSorted[i][1];if(!v)return;ctx.save();ctx.fillStyle='rgba(240,82,82,.9)';
+      ctx.font='bold 11px Prompt,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(`${v} ราย`,bar.x+5,bar.y);ctx.restore();
+    });}]
+  });
+
+  renderOwnerTable();
+  renderNotifyList();
+}
+
+function setOwnerFilter(o) {
+  ownerFilter = o;
+  renderOwnerDashboard();
+}
+
+function renderOwnerTable() {
+  const all = activeData();
+  let rows = ownerFilter==='all' ? all : all.filter(r=>(r.owner||'-')===ownerFilter);
+  rows = applySortToRows(rows, 'owner');
+  const tbody = document.getElementById('owner-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = rows.map(r=>{
+    const d=daysLeft(r.renew_date), sc=churnScore(r);
+    return `<tr class="${rowCls(r)}">
+      <td style="color:var(--t3)">${r.no}</td>
+      <td><strong>${r.restaurant_name}</strong></td>
+      <td>${pkgTag(r.package)}</td>
+      <td>฿${fmt(r.price)}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${payBadge(r.payment_status)}</td>
+      <td style="font-size:12px">${fmtD(r.renew_date)}</td>
+      <td>${dayChip(d)}</td>
+      <td>${churnBadge(sc)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('owner-count').textContent = `แสดง ${rows.length} สาขา`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LINE NOTIFY PANEL
+   ═══════════════════════════════════════════════════════════ */
+function renderNotifyList() {
+  const all = activeData();
+  const now = new Date(); now.setHours(0,0,0,0);
+  const urgent = all.filter(r=>{
+    const d=daysLeft(r.renew_date);
+    return d!==null && (d===30||d===7||d===1||d===0||d<0);
+  }).sort((a,b)=>(daysLeft(a.renew_date)||0)-(daysLeft(b.renew_date)||0));
+
+  const el = document.getElementById('notify-list');
+  if(!el) return;
+  if(urgent.length===0){ el.innerHTML=`<div style="color:var(--t3);font-size:13px">✅ ไม่มีสาขาที่ต้องแจ้งเตือนวันนี้</div>`; return; }
+  el.innerHTML = urgent.slice(0,8).map(r=>{
+    const d=daysLeft(r.renew_date);
+    const col = d<0?'var(--red)':d<=1?'var(--red)':d<=7?'var(--ylw)':'var(--blu)';
+    const label = d<0?`หมดแล้ว ${Math.abs(d)} วัน`:d===0?'หมดวันนี้!':d===1?'หมดพรุ่งนี้!':d===7?'อีก 7 วัน':'อีก 30 วัน';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--s2);border:1px solid var(--b1)">
+      <span style="font-size:11px;font-weight:800;color:${col};min-width:90px">${label}</span>
+      <span style="font-size:12px;flex:1;font-weight:600">${r.restaurant_name}</span>
+      <span style="font-size:11px;color:var(--t3)">${r.owner||'-'}</span>
+    </div>`;
+  }).join('');
+}
+
+async function testLineNotify() {
+  const token = document.getElementById('line-token').value.trim();
+  if(!token){ toast('กรุณาใส่ Line Notify Token', 'error'); return; }
+  const msg = encodeURIComponent('\n[Resrun CRM Test] แจ้งเตือนระบบทำงานปกติ ✅');
+  try {
+    const res = await fetch(`https://notify-api.line.me/api/notify`,{
+      method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','Authorization':'Bearer '+token},
+      body:'message='+msg
+    });
+    if(res.ok) toast('ส่ง Line Notify สำเร็จ! ✅', 'success');
+    else toast('Token ไม่ถูกต้อง หรือ CORS blocked (ต้องรันผ่าน Server)', 'error');
+  } catch(e) { toast('ต้องรัน Line Notify ผ่าน Backend (CORS)', 'info'); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UPDATE renderBranches + renderRenewals ให้ใช้ applySortToRows
+   ═══════════════════════════════════════════════════════════ */
+const _origRenderBranches = renderBranches;
+renderBranches = function() {
+  const q = (document.getElementById('br-search')?.value||'').toLowerCase();
+  let rows = activeData();
+  if (q) rows = rows.filter(r => r.restaurant_name.toLowerCase().includes(q));
+  if (brFilter !== 'all') {
+    if (brFilter === 'Overdue') rows = rows.filter(r => r.payment_status === 'Overdue');
+    else rows = rows.filter(r => r.package === brFilter);
+  }
+  rows = applySortToRows(rows, 'br');
+  const tbody = document.getElementById('br-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="12"><div class="no-data">ไม่พบข้อมูล</div></td></tr>`
+    : rows.map(r => {
+        const d = daysLeft(r.renew_date);
+        const editDel = IS_ADMIN
+          ? `<td><button class="act-btn" onclick="openRecordModal('${r.id||r.no}')">✏️</button><button class="act-btn del" onclick="deleteRec('${r.id||r.no}')">🗑</button></td>`
+          : '';
+        return `<tr class="${rowCls(r)}">
+          <td style="color:var(--t3);font-size:12px">${r.no}</td>
+          <td><strong style="font-size:14px">${r.restaurant_name}</strong></td>
+          <td>${pkgTag(r.package)}</td>
+          <td style="font-weight:700">฿${fmt(r.price)}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td>${payBadge(r.payment_status)}</td>
+          <td style="font-size:13px">${fmtD(r.renew_date)}</td>
+          <td>${dayChip(d)}</td>
+          <td style="color:var(--t2);font-size:13px;font-weight:600">${r.owner||'-'}</td>
+          <td style="font-size:12px;color:var(--t3)">${r.type||'-'}</td>
+          <td>${r.url?`<a href="${r.url}" target="_blank" class="link-btn">🔗 เปิด</a>`:'-'}</td>
+          ${editDel}
+        </tr>`;
+      }).join('');
+  document.getElementById('br-count').textContent = `แสดง ${rows.length} จาก ${activeData().length} สาขา`;
+  document.getElementById('action-col').style.display = IS_ADMIN ? '' : 'none';
+  document.getElementById('add-btn').style.display = IS_ADMIN ? '' : 'none';
+};
+
+const _origRenderRenewals = renderRenewals;
+renderRenewals = function() {
+  const q = (document.getElementById('rn-search')?.value||'').toLowerCase();
+  let rows = activeData().filter(r => r.renew_date || r.payment_status === 'Overdue');
+  if (q) rows = rows.filter(r => r.restaurant_name.toLowerCase().includes(q));
+  if (rnFilter === 'expired') rows = rows.filter(r=>{ const d=daysLeft(r.renew_date); return d!==null&&d<0; });
+  else if (rnFilter === 'soon') rows = rows.filter(r=>{ const d=daysLeft(r.renew_date); return d!==null&&d>=0&&d<=30; });
+  else if (rnFilter === 'follow') rows = rows.filter(r=>r.payment_status==='Follow to Renew');
+
+  // Default sort by days if no explicit sort
+  if (!sortState['rn']?.col) rows.sort((a,b) => (daysLeft(a.renew_date)??9999) - (daysLeft(b.renew_date)??9999));
+  else rows = applySortToRows(rows, 'rn');
+
+  const tbody = document.getElementById('rn-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.length === 0
+    ? `<tr><td colspan="10"><div class="no-data">✅ ไม่มีรายการด่วน</div></td></tr>`
+    : rows.map(r => {
+        const d = daysLeft(r.renew_date);
+        const prio = d===null?'-':d<0?'🔴 ด่วนมาก':d<=7?'🔴 ด่วน':d<=30?'🟡 ติดตาม':'🟢 ปกติ';
+        return `<tr class="${rowCls(r)}">
+          <td style="font-weight:700">${prio}</td>
+          <td><strong style="font-size:14px">${r.restaurant_name}</strong></td>
+          <td>${pkgTag(r.package)}</td>
+          <td style="font-weight:700">฿${fmt(r.price)}</td>
+          <td style="font-size:13px">${fmtD(r.renew_date)}</td>
+          <td>${dayChip(d)}</td>
+          <td>${payBadge(r.payment_status)}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td style="color:var(--t2);font-size:13px;font-weight:600">${r.owner||'-'}</td>
+          <td>${r.url?`<a href="${r.url}" target="_blank" class="link-btn">🔗</a>`:'-'}</td>
+        </tr>`;
+      }).join('');
+  document.getElementById('rn-count').textContent = `แสดง ${rows.length} รายการ`;
+};
+
+/* ═══════════════════════════════════════════════════════════
+   PATCH switchTab to render Owner Dashboard
+   ═══════════════════════════════════════════════════════════ */
+const _origSwitchTab = switchTab;
+switchTab = function(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'owner') renderOwnerDashboard();
+  else if (name === 'cashflow') renderCashflow();
+  else if (name === 'branches') renderBranches();
+  else if (name === 'renewals') renderRenewals();
+};
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE: update heatmap colors when theme changes
+   ═══════════════════════════════════════════════════════════ */
+const _origToggleTheme = toggleTheme;
+toggleTheme = function() {
+  isDark = !isDark; applyTheme();
+  // re-render dashboard to update chart colors
+  renderDashboard();
+};
 </script>
 </body>
 </html>
