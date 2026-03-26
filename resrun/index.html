@@ -133,22 +133,39 @@ body{background:var(--bg);color:var(--txt);font-family:'Prompt','Noto Sans Thai'
 
 /* ─── HEATMAP ────────────────────────────────────────────── */
 .hm-wrap{margin-top:6px}
-.hm-labels{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-bottom:3px}
-.hm-labels span{font-size:10px;color:var(--t3);text-align:center}
-.hm-cells{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
-.hm-cell{
-  aspect-ratio:1.4;border-radius:5px;cursor:default;
-  position:relative;display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:700;transition:transform .12s;
+/* Quarter layout: Q-label + 3 month cells */
+.hm-grid{display:grid;grid-template-columns:44px 1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.hm-q-label{
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:12px;font-weight:800;
+  letter-spacing:.5px;padding:6px 4px;
 }
-.hm-cell:hover{transform:scale(1.15);z-index:5}
+.hm-q-label.q1{background:rgba(99,102,241,.15);color:#818cf8}
+.hm-q-label.q2{background:rgba(16,185,129,.15);color:#34d399}
+.hm-q-label.q3{background:rgba(245,158,11,.15);color:#fbbf24}
+.hm-q-label.q4{background:rgba(236,72,153,.15);color:#f472b6}
+.hm-col-header{
+  font-size:12px;color:var(--t3);text-align:center;font-weight:700;
+  padding:4px 0;letter-spacing:.3px;
+}
+.hm-cell{
+  min-height:88px;border-radius:10px;cursor:default;
+  position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;
+  font-weight:800;transition:transform .15s, box-shadow .15s;padding:10px 8px;
+}
+.hm-cell:hover{transform:scale(1.05);z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.hm-cell .hm-month{font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.5px}
+.hm-cell .hm-num{font-size:18px;line-height:1;letter-spacing:-1px;font-weight:900}
+.hm-cell .hm-cnt{font-size:10px;opacity:.65;font-weight:600}
 .hm-cell .tt{
   display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);
-  background:var(--s3);border:1px solid var(--b2);border-radius:6px;
-  padding:6px 10px;font-size:11px;white-space:nowrap;z-index:20;pointer-events:none;
+  background:var(--s3);border:1px solid var(--b2);border-radius:8px;
+  padding:8px 12px;font-size:12px;white-space:nowrap;z-index:20;pointer-events:none;
+  color:var(--txt);font-weight:600;line-height:1.6;box-shadow:0 4px 16px rgba(0,0,0,.3);
 }
 .hm-cell:hover .tt{display:block}
-.hm-legend{display:flex;align-items:center;gap:6px;margin-top:8px}
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:4px}
 .hm-legend span{font-size:10px;color:var(--t3)}
 .hm-steps{display:flex;gap:3px}
 .hm-step{width:14px;height:14px;border-radius:3px}
@@ -373,6 +390,31 @@ body.light .md-stat{background:#fff;border-color:var(--b1)}
 /* ─── CLICKABLE KPI ──────────────────────────────────────── */
 .kpi-val-link{cursor:pointer;transition:opacity .15s;display:inline-block}
 .kpi-val-link:hover{opacity:.72;text-decoration:underline;text-underline-offset:4px}
+/* ─── LOADING OVERLAY ────────────────────────────────────── */
+#loading-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(10,12,18,.88);backdrop-filter:blur(6px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+#loading-overlay.show{display:flex}
+.ld-spinner{
+  width:54px;height:54px;border-radius:50%;
+  border:4px solid rgba(240,180,41,.15);
+  border-top-color:var(--gold);
+  animation:spin .75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-brand{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:-6px}
+.ld-msg{font-size:14px;color:var(--t2);font-family:Prompt,Noto Sans Thai,sans-serif;font-weight:500;text-align:center}
+.ld-sub{font-size:12px;color:var(--t3);font-family:Prompt,Noto Sans Thai,sans-serif}
+.ld-bar-wrap{width:240px;height:5px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:4px}
+.ld-bar{height:100%;background:linear-gradient(90deg,var(--gold),#60a5fa,var(--grn));border-radius:4px;
+  animation:ldslide 1.6s ease-in-out infinite}
+@keyframes ldslide{
+  0%{width:0%;margin-left:0%}
+  50%{width:70%;margin-left:15%}
+  100%{width:0%;margin-left:100%}
+}
 /* ─── SHOP DETAIL MODAL ──────────────────────────────────── */
 .shop-modal{max-width:680px}
 .shop-modal .shop-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--b2)}
@@ -412,6 +454,15 @@ body.light .md-stat{background:#fff;border-color:var(--b1)}
 </style>
 </head>
 <body>
+
+<!-- ══ LOADING OVERLAY ══════════════════════════════════════ -->
+<div id="loading-overlay">
+  <div class="ld-spinner"></div>
+  <div class="ld-brand">RESRUN POS</div>
+  <div class="ld-msg" id="ld-msg">กำลังเชื่อมต่อ Supabase…</div>
+  <div class="ld-sub" id="ld-sub">SERVICE RUN CO.,LTD</div>
+  <div class="ld-bar-wrap"><div class="ld-bar"></div></div>
+</div>
 
 <!-- ══ TOPBAR ══════════════════════════════════════════════ -->
 <header class="topbar">
@@ -481,19 +532,20 @@ body.light .md-stat{background:#fff;border-color:var(--b1)}
         <canvas id="monthly-chart" height="260"></canvas>
       </div>
       <div class="cbox">
-        <div class="cbox-title"><span>Revenue Heatmap</span> — ความหนาแน่นรายได้</div>
+        <div class="cbox-title"><span>Revenue Heatmap</span> — ความหนาแน่นรายได้ (Active เท่านั้น)</div>
         <div class="hm-wrap">
-          <div class="hm-labels" id="hm-labels"></div>
-          <div class="hm-cells" id="hm-cells"></div>
-          <div class="hm-legend">
+          <!-- Header row: Q-label + month names (filled by JS) -->
+          <div class="hm-grid" id="hm-header">
+            <div></div>
+            <div class="hm-col-header">เดือนที่ 1</div>
+            <div class="hm-col-header">เดือนที่ 2</div>
+            <div class="hm-col-header">เดือนที่ 3</div>
+          </div>
+          <!-- 4 Quarter rows (filled by JS) -->
+          <div id="hm-grid-body"></div>
+          <div class="hm-legend" style="margin-top:10px">
             <span>น้อย</span>
-            <div class="hm-steps">
-              <div class="hm-step" style="background:#111827"></div>
-              <div class="hm-step" style="background:#1e3a5f"></div>
-              <div class="hm-step" style="background:#1d4ed8"></div>
-              <div class="hm-step" style="background:#0ea5e9"></div>
-              <div class="hm-step" style="background:#f0b429"></div>
-            </div>
+            <div class="hm-steps" id="hm-steps-legend"></div>
             <span>มาก</span>
           </div>
         </div>
@@ -968,12 +1020,27 @@ window.addEventListener('DOMContentLoaded', async () => {
   localStorage.removeItem('sb_key');
   applyTheme();
   updateAdminUI();
+  showLoading('กำลังเริ่มต้นระบบ…', 'RESRUN POS CRM');
   await connectSupabase();
 });
 
 /* ═══════════════════════════════════════════════════════════
    SUPABASE
    ═══════════════════════════════════════════════════════════ */
+/* ─── LOADING OVERLAY HELPERS ───────────────────────────── */
+function showLoading(msg = 'กำลังโหลดข้อมูล…', sub = '') {
+  document.getElementById('ld-msg').textContent = msg;
+  document.getElementById('ld-sub').textContent = sub || 'SERVICE RUN CO.,LTD';
+  document.getElementById('loading-overlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.remove('show');
+}
+function updateLoading(msg, sub) {
+  document.getElementById('ld-msg').textContent = msg;
+  if (sub) document.getElementById('ld-sub').textContent = sub;
+}
+
 /* ═══════════════════════════════════════════════════════════
    SUPABASE FETCH HELPERS — ใช้ fetch โดยตรง ไม่ผ่าน SDK
    ═══════════════════════════════════════════════════════════ */
@@ -998,20 +1065,25 @@ async function sbFetch(path, opts = {}) {
 
 /* ─────────────────────────────────────────────────────────── */
 async function connectSupabase() {
+  showLoading('กำลังเชื่อมต่อ Supabase…', 'qktqbiurepifkmsggehf.supabase.co');
   setSyncStatus('loading', 'กำลังเชื่อมต่อ…');
   showConnBanner('loading', `กำลังเชื่อมต่อ → ${SUPABASE_URL}`);
   try {
     // Ping
+    updateLoading('กำลังทดสอบการเชื่อมต่อ…', 'Ping Supabase REST API');
     await sbFetch('?limit=1&select=id');
 
     // Load all
+    updateLoading('กำลังโหลดข้อมูลสาขา…', 'SELECT * FROM customers');
     const data = await sbFetch('?order=no&select=*');
 
     if (!data || data.length === 0) {
-      showConnBanner('loading', `✅ เชื่อมต่อได้ — กำลัง Import ${SEED.length} สาขา…`);
+      updateLoading(`กำลัง Import ${SEED.length} สาขา…`, 'INSERT INTO customers');
       await _doImport();
     } else {
       DATA = data;
+      updateLoading(`โหลดสำเร็จ ${data.length} สาขา ✅`, '');
+      await new Promise(r => setTimeout(r, 600)); // แสดงผลสำเร็จสั้นๆ
       setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
       showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ · ${DATA.length} สาขา · ${new Date().toLocaleTimeString('th-TH')}`);
       renderAll();
@@ -1024,6 +1096,8 @@ async function connectSupabase() {
     renderAll();
     toast('❌ ' + msg, 'error');
     console.error('[Supabase]', e);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -1088,7 +1162,7 @@ async function testConnection() {
 async function importSeedData() {
   const btn = document.getElementById('import-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลัง Import…'; }
-  showConnBanner('loading', `กำลัง Import ${SEED.length} สาขา → Supabase…`);
+  showLoading(`กำลัง Import ${SEED.length} สาขา → Supabase…`, 'กรุณารอสักครู่');
   try {
     await _doImport(btn);
   } catch(e) {
@@ -1096,12 +1170,15 @@ async function importSeedData() {
     showConnBanner('err', '❌ Import ล้มเหลว: ' + msg);
     toast('❌ ' + msg, 'error');
     console.error('[Import]', e);
+  } finally {
+    hideLoading();
+    if (btn) { btn.disabled = false; btn.textContent = '📥 Import 106 สาขา'; }
   }
-  if (btn) { btn.disabled = false; btn.textContent = '📥 Import 106 สาขา'; }
 }
 
 async function _doImport(btn) {
   // ลบเก่าก่อน
+  updateLoading('กำลังล้างข้อมูลเดิม…', 'DELETE FROM customers');
   try {
     await sbFetch('?no=gte.0', { method: 'DELETE', headers: { ...SB_H(), 'Prefer': 'return=minimal' } });
   } catch(e) { /* table อาจว่างอยู่แล้ว */ }
@@ -1114,7 +1191,7 @@ async function _doImport(btn) {
     await sbFetch('', { method: 'POST', body: JSON.stringify(chunk) });
     imported += chunk.length;
     if (btn) btn.textContent = `⏳ ${imported}/${SEED.length}…`;
-    showConnBanner('loading', `กำลัง Import… ${imported}/${SEED.length} สาขา`);
+    updateLoading(`กำลัง Import… ${imported}/${SEED.length} สาขา`, `INSERT batch ${Math.ceil(imported/50)}/${chunks.length}`);
   }
 
   DATA = await sbFetch('?order=no&select=*');
@@ -1472,18 +1549,63 @@ function renderDashboard() {
     }]
   });
 
-  // ── HEATMAP ──
+  // ── HEATMAP (4 Quarters × 3 months) ──
   const hmax = Math.max(...mVals, 1);
   const hColors = isDarkMode
-    ? ['#111827','#1e3a5f','#1d4ed8','#0ea5e9','#f0b429']
-    : ['#e2e8f0','#bfdbfe','#93c5fd','#3b82f6','#f0b429'];
-  document.getElementById('hm-labels').innerHTML = MONTHS.map(m=>`<span>${m}</span>`).join('');
-  document.getElementById('hm-cells').innerHTML = mVals.map((v,i)=>{
-    const lvl = v===0?0:Math.min(4,Math.ceil((v/hmax)*4));
-    const txtCol = lvl>=3?(isDarkMode?'#1a1200':'#1a1200'):(isDarkMode?'#8892a4':'#4a5268');
-    return `<div class="hm-cell" style="background:${hColors[lvl]};color:${txtCol}">
-      ${lvl>=2?(v>=1000?Math.round(v/1000)+'k':''):''}
-      <div class="tt" style="color:var(--txt)">${MONTHS[i]}<br>฿${fmt(v)}<br>${mCounts[i]} ราย</div>
+    ? ['#161b27','#1e3a5f','#1d4ed8','#0ea5e9','#f0b429']
+    : ['#dde3f0','#bfdbfe','#93c5fd','#3b82f6','#f0b429'];
+
+  // Legend steps
+  document.getElementById('hm-steps-legend').innerHTML = hColors.map(c=>
+    `<div class="hm-step" style="background:${c}"></div>`).join('');
+
+  // Quarter definitions: name, class, month indices [0-based]
+  const quarters = [
+    { label:'Q1', cls:'q1', months:[0,1,2]  },
+    { label:'Q2', cls:'q2', months:[3,4,5]  },
+    { label:'Q3', cls:'q3', months:[6,7,8]  },
+    { label:'Q4', cls:'q4', months:[9,10,11] },
+  ];
+
+  // Update header with actual month names
+  document.getElementById('hm-header').innerHTML = `
+    <div></div>
+    ${['เดือน 1','เดือน 2','เดือน 3'].map(h=>`<div class="hm-col-header">${h}</div>`).join('')}
+  `;
+
+  // Build 4 quarter rows
+  document.getElementById('hm-grid-body').innerHTML = quarters.map(q => {
+    const cells = q.months.map(mi => {
+      const v   = mVals[mi];
+      const cnt = mCounts[mi];
+      const lvl = v===0?0:Math.min(4,Math.ceil((v/hmax)*4));
+      const darkTxt = lvl>=3;
+      const numCol  = darkTxt?'#1a1200':(isDarkMode?'#e2e8f4':'#1e2540');
+      const cntCol  = darkTxt?'rgba(0,0,0,.55)':(isDarkMode?'rgba(255,255,255,.4)':'rgba(30,37,64,.4)');
+      const mnCol   = darkTxt?'rgba(0,0,0,.5)':(isDarkMode?'rgba(255,255,255,.4)':'rgba(30,37,64,.4)');
+      const numStr  = v===0?'—':(v>=1000?(v/1000).toFixed(1)+'k':v.toString());
+      const isCurr  = mi===curM;
+      const ring    = isCurr?`box-shadow:0 0 0 2px var(--gold);`:'';
+      return `<div class="hm-cell" style="background:${hColors[lvl]};${ring}">
+        <div class="hm-month" style="color:${mnCol}">${MONTHS[mi]}${isCurr?' ◀':''}</div>
+        <div class="hm-num" style="color:${numCol}">${numStr}</div>
+        ${cnt>0?`<div class="hm-cnt" style="color:${cntCol}">${cnt} ร้าน</div>`:''}
+        <div class="tt">${MONTHS[mi]} (${q.label})<br>${Number(v).toLocaleString('th-TH')} บาท<br>${cnt} ราย</div>
+      </div>`;
+    }).join('');
+
+    // Quarter total
+    const qTotal = q.months.reduce((a,mi)=>a+mVals[mi],0);
+    const qCount = q.months.reduce((a,mi)=>a+mCounts[mi],0);
+
+    return `<div class="hm-grid" style="margin-bottom:8px">
+      <div class="hm-q-label ${q.cls}" title="${q.label}: ${Number(qTotal).toLocaleString('th-TH')} บาท · ${qCount} ราย">
+        <div style="text-align:center">
+          <div>${q.label}</div>
+          <div style="font-size:9px;opacity:.75;font-weight:600;margin-top:2px">${qTotal>=1000?(qTotal/1000).toFixed(0)+'k':'0'}</div>
+        </div>
+      </div>
+      ${cells}
     </div>`;
   }).join('');
 
@@ -1628,20 +1750,14 @@ function renderMonthDetail(mi) {
       <div class="rate-bar-bg"><div class="rate-bar-fill" style="width:${rate}%;background:${rateColor}"></div></div>
     </div>
 
-    <!-- SECTION 1: OVERDUE (Active only) -->
-    ${sectionHeader('🔴','ค้างจ่าย — Overdue (Active)',secOverdue.length,overdueVal,'#f05252','rgba(240,82,82,.06)')}
-    <div style="overflow-x:auto;margin-bottom:16px;border:1px solid rgba(240,82,82,.2);border-top:none;border-radius:0 0 8px 8px">
-      <table class="md-tbl" style="background:rgba(240,82,82,.02)">${tblHead}<tbody>${buildRows(secOverdue)}</tbody></table>
-    </div>
-
-    <!-- SECTION 2: FOLLOW / WORKING (Active only) -->
-    ${sectionHeader('🟡','รอติดตาม — Follow to Renew / Working (Active)',secFollow.length,followVal,'#fbbf24','rgba(251,191,36,.06)')}
+    <!-- SECTION 1: FOLLOW / WORKING (Active only) -->
+    ${sectionHeader('🟡','รอติดตาม — Follow to Renew / Working',secFollow.length,followVal,'#fbbf24','rgba(251,191,36,.06)')}
     <div style="overflow-x:auto;margin-bottom:16px;border:1px solid rgba(251,191,36,.2);border-top:none;border-radius:0 0 8px 8px">
       <table class="md-tbl" style="background:rgba(251,191,36,.02)">${tblHead}<tbody>${buildRows(secFollow)}</tbody></table>
     </div>
 
-    <!-- SECTION 3: PAID (Active only) -->
-    ${sectionHeader('🟢','ชำระแล้ว — Paid (Active)',secPaid.length,paidVal,'#34d399','rgba(52,211,153,.06)')}
+    <!-- SECTION 2: PAID (Active only) -->
+    ${sectionHeader('🟢','ชำระแล้ว — Paid',secPaid.length,paidVal,'#34d399','rgba(52,211,153,.06)')}
     <div style="overflow-x:auto;margin-bottom:4px;border:1px solid rgba(52,211,153,.2);border-top:none;border-radius:0 0 8px 8px">
       <table class="md-tbl" style="background:rgba(52,211,153,.02)">${tblHead}<tbody>${buildRows(secPaid)}</tbody></table>
     </div>
