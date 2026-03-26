@@ -124,6 +124,7 @@ body:not(.light) .kpi-val.grn{text-shadow:0 0 20px rgba(52,211,153,.25)}
 .chart-row{display:grid;gap:16px;margin-bottom:18px}
 .chart-row.r-3-2{grid-template-columns:3fr 2fr}
 .chart-row.r-1-1{grid-template-columns:1fr 1fr}
+.chart-row.r-1-1-1{grid-template-columns:1fr 1fr 1fr}
 .chart-row.r-full{grid-template-columns:1fr}
 .cbox{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:18px 20px}
 .cbox-title{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
@@ -722,27 +723,51 @@ body:not(.light){
   <!-- PAGE: Cash Flow -->
   <div id="page-cashflow" class="page">
     <div class="page-header">
-      <div class="page-title">Cash Flow Forecast</div>
-      <div class="page-sub">วางแผนกระแสเงินสด Service Run Co.,Ltd</div>
+      <div class="page-title">Revenue Intelligence</div>
+      <div class="page-sub" id="cf-date-sub">SaaS Financial Overview — Service Run Co.,Ltd · Active Customers Only</div>
     </div>
-    <div class="kpi-grid" id="cf-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
 
-    <!-- 12-Month Full Row -->
-    <div class="chart-row r-full" style="margin-bottom:18px">
+    <!-- ROW 1: Core SaaS Metrics (6 cards) -->
+    <div class="kpi-grid" id="cf-kpi" style="grid-template-columns:repeat(6,1fr);margin-bottom:18px"></div>
+
+    <!-- ROW 2: Revenue Bridge (Waterfall) + Monthly Renewal Forecast -->
+    <div class="chart-row r-1-1" style="margin-bottom:18px">
       <div class="cbox">
-        <div class="cbox-title"><span>12-Month Revenue Forecast</span> — รายได้รายเดือน (กราฟแท่งแนวนอน)</div>
-        <canvas id="cf-chart" height="340"></canvas>
+        <div class="cbox-title"><span>📊 Revenue Waterfall</span> — Revenue Bridge วิเคราะห์ที่มารายได้</div>
+        <canvas id="cf-waterfall" height="220"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>📅 Monthly Renewal Forecast</span> — License ที่จะหมดอายุ 12 เดือนข้างหน้า</div>
+        <canvas id="cf-forecast" height="220"></canvas>
       </div>
     </div>
 
-    <div class="chart-row r-1-1">
+    <!-- ROW 3: Package Mix (Doughnut) + Collection Pipeline + At-Risk -->
+    <div class="chart-row r-1-1-1" style="margin-bottom:18px">
       <div class="cbox">
-        <div class="cbox-title"><span>ARR by Package</span></div>
-        <canvas id="arr-chart" height="200"></canvas>
+        <div class="cbox-title"><span>📦 Package Revenue Mix</span></div>
+        <canvas id="cf-pkg" height="200"></canvas>
+        <div id="cf-pkg-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:5px"></div>
       </div>
       <div class="cbox">
-        <div class="cbox-title"><span>Owner Performance</span> — สัดส่วนพอร์ตแต่ละทีม</div>
-        <canvas id="owner-chart" height="200"></canvas>
+        <div class="cbox-title"><span>🎯 Collection Pipeline</span> — สถานะการจัดเก็บ</div>
+        <canvas id="cf-pipeline" height="200"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>⚠️ At-Risk Revenue</span> — Overdue + Follow (เร่งด่วน)</div>
+        <div id="cf-risk-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <!-- ROW 4: Owner Leaderboard + Renewal Urgency Table -->
+    <div class="chart-row r-1-1" style="margin-bottom:18px">
+      <div class="cbox">
+        <div class="cbox-title"><span>👥 Owner Portfolio Performance</span></div>
+        <canvas id="cf-owner" height="200"></canvas>
+      </div>
+      <div class="cbox">
+        <div class="cbox-title"><span>🔥 Renewal Urgency — ≤90 วัน</span> <span style="font-size:11px;color:var(--t3)">เรียงตามความเร่งด่วน</span></div>
+        <div id="cf-urgency" style="margin-top:8px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
       </div>
     </div>
   </div>
@@ -1936,75 +1961,303 @@ function renderRenewals() {
 /* ─── CASH FLOW ─────────────────────────────────────────── */
 function renderCashflow() {
   const all = trackingData();
-  const arr = all.reduce((a,r)=>a+(r.price||0),0);
-  const paid = all.filter(r=>r.payment_status==='Paid').reduce((a,r)=>a+(r.price||0),0);
-  const overdue = all.filter(r=>r.payment_status==='Overdue').reduce((a,r)=>a+(r.price||0),0);
-  const follow = all.filter(r=>r.payment_status==='Follow to Renew').reduce((a,r)=>a+(r.price||0),0);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const curM = now.getMonth();
+  const isDark = !document.body.classList.contains('light');
+  const gc = isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
+  const lc = isDark?'#8892a4':'#4a5268';
+  const chartFont = {family:'Prompt,Noto Sans Thai,sans-serif',size:11};
 
+  // ── CORE METRICS ─────────────────────────────────────────
+  const ARR        = all.reduce((a,r)=>a+(r.price||0),0);
+  const MRR        = ARR / 12;
+  const paidRows   = all.filter(r=>r.payment_status==='Paid'||r.payment_status==='Working');
+  const overdueRows= all.filter(r=>r.payment_status==='Overdue');
+  const followRows = all.filter(r=>r.payment_status==='Follow to Renew');
+  const confirmedARR = paidRows.reduce((a,r)=>a+(r.price||0),0);
+  const overdueARR   = overdueRows.reduce((a,r)=>a+(r.price||0),0);
+  const followARR    = followRows.reduce((a,r)=>a+(r.price||0),0);
+  const atRiskARR    = overdueARR + followARR;
+
+  // Collection Rate
+  const collRate = ARR>0 ? Math.round((confirmedARR/ARR)*100) : 0;
+
+  // Churn: DeActive count vs all DATA
+  const allBranches = DATA.filter(r=>r.restaurant_name?.trim());
+  const deactCount  = allBranches.filter(r=>r.status==='DeActivate').length;
+  const churnRate   = allBranches.length>0 ? (deactCount/allBranches.length*100).toFixed(1) : '0.0';
+
+  // Upcoming 30d revenue at risk
+  const expiring30 = all.filter(r=>{const d=daysLeft(r.renew_date);return d!==null&&d>=0&&d<=30;});
+  const expiring30Val = expiring30.reduce((a,r)=>a+(r.price||0),0);
+
+  // ── KPI CARDS (6) ────────────────────────────────────────
   document.getElementById('cf-kpi').innerHTML = `
-    <div class="kpi c-gold"><span class="kpi-ico">📊</span><div class="kpi-lbl">Total ARR</div><div class="kpi-val gold">฿${fmt(arr)}</div><div class="kpi-sub">Annual Recurring</div></div>
-    <div class="kpi c-grn"><span class="kpi-ico">✅</span><div class="kpi-lbl">Confirmed</div><div class="kpi-val grn">฿${fmt(paid)}</div><div class="kpi-sub">Paid + Working</div></div>
-    <div class="kpi c-red"><span class="kpi-ico">⚠️</span><div class="kpi-lbl">Overdue</div><div class="kpi-val red">฿${fmt(overdue)}</div><div class="kpi-sub">ค้างชำระ</div></div>
-    <div class="kpi c-ylw"><span class="kpi-ico">🔔</span><div class="kpi-lbl">Follow to Renew</div><div class="kpi-val ylw">฿${fmt(follow)}</div><div class="kpi-sub">รอปิด</div></div>`;
+    <div class="kpi c-gold">
+      <span class="kpi-ico">💰</span>
+      <div class="kpi-lbl">ARR (Active)</div>
+      <div class="kpi-val gold" style="font-size:22px">${fmtMoney(ARR,'gold-money')}</div>
+      <div class="kpi-sub">Annual Recurring Revenue</div>
+    </div>
+    <div class="kpi c-blu">
+      <span class="kpi-ico">📆</span>
+      <div class="kpi-lbl">MRR</div>
+      <div class="kpi-val blu" style="font-size:22px">${fmtMoney(Math.round(MRR),'gold-money')}</div>
+      <div class="kpi-sub">Monthly Recurring (ARR÷12)</div>
+    </div>
+    <div class="kpi c-grn">
+      <span class="kpi-ico">✅</span>
+      <div class="kpi-lbl">Confirmed Revenue</div>
+      <div class="kpi-val grn" style="font-size:22px">${fmtMoney(confirmedARR,'grn-money')}</div>
+      <div class="kpi-sub">Collection Rate <strong>${collRate}%</strong></div>
+    </div>
+    <div class="kpi c-red">
+      <span class="kpi-ico">⚠️</span>
+      <div class="kpi-lbl">At-Risk Revenue</div>
+      <div class="kpi-val red" style="font-size:22px">${fmtMoney(atRiskARR,'red-money')}</div>
+      <div class="kpi-sub">Overdue + Follow to Renew</div>
+    </div>
+    <div class="kpi c-ylw">
+      <span class="kpi-ico">⏰</span>
+      <div class="kpi-lbl">Expiring ≤30 วัน</div>
+      <div class="kpi-val ylw" style="font-size:22px">${fmtMoney(expiring30Val,'ylw-money')}</div>
+      <div class="kpi-sub">${expiring30.length} สาขา ต้องต่อสัญญา</div>
+    </div>
+    <div class="kpi c-red">
+      <span class="kpi-ico">📉</span>
+      <div class="kpi-lbl">Churn Rate</div>
+      <div class="kpi-val red" style="font-size:28px">${churnRate}%</div>
+      <div class="kpi-sub">DeActive ${deactCount} จาก ${allBranches.length} สาขา</div>
+    </div>`;
 
-  const mVals = Array(12).fill(0), mCounts = Array(12).fill(0);
-  all.forEach(r=>{if(!r.renew_date)return;const mi=new Date(r.renew_date).getMonth();mVals[mi]+=r.price||0;mCounts[mi]++;});
-  const cOpts = {responsive:true,plugins:{legend:{labels:{color:'#8892a4',font:{family:'Noto Sans Thai',size:11}},position:'bottom'}}};
-  if(chartCF) chartCF.destroy();
-  const isDarkMode2 = !document.body.classList.contains('light');
-  const gc2 = isDarkMode2?'#161920':'#e8ecf4', tc2 = isDarkMode2?'#4a5268':'#8892a4', lc2 = isDarkMode2?'#8892a4':'#4a5268';
-  chartCF = new Chart(document.getElementById('cf-chart'),{
+  // ── CHART COMMON OPTIONS ──────────────────────────────────
+  const baseOpts = {
+    responsive:true,
+    plugins:{legend:{labels:{color:lc,font:chartFont},position:'bottom'},
+      tooltip:{bodyFont:chartFont,titleFont:{...chartFont,weight:'bold'}}},
+  };
+
+  // ── 1. WATERFALL — Revenue Bridge ────────────────────────
+  // Confirmed → +Follow → +Overdue → =ARR
+  const wLabels = ['Confirmed\n(Paid/Working)','+ Follow to\nRenew','+ Overdue','= Total\nARR'];
+  const wData   = [confirmedARR, followARR, overdueARR, ARR];
+  const wColors = [
+    isDark?'rgba(52,211,153,.75)':'rgba(26,122,74,.7)',
+    isDark?'rgba(251,191,36,.75)':'rgba(154,101,0,.7)',
+    isDark?'rgba(240,82,82,.75)' :'rgba(192,57,43,.7)',
+    isDark?'rgba(240,180,41,.85)':'rgba(154,101,0,.85)',
+  ];
+  if(window._cfWaterfall) window._cfWaterfall.destroy();
+  window._cfWaterfall = new Chart(document.getElementById('cf-waterfall'),{
     type:'bar',
-    data:{labels:MONTHS,datasets:[
-      {label:'Forecast (฿)',data:mVals,backgroundColor:mVals.map((_,i)=>i===new Date().getMonth()?'rgba(240,180,41,.95)':'rgba(240,180,41,.45)'),borderRadius:4},
-      {label:'จำนวนราย',data:mCounts,backgroundColor:'rgba(96,165,250,.35)',borderRadius:4}
-    ]},
-    options:{
-      responsive:true,indexAxis:'y',
-      plugins:{legend:{labels:{color:lc2,font:{family:'Noto Sans Thai',size:11}},position:'bottom'},
-        tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?'฿'+fmt(ctx.raw):`${ctx.raw} ราย`}}},
+    data:{labels:wLabels, datasets:[{
+      label:'Revenue (บาท)',data:wData,
+      backgroundColor:wColors,borderRadius:8,borderSkipped:false,
+    }]},
+    options:{...baseOpts,
+      plugins:{...baseOpts.plugins, legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${Number(c.raw).toLocaleString('th-TH')} บาท`}}},
       scales:{
-        y:{ticks:{color:lc2},grid:{display:false}},
-        x:{ticks:{color:tc2,callback:v=>'฿'+(v>=1000?(v/1000).toFixed(0)+'k':v)},grid:{color:gc2}}
+        x:{ticks:{color:lc,font:chartFont},grid:{color:gc}},
+        y:{ticks:{color:lc,font:chartFont,callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:gc}}
       }
     },
-    plugins:[{id:'cfLabels',afterDatasetsDraw(chart){
-      const {ctx}=chart;
-      chart.getDatasetMeta(0).data.forEach((bar,i)=>{
-        const val=mVals[i]; if(!val) return;
-        ctx.save();ctx.fillStyle='rgba(240,180,41,.85)';
-        ctx.font='bold 10px Noto Sans Thai,sans-serif';
-        ctx.textAlign='left';ctx.textBaseline='middle';
-        ctx.fillText('฿'+(val>=1000?(val/1000).toFixed(0)+'k':val),bar.x+4,bar.y);
+    plugins:[{id:'wf',afterDatasetsDraw(c){
+      const {ctx}=c;c.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const v=wData[i]; if(!v) return;
+        ctx.save();ctx.fillStyle=lc;ctx.font=`bold 11px Prompt,sans-serif`;
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(v>=1000?(v/1000).toFixed(0)+'k':v, bar.x, bar.y-4);
         ctx.restore();
       });
     }}]
   });
 
-  const pkgRev={};
-  all.forEach(r=>{if(r.package&&r.package!=='-') pkgRev[r.package]=(pkgRev[r.package]||0)+(r.price||0);});
-  if(chartARR) chartARR.destroy();
-  chartARR = new Chart(document.getElementById('arr-chart'),{
+  // ── 2. FORECAST — 12-Month Renewal Calendar ───────────────
+  const mVals=[],mCounts=[],mPaid=[],mUnpaid=[];
+  for(let i=0;i<12;i++){mVals.push(0);mCounts.push(0);mPaid.push(0);mUnpaid.push(0);}
+  all.forEach(r=>{
+    if(!r.renew_date) return;
+    const mi = new Date(r.renew_date).getMonth();
+    const v = r.price||0;
+    mVals[mi]+=v; mCounts[mi]++;
+    if(r.payment_status==='Paid'||r.payment_status==='Working') mPaid[mi]+=v;
+    else mUnpaid[mi]+=v;
+  });
+  if(window._cfForecast) window._cfForecast.destroy();
+  window._cfForecast = new Chart(document.getElementById('cf-forecast'),{
     type:'bar',
-    data:{labels:Object.keys(pkgRev),datasets:[{label:'ARR (฿)',data:Object.values(pkgRev),
-      backgroundColor:['#3b82f6','#8b5cf6','#f59e0b','#10b981'],borderRadius:6}]},
-    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:'#4a5268',callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
-    }
+    data:{labels:MONTHS,datasets:[
+      {label:'Confirmed (Paid/Working)',data:mPaid,
+        backgroundColor:isDark?'rgba(52,211,153,.75)':'rgba(26,122,74,.6)',
+        borderRadius:[6,6,0,0],stack:'s'},
+      {label:'Pending (Follow/Overdue)',data:mUnpaid,
+        backgroundColor:isDark?'rgba(251,191,36,.65)':'rgba(154,101,0,.5)',
+        borderRadius:[6,6,0,0],stack:'s'},
+    ]},
+    options:{...baseOpts,
+      plugins:{...baseOpts.plugins,
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Number(c.raw).toLocaleString('th-TH')} บาท`}}},
+      scales:{
+        x:{ticks:{color:lc,font:chartFont},grid:{display:false},
+          afterDataLimits(scale){scale.max=scale.max*1.05}},
+        y:{stacked:true,ticks:{color:lc,font:chartFont,callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},
+          grid:{color:gc}}
+      }
+    },
+    plugins:[{id:'hlCur',beforeDraw(c){
+      const {ctx,chartArea,scales}=c;
+      const x=scales.x.getPixelForValue(curM);
+      const bw=scales.x.width/12;
+      ctx.save();ctx.fillStyle=isDark?'rgba(240,180,41,.06)':'rgba(154,101,0,.06)';
+      ctx.fillRect(x-bw/2,chartArea.top,bw,chartArea.bottom-chartArea.top);
+      ctx.restore();
+    }}]
   });
 
-  const ownerRev={};
-  all.forEach(r=>{const o=r.owner||'-';ownerRev[o]=(ownerRev[o]||0)+(r.price||0);});
-  const ownerSorted = Object.entries(ownerRev).filter(([k])=>k!=='-').sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if(chartOwner) chartOwner.destroy();
-  chartOwner = new Chart(document.getElementById('owner-chart'),{
-    type:'bar',
-    data:{labels:ownerSorted.map(x=>x[0]),datasets:[{label:'ARR (฿)',data:ownerSorted.map(x=>x[1]),
-      backgroundColor:['#f0b429','#60a5fa','#34d399','#a78bfa','#fb923c','#f472b6','#4ade80','#38bdf8'],borderRadius:6}]},
-    options:{...cOpts,indexAxis:'y',plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:'#4a5268',callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:'#161920'}},y:{ticks:{color:'#8892a4'},grid:{display:false}}}
+  // ── 3. PACKAGE MIX — Doughnut ────────────────────────────
+  const pkgRev={},pkgCnt={};
+  all.forEach(r=>{if(r.package&&r.package!=='-'){pkgRev[r.package]=(pkgRev[r.package]||0)+(r.price||0);pkgCnt[r.package]=(pkgCnt[r.package]||0)+1;}});
+  const pkgSorted = Object.entries(pkgRev).sort((a,b)=>b[1]-a[1]);
+  const pkgColors = ['#f0b429','#60a5fa','#a78bfa','#34d399','#fb923c'];
+  if(window._cfPkg) window._cfPkg.destroy();
+  window._cfPkg = new Chart(document.getElementById('cf-pkg'),{
+    type:'doughnut',
+    data:{labels:pkgSorted.map(x=>x[0]),datasets:[{
+      data:pkgSorted.map(x=>x[1]),backgroundColor:pkgColors,
+      borderColor:isDark?'#0f1117':'#ffffff',borderWidth:2,
+    }]},
+    options:{...baseOpts,cutout:'62%',
+      plugins:{...baseOpts.plugins,
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${Number(c.raw).toLocaleString('th-TH')} บาท (${pkgCnt[c.label]} สาขา)`}}},
     }
   });
+  // Custom legend
+  document.getElementById('cf-pkg-legend').innerHTML = pkgSorted.map(([pkg,rev],i)=>{
+    const pct = ARR>0?((rev/ARR)*100).toFixed(1):'0';
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:12px">
+      <div style="width:10px;height:10px;border-radius:2px;background:${pkgColors[i]};flex-shrink:0"></div>
+      <span style="flex:1;color:var(--t2);font-weight:600">${pkg}</span>
+      <span style="color:var(--money-gold);font-weight:800">${(rev/1000).toFixed(0)}k</span>
+      <span style="color:var(--t3);font-size:10px">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  // ── 4. COLLECTION PIPELINE — Horizontal Bar ───────────────
+  const pipeLabels=['Paid','Working','Follow to Renew','Overdue','Free trial'];
+  const pipeColors=[
+    isDark?'rgba(52,211,153,.8)' :'rgba(26,122,74,.75)',
+    isDark?'rgba(96,165,250,.8)' :'rgba(26,95,168,.75)',
+    isDark?'rgba(251,191,36,.8)' :'rgba(154,101,0,.75)',
+    isDark?'rgba(240,82,82,.8)'  :'rgba(192,57,43,.75)',
+    isDark?'rgba(167,139,250,.8)':'rgba(91,71,197,.75)',
+  ];
+  const pipeVals = pipeLabels.map(s=>all.filter(r=>r.payment_status===s).reduce((a,r)=>a+(r.price||0),0));
+  if(window._cfPipeline) window._cfPipeline.destroy();
+  window._cfPipeline = new Chart(document.getElementById('cf-pipeline'),{
+    type:'bar',
+    data:{labels:pipeLabels,datasets:[{
+      label:'ARR (บาท)',data:pipeVals,backgroundColor:pipeColors,borderRadius:6,
+    }]},
+    options:{...baseOpts,indexAxis:'y',
+      plugins:{...baseOpts.plugins,legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${Number(c.raw).toLocaleString('th-TH')} บาท`}}},
+      scales:{
+        x:{ticks:{color:lc,font:chartFont,callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:gc}},
+        y:{ticks:{color:lc,font:chartFont},grid:{display:false}}
+      }
+    },
+    plugins:[{id:'pl',afterDatasetsDraw(c){
+      const{ctx}=c;c.getDatasetMeta(0).data.forEach((bar,i)=>{
+        const v=pipeVals[i];if(!v)return;
+        ctx.save();ctx.fillStyle=lc;ctx.font=`bold 10px Prompt,sans-serif`;
+        ctx.textAlign='left';ctx.textBaseline='middle';
+        ctx.fillText(v>=1000?(v/1000).toFixed(0)+'k บาท':v+' บาท',bar.x+4,bar.y);
+        ctx.restore();
+      });
+    }}]
+  });
+
+  // ── 5. AT-RISK LIST ───────────────────────────────────────
+  const atRiskRows = all.filter(r=>r.payment_status==='Overdue'||r.payment_status==='Follow to Renew')
+    .sort((a,b)=>(daysLeft(a.renew_date)??9999)-(daysLeft(b.renew_date)??9999)).slice(0,8);
+  document.getElementById('cf-risk-list').innerHTML = atRiskRows.length===0
+    ? `<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">✅ ไม่มีรายการ At-Risk</div>`
+    : atRiskRows.map(r=>{
+      const d=daysLeft(r.renew_date);
+      const isOv = r.payment_status==='Overdue';
+      const col  = isOv?'var(--red)':'var(--ylw)';
+      const tag  = isOv?'Overdue':'Follow';
+      const dayTxt = d===null?'ไม่มีกำหนด':d<0?`หมด ${Math.abs(d)} วัน`:d===0?'หมดวันนี้':(`อีก ${d} วัน`);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:var(--s2);border:1px solid var(--b1)">
+        <span style="font-size:10px;font-weight:800;color:${col};min-width:52px;padding:2px 6px;border-radius:6px;background:${isOv?'rgba(240,82,82,.1)':'rgba(251,191,36,.1)'};text-align:center">${tag}</span>
+        <span style="flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.restaurant_name}</span>
+        <span style="font-size:11px;font-weight:800;color:var(--money-gold)">${Number(r.price||0).toLocaleString('th-TH')}</span>
+        <span style="font-size:10px;color:${col};font-weight:700;min-width:72px;text-align:right">${dayTxt}</span>
+      </div>`;
+    }).join('');
+
+  // ── 6. OWNER LEADERBOARD ──────────────────────────────────
+  const ownerMap={};
+  all.forEach(r=>{
+    const o=r.owner||'-'; if(o==='-') return;
+    if(!ownerMap[o]) ownerMap[o]={arr:0,confirmed:0,overdue:0,cnt:0};
+    ownerMap[o].arr+=r.price||0;
+    ownerMap[o].cnt++;
+    if(r.payment_status==='Paid'||r.payment_status==='Working') ownerMap[o].confirmed+=r.price||0;
+    if(r.payment_status==='Overdue') ownerMap[o].overdue+=r.price||0;
+  });
+  const ownerSorted = Object.entries(ownerMap).sort((a,b)=>b[1].arr-a[1].arr);
+  const ownerColors = ['#f0b429','#60a5fa','#34d399','#a78bfa','#fb923c'];
+  if(window._cfOwner) window._cfOwner.destroy();
+  window._cfOwner = new Chart(document.getElementById('cf-owner'),{
+    type:'bar',
+    data:{labels:ownerSorted.map(x=>x[0]),datasets:[
+      {label:'Confirmed',data:ownerSorted.map(x=>x[1].confirmed),
+        backgroundColor:isDark?'rgba(52,211,153,.7)':'rgba(26,122,74,.65)',borderRadius:[4,4,0,0],stack:'s'},
+      {label:'Pending',data:ownerSorted.map(x=>x[1].arr-x[1].confirmed),
+        backgroundColor:isDark?'rgba(251,191,36,.5)':'rgba(154,101,0,.45)',borderRadius:[4,4,0,0],stack:'s'},
+    ]},
+    options:{...baseOpts,
+      scales:{
+        x:{ticks:{color:lc,font:chartFont},grid:{display:false}},
+        y:{stacked:true,ticks:{color:lc,font:chartFont,callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:gc}}
+      }
+    },
+    plugins:[{id:'ol',afterDatasetsDraw(c){
+      const{ctx,scales}=c;
+      ownerSorted.forEach(([o,d],i)=>{
+        const bar=c.getDatasetMeta(1).data[i];if(!bar)return;
+        ctx.save();ctx.fillStyle=lc;ctx.font=`bold 10px Prompt,sans-serif`;
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText(`${d.cnt}ร้าน`,bar.x,bar.y-2);
+        ctx.restore();
+      });
+    }}]
+  });
+
+  // ── 7. RENEWAL URGENCY LIST (≤90 วัน) ────────────────────
+  const urgent = all.filter(r=>{const d=daysLeft(r.renew_date);return d!==null&&d>=0&&d<=90;})
+    .sort((a,b)=>(daysLeft(a.renew_date)||0)-(daysLeft(b.renew_date)||0));
+  document.getElementById('cf-urgency').innerHTML = urgent.length===0
+    ? `<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">✅ ไม่มีสาขาหมดอายุใน 90 วัน</div>`
+    : urgent.map(r=>{
+      const d=daysLeft(r.renew_date);
+      const col = d<=7?'var(--red)':d<=30?'var(--ylw)':'var(--grn)';
+      const pct = Math.round((1-d/90)*100);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:var(--s2);border:1px solid var(--b1)">
+        <div style="width:36px;height:36px;border-radius:8px;background:${d<=7?'rgba(240,82,82,.12)':d<=30?'rgba(251,191,36,.1)':'rgba(52,211,153,.1)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:${col};flex-shrink:0">${d}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.restaurant_name}</div>
+          <div style="font-size:10px;color:var(--t3)">${r.payment_status} · ${r.owner||'-'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:12px;font-weight:800;color:var(--money-gold)">${Number(r.price||0).toLocaleString('th-TH')}</div>
+          <div style="font-size:10px;color:var(--t3)">${pkgTag(r.package)}</div>
+        </div>
+      </div>`;
+    }).join('');
 }
 
 /* ═══════════════════════════════════════════════════════════
