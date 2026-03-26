@@ -914,48 +914,56 @@ window.addEventListener('DOMContentLoaded', async () => {
 /* ═══════════════════════════════════════════════════════════
    SUPABASE
    ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   SUPABASE FETCH HELPERS — ใช้ fetch โดยตรง ไม่ผ่าน SDK
+   ═══════════════════════════════════════════════════════════ */
+const SB_H = () => ({
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Prefer': 'return=representation'
+});
+const SB_REST = () => `${SUPABASE_URL}/rest/v1/customers`;
+
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SB_REST() + path, { headers: SB_H(), ...opts });
+  if (!res.ok) {
+    let errMsg = `HTTP ${res.status}`;
+    try { const j = await res.json(); errMsg = j.message || j.hint || j.error || errMsg; } catch(e) {}
+    throw new Error(errMsg);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+/* ─────────────────────────────────────────────────────────── */
 async function connectSupabase() {
-  setSyncStatus('loading', 'กำลังเชื่อมต่อ Supabase…');
-  showConnBanner('loading', 'กำลังเชื่อมต่อ Supabase…');
+  setSyncStatus('loading', 'กำลังเชื่อมต่อ…');
+  showConnBanner('loading', `กำลังเชื่อมต่อ → ${SUPABASE_URL}`);
   try {
-    const { createClient } = supabase;
-    SB = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Ping
+    await sbFetch('?limit=1&select=id');
 
-    // Step 1: Test ping
-    const { error: pingErr } = await SB.from('customers').select('id', { count: 'exact', head: true });
-    if (pingErr) throw new Error('Table ไม่พบ หรือ RLS บล็อก: ' + pingErr.message);
+    // Load all
+    const data = await sbFetch('?order=no&select=*');
 
-    // Step 2: Load data
-    const { data, error } = await SB.from('customers').select('*').order('no');
-    if (error) throw error;
-
-    if (data.length === 0) {
-      // Auto-seed
-      showConnBanner('loading', `เชื่อมต่อสำเร็จ ✅ — กำลัง Import ข้อมูล ${SEED.length} สาขา…`);
-      const chunks = [];
-      for (let i = 0; i < SEED.length; i += 50) chunks.push(SEED.slice(i, i + 50));
-      for (const chunk of chunks) {
-        const { error: insErr } = await SB.from('customers').insert(chunk);
-        if (insErr) throw new Error('Insert failed: ' + insErr.message);
-      }
-      const { data: fresh } = await SB.from('customers').select('*').order('no');
-      DATA = fresh || SEED;
-      toast(`🎉 Import ${DATA.length} สาขาสำเร็จ!`, 'success');
+    if (!data || data.length === 0) {
+      showConnBanner('loading', `✅ เชื่อมต่อได้ — กำลัง Import ${SEED.length} สาขา…`);
+      await _doImport();
     } else {
       DATA = data;
+      setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
+      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ · ${DATA.length} สาขา · ${new Date().toLocaleTimeString('th-TH')}`);
+      renderAll();
     }
-
-    setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
-    showConnBanner('ok', `✅ เชื่อมต่อ Supabase สำเร็จ · ${DATA.length} สาขา · ${new Date().toLocaleTimeString('th-TH')}`);
-    renderAll();
   } catch(e) {
-    const msg = e.message || String(e);
-    setSyncStatus('err', '❌ เชื่อม Supabase ไม่สำเร็จ');
-    showConnBanner('err', '❌ เชื่อมต่อ Supabase ไม่สำเร็จ: ' + msg);
+    const msg = diagError(e.message || String(e));
+    setSyncStatus('err', '❌ เชื่อมไม่ได้');
+    showConnBanner('err', '❌ ' + msg);
     DATA = SEED.filter(r => r.restaurant_name && r.restaurant_name.trim());
     renderAll();
     toast('❌ ' + msg, 'error');
-    console.error('[Supabase Error]', e);
+    console.error('[Supabase]', e);
   }
 }
 
@@ -984,7 +992,7 @@ function showConnBanner(type, msg) {
   banner.style.borderColor = s.border;
   banner.style.color = s.color;
   banner.innerHTML = `<span style="font-size:16px">${s.icon}</span><span>${msg}</span>`;
-  if (type === 'ok') setTimeout(() => banner?.remove(), 5000);
+  if (type === 'ok') setTimeout(() => banner?.remove(), 6000);
 }
 
 /* ─── TEST CONNECTION ────────────────────────────────────── */
@@ -993,84 +1001,87 @@ async function testConnection() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังทดสอบ…'; }
   showConnBanner('loading', `กำลังทดสอบ → ${SUPABASE_URL}`);
   try {
-    const { createClient } = supabase;
-    const testSB = createClient(SUPABASE_URL, SUPABASE_KEY);
     const start = Date.now();
-
-    // Ping table
-    const { error } = await testSB.from('customers').select('id').limit(1);
+    await sbFetch('?limit=1&select=id');
     const ms = Date.now() - start;
-    if (error) throw new Error(error.message);
 
-    // Count rows
-    const { data: rows } = await testSB.from('customers').select('id');
-    const rowCount = rows?.length || 0;
+    const rows = await sbFetch('?select=id');
+    const count = rows?.length || 0;
 
-    if (rowCount === 0) {
-      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ (${ms}ms) — Table ว่าง 0 rows → กด "Import 106 สาขา" ด้านบน`);
-      toast(`✅ เชื่อมต่อได้ (${ms}ms) แต่ Table ว่าง — กด Import 106 สาขา`, 'info');
+    if (count === 0) {
+      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ! (${ms}ms) — Table ว่าง กด "📥 Import 106 สาขา" ด้านบน`);
+      toast(`✅ เชื่อมต่อได้ (${ms}ms) — Table ว่าง → กด Import`, 'info');
     } else {
-      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ (${ms}ms) — มีข้อมูลอยู่แล้ว ${rowCount} rows`);
-      toast(`✅ เชื่อมต่อสำเร็จ! ${rowCount} rows (${ms}ms)`, 'success');
+      showConnBanner('ok', `✅ เชื่อมต่อสำเร็จ! (${ms}ms) — มีข้อมูล ${count} rows พร้อมใช้งาน`);
+      toast(`✅ เชื่อมต่อสำเร็จ! ${count} rows (${ms}ms)`, 'success');
     }
   } catch(e) {
-    const msg = diagError(e.message);
+    const msg = diagError(e.message || String(e));
     showConnBanner('err', '❌ ' + msg);
     toast('❌ ' + msg, 'error');
+    console.error('[Test Connection]', e);
   }
   if (btn) { btn.disabled = false; btn.textContent = '🔌 Test Connection'; }
 }
 
-/* ─── IMPORT DATA MANUALLY ──────────────────────────────── */
+/* ─── IMPORT DATA ───────────────────────────────────────── */
 async function importSeedData() {
   const btn = document.getElementById('import-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลัง Import…'; }
-  showConnBanner('loading', `กำลัง Import ${SEED.length} สาขาเข้า Supabase…`);
+  showConnBanner('loading', `กำลัง Import ${SEED.length} สาขา → Supabase…`);
   try {
-    const { createClient } = supabase;
-    SB = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // ลบข้อมูลเก่าก่อน (ถ้ามี)
-    await SB.from('customers').delete().gte('no', 0);
-
-    // Insert ทีละ 50 rows
-    let imported = 0;
-    const chunks = [];
-    for (let i = 0; i < SEED.length; i += 50) chunks.push(SEED.slice(i, i + 50));
-
-    for (const chunk of chunks) {
-      const { error } = await SB.from('customers').insert(chunk);
-      if (error) throw new Error('Insert error: ' + error.message);
-      imported += chunk.length;
-      if (btn) btn.textContent = `⏳ ${imported}/${SEED.length}…`;
-      showConnBanner('loading', `กำลัง Import… ${imported}/${SEED.length} สาขา`);
-    }
-
-    // Reload
-    const { data, error: fetchErr } = await SB.from('customers').select('*').order('no');
-    if (fetchErr) throw fetchErr;
-    DATA = data;
-
-    setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
-    showConnBanner('ok', `✅ Import สำเร็จ! ${DATA.length} สาขาอยู่ใน Supabase แล้ว 🎉`);
-    toast(`🎉 Import ${DATA.length} สาขาเข้า Supabase สำเร็จ!`, 'success');
-    renderAll();
+    await _doImport(btn);
   } catch(e) {
     const msg = diagError(e.message || String(e));
     showConnBanner('err', '❌ Import ล้มเหลว: ' + msg);
     toast('❌ ' + msg, 'error');
-    console.error('[Import Error]', e);
+    console.error('[Import]', e);
   }
   if (btn) { btn.disabled = false; btn.textContent = '📥 Import 106 สาขา'; }
+}
+
+async function _doImport(btn) {
+  // ลบเก่าก่อน
+  try {
+    await sbFetch('?no=gte.0', { method: 'DELETE', headers: { ...SB_H(), 'Prefer': 'return=minimal' } });
+  } catch(e) { /* table อาจว่างอยู่แล้ว */ }
+
+  // Insert ทีละ 50
+  let imported = 0;
+  const chunks = [];
+  for (let i = 0; i < SEED.length; i += 50) chunks.push(SEED.slice(i, i + 50));
+  for (const chunk of chunks) {
+    await sbFetch('', { method: 'POST', body: JSON.stringify(chunk) });
+    imported += chunk.length;
+    if (btn) btn.textContent = `⏳ ${imported}/${SEED.length}…`;
+    showConnBanner('loading', `กำลัง Import… ${imported}/${SEED.length} สาขา`);
+  }
+
+  DATA = await sbFetch('?order=no&select=*');
+  setSyncStatus('ok', `✅ Supabase · ${DATA.length} สาขา`);
+  showConnBanner('ok', `✅ Import สำเร็จ! ${DATA.length} สาขาอยู่ใน Supabase แล้ว 🎉`);
+  toast(`🎉 Import ${DATA.length} สาขาเข้า Supabase สำเร็จ!`, 'success');
+  renderAll();
+}
+
+/* ─── CRUD via fetch ─────────────────────────────────────── */
+async function sbUpdateRow(id, row) {
+  return sbFetch(`?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(row) });
+}
+async function sbDeleteRow(id) {
+  return sbFetch(`?id=eq.${id}`, { method: 'DELETE', headers: { ...SB_H(), 'Prefer': 'return=minimal' } });
+}
+async function sbInsertRow(row) {
+  return sbFetch('', { method: 'POST', body: JSON.stringify([row]) });
 }
 
 /* ─── ERROR DIAGNOSIS ───────────────────────────────────── */
 function diagError(msg) {
   if (!msg) return 'Unknown error';
-  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) return 'Network Error — ตรวจสอบ Internet หรือ Supabase URL';
-  if (msg.includes('JWT') || msg.includes('invalid') || msg.includes('token')) return 'API Key ไม่ถูกต้อง — ตรวจสอบ Anon Key';
-  if (msg.includes('relation') || msg.includes('does not exist')) return 'Table "customers" ไม่มี — รัน SQL สร้าง Table ก่อน';
-  if (msg.includes('permission') || msg.includes('policy') || msg.includes('RLS')) return 'RLS Policy บล็อก — ตรวจสอบ Policy ใน Supabase';
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Load failed')) return 'ไม่มี Internet หรือ Supabase URL ผิด';
+  if (msg.includes('JWT') || msg.includes('invalid') || msg.includes('401')) return 'API Key ไม่ถูกต้อง';
+  if (msg.includes('relation') || msg.includes('does not exist') || msg.includes('404')) return 'Table "customers" ยังไม่มี — รัน SQL ใน Supabase ก่อน';
+  if (msg.includes('permission') || msg.includes('policy') || msg.includes('RLS') || msg.includes('403')) return 'RLS บล็อก — ตรวจสอบ Policy ใน Supabase';
   if (msg.includes('CORS')) return 'CORS Error — ต้องเปิดจาก HTTPS ไม่ใช่ file://';
   return msg;
 }
@@ -1763,30 +1774,27 @@ async function saveRecord() {
   };
 
   try {
-    if (SB) {
-      if (editRecordId) {
-        const r = DATA.find(x=>(x.id||x.no)?.toString()===editRecordId?.toString());
-        await SB.from('customers').update(rec).eq('id', r.id);
-      } else {
-        await SB.from('customers').insert([rec]);
-      }
-      // Reload
-      const {data} = await SB.from('customers').select('*').order('no');
-      DATA = data;
+    const r = editRecordId ? DATA.find(x=>(x.id||x.no)?.toString()===editRecordId?.toString()) : null;
+    if (r?.id) {
+      await sbUpdateRow(r.id, rec);
     } else {
-      // Local fallback
-      if (editRecordId) {
-        const idx = DATA.findIndex(x=>(x.id||x.no)?.toString()===editRecordId?.toString());
-        if(idx!==-1) DATA[idx]={...DATA[idx],...rec};
-      } else {
-        DATA.push({...rec, id: Date.now(), no: DATA.length+1});
-      }
+      await sbInsertRow(rec);
     }
+    DATA = await sbFetch('?order=no&select=*');
     closeModal('m-record');
     renderAll();
     toast(editRecordId?'แก้ไขสำเร็จ ✅':'เพิ่มสาขาสำเร็จ ✅','success');
   } catch(e) {
-    toast('เกิดข้อผิดพลาด: '+e.message,'error');
+    // Local fallback
+    if (editRecordId) {
+      const idx = DATA.findIndex(x=>(x.id||x.no)?.toString()===editRecordId?.toString());
+      if(idx!==-1) DATA[idx]={...DATA[idx],...rec};
+    } else {
+      DATA.push({...rec, id: Date.now().toString(), no: DATA.length+1});
+    }
+    closeModal('m-record');
+    renderAll();
+    toast('บันทึก Local (Supabase: '+e.message+')','info');
   }
   btn.disabled = false; btn.textContent = '💾 บันทึกลง Supabase';
 }
@@ -1795,10 +1803,9 @@ async function deleteRec(id) {
   if (!IS_ADMIN || !confirm('ยืนยันการลบ?')) return;
   try {
     const r = DATA.find(x=>(x.id||x.no)?.toString()===id?.toString());
-    if (SB && r?.id) {
-      await SB.from('customers').delete().eq('id', r.id);
-      const {data} = await SB.from('customers').select('*').order('no');
-      DATA = data;
+    if (r?.id) {
+      await sbDeleteRow(r.id);
+      DATA = await sbFetch('?order=no&select=*');
     } else {
       DATA = DATA.filter(x=>(x.id||x.no)?.toString()!==id?.toString());
     }
