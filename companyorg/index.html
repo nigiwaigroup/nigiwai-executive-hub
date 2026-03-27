@@ -511,8 +511,9 @@
         <div class="sub" style="margin-bottom:0">ระบบจัดการสาขา Nigiwai Group</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span id="authState" class="muted" style="font-size:12px"><span id="connDot" class="conn-dot"></span>ยังไม่ได้ล็อกอิน</span>
-        <button id="btnLogout" class="btn btn-red hidden">Logout</button>
+        <span id="authState" class="muted" style="font-size:12px">
+          <span id="connDot" class="conn-dot"></span>กำลังเชื่อมต่อ...
+        </span>
       </div>
     </div>
 
@@ -560,17 +561,15 @@
         <div style="font-size:18px;font-weight:800;color:var(--gl);margin-bottom:4px">⚙️ Admin Panel</div>
         <div style="font-size:12px;color:var(--td);margin-bottom:18px">จัดการระบบและเชื่อมต่อ Firebase</div>
 
-        <!-- Auth form -->
+        <!-- Admin PIN section -->
         <div id="adminAuthSection">
-          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 เข้าสู่ระบบ</div>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
-            <input id="authEmail" class="input" placeholder="อีเมล Firebase" type="email" />
-            <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')document.getElementById('btnLogin').click()" />
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="btnLogin" class="btn btn-green">Login</button>
-            <button id="btnRegister" class="btn btn-blue">Register</button>
-            <button id="btnCheckStatus" class="btn" style="margin-left:auto">🔌 Check Status</button>
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 Admin Access</div>
+          <div style="font-size:12px;color:var(--td);margin-bottom:12px">ใส่ PIN เพื่อเข้าใช้งาน Admin — ไม่เกี่ยวกับ Firebase account</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="adminPinInput" class="input" type="password" placeholder="Admin PIN"
+              style="flex:1;letter-spacing:4px;font-size:18px"
+              onkeydown="if(event.key==='Enter')document.getElementById('btnAdminPin').click()" />
+            <button id="btnAdminPin" class="btn btn-green" style="white-space:nowrap">เข้าสู่ระบบ</button>
           </div>
           <div id="adminLoginMsg" style="margin-top:10px;font-size:12px;min-height:18px"></div>
         </div>
@@ -578,9 +577,10 @@
         <!-- Logged-in section -->
         <div id="adminLoggedSection" class="hidden">
           <div class="admin-status-bar">
-            <span id="connDotAdmin" class="conn-dot ok"></span>
-            <span id="adminUserLabel" style="font-weight:700;color:var(--gr)">ล็อกอินแล้ว</span>
+            <span class="conn-dot ok"></span>
+            <span id="adminUserLabel" style="font-weight:700;color:var(--gr)">Admin Mode</span>
             <span style="flex:1"></span>
+            <button id="btnAdminLogout" class="btn btn-red" style="padding:5px 10px;font-size:12px">ออกจากระบบ</button>
             <button id="btnCheckStatus2" class="btn" style="padding:5px 10px;font-size:12px">🔌 Status</button>
           </div>
         </div>
@@ -954,8 +954,7 @@
       onSnapshot, serverTimestamp, writeBatch, getDocs, query, limit, getDoc, setDoc
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import {
-      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-      createUserWithEmailAndPassword, signOut
+      getAuth, onAuthStateChanged, signInAnonymously, signOut
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const app = initializeApp(firebaseConfig);
@@ -972,9 +971,6 @@
     ];
 
     const el = {
-      authEmail: document.getElementById("authEmail"),
-      authPassword: document.getElementById("authPassword"),
-      btnLogout: document.getElementById("btnLogout"),
       authState: document.getElementById("authState"),
       q: document.getElementById("q"),
       fModel: document.getElementById("fModel"),
@@ -1237,17 +1233,19 @@
     // ════════════════════════════════════════════
     // Admin: hardcode check + branch table
     // ════════════════════════════════════════════
-    const ADMIN_EMAIL = "admin@nigiwai.com";
-    const ADMIN_PASS  = "11122334455";
+    // ── Admin PIN (app-level only — ไม่เกี่ยวกับ Firebase credentials) ──
+    const ADMIN_PIN = "11122334455"; // เปลี่ยนได้ที่นี่จุดเดียว
     let isAdmin = false;
 
-    function checkAdminAccess(user) {
-      isAdmin = !!(user && user.email === ADMIN_EMAIL);
-      // หน้าแรก: ซ่อนปุ่ม edit ถ้าไม่ใช่ admin (no-op เพราะ groupedView ไม่มีปุ่ม edit)
-      // Admin tab: แสดง branch section ถ้าเป็น admin
-      const adminBranchSec = document.getElementById("adminBranchSection");
-      if (adminBranchSec) adminBranchSec.classList.toggle("hidden", !isAdmin);
-      if (isAdmin) renderAdminTable();
+    function setAdminMode(on) {
+      isAdmin = on;
+      const authSec   = document.getElementById("adminAuthSection");
+      const loggedSec = document.getElementById("adminLoggedSection");
+      const branchSec = document.getElementById("adminBranchSection");
+      if (authSec)   authSec.classList.toggle("hidden", on);
+      if (loggedSec) loggedSec.classList.toggle("hidden", !on);
+      if (branchSec) branchSec.classList.toggle("hidden", !on);
+      if (on) renderAdminTable();
     }
 
     function renderAdminTable(filter) {
@@ -1284,7 +1282,7 @@
 
     // ─── Status Check ───
     const ovStatus = document.getElementById("ovStatus");
-    document.getElementById("btnCheckStatus").addEventListener("click", () => {
+    document.getElementById("btnCheckStatus")?.addEventListener("click", () => {
       ovStatus.classList.add("open");
       runStatusCheck();
     });
@@ -1715,7 +1713,7 @@
         rows = [];
         buildModelOptions([]);
         render();
-        el.orgWrap.innerHTML = '<div class="org-empty">กรุณา Login ก่อนใช้งานข้อมูล</div>';
+        if (el.orgWrap) el.orgWrap.innerHTML = '<div class="org-empty">กำลังเชื่อมต่อ...</div>';
       }
     }
 
@@ -2048,37 +2046,23 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       el.style.color = ok ? "var(--gr)" : "var(--rd)";
     }
 
-    document.getElementById("btnLogin")?.addEventListener("click", async () => {
-      const email = document.getElementById("authEmail")?.value.trim();
-      const pass  = document.getElementById("authPassword")?.value;
-      if (!email || !pass) { setAdminMsg("กรุณากรอกอีเมลและรหัสผ่าน", false); return; }
-      setAdminMsg("กำลัง Login...", true);
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        setAdminMsg("Login สำเร็จ ✓", true);
-      } catch (e) {
-        const msg = e.code === "auth/invalid-credential" || e.code === "auth/wrong-password"
-          ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-          : e.code === "auth/user-not-found" ? "ไม่พบบัญชีนี้"
-          : e.code === "auth/too-many-requests" ? "ลองเข้าสู่ระบบหลายครั้งเกินไป กรุณารอสักครู่"
-          : e.message;
-        setAdminMsg("Login ไม่สำเร็จ: " + msg, false);
+    // ── PIN login ──
+    document.getElementById("btnAdminPin")?.addEventListener("click", () => {
+      const pin = document.getElementById("adminPinInput")?.value.trim();
+      if (!pin) { setAdminMsg("กรุณาใส่ PIN", false); return; }
+      if (pin === ADMIN_PIN) {
+        document.getElementById("adminPinInput").value = "";
+        setAdminMsg("", true);
+        setAdminMode(true);
+      } else {
+        setAdminMsg("PIN ไม่ถูกต้อง", false);
+        document.getElementById("adminPinInput").value = "";
       }
     });
-    document.getElementById("btnRegister")?.addEventListener("click", async () => {
-      const email = document.getElementById("authEmail")?.value.trim();
-      const pass  = document.getElementById("authPassword")?.value;
-      if (!email || !pass) { setAdminMsg("กรุณากรอกอีเมลและรหัสผ่าน", false); return; }
-      try {
-        await createUserWithEmailAndPassword(auth, email, pass);
-        setAdminMsg("สมัครสมาชิกสำเร็จและล็อกอินแล้ว ✓", true);
-      } catch (e) {
-        setAdminMsg("Register ไม่สำเร็จ: " + e.message, false);
-      }
-    });
-    el.btnLogout.addEventListener("click", async () => {
-      try { await signOut(auth); }
-      catch (e) { showMsg("Logout ไม่สำเร็จ: " + e.message, "err"); }
+
+    // ── Admin logout (PIN only — ไม่ logout Firebase) ──
+    document.getElementById("btnAdminLogout")?.addEventListener("click", () => {
+      setAdminMode(false);
     });
 
     el.q.addEventListener("input", render);
@@ -2143,36 +2127,29 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       }
     });
 
+    // ── Silent anonymous auth — เชื่อมต่อ Firebase โดยอัตโนมัติ ไม่ต้องกด login ──
     onAuthStateChanged(auth, (user) => {
       const connDot = document.getElementById("connDot");
+      const authStateEl = document.getElementById("authState");
       if (user) {
-        connDot.className = "conn-dot ok";
-        el.authState.innerHTML = `<span id="connDot" class="conn-dot ok"></span>ล็อกอินแล้ว: ${esc(user.email)}`;
-        el.btnLogout.classList.remove("hidden");
-        // admin panel sync
-        const adminAuth = document.getElementById("adminAuthSection");
-        const adminLogged = document.getElementById("adminLoggedSection");
-        const adminLabel = document.getElementById("adminUserLabel");
-        if (adminAuth) adminAuth.classList.add("hidden");
-        if (adminLogged) adminLogged.classList.remove("hidden");
-        if (adminLabel) adminLabel.textContent = `ล็อกอิน: ${user.email}`;
+        // เชื่อมต่อสำเร็จ (anonymous หรือ any auth)
+        if (connDot) connDot.className = "conn-dot ok";
+        if (authStateEl) authStateEl.innerHTML =
+          `<span id="connDot" class="conn-dot ok"></span>เชื่อมต่อแล้ว`;
         setDashboardEnabled(true);
         startSnapshot();
         loadCatFromFirestore();
-        checkAdminAccess(user);
       } else {
-        el.authState.innerHTML = `<span id="connDot" class="conn-dot err"></span>ยังไม่ได้ล็อกอิน`;
-        el.btnLogout.classList.add("hidden");
-        // admin panel sync
-        const adminAuth2 = document.getElementById("adminAuthSection");
-        const adminLogged2 = document.getElementById("adminLoggedSection");
-        if (adminAuth2) adminAuth2.classList.remove("hidden");
-        if (adminLogged2) adminLogged2.classList.add("hidden");
-        setDashboardEnabled(false);
-        checkAdminAccess(null);
-        if (unsubscribeRows) unsubscribeRows();
-        unsubscribeRows = null;
-        showMsg("กรุณา Login ก่อนใช้งานข้อมูล", "muted");
+        // ยังไม่มี session — signin anonymously เงียบๆ
+        if (connDot) connDot.className = "conn-dot";
+        if (authStateEl) authStateEl.innerHTML =
+          `<span id="connDot" class="conn-dot"></span>กำลังเชื่อมต่อ...`;
+        signInAnonymously(auth).catch(e => {
+          if (connDot) connDot.className = "conn-dot err";
+          if (authStateEl) authStateEl.innerHTML =
+            `<span id="connDot" class="conn-dot err"></span>เชื่อมต่อไม่ได้`;
+          showMsg("เชื่อมต่อ Firebase ไม่ได้: " + e.message, "err");
+        });
       }
     });
   </script>
