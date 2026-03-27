@@ -66,6 +66,41 @@
     label{font-size:12px;color:var(--td);display:block;margin-bottom:5px}
     .field{width:100%}
     .note{font-size:12px;color:var(--td);margin-top:8px}
+
+    /* ── Admin tab / login modal ── */
+    .admin-login-card{background:var(--nl);border:1px solid rgba(200,164,86,.2);border-radius:14px;padding:24px;width:min(380px,96vw)}
+    .admin-link-card{background:#0a1628;border:1px solid rgba(91,141,239,.2);border-radius:12px;padding:16px;margin-top:14px;display:flex;align-items:center;gap:12px;text-decoration:none;transition:.18s}
+    .admin-link-card:hover{border-color:rgba(91,141,239,.5);background:rgba(91,141,239,.07)}
+    .admin-link-icon{font-size:28px;flex-shrink:0}
+    .admin-link-label{font-size:14px;font-weight:700;color:var(--bl)}
+    .admin-link-sub{font-size:11px;color:var(--td);margin-top:2px}
+    .admin-status-bar{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;background:#0a1628;border-radius:10px;font-size:12px}
+
+    /* ── branch card view on main page ── */
+    .branch-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:12px}
+    .branch-card{background:#0f1b33;border:1px solid rgba(200,164,86,.1);border-radius:12px;padding:14px;transition:.18s;cursor:pointer}
+    .branch-card:hover{border-color:rgba(200,164,86,.35);background:rgba(200,164,86,.04)}
+    .bc-name{font-size:14px;font-weight:800;color:var(--tx);margin-bottom:6px;line-height:1.3}
+    .bc-model{font-size:11px;color:var(--bl);font-weight:700;margin-bottom:8px}
+    .bc-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--td);margin-bottom:3px}
+    .bc-row .ico{font-size:13px;flex-shrink:0}
+    .bc-links{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+    .bc-link{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;
+      font-size:11px;font-weight:700;text-decoration:none;transition:.15s;border:1px solid}
+    .bc-link-fb{color:#4267B2;border-color:rgba(66,103,178,.35);background:rgba(66,103,178,.08)}
+    .bc-link-fb:hover{background:#4267B2;color:#fff}
+    .bc-link-map{color:var(--gr);border-color:rgba(61,214,140,.35);background:rgba(61,214,140,.08)}
+    .bc-link-map:hover{background:var(--gr);color:#0B1426}
+
+    /* ── view toggle ── */
+    .view-toggle{display:flex;gap:6px;align-items:center}
+    .vt-btn{padding:7px 12px;border-radius:8px;border:1px solid rgba(200,164,86,.2);
+      background:transparent;color:var(--td);cursor:pointer;font-size:13px;transition:.15s}
+    .vt-btn.active{background:rgba(200,164,86,.12);border-color:rgba(200,164,86,.4);color:var(--gold)}
+
+    /* ── date input ── */
+    input[type=date].input{color-scheme:dark}
+
     .auth-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     @media(max-width:780px){.grid{grid-template-columns:1fr}}
 
@@ -419,26 +454,23 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="title">Nigiwai Branch Dashboard</div>
-    <div class="sub">Production-ready: Firebase Config แยกไฟล์ + Auth + Firestore CRUD + CSV Import/Export</div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="auth-row">
-        <input id="authEmail" class="input" placeholder="อีเมล" />
-        <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" />
-        <button id="btnLogin" class="btn btn-green">Login</button>
-        <button id="btnRegister" class="btn btn-blue">Register</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="title" style="margin-bottom:2px">Nigiwai Branch Dashboard</div>
+        <div class="sub" style="margin-bottom:0">ระบบจัดการสาขา Nigiwai Group</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="authState" class="muted" style="font-size:12px"><span id="connDot" class="conn-dot"></span>ยังไม่ได้ล็อกอิน</span>
         <button id="btnLogout" class="btn btn-red hidden">Logout</button>
-        <button id="btnCheckStatus" class="btn btn-blue">Check Status</button>
-        <span id="authState" class="muted"><span id="connDot" class="conn-dot"></span>ยังไม่ได้ล็อกอิน</span>
       </div>
     </div>
 
     <!-- Tab Navigation -->
     <div class="tabs">
-      <button class="tab-btn active" data-tab="branches">สาขา</button>
-      <button class="tab-btn" data-tab="orgchart">Org Chart</button>
-      <button class="tab-btn" data-tab="catmgr">จัดการ Category</button>
+      <button class="tab-btn active" data-tab="branches">🏪 สาขา</button>
+      <button class="tab-btn" data-tab="orgchart">🌳 Org Chart</button>
+      <button class="tab-btn" data-tab="catmgr">📂 Category</button>
+      <button class="tab-btn" data-tab="admin">⚙️ Admin</button>
     </div>
 
     <!-- Tab: สาขา -->
@@ -461,6 +493,10 @@
           <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
           <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
           <input id="csvFile" class="hidden" type="file" accept=".csv,text/csv" />
+          <div class="view-toggle">
+            <button class="vt-btn active" id="btnViewTable" title="ตาราง">☰</button>
+            <button class="vt-btn" id="btnViewCard" title="การ์ด">⊞</button>
+          </div>
         </div>
 
         <div class="stat">
@@ -478,16 +514,75 @@
                 <th>Model</th>
                 <th>สถานะ</th>
                 <th>วันเปิด</th>
-                <th>ภูมิภาค</th>
+                <th>วันปิด</th>
                 <th>จังหวัด</th>
-                <th>ประเทศ</th>
+                <th>ลิงก์</th>
                 <th>จัดการ</th>
               </tr>
             </thead>
             <tbody id="tb"></tbody>
           </table>
         </div>
+        <!-- Card View -->
+        <div id="cardView" class="branch-cards" style="display:none"></div>
         <div id="msg" class="msg muted"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Admin -->
+    <div id="panel-admin" class="tab-panel">
+      <div class="card" style="max-width:480px;margin:0 auto">
+        <div style="font-size:18px;font-weight:800;color:var(--gl);margin-bottom:4px">⚙️ Admin Panel</div>
+        <div style="font-size:12px;color:var(--td);margin-bottom:18px">จัดการระบบและเชื่อมต่อ Firebase</div>
+
+        <!-- Auth form -->
+        <div id="adminAuthSection">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 เข้าสู่ระบบ</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <input id="authEmail" class="input" placeholder="อีเมล Firebase" type="email" />
+            <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" />
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="btnLogin" class="btn btn-green">Login</button>
+            <button id="btnRegister" class="btn btn-blue">Register</button>
+            <button id="btnCheckStatus" class="btn" style="margin-left:auto">🔌 Check Status</button>
+          </div>
+        </div>
+
+        <!-- Logged-in section -->
+        <div id="adminLoggedSection" class="hidden">
+          <div class="admin-status-bar">
+            <span id="connDotAdmin" class="conn-dot ok"></span>
+            <span id="adminUserLabel" style="font-weight:700;color:var(--gr)">ล็อกอินแล้ว</span>
+            <span style="flex:1"></span>
+            <button id="btnCheckStatus2" class="btn" style="padding:5px 10px;font-size:12px">🔌 Status</button>
+          </div>
+        </div>
+
+        <!-- Tool links -->
+        <div style="margin-top:18px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🛠 เครื่องมือ Admin</div>
+        <a class="admin-link-card" href="https://nigiwaigroup.github.io/nigiwai-executive-hub/companyorg/firebase-status-check.html" target="_blank">
+          <span class="admin-link-icon">🔥</span>
+          <div>
+            <div class="admin-link-label">Firebase Status Check</div>
+            <div class="admin-link-sub">ตรวจสอบการเชื่อมต่อ Firestore, Auth, Rules</div>
+          </div>
+          <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
+        </a>
+        <a class="admin-link-card" href="https://console.firebase.google.com/project/nigiwai-core-a1c41/firestore" target="_blank">
+          <span class="admin-link-icon">🗄️</span>
+          <div>
+            <div class="admin-link-label">Firebase Console — Firestore</div>
+            <div class="admin-link-sub">จัดการ Database, Rules, Indexes</div>
+          </div>
+          <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
+        </a>
+
+        <!-- Danger zone -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(240,96,96,.15)">
+          <div style="font-size:11px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠ Danger Zone</div>
+          <button id="btnSeed" class="btn btn-blue" style="font-size:12px">📦 Import ตัวอย่างเริ่มต้น</button>
+        </div>
       </div>
     </div>
 
@@ -624,8 +719,15 @@
       </div>
       <form id="fm">
         <div class="grid">
+          <!-- row 1 -->
           <div><label>ชื่อสาขา *</label><input class="input field" name="name" required /></div>
-          <div><label>Model *</label><input class="input field" name="model" required /></div>
+          <div>
+            <label>Model *</label>
+            <select class="select field" name="model" id="fmModel" required>
+              <option value="">— เลือก Model —</option>
+            </select>
+          </div>
+          <!-- row 2 -->
           <div>
             <label>สถานะ *</label>
             <select class="select field" name="status" required>
@@ -637,22 +739,153 @@
               <option value="ฟ้องร้อง">ฟ้องร้อง</option>
             </select>
           </div>
-          <div><label>วันเปิด (dd/mm/yyyy)</label><input class="input field" name="openDate" placeholder="25/12/2025" /></div>
-          <div><label>ประเภทผู้ถือสิทธิ์</label><input class="input field" name="branchType" placeholder="นิติบุคคล / บุคคลธรรมดา" /></div>
-          <div><label>เจ้าของ</label><input class="input field" name="owner" /></div>
-          <div><label>ประเภทที่ตั้ง</label><input class="input field" name="locationType" placeholder="ในห้าง / นอกห้าง" /></div>
-          <div><label>ภูมิภาค</label><input class="input field" name="zone" /></div>
-          <div><label>จังหวัด</label><input class="input field" name="province" /></div>
+          <div>
+            <label>ประเภทผู้ถือสิทธิ์</label>
+            <select class="select field" name="branchType">
+              <option value="">— เลือก —</option>
+              <option value="นิติบุคคล">นิติบุคคล</option>
+              <option value="บุคคลธรรมดา">บุคคลธรรมดา</option>
+            </select>
+          </div>
+          <!-- row 3: dates -->
+          <div><label>วันเปิด</label><input class="input field" type="date" name="openDate" /></div>
+          <div><label>วันปิด</label><input class="input field" type="date" name="closeDate" /></div>
+          <!-- row 4 -->
+          <div><label>เจ้าของ / บริษัท</label><input class="input field" name="owner" /></div>
+          <div><label>ชื่อนักลงทุน</label><input class="input field" name="investorName" /></div>
+          <!-- row 5 -->
+          <div><label>เบอร์ติดต่อ</label><input class="input field" name="phone" placeholder="08X-XXX-XXXX" /></div>
+          <div>
+            <label>Relation</label>
+            <select class="select field" name="relation">
+              <option value="Normal">Normal</option>
+              <option value="Good">Good</option>
+              <option value="VIP">VIP</option>
+              <option value="Problem">Problem</option>
+              <option value="Terminated">Terminated</option>
+            </select>
+          </div>
+          <!-- row 6 -->
+          <div>
+            <label>ประเภทที่ตั้ง</label>
+            <select class="select field" name="locationType">
+              <option value="">— เลือก —</option>
+              <option value="ในห้าง">ในห้าง</option>
+              <option value="นอกห้าง">นอกห้าง</option>
+              <option value="Online">Online</option>
+            </select>
+          </div>
+          <div>
+            <label>ภูมิภาค</label>
+            <select class="select field" name="zone">
+              <option value="">— เลือก —</option>
+                            <option value="กรุงเทพและปริมณฑล">กรุงเทพและปริมณฑล</option>
+              <option value="ภาคเหนือ">ภาคเหนือ</option>
+              <option value="ภาคใต้">ภาคใต้</option>
+              <option value="ภาคตะวันออก">ภาคตะวันออก</option>
+              <option value="ภาคตะวันออกเฉียงเหนือ">ภาคตะวันออกเฉียงเหนือ</option>
+              <option value="ภาคตะวันตก">ภาคตะวันตก</option>
+              <option value="ภาคกลาง">ภาคกลาง</option>
+              <option value="ต่างประเทศ">ต่างประเทศ</option>
+            </select>
+          </div>
+          <!-- row 7 -->
+          <div>
+            <label>จังหวัด</label>
+            <select class="select field" name="province">
+              <option value="">— เลือก —</option>
+                            <option value="กระบี่">กระบี่</option>
+              <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+              <option value="กาญจนบุรี">กาญจนบุรี</option>
+              <option value="กาฬสินธุ์">กาฬสินธุ์</option>
+              <option value="กำแพงเพชร">กำแพงเพชร</option>
+              <option value="ขอนแก่น">ขอนแก่น</option>
+              <option value="จันทบุรี">จันทบุรี</option>
+              <option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option>
+              <option value="ชลบุรี">ชลบุรี</option>
+              <option value="ชัยนาท">ชัยนาท</option>
+              <option value="ชัยภูมิ">ชัยภูมิ</option>
+              <option value="ชุมพร">ชุมพร</option>
+              <option value="เชียงราย">เชียงราย</option>
+              <option value="เชียงใหม่">เชียงใหม่</option>
+              <option value="ตรัง">ตรัง</option>
+              <option value="ตราด">ตราด</option>
+              <option value="ตาก">ตาก</option>
+              <option value="นครนายก">นครนายก</option>
+              <option value="นครปฐม">นครปฐม</option>
+              <option value="นครพนม">นครพนม</option>
+              <option value="นครราชสีมา">นครราชสีมา</option>
+              <option value="นครศรีธรรมราช">นครศรีธรรมราช</option>
+              <option value="นครสวรรค์">นครสวรรค์</option>
+              <option value="นนทบุรี">นนทบุรี</option>
+              <option value="นราธิวาส">นราธิวาส</option>
+              <option value="น่าน">น่าน</option>
+              <option value="บึงกาฬ">บึงกาฬ</option>
+              <option value="บุรีรัมย์">บุรีรัมย์</option>
+              <option value="ปทุมธานี">ปทุมธานี</option>
+              <option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option>
+              <option value="ปราจีนบุรี">ปราจีนบุรี</option>
+              <option value="ปัตตานี">ปัตตานี</option>
+              <option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option>
+              <option value="พะเยา">พะเยา</option>
+              <option value="พังงา">พังงา</option>
+              <option value="พัทลุง">พัทลุง</option>
+              <option value="พิจิตร">พิจิตร</option>
+              <option value="พิษณุโลก">พิษณุโลก</option>
+              <option value="เพชรบุรี">เพชรบุรี</option>
+              <option value="เพชรบูรณ์">เพชรบูรณ์</option>
+              <option value="แพร่">แพร่</option>
+              <option value="ภูเก็ต">ภูเก็ต</option>
+              <option value="มหาสารคาม">มหาสารคาม</option>
+              <option value="มุกดาหาร">มุกดาหาร</option>
+              <option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option>
+              <option value="ยโสธร">ยโสธร</option>
+              <option value="ยะลา">ยะลา</option>
+              <option value="ร้อยเอ็ด">ร้อยเอ็ด</option>
+              <option value="ระนอง">ระนอง</option>
+              <option value="ระยอง">ระยอง</option>
+              <option value="ราชบุรี">ราชบุรี</option>
+              <option value="ลพบุรี">ลพบุรี</option>
+              <option value="ลำปาง">ลำปาง</option>
+              <option value="ลำพูน">ลำพูน</option>
+              <option value="เลย">เลย</option>
+              <option value="ศรีสะเกษ">ศรีสะเกษ</option>
+              <option value="สกลนคร">สกลนคร</option>
+              <option value="สงขลา">สงขลา</option>
+              <option value="สตูล">สตูล</option>
+              <option value="สมุทรปราการ">สมุทรปราการ</option>
+              <option value="สมุทรสงคราม">สมุทรสงคราม</option>
+              <option value="สมุทรสาคร">สมุทรสาคร</option>
+              <option value="สระแก้ว">สระแก้ว</option>
+              <option value="สระบุรี">สระบุรี</option>
+              <option value="สิงห์บุรี">สิงห์บุรี</option>
+              <option value="สุโขทัย">สุโขทัย</option>
+              <option value="สุพรรณบุรี">สุพรรณบุรี</option>
+              <option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option>
+              <option value="สุรินทร์">สุรินทร์</option>
+              <option value="หนองคาย">หนองคาย</option>
+              <option value="หนองบัวลำภู">หนองบัวลำภู</option>
+              <option value="อ่างทอง">อ่างทอง</option>
+              <option value="อำนาจเจริญ">อำนาจเจริญ</option>
+              <option value="อุดรธานี">อุดรธานี</option>
+              <option value="อุตรดิตถ์">อุตรดิตถ์</option>
+              <option value="อุทัยธานี">อุทัยธานี</option>
+              <option value="อุบลราชธานี">อุบลราชธานี</option>
+            </select>
+          </div>
           <div><label>ประเทศ</label><input class="input field" name="country" value="Thailand" /></div>
-          <div><label>Relation</label><input class="input field" name="relation" value="Normal" /></div>
-          <div class="full"><label>Location</label><input class="input field" name="location" /></div>
+          <!-- row 8: links -->
+          <div><label>📘 Facebook URL สาขา</label><input class="input field" name="facebook" placeholder="https://facebook.com/..." /></div>
+          <div><label>📍 Google Map URL สาขา</label><input class="input field" name="googleMap" placeholder="https://maps.google.com/..." /></div>
+          <!-- row 9 -->
+          <div class="full"><label>Location / ที่อยู่</label><input class="input field" name="location" /></div>
         </div>
         <div style="display:flex;gap:10px;margin-top:12px">
           <button class="btn" type="submit" id="btnSave">บันทึก</button>
           <button class="btn btn-red" type="button" id="btnDelete" style="display:none">ลบสาขานี้</button>
         </div>
       </form>
-      <div class="note">* ถ้า `วันเปิด` ไม่ทราบ ให้เว้นว่างได้</div>
+      <div class="note">* วันที่ถ้าไม่ทราบให้เว้นว่างได้</div>
     </div>
   </div>
 
@@ -691,8 +924,6 @@
     const el = {
       authEmail: document.getElementById("authEmail"),
       authPassword: document.getElementById("authPassword"),
-      btnLogin: document.getElementById("btnLogin"),
-      btnRegister: document.getElementById("btnRegister"),
       btnLogout: document.getElementById("btnLogout"),
       authState: document.getElementById("authState"),
       q: document.getElementById("q"),
@@ -958,6 +1189,10 @@
       ovStatus.classList.add("open");
       runStatusCheck();
     });
+    document.getElementById("btnCheckStatus2")?.addEventListener("click", () => {
+      ovStatus.classList.add("open");
+      runStatusCheck();
+    });
     document.getElementById("btnStatusClose").addEventListener("click", () => ovStatus.classList.remove("open"));
     document.getElementById("btnRecheck").addEventListener("click", runStatusCheck);
     ovStatus.addEventListener("click", e => { if (e.target === ovStatus) ovStatus.classList.remove("open"); });
@@ -1049,6 +1284,7 @@
         btn.classList.add("active");
         document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
         if (btn.dataset.tab === "orgchart") renderOrgChart();
+        if (btn.dataset.tab === "admin") { /* admin panel loaded statically */ }
         if (btn.dataset.tab === "catmgr") {
           allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
           renderCatManager();
@@ -1394,19 +1630,31 @@
       for (const k of required) {
         if (!data[k]?.trim()) throw new Error(`กรุณากรอก ${k}`);
       }
+      // แปลง date input (yyyy-mm-dd) → dd/mm/yyyy
+      const fmtDate = v => {
+        if (!v) return null;
+        const d = new Date(v);
+        if (isNaN(d)) return v;
+        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+      };
       return {
         name: data.name.trim(),
         model: data.model.trim(),
         status: data.status.trim(),
-        openDate: data.openDate?.trim() || null,
+        openDate: fmtDate(data.openDate) || null,
+        closeDate: fmtDate(data.closeDate) || null,
         branchType: data.branchType?.trim() || "",
         owner: data.owner?.trim() || "",
+        investorName: data.investorName?.trim() || "",
+        phone: data.phone?.trim() || "",
         locationType: data.locationType?.trim() || "",
         location: data.location?.trim() || "",
         country: data.country?.trim() || "Thailand",
         zone: data.zone?.trim() || "",
         province: data.province?.trim() || "",
-        relation: data.relation?.trim() || "Normal"
+        relation: data.relation?.trim() || "Normal",
+        facebook: data.facebook?.trim() || "",
+        googleMap: data.googleMap?.trim() || "",
       };
     }
 
@@ -1415,15 +1663,26 @@
       el.fm.country.value = "Thailand";
       el.fm.relation.value = "Normal";
     }
+    // แปลง dd/mm/yyyy → yyyy-mm-dd สำหรับ <input type=date>
+    function toDateInput(v) {
+      if (!v) return "";
+      const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+      return v;
+    }
 
     function openModal(mode, row = null) {
       editingId = mode === "edit" ? row.id : null;
       el.modalTitle.textContent = mode === "edit" ? "แก้ไขสาขา" : "เพิ่มสาขา";
       el.btnDelete.style.display = mode === "edit" ? "inline-flex" : "none";
       if (mode === "edit" && row) {
-        const keys = ["name","model","status","openDate","branchType","owner","locationType","location","country","zone","province","relation"];
+const keys = ["name","model","status","branchType","owner","investorName","phone","locationType","location","country","zone","province","relation","facebook","googleMap"];
         keys.forEach(k => {
           if (el.fm[k]) el.fm[k].value = row[k] ?? "";
+        });
+        // วันที่ต้องแปลงก่อน
+        ["openDate","closeDate"].forEach(k => {
+          if (el.fm[k]) el.fm[k].value = toDateInput(row[k] ?? "");
         });
       } else {
         resetForm();
@@ -1442,6 +1701,13 @@
       const current = el.fModel.value;
       el.fModel.innerHTML = '<option value="">ทุก Model</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
       if (models.includes(current)) el.fModel.value = current;
+      // sync ไป form dropdown
+      const fmModel = document.getElementById("fmModel");
+      if (fmModel) {
+        const cur2 = fmModel.value;
+        fmModel.innerHTML = '<option value="">— เลือก Model —</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+        if (models.includes(cur2)) fmModel.value = cur2;
+      }
     }
 
     function filteredRows() {
@@ -1464,17 +1730,23 @@
       el.sAll.textContent = `ทั้งหมด ${data.length}`;
       el.sOpen.textContent = `เปิดอยู่ ${openCount}`;
       el.sClose.textContent = `ปิดแล้ว ${closeCount}`;
+      if (viewMode === "card") { renderCards(); }
 
       el.tb.innerHTML = data.map((r, i) => `
         <tr>
           <td>${i + 1}</td>
-          <td style="font-weight:700">${esc(r.name)}</td>
-          <td>${esc(r.model || "")}</td>
+          <td style="font-weight:700;min-width:140px">${esc(r.name)}</td>
+          <td style="font-size:11px">${esc(r.model || "")}</td>
           <td><span class="badge ${badgeClass(r.status)}">${esc(r.status || "-")}</span></td>
-          <td>${esc(r.openDate || "ไม่ทราบ")}</td>
-          <td>${esc(r.zone || "-")}</td>
-          <td>${esc(r.province || "-")}</td>
-          <td>${esc(r.country || "-")}</td>
+          <td style="font-size:12px">${esc(r.openDate || "-")}</td>
+          <td style="font-size:12px;color:var(--rd)">${esc(r.closeDate || "-")}</td>
+          <td style="font-size:12px">${esc(r.province || "-")}</td>
+          <td>
+            <div class="actions">
+              ${r.facebook ? `<a href="${esc(r.facebook)}" target="_blank" class="btn btn-blue" style="padding:5px 8px;font-size:11px;text-decoration:none">📘 FB</a>` : ""}
+              ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="btn btn-green" style="padding:5px 8px;font-size:11px;text-decoration:none">📍 Map</a>` : ""}
+            </div>
+          </td>
           <td>
             <div class="actions">
               <button class="btn btn-blue" data-act="edit" data-id="${esc(r.id)}">แก้ไข</button>
@@ -1484,6 +1756,61 @@
         </tr>
       `).join("");
     }
+
+
+    // ── Card View ──
+    let viewMode = "table"; // "table" | "card"
+
+    function renderCards() {
+      const data = filteredRows();
+      const cv = document.getElementById("cardView");
+      if (!cv) return;
+      cv.innerHTML = data.map(r => `
+        <div class="branch-card" data-act="edit" data-id="${esc(r.id)}">
+          <div class="bc-name">${esc(r.name)}</div>
+          <div class="bc-model">${esc(r.model || "")}</div>
+          <div class="bc-row"><span class="ico">📍</span>${esc(r.province || "-")} ${r.zone ? "· "+esc(r.zone) : ""}</div>
+          <div class="bc-row"><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span><span style="margin-left:6px;font-size:11px;color:var(--td)">${esc(r.openDate||"")}</span></div>
+          ${r.owner ? `<div class="bc-row" style="font-size:11px"><span class="ico">👤</span>${esc(r.owner)}</div>` : ""}
+          ${(r.facebook || r.googleMap) ? `
+          <div class="bc-links">
+            ${r.facebook  ? `<a href="${esc(r.facebook)}"  target="_blank" class="bc-link bc-link-fb"  onclick="event.stopPropagation()">📘 Facebook</a>` : ""}
+            ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="bc-link bc-link-map" onclick="event.stopPropagation()">📍 Google Map</a>` : ""}
+          </div>` : ""}
+        </div>
+      `).join("") || '<div style="color:var(--td);padding:40px;text-align:center">ไม่พบข้อมูล</div>';
+
+      // card click → edit
+      cv.querySelectorAll(".branch-card[data-id]").forEach(card => {
+        card.addEventListener("click", () => {
+          const row = rows.find(r => r.id === card.dataset.id);
+          if (row) openModal("edit", row);
+        });
+      });
+    }
+
+    function setView(mode) {
+      viewMode = mode;
+      const tw = document.querySelector(".table-wrap");
+      const cv = document.getElementById("cardView");
+      const btnT = document.getElementById("btnViewTable");
+      const btnC = document.getElementById("btnViewCard");
+      if (mode === "card") {
+        if (tw) tw.style.display = "none";
+        if (cv) cv.style.display = "grid";
+        btnT?.classList.remove("active");
+        btnC?.classList.add("active");
+        renderCards();
+      } else {
+        if (tw) tw.style.display = "";
+        if (cv) cv.style.display = "none";
+        btnT?.classList.add("active");
+        btnC?.classList.remove("active");
+      }
+    }
+
+    document.getElementById("btnViewTable")?.addEventListener("click", () => setView("table"));
+    document.getElementById("btnViewCard")?.addEventListener("click",  () => setView("card"));
 
     function exportCsv() {
       const headers = ["name","model","status","openDate","branchType","owner","locationType","location","country","zone","province","relation"];
@@ -1611,13 +1938,17 @@
     }
 
     // ─── Events ───
-    el.btnLogin.addEventListener("click", async () => {
-      try { await signInWithEmailAndPassword(auth, el.authEmail.value.trim(), el.authPassword.value); }
+    document.getElementById("btnLogin")?.addEventListener("click", async () => {
+      const email = document.getElementById("authEmail")?.value.trim();
+      const pass  = document.getElementById("authPassword")?.value;
+      try { await signInWithEmailAndPassword(auth, email, pass); }
       catch (e) { showMsg("Login ไม่สำเร็จ: " + e.message, "err"); }
     });
-    el.btnRegister.addEventListener("click", async () => {
+    document.getElementById("btnRegister")?.addEventListener("click", async () => {
+      const email = document.getElementById("authEmail")?.value.trim();
+      const pass  = document.getElementById("authPassword")?.value;
       try {
-        await createUserWithEmailAndPassword(auth, el.authEmail.value.trim(), el.authPassword.value);
+        await createUserWithEmailAndPassword(auth, email, pass);
         showMsg("สมัครสมาชิกสำเร็จและล็อกอินแล้ว", "ok");
       } catch (e) { showMsg("Register ไม่สำเร็จ: " + e.message, "err"); }
     });
@@ -1694,16 +2025,24 @@
         connDot.className = "conn-dot ok";
         el.authState.innerHTML = `<span id="connDot" class="conn-dot ok"></span>ล็อกอินแล้ว: ${esc(user.email)}`;
         el.btnLogout.classList.remove("hidden");
-        el.btnLogin.classList.add("hidden");
-        el.btnRegister.classList.add("hidden");
+        // admin panel sync
+        const adminAuth = document.getElementById("adminAuthSection");
+        const adminLogged = document.getElementById("adminLoggedSection");
+        const adminLabel = document.getElementById("adminUserLabel");
+        if (adminAuth) adminAuth.classList.add("hidden");
+        if (adminLogged) adminLogged.classList.remove("hidden");
+        if (adminLabel) adminLabel.textContent = `ล็อกอิน: ${user.email}`;
         setDashboardEnabled(true);
         startSnapshot();
         loadCatFromFirestore();
       } else {
         el.authState.innerHTML = `<span id="connDot" class="conn-dot err"></span>ยังไม่ได้ล็อกอิน`;
         el.btnLogout.classList.add("hidden");
-        el.btnLogin.classList.remove("hidden");
-        el.btnRegister.classList.remove("hidden");
+        // admin panel sync
+        const adminAuth2 = document.getElementById("adminAuthSection");
+        const adminLogged2 = document.getElementById("adminLoggedSection");
+        if (adminAuth2) adminAuth2.classList.remove("hidden");
+        if (adminLogged2) adminLogged2.classList.add("hidden");
         setDashboardEnabled(false);
         if (unsubscribeRows) unsubscribeRows();
         unsubscribeRows = null;
