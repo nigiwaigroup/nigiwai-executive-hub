@@ -455,8 +455,15 @@
   </div>
 
   <script type="module">
-    import { firebaseConfig } from "./firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    const firebaseConfig = {
+      apiKey:            "AIzaSyB75sJAh4myOUkXIEKzrwo0yoPFwZJQ1po",
+      authDomain:        "nigiwai-core-a1c41.firebaseapp.com",
+      projectId:         "nigiwai-core-a1c41",
+      storageBucket:     "nigiwai-core-a1c41.firebasestorage.app",
+      messagingSenderId: "815850074955",
+      appId:             "1:815850074955:web:31c9ba46dbd4d95d4eaece",
+    };
     import {
       getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
       onSnapshot, serverTimestamp, writeBatch, getDocs, query, limit
