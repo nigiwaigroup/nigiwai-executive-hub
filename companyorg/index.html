@@ -1298,17 +1298,18 @@
     function setStat(id, dotCls, valText, valCls = "") {
       const dot = document.getElementById("sd" + id);
       const val = document.getElementById("sv" + id);
-      dot.className = "status-dot " + dotCls;
-      val.className = "status-val" + (valCls ? " " + valCls : "");
-      val.innerHTML = valText;
+      if (dot) dot.className = "status-dot " + dotCls;
+      if (val) {
+        val.className = "status-val" + (valCls ? " " + valCls : "");
+        val.innerHTML = valText;
+      }
     }
     function resetStats() {
       ["App","Auth","Read","Write","Docs"].forEach(id => {
         setStat(id, "dot-spin", "กำลังตรวจสอบ...");
-        const ping = document.getElementById("sp" + id);
-        if (ping) ping.textContent = "";
       });
-      document.getElementById("svTime").textContent = new Date().toLocaleString("th-TH");
+      const svTime = document.getElementById("svTime");
+      if (svTime) svTime.textContent = new Date().toLocaleString("th-TH");
     }
 
     async function runStatusCheck() {
@@ -1337,7 +1338,6 @@
         const ms = Math.round(performance.now() - t0);
         setStat("Read", "dot-ok",
           `OK <span class="status-ping">${ms} ms</span>`, "ok");
-        document.getElementById("spRead").textContent = "";
 
         // 5. Count docs (reuse snapshot full)
         try {
@@ -1371,7 +1371,7 @@
         }
       }
 
-      document.getElementById("svTime").textContent = new Date().toLocaleString("th-TH");
+      const _t = document.getElementById("svTime"); if(_t) _t.textContent = new Date().toLocaleString("th-TH");
     }
 
     // ─── Tab switching ───
