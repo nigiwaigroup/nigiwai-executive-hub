@@ -1705,10 +1705,8 @@
     }
 
     function setDashboardEnabled(enabled) {
-      editorIds.forEach(id => {
-        const node = document.getElementById(id);
-        if (node) node.disabled = !enabled;
-      });
+      // ค้นหา filter ยังคง enable ตลอด — ทุกคนดูได้
+      // เฉพาะปุ่ม write จะถูก guard โดย isAdmin ใน createBranch/updateBranch/deleteBranch
       if (!enabled) {
         rows = [];
         buildModelOptions([]);
@@ -1999,12 +1997,15 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
     }
 
     async function createBranch(data) {
+      if (!isAdmin) throw new Error("ต้องเข้าสู่ระบบ Admin ก่อน");
       await addDoc(colRef, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     }
     async function updateBranch(id, data) {
+      if (!isAdmin) throw new Error("ต้องเข้าสู่ระบบ Admin ก่อน");
       await updateDoc(doc(db, "branches", id), { ...data, updatedAt: serverTimestamp() });
     }
     async function deleteBranch(id) {
+      if (!isAdmin) throw new Error("ต้องเข้าสู่ระบบ Admin ก่อน");
       await deleteDoc(doc(db, "branches", id));
     }
 
@@ -2127,31 +2128,49 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       }
     });
 
-    // ── Silent anonymous auth — เชื่อมต่อ Firebase โดยอัตโนมัติ ไม่ต้องกด login ──
-    onAuthStateChanged(auth, (user) => {
-      const connDot = document.getElementById("connDot");
-      const authStateEl = document.getElementById("authState");
-      if (user) {
-        // เชื่อมต่อสำเร็จ (anonymous หรือ any auth)
-        if (connDot) connDot.className = "conn-dot ok";
-        if (authStateEl) authStateEl.innerHTML =
-          `<span id="connDot" class="conn-dot ok"></span>เชื่อมต่อแล้ว`;
-        setDashboardEnabled(true);
-        startSnapshot();
-        loadCatFromFirestore();
-      } else {
-        // ยังไม่มี session — signin anonymously เงียบๆ
-        if (connDot) connDot.className = "conn-dot";
-        if (authStateEl) authStateEl.innerHTML =
-          `<span id="connDot" class="conn-dot"></span>กำลังเชื่อมต่อ...`;
-        signInAnonymously(auth).catch(e => {
-          if (connDot) connDot.className = "conn-dot err";
-          if (authStateEl) authStateEl.innerHTML =
-            `<span id="connDot" class="conn-dot err"></span>เชื่อมต่อไม่ได้`;
-          showMsg("เชื่อมต่อ Firebase ไม่ได้: " + e.message, "err");
-        });
-      }
-    });
+    // ── Silent Anonymous Auth ──
+    // เปิดหน้าเว็บ → signInAnonymously อัตโนมัติ → โหลดข้อมูล
+    // ไม่มีหน้า login ให้กด ไม่เก็บ email/password ใดๆ
+    function initConnection() {
+      const connDot   = document.getElementById("connDot");
+      const authState = document.getElementById("authState");
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // มี session แล้ว (anonymous หรือ existing)
+          if (connDot)   connDot.className = "conn-dot ok";
+          if (authState) authState.innerHTML =
+            `<span id="connDot" class="conn-dot ok"></span>เชื่อมต่อแล้ว`;
+          setDashboardEnabled(true);
+          startSnapshot();
+          loadCatFromFirestore();
+        } else {
+          // ยังไม่มี session → signin anonymously เงียบๆ
+          if (connDot)   connDot.className = "conn-dot";
+          if (authState) authState.innerHTML =
+            `<span id="connDot" class="conn-dot"></span>กำลังเชื่อมต่อ...`;
+
+          signInAnonymously(auth).catch(e => {
+            // Anonymous Auth ยังไม่ได้ Enable — fallback: โหลดข้อมูลโดยไม่ต้อง auth
+            if (e.code === "auth/operation-not-allowed") {
+              console.warn("Anonymous Auth ไม่ได้ enable — ใช้ read-only mode");
+              if (connDot)   connDot.className = "conn-dot ok";
+              if (authState) authState.innerHTML =
+                `<span id="connDot" class="conn-dot ok"></span>เชื่อมต่อแล้ว (read-only)`;
+              setDashboardEnabled(true);
+              startSnapshot();
+              loadCatFromFirestore();
+            } else {
+              if (connDot)   connDot.className = "conn-dot err";
+              if (authState) authState.innerHTML =
+                `<span id="connDot" class="conn-dot err"></span>เชื่อมต่อไม่ได้`;
+              showMsg("เชื่อมต่อ Firebase ไม่ได้: " + e.message, "err");
+            }
+          });
+        }
+      });
+    }
+    initConnection();
   </script>
   <!-- Branch Detail Popup -->
   <div class="branch-popup" id="branchPopup">
