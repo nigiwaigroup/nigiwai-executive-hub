@@ -444,6 +444,33 @@
     .tv-open-count { color: var(--gr); }
 
 
+
+    /* ── Stat pills ── */
+    .tv-stat-pill {
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:22px;height:18px;padding:0 6px;border-radius:999px;
+      font-size:10px;font-weight:800;margin-left:4px;flex-shrink:0;
+    }
+    .tv-sp-open   { background:rgba(61,214,140,.18);color:var(--gr); }
+    .tv-sp-close  { background:rgba(240,96,96,.18); color:var(--rd); }
+    .tv-sp-build  { background:rgba(91,141,239,.18);color:var(--bl); }
+    .tv-sp-cancel { background:rgba(200,164,86,.18);color:var(--gold); }
+    .tv-sp-other  { background:rgba(154,154,170,.15);color:var(--td); }
+
+    /* ── Link icons in tree ── */
+    .tv-link-icon {
+      display:inline-flex;align-items:center;justify-content:center;
+      width:20px;height:20px;border-radius:5px;
+      font-size:11px;font-weight:900;text-decoration:none;
+      margin-left:4px;flex-shrink:0;transition:.15s;
+    }
+    .tv-fb  { background:rgba(66,103,178,.18);color:#4267B2;border:1px solid rgba(66,103,178,.3); }
+    .tv-fb:hover  { background:#4267B2;color:#fff; }
+    .tv-map { background:rgba(61,214,140,.12);color:var(--gr);border:1px solid rgba(61,214,140,.3); }
+    .tv-map:hover { background:var(--gr);color:#0B1426; }
+    .tv-level-branch { cursor:pointer; }
+    .tv-level-branch:hover { background:rgba(255,255,255,.04); }
+
     /* ── Zone bar chart ── */
     .zone-bar-wrap { background:#0a1628; border-radius:12px; padding:14px 16px;
       margin-bottom:16px; border:1px solid rgba(200,164,86,.1); }
@@ -1950,92 +1977,165 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
 
       const gv = document.getElementById("groupedView");
       if (!gv) return;
-
       if (!data.length) {
         gv.innerHTML = '<div style="color:var(--td);text-align:center;padding:40px">ไม่พบข้อมูล</div>';
         return;
       }
 
-      // ── จัดกลุ่มตาม Category ──
+      // จัดกลุ่ม Category → Model → Branch
       const catMap = new Map();
       data.forEach(r => {
-        const cat = getCategory(r.model || "");
-        if (!catMap.has(cat)) catMap.set(cat, []);
-        catMap.get(cat).push(r);
+        const cat   = getCategory(r.model || "");
+        const model = r.model || "ไม่ระบุ Model";
+        if (!catMap.has(cat))            catMap.set(cat, new Map());
+        if (!catMap.get(cat).has(model)) catMap.get(cat).set(model, []);
+        catMap.get(cat).get(model).push(r);
       });
       const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
-      let out = "";
+      // ── stat pills helper ──
+      function statPills(branches) {
+        const o = branches.filter(r => r.status === "เปิดอยู่").length;
+        const c = branches.filter(r => r.status === "ปิดแล้ว").length;
+        const b = branches.filter(r => r.status === "กำลังก่อสร้าง").length;
+        const x = branches.filter(r => r.status === "ยกเลิกสัญญา").length;
+        const oth = branches.length - o - c - b - x;
+        let pills = "";
+        if (o)   pills += `<span class="tv-stat-pill tv-sp-open"  title="เปิดอยู่">${o}</span>`;
+        if (c)   pills += `<span class="tv-stat-pill tv-sp-close" title="ปิดแล้ว">${c}</span>`;
+        if (b)   pills += `<span class="tv-stat-pill tv-sp-build" title="กำลังก่อสร้าง">🏗${b}</span>`;
+        if (x)   pills += `<span class="tv-stat-pill tv-sp-cancel"title="ยกเลิก">${x}✕</span>`;
+        if (oth) pills += `<span class="tv-stat-pill tv-sp-other" title="อื่นๆ">${oth}</span>`;
+        return pills;
+      }
+
+      let out = `<div class="tv-root">
+        <div class="tv-row tv-level-root">
+          <span class="tv-toggle tv-open" data-tv="main-root-ch">▼</span>
+          <span class="tv-icon">🏢</span>
+          <span class="tv-label-root">Nigiwai Group</span>
+          <span class="tv-meta">${data.length} สาขา · ${sortedCats.length} หมวด</span>
+          ${statPills(data)}
+        </div>
+        <div class="tv-children" id="main-root-ch">`;
+
       sortedCats.forEach((cat, ci) => {
-        const branches = catMap.get(cat);
-        const openC    = branches.filter(r => r.status === "เปิดอยู่").length;
-        const sorted   = [...branches].sort((a,b) => (a.model||"").localeCompare(b.model||"","th") || (a.name||"").localeCompare(b.name||"","th"));
-        const bodyId   = `gv-body-${ci}`;
-        const isOpen   = _catOpenState[cat] !== false; // default: open
+        const modelMap   = catMap.get(cat);
+        const allBranch  = [...modelMap.values()].flat();
+        const catId      = `main-cat-${ci}`;
+        const isOpen     = _catOpenState[cat] !== false;
 
         out += `
-          <div class="gv-cat-block">
-            <div class="gv-cat-head" data-cat-toggle="${bodyId}" data-cat-name="${esc(cat)}">
-              <span class="gv-cat-toggle ${isOpen ? "" : "collapsed"}">▼</span>
-              📂 ${esc(cat)}
-              <span style="font-weight:400;font-size:11px;color:var(--td);margin-left:6px">${branches.length} สาขา · เปิด ${openC}</span>
-            </div>
-            <div class="gv-cat-body ${isOpen ? "" : "collapsed"}" id="${bodyId}">
-            <div class="main-table-wrap">
-            <table class="main-table">
-              <thead><tr>
-                <th style="width:32px">#</th>
-                <th>ชื่อสาขา</th>
-                <th style="min-width:140px">Model</th>
-                <th style="width:100px">สถานะ</th>
-                <th style="width:110px">จังหวัด</th>
-                <th style="width:160px">ภูมิภาค</th>
-                <th style="width:100px">วันเปิด</th>
-                <th style="width:40px">FB</th>
-                <th style="width:40px">Map</th>
-              </tr></thead>
-              <tbody>`;
+          <div class="tv-row tv-level-cat" data-tv-toggle="${catId}">
+            <span class="tv-connector"></span>
+            <span class="tv-toggle ${isOpen?"tv-open":"tv-closed"}" data-tv="${catId}">${isOpen?"▼":"▶"}</span>
+            <span class="tv-icon">📂</span>
+            <span class="tv-label-cat">${esc(cat)}</span>
+            <span class="tv-badge tv-badge-cat">${modelMap.size} Model · ${allBranch.length} สาขา</span>
+            ${statPills(allBranch)}
+          </div>
+          <div class="tv-children ${isOpen?"":"tv-hidden"}" id="${catId}">`;
 
-        sorted.forEach((r, i) => {
-          out += `<tr class="main-row">
-            <td style="color:var(--td);font-size:11px">${i+1}</td>
-            <td style="font-weight:700">${esc(r.name)}</td>
-            <td style="font-size:12px;color:var(--bl)">${esc(r.model||"")}</td>
-            <td><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span></td>
-            <td style="font-size:12px">${esc(r.province||"-")}</td>
-            <td style="font-size:12px;color:var(--td)">${esc(r.zone||"-")}</td>
-            <td style="font-size:11px;color:var(--td)">${esc(r.openDate||"-")}</td>
-            <td style="text-align:center">
-              ${r.facebook ? `<a href="${esc(r.facebook)}" target="_blank" class="tbl-icon-link tbl-fb" title="Facebook">f</a>` : ""}
-            </td>
-            <td style="text-align:center">
-              ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="tbl-icon-link tbl-map" title="Google Map">📍</a>` : ""}
-            </td>
-          </tr>`;
-        });
+        [...modelMap.entries()]
+          .sort((a,b) => a[0].localeCompare(b[0],"th"))
+          .forEach(([model, branches], mi) => {
+            const modelId = `main-model-${ci}-${mi}`;
+            const sorted  = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
 
-        out += `</tbody></table></div></div></div>`;
+            out += `
+              <div class="tv-row tv-level-model" data-tv-toggle="${modelId}">
+                <span class="tv-connector"></span>
+                <span class="tv-connector"></span>
+                <span class="tv-toggle tv-closed" data-tv="${modelId}">▶</span>
+                <span class="tv-icon">🏪</span>
+                <span class="tv-label-model">${esc(model)}</span>
+                <span class="tv-badge tv-badge-model">${branches.length} สาขา</span>
+                ${statPills(branches)}
+              </div>
+              <div class="tv-children tv-hidden" id="${modelId}">`;
+
+            sorted.forEach((r, bi) => {
+              const isLast = bi === sorted.length - 1;
+              const stCls  = badgeForStatus(r.status);
+              out += `
+                <div class="tv-row tv-level-branch main-branch-row" data-bid="${esc(r.id)}">
+                  <span class="tv-connector"></span>
+                  <span class="tv-connector"></span>
+                  <span class="tv-connector"></span>
+                  <span class="tv-leaf">${isLast?"└":"├"}</span>
+                  <span class="tv-branch-name">${esc(r.name)}</span>
+                  <span class="badge ${stCls} tv-status-badge">${esc(r.status||"-")}</span>
+                  ${r.province?`<span class="tv-prov">${esc(r.province)}</span>`:""}
+                  ${r.zone?`<span class="tv-zone-tag">${esc(r.zone)}</span>`:""}
+                  ${r.facebook?`<a href="${esc(r.facebook)}" target="_blank" class="tv-link-icon tv-fb" onclick="event.stopPropagation()" title="Facebook">f</a>`:""}
+                  ${r.googleMap?`<a href="${esc(r.googleMap)}" target="_blank" class="tv-link-icon tv-map" onclick="event.stopPropagation()" title="Google Map">📍</a>`:""}
+                </div>`;
+            });
+
+            out += `</div>`; // end model children
+          });
+
+        out += `</div>`; // end cat children
       });
 
+      out += `</div></div>`; // end main-root-ch + tv-root
       gv.innerHTML = out;
 
-      // ── wire collapse/expand ──
-      gv.querySelectorAll("[data-cat-toggle]").forEach(head => {
-        head.addEventListener("click", () => {
-          const bodyId  = head.dataset.catToggle;
-          const catName = head.dataset.catName;
-          const body    = document.getElementById(bodyId);
-          const tog     = head.querySelector(".gv-cat-toggle");
-          if (!body) return;
-          const collapsed = body.classList.toggle("collapsed");
-          if (tog) tog.classList.toggle("collapsed", collapsed);
-          _catOpenState[catName] = !collapsed;
-        });
-      });
+      // ── toggle (delegation) ──
+      gv.onclick = (e) => {
+        if (e.target.closest(".tv-link-icon")) return; // ไม่ toggle เมื่อกด link
+        // root toggle
+        const rootTog = e.target.closest("[data-tv='main-root-ch']");
+        if (rootTog) {
+          const ch = document.getElementById("main-root-ch");
+          if (!ch) return;
+          const h = ch.classList.toggle("tv-hidden");
+          rootTog.textContent = h ? "▶" : "▼";
+          return;
+        }
+        // branch row → popup
+        const branchRow = e.target.closest(".main-branch-row[data-bid]");
+        if (branchRow) {
+          const bid = branchRow.dataset.bid;
+          const r   = rows.find(x => x.id === bid);
+          if (!r) return;
+          const popup = document.getElementById("branchPopup");
+          document.getElementById("bpTitle").textContent = r.name;
+          const fields = [
+            ["Model",    r.model],["สถานะ",r.status],
+            ["วันเปิด", r.openDate||"ไม่ทราบ"],["วันปิด",r.closeDate],
+            ["ภูมิภาค", r.zone],["จังหวัด",r.province],
+            ["เจ้าของ", r.owner],["นักลงทุน",r.investorName],
+            ["เบอร์",   r.phone],["Relation",r.relation],
+          ].filter(([,v]) => v);
+          document.getElementById("bpBody").innerHTML = fields
+            .map(([k,v]) => `<div class="bp-row"><span class="bp-key">${esc(k)}</span><span class="bp-val">${esc(v)}</span></div>`)
+            .join("");
+          const rect = branchRow.getBoundingClientRect();
+          let left = rect.right + 12, top = rect.top + window.scrollY;
+          if (left + 320 > window.innerWidth) left = Math.max(8, rect.left - 332);
+          popup.style.cssText = `left:${left}px;top:${top}px`;
+          popup.classList.add("show");
+          return;
+        }
+        // cat/model toggle
+        const row = e.target.closest("[data-tv-toggle]");
+        if (!row) return;
+        const targetId = row.dataset.tvToggle;
+        const children = document.getElementById(targetId);
+        const toggleEl = row.querySelector("[data-tv]");
+        if (!children || !toggleEl) return;
+        const isHidden = children.classList.toggle("tv-hidden");
+        toggleEl.textContent = isHidden ? "▶" : "▼";
+        toggleEl.classList.toggle("tv-open",   !isHidden);
+        toggleEl.classList.toggle("tv-closed",  isHidden);
+        // บันทึก state สำหรับ cat
+        const catName = row.querySelector(".tv-label-cat")?.textContent;
+        if (catName) _catOpenState[catName] = !isHidden;
+      };
     }
 
-
-    // ── Card View ──
+        // ── Card View ──
     let viewMode = "table";
     const _catOpenState = {}; // เก็บ state collapse ของแต่ละ Category
     let _statusFilter   = "";  // status chip filter
