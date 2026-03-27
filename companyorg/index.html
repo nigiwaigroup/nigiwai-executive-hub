@@ -255,6 +255,67 @@
       height:1px;background:rgba(200,164,86,.4)
     }
 
+
+    /* ════ Tree View (vertical file-explorer) ════ */
+    .tv-root { font-size: 13px; line-height: 1; padding: 8px 4px; }
+
+    .tv-row {
+      display: flex; align-items: center; gap: 0;
+      padding: 5px 6px; border-radius: 8px; cursor: default;
+      transition: background .12s; white-space: nowrap; min-width: 0;
+    }
+    .tv-level-cat:hover   { background: rgba(200,164,86,.07); cursor: pointer; }
+    .tv-level-model:hover { background: rgba(91,141,239,.07); cursor: pointer; }
+    .tv-level-branch      { cursor: pointer; }
+    .tv-level-branch:hover { background: rgba(255,255,255,.04); }
+
+    .tv-toggle {
+      width: 18px; flex-shrink: 0; font-size: 9px;
+      color: var(--td); cursor: pointer; text-align: center;
+      transition: color .15s;
+    }
+    .tv-toggle.tv-open  { color: var(--gold); }
+    .tv-toggle.tv-closed { color: var(--td); }
+
+    .tv-connector {
+      width: 20px; flex-shrink: 0; height: 1px;
+      border-left: 1px solid rgba(255,255,255,.07);
+      margin: 0; align-self: stretch;
+    }
+    .tv-leaf {
+      width: 20px; flex-shrink: 0; color: rgba(255,255,255,.18);
+      font-size: 12px; line-height: 1; padding-top: 1px;
+    }
+
+    .tv-icon { font-size: 14px; margin-right: 6px; flex-shrink: 0; }
+
+    /* root */
+    .tv-level-root { padding: 8px 6px 10px; border-bottom: 1px solid rgba(200,164,86,.1); margin-bottom: 6px; }
+    .tv-label-root { font-size: 16px; font-weight: 800; color: var(--gl); margin-right: 10px; }
+
+    /* category */
+    .tv-label-cat  { font-size: 14px; font-weight: 800; color: var(--gl); margin-right: 8px; }
+    .tv-badge      { border-radius: 999px; padding: 1px 9px; font-size: 11px; font-weight: 700; margin-right: 6px; flex-shrink: 0; }
+    .tv-badge-cat  { background: rgba(200,164,86,.15); color: var(--gold); border: 1px solid rgba(200,164,86,.3); }
+
+    /* model */
+    .tv-label-model { font-size: 13px; font-weight: 700; color: var(--bl); margin-right: 8px; }
+    .tv-badge-model { background: rgba(91,141,239,.15); color: var(--bl); border: 1px solid rgba(91,141,239,.3); }
+
+    /* branch */
+    .tv-branch-name { font-size: 12px; font-weight: 600; color: var(--tx); margin-right: 8px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .tv-status-badge { flex-shrink: 0; }
+    .tv-prov        { font-size: 11px; color: var(--td); margin-left: 6px; flex-shrink: 0; }
+
+    /* meta labels */
+    .tv-meta    { font-size: 12px; color: var(--td); margin-left: 6px; }
+    .tv-meta-sm { font-size: 11px; color: var(--td); margin-left: 4px; }
+    .tv-open-count { color: var(--gr); }
+
+    /* children container */
+    .tv-children { border-left: 1px solid rgba(255,255,255,.05); margin-left: 26px; }
+    .tv-hidden   { display: none; }
+
     /* ─── Org Chart ─── */
     .org-wrap{padding:24px 8px;overflow-x:auto;min-height:320px}
     .org-empty{text-align:center;color:var(--td);padding:60px 0;font-size:14px}
@@ -1090,104 +1151,137 @@
         if (!catMap.get(cat).has(model)) catMap.get(cat).set(model, []);
         catMap.get(cat).get(model).push(r);
       });
-
       const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
-      function renderBranches(branches, modelId) {
-        const sorted = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
-        const bar = branches.length > 1
-          ? `<div class="org-h-bar" style="background:rgba(91,141,239,.25)"></div>` : "";
-        return `
-          <div class="org-branch-list org-children collapsed" id="bl-${modelId}" style="position:relative">
-            ${bar}
-            ${sorted.map(r => `
-              <div class="org-branch-col">
-                <div class="org-node org-node-branch" data-bid="${esc(r.id)}">
-                  <div class="org-node-label">${esc(r.name)}</div>
-                  <div class="org-node-prov">
-                    <span class="badge ${badgeForStatus(r.status)}">${esc(r.status||"-")}</span>
-                    ${r.province ? `<span style="margin-left:4px">${esc(r.province)}</span>` : ""}
-                  </div>
-                </div>
-              </div>`).join("")}
-          </div>`;
-      }
+      // ── build tree HTML (vertical file-explorer style) ──
+      let html = `<div class="tv-root">`;
 
-      function renderModels(modelMap, catId) {
-        return [...modelMap.entries()].map(([model, branches], mi) => {
-          const openB   = branches.filter(r => r.status === "เปิดอยู่").length;
-          const modelId = `${catId}-m${mi}`;
-          return `
-            <div class="org-brand-col">
-              <div class="org-node org-node-model">
-                <div class="org-node-label">${esc(model)}</div>
-                <span class="org-model-pill" data-toggle="bl-${modelId}">
-                  🏪 ${branches.length} สาขา · เปิด ${openB}
-                </span>
-              </div>
-              ${renderBranches(branches, modelId)}
-            </div>`;
-        }).join("");
-      }
+      // root node
+      html += `
+        <div class="tv-row tv-level-root">
+          <span class="tv-toggle tv-open" data-tv="root-children">▼</span>
+          <span class="tv-icon">🏢</span>
+          <span class="tv-label-root">Nigiwai Group</span>
+          <span class="tv-meta">${data.length} สาขา · ${sortedCats.length} หมวด · ${brands.length} แบรนด์</span>
+        </div>
+        <div class="tv-children" id="root-children">`;
 
-      const catCols = sortedCats.map((cat, ci) => {
-        const modelMap   = catMap.get(cat);
-        const allBranch  = [...modelMap.values()].flat();
-        const openC      = allBranch.filter(r => r.status === "เปิดอยู่").length;
-        const catId      = `cat-${ci}`;
-        const modelCount = modelMap.size;
-        const modelsBar  = modelCount > 1
-          ? `<div class="org-h-bar" style="background:rgba(200,164,86,.3)"></div>` : "";
-        return `
-          <div class="org-cat-col">
-            <div class="org-node org-node-cat">
-              <div class="org-node-label">${esc(cat)}</div>
-              <div class="org-cat-meta">${modelCount} Model</div>
-              <span class="org-cat-pill" data-toggle-cat="${catId}">
-                🏬 ${allBranch.length} สาขา · เปิด ${openC}
-              </span>
+      sortedCats.forEach((cat, ci) => {
+        const modelMap  = catMap.get(cat);
+        const allBranch = [...modelMap.values()].flat();
+        const openC     = allBranch.filter(r => r.status === "เปิดอยู่").length;
+        const catId     = `tv-cat-${ci}`;
+
+        html += `
+          <div class="tv-row tv-level-cat" data-tv-toggle="${catId}">
+            <span class="tv-connector"></span>
+            <span class="tv-toggle tv-closed" data-tv="${catId}">▶</span>
+            <span class="tv-icon">📂</span>
+            <span class="tv-label-cat">${esc(cat)}</span>
+            <span class="tv-badge tv-badge-cat">${modelMap.size} Model</span>
+            <span class="tv-meta-sm">${allBranch.length} สาขา · เปิด ${openC}</span>
+          </div>
+          <div class="tv-children tv-hidden" id="${catId}">`;
+
+        [...modelMap.entries()].forEach(([model, branches], mi) => {
+          const openB    = branches.filter(r => r.status === "เปิดอยู่").length;
+          const modelId  = `tv-model-${ci}-${mi}`;
+          const sorted   = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
+
+          html += `
+            <div class="tv-row tv-level-model" data-tv-toggle="${modelId}">
+              <span class="tv-connector"></span>
+              <span class="tv-connector"></span>
+              <span class="tv-toggle tv-closed" data-tv="${modelId}">▶</span>
+              <span class="tv-icon">🏪</span>
+              <span class="tv-label-model">${esc(model)}</span>
+              <span class="tv-badge tv-badge-model">${branches.length} สาขา</span>
+              <span class="tv-meta-sm tv-open-count">เปิด ${openB}</span>
             </div>
-            <div class="org-children org-brand-row collapsed" id="${catId}" style="position:relative">
-              ${modelsBar}
-              ${renderModels(modelMap, catId)}
-            </div>
-          </div>`;
-      }).join("");
+            <div class="tv-children tv-hidden" id="${modelId}">`;
 
-      const rootBar = sortedCats.length > 1
-        ? `<div class="org-h-bar" style="background:rgba(200,164,86,.4)"></div>` : "";
+          sorted.forEach((r, bi) => {
+            const isLast = bi === sorted.length - 1;
+            html += `
+              <div class="tv-row tv-level-branch" data-bid="${esc(r.id)}">
+                <span class="tv-connector"></span>
+                <span class="tv-connector"></span>
+                <span class="tv-connector"></span>
+                <span class="tv-leaf">${isLast ? "└" : "├"}</span>
+                <span class="tv-branch-name">${esc(r.name)}</span>
+                <span class="badge ${badgeForStatus(r.status)} tv-status-badge">${esc(r.status||"-")}</span>
+                ${r.province ? `<span class="tv-prov">${esc(r.province)}</span>` : ""}
+              </div>`;
+          });
 
-      el.orgWrap.innerHTML = `
-        <div class="org-tree">
-          <li style="list-style:none;display:flex;flex-direction:column;align-items:center">
-            <div class="org-node org-node-root">
-              <div class="org-node-label">Nigiwai Group</div>
-              <div class="org-node-sub">${data.length} สาขา · ${sortedCats.length} หมวดหมู่ · ${brands.length} แบรนด์</div>
-            </div>
-            <div style="width:1px;height:28px;background:rgba(200,164,86,.4)"></div>
-            <div class="org-cat-row" style="position:relative">
-              ${rootBar}
-              ${catCols}
-            </div>
-          </li>
-        </div>`;
-
-      el.orgWrap.querySelectorAll("[data-toggle-cat]").forEach(pill => {
-        pill.addEventListener("click", e => {
-          e.stopPropagation();
-          const target = document.getElementById(pill.dataset.toggleCat);
-          if (target) target.classList.toggle("collapsed");
+          html += `</div>`; // end model children
         });
+
+        html += `</div>`; // end cat children
       });
 
-      el.orgWrap.querySelectorAll("[data-toggle]").forEach(pill => {
-        pill.addEventListener("click", e => {
+      html += `</div></div>`; // end root-children + tv-root
+      el.orgWrap.innerHTML = html;
+
+      // ── toggle handler (event delegation) ──
+      el.orgWrap.addEventListener("click", function handler(e) {
+        const row = e.target.closest("[data-tv-toggle]");
+        if (!row) return;
+        const targetId = row.dataset.tvToggle;
+        const children = document.getElementById(targetId);
+        const toggleEl = row.querySelector("[data-tv]");
+        if (!children || !toggleEl) return;
+        const isHidden = children.classList.contains("tv-hidden");
+        children.classList.toggle("tv-hidden", !isHidden);
+        toggleEl.textContent  = isHidden ? "▼" : "▶";
+        toggleEl.classList.toggle("tv-open",   isHidden);
+        toggleEl.classList.toggle("tv-closed", !isHidden);
+      });
+
+      // root toggle
+      el.orgWrap.querySelector("[data-tv='root-children']")?.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const children = document.getElementById("root-children");
+        const isHidden = children.classList.contains("tv-hidden");
+        children.classList.toggle("tv-hidden", !isHidden);
+        this.textContent = isHidden ? "▼" : "▶";
+      });
+
+      // branch click → popup detail
+      el.orgWrap.querySelectorAll(".tv-level-branch[data-bid]").forEach(row => {
+        row.addEventListener("click", e => {
           e.stopPropagation();
-          const target = document.getElementById(pill.dataset.toggle);
-          if (target) target.classList.toggle("collapsed");
+          const bid = row.dataset.bid;
+          const r   = rows.find(x => x.id === bid);
+          if (!r) return;
+          const popup = document.getElementById("branchPopup");
+          document.getElementById("bpTitle").textContent = r.name;
+          const fields = [
+            ["Model",    r.model],
+            ["สถานะ",    r.status],
+            ["วันเปิด", r.openDate || "ไม่ทราบ"],
+            ["ภูมิภาค", r.zone],
+            ["จังหวัด", r.province],
+            ["ประเทศ",  r.country],
+            ["ประเภท",  r.branchType],
+            ["เจ้าของ", r.owner],
+            ["Location",r.locationType],
+            ["Relation",r.relation],
+          ].filter(([,v]) => v);
+          document.getElementById("bpBody").innerHTML = fields
+            .map(([k,v]) => `<div class="bp-row"><span class="bp-key">${esc(k)}</span><span class="bp-val">${esc(v)}</span></div>`)
+            .join("");
+          const rect = row.getBoundingClientRect();
+          let left = rect.right + 12, top = rect.top + window.scrollY;
+          if (left + 320 > window.innerWidth) left = rect.left - 332;
+          if (left < 8) left = 8;
+          popup.style.left = left + "px";
+          popup.style.top  = top + "px";
+          popup.classList.add("show");
         });
       });
     }
+
 
 
     el.orgFilterStatus.addEventListener("change", renderOrgChart);
