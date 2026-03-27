@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firebase Status Check — Nigiwai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:#0B1426;--nl:#132040;--gold:#C8A456;--gl:#E8CA7A;
+      --tx:#E8E4DC;--td:#9A9AAA;--gr:#3DD68C;--rd:#F06060;--bl:#5B8DEF;--or:#F5A623;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans Thai',sans-serif;background:var(--navy);color:var(--tx);
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .page{width:min(560px,100%)}
+    .header{text-align:center;margin-bottom:28px}
+    .logo{width:52px;height:52px;border-radius:14px;margin:0 auto 12px;
+      background:linear-gradient(135deg,rgba(200,164,86,.25),rgba(200,164,86,.08));
+      border:1px solid rgba(200,164,86,.4);display:flex;align-items:center;justify-content:center;font-size:26px}
+    .header-title{font-size:22px;font-weight:800;color:var(--gl)}
+    .header-sub{font-size:13px;color:var(--td);margin-top:4px}
+    .card{background:var(--nl);border:1px solid rgba(200,164,86,.14);border-radius:16px;padding:20px;margin-bottom:14px}
+    .card-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;
+      letter-spacing:.06em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(200,164,86,.1)}
+    .s-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(200,164,86,.06)}
+    .s-row:last-child{border-bottom:none}
+    .s-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s,box-shadow .3s}
+    .dot-idle{background:var(--td)}
+    .dot-spin{background:var(--td);animation:pulse 1s infinite}
+    .dot-ok{background:var(--gr);box-shadow:0 0 8px rgba(61,214,140,.55)}
+    .dot-warn{background:var(--or);box-shadow:0 0 8px rgba(245,166,35,.5)}
+    .dot-err{background:var(--rd);box-shadow:0 0 8px rgba(240,96,96,.5)}
+    @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+    .s-label{font-size:13px;font-weight:700;color:var(--tx);flex:1}
+    .s-detail{font-size:12px;color:var(--td);min-width:0;text-align:right}
+    .s-detail.ok{color:var(--gr)}.s-detail.warn{color:var(--or)}.s-detail.err{color:var(--rd)}
+    .ping{font-size:11px;color:var(--td);margin-left:5px}
+    .overall{display:flex;align-items:center;gap:10px;justify-content:center;
+      padding:14px;border-radius:12px;margin-bottom:14px;font-size:14px;font-weight:700;
+      background:rgba(154,154,170,.08);border:1px solid rgba(154,154,170,.18);color:var(--td)}
+    .overall.ok{background:rgba(61,214,140,.08);border-color:rgba(61,214,140,.3);color:var(--gr)}
+    .overall.warn{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.3);color:var(--or)}
+    .overall.err{background:rgba(240,96,96,.08);border-color:rgba(240,96,96,.3);color:var(--rd)}
+    .overall .big-dot{width:14px;height:14px;border-radius:50%;background:currentColor;flex-shrink:0}
+    .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+    .input{background:#0f1b33;border:1px solid rgba(200,164,86,.2);color:var(--tx);
+      border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%}
+    .input:focus{outline:none;border-color:rgba(200,164,86,.5)}
+    .auth-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border-radius:10px;padding:10px 16px;font-family:inherit;font-size:13px;
+      font-weight:700;cursor:pointer;border:1px solid;transition:.18s}
+    .btn-gold{border-color:rgba(200,164,86,.35);background:rgba(200,164,86,.1);color:var(--gold)}
+    .btn-gold:hover{background:var(--gold);color:#0B1426}
+    .btn-green{border-color:rgba(61,214,140,.35);background:rgba(61,214,140,.1);color:var(--gr)}
+    .btn-green:hover{background:var(--gr);color:#0B1426}
+    .btn-blue{border-color:rgba(91,141,239,.35);background:rgba(91,141,239,.1);color:var(--bl)}
+    .btn-red{border-color:rgba(240,96,96,.35);background:rgba(240,96,96,.1);color:var(--rd)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .auth-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+      border-radius:999px;font-size:11px;font-weight:700;
+      background:rgba(154,154,170,.1);color:var(--td)}
+    .auth-chip.ok{background:rgba(61,214,140,.12);color:var(--gr)}
+    .auth-chip.err{background:rgba(240,96,96,.1);color:var(--rd)}
+    .chip-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .err-msg{font-size:11px;color:var(--rd);margin-top:6px;word-break:break-all}
+    .meta{font-size:11px;color:var(--td);text-align:center;margin-top:6px}
+    .project-id{font-weight:700;color:rgba(200,164,86,.6)}
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo">🔥</div>
+    <div class="header-title">Firebase Status Check</div>
+    <div class="header-sub">Nigiwai Group — Firestore Connection Diagnostics</div>
+  </div>
+
+  <div class="overall" id="overall">
+    <span class="big-dot"></span>
+    <span id="overallText">กดปุ่ม Run Check เพื่อเริ่มตรวจสอบ</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔐 Authentication</div>
+    <div class="auth-grid">
+      <input id="email"    class="input" placeholder="อีเมล Firebase" type="email" />
+      <input id="password" class="input" placeholder="รหัสผ่าน" type="password" />
+    </div>
+    <div class="auth-actions">
+      <button class="btn btn-green" id="btnLogin">Login</button>
+      <button class="btn btn-red"   id="btnLogout" disabled>Logout</button>
+      <span id="authChip" class="auth-chip err"><span class="chip-dot"></span>ยังไม่ได้ล็อกอิน</span>
+    </div>
+    <div id="authErr" class="err-msg"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📡 Connection Status</div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-app"></div>
+      <div class="s-label">Firebase App Init</div>
+      <div class="s-detail" id="val-app">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-auth"></div>
+      <div class="s-label">Auth State</div>
+      <div class="s-detail" id="val-auth">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-read"></div>
+      <div class="s-label">Firestore Read</div>
+      <div class="s-detail" id="val-read">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-write"></div>
+      <div class="s-label">Firestore Write</div>
+      <div class="s-detail" id="val-write">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-docs"></div>
+      <div class="s-label">Document Count (branches)</div>
+      <div class="s-detail" id="val-docs">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-idle" id="dot-rt"></div>
+      <div class="s-label">Realtime Listener (onSnapshot)</div>
+      <div class="s-detail" id="val-rt">รอ...</div>
+    </div>
+    <div class="s-row">
+      <div class="s-dot dot-ok" id="dot-time"></div>
+      <div class="s-label">ตรวจสอบล่าสุด</div>
+      <div class="s-detail" id="val-time">—</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <button class="btn btn-gold" id="btnRun" style="flex:1">▶ Run Check</button>
+    <button class="btn btn-blue" id="btnReset">Reset</button>
+  </div>
+
+  <div class="meta">
+    Project: <span class="project-id">nigiwai-core-a1c41</span> &nbsp;·&nbsp;
+    Region: asia-southeast1 &nbsp;·&nbsp; SDK: Firebase 10.12.2
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged,
+    signInWithEmailAndPassword, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc,
+    getDocs, query, limit, onSnapshot, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyB75sJAh4myOUkXIEKzrwo0yoPFwZJQ1po",
+    authDomain:        "nigiwai-core-a1c41.firebaseapp.com",
+    projectId:         "nigiwai-core-a1c41",
+    storageBucket:     "nigiwai-core-a1c41.firebasestorage.app",
+    messagingSenderId: "815850074955",
+    appId:             "1:815850074955:web:31c9ba46dbd4d95d4eaece",
+  };
+
+  const app    = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth   = getAuth(app);
+  const db     = getFirestore(app);
+  const colRef = collection(db, "branches");
+
+  let rtUnsub = null;
+
+  const esc = s => (s ?? "").toString()
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  function setRow(key, dotCls, html, textCls = "") {
+    document.getElementById("dot-" + key).className = "s-dot " + dotCls;
+    const el = document.getElementById("val-" + key);
+    el.className = "s-detail" + (textCls ? " " + textCls : "");
+    el.innerHTML = html;
+  }
+
+  function setOverall(state, text) {
+    document.getElementById("overall").className = "overall " + state;
+    document.getElementById("overallText").textContent = text;
+  }
+
+  function resetAll() {
+    ["app","auth","read","write","docs","rt"].forEach(k => setRow(k, "dot-idle", "รอ..."));
+    setRow("time", "dot-ok", "—");
+    setOverall("", "กดปุ่ม Run Check เพื่อเริ่มตรวจสอบ");
+    if (rtUnsub) { rtUnsub(); rtUnsub = null; }
+  }
+
+  onAuthStateChanged(auth, user => {
+    const chip = document.getElementById("authChip");
+    if (user) {
+      chip.className = "auth-chip ok";
+      chip.innerHTML = `<span class="chip-dot"></span>ล็อกอิน: ${esc(user.email)}`;
+      document.getElementById("btnLogin").disabled  = true;
+      document.getElementById("btnLogout").disabled = false;
+    } else {
+      chip.className = "auth-chip err";
+      chip.innerHTML = `<span class="chip-dot"></span>ยังไม่ได้ล็อกอิน`;
+      document.getElementById("btnLogin").disabled  = false;
+      document.getElementById("btnLogout").disabled = true;
+    }
+  });
+
+  document.getElementById("btnLogin").addEventListener("click", async () => {
+    document.getElementById("authErr").textContent = "";
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        document.getElementById("email").value.trim(),
+        document.getElementById("password").value
+      );
+    } catch(e) {
+      document.getElementById("authErr").textContent = "Login ไม่สำเร็จ: " + e.message;
+    }
+  });
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    try { await signOut(auth); }
+    catch(e) { document.getElementById("authErr").textContent = e.message; }
+  });
+
+  document.getElementById("btnReset").addEventListener("click", resetAll);
+
+  document.getElementById("btnRun").addEventListener("click", async () => {
+    const btnRun = document.getElementById("btnRun");
+    btnRun.disabled = true;
+    btnRun.textContent = "⏳ กำลังตรวจสอบ...";
+
+    ["app","auth","read","write","docs","rt"].forEach(k =>
+      setRow(k, "dot-spin", "กำลังตรวจสอบ...")
+    );
+    setOverall("", "กำลังตรวจสอบ...");
+
+    let errors = 0, warns = 0;
+
+    // 1. App init
+    try {
+      setRow("app", "dot-ok",
+        `OK &nbsp;<span style="color:var(--td);font-size:11px">[${esc(app.name)}]</span>`, "ok");
+    } catch(e) {
+      setRow("app", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
+    }
+
+    // 2. Auth
+    const user = auth.currentUser;
+    if (user) {
+      setRow("auth", "dot-ok", `ล็อกอินแล้ว: ${esc(user.email)}`, "ok");
+    } else {
+      setRow("auth", "dot-warn", "ยังไม่ได้ล็อกอิน (Write จะถูกข้าม)", "warn"); warns++;
+    }
+
+    // 3. Read
+    try {
+      const t0 = performance.now();
+      await getDocs(query(colRef, limit(1)));
+      const ms = Math.round(performance.now() - t0);
+      setRow("read", "dot-ok", `OK <span class="ping">${ms} ms</span>`, "ok");
+    } catch(e) {
+      setRow("read", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
+    }
+
+    // 4. Write
+    if (!user) {
+      setRow("write", "dot-warn", "ข้าม — ยังไม่ได้ล็อกอิน", "warn"); warns++;
+    } else {
+      try {
+        const pingCol = collection(db, "_ping");
+        const t0 = performance.now();
+        const ref = await addDoc(pingCol, { ts: serverTimestamp(), by: user.email });
+        await deleteDoc(ref);
+        const ms = Math.round(performance.now() - t0);
+        setRow("write", "dot-ok",
+          `OK — write+delete <span class="ping">${ms} ms</span>`, "ok");
+      } catch(e) {
+        setRow("write", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
+      }
+    }
+
+    // 5. Count
+    try {
+      const t0 = performance.now();
+      const snap = await getDocs(colRef);
+      const ms = Math.round(performance.now() - t0);
+      setRow("docs", "dot-ok",
+        `${snap.size} documents <span class="ping">${ms} ms</span>`, "ok");
+    } catch(e) {
+      setRow("docs", "dot-warn", "นับไม่ได้: " + esc(e.message), "warn"); warns++;
+    }
+
+    // 6. Realtime listener
+    await new Promise(resolve => {
+      const timeout = setTimeout(() => {
+        setRow("rt", "dot-err", "Timeout 5s — Listener ไม่ตอบสนอง", "err");
+        errors++; resolve();
+      }, 5000);
+      if (rtUnsub) rtUnsub();
+      const t0 = performance.now();
+      rtUnsub = onSnapshot(
+        query(colRef, limit(1)),
+        () => {
+          clearTimeout(timeout);
+          const ms = Math.round(performance.now() - t0);
+          setRow("rt", "dot-ok",
+            `Live <span class="ping">${ms} ms first event</span>`, "ok");
+          resolve();
+        },
+        err => {
+          clearTimeout(timeout);
+          setRow("rt", "dot-err", "Listener Error: " + esc(err.message), "err");
+          errors++; resolve();
+        }
+      );
+    });
+
+    setRow("time", "dot-ok", new Date().toLocaleString("th-TH"));
+
+    if (errors === 0 && warns === 0) {
+      setOverall("ok", "✅ ทุกอย่างปกติ — Firestore พร้อมใช้งาน");
+    } else if (errors === 0) {
+      setOverall("warn", `⚠ เชื่อมต่อได้ แต่มี ${warns} รายการที่ควรตรวจสอบ`);
+    } else {
+      setOverall("err", `❌ พบ ${errors} ข้อผิดพลาด${warns ? ` และ ${warns} คำเตือน` : ""}`);
+    }
+
+    btnRun.disabled = false;
+    btnRun.textContent = "▶ Run Check";
+  });
+</script>
+</body>
+</html>
