@@ -1822,14 +1822,77 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
 
     function render() {
       const data = filteredRows();
-      const openCount = data.filter(r => r.status === "เปิดอยู่").length;
+      const openCount  = data.filter(r => r.status === "เปิดอยู่").length;
       const closeCount = data.filter(r => r.status === "ปิดแล้ว").length;
-      el.sAll.textContent = `ทั้งหมด ${data.length}`;
-      el.sOpen.textContent = `เปิดอยู่ ${openCount}`;
+      el.sAll.textContent   = `ทั้งหมด ${data.length}`;
+      el.sOpen.textContent  = `เปิดอยู่ ${openCount}`;
       el.sClose.textContent = `ปิดแล้ว ${closeCount}`;
-      if (viewMode === "card") { renderCards(); }
 
+      // ── Grouped View: Category → Model → Branch ──
+      const catMap = new Map();
+      data.forEach(r => {
+        const cat   = getCategory(r.model || "");
+        const model = r.model || "ไม่ระบุ Model";
+        if (!catMap.has(cat))            catMap.set(cat, new Map());
+        if (!catMap.get(cat).has(model)) catMap.get(cat).set(model, []);
+        catMap.get(cat).get(model).push(r);
+      });
+      const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
+      const gv = document.getElementById("groupedView");
+      if (!gv) return;
+
+      if (!data.length) {
+        gv.innerHTML = '<div style="color:var(--td);text-align:center;padding:40px">ไม่พบข้อมูล</div>';
+        return;
+      }
+
+      let out = "";
+      sortedCats.forEach(cat => {
+        const modelMap = catMap.get(cat);
+        out += `<div class="gv-cat-block">
+          <div class="gv-cat-head">📂 ${esc(cat)}</div>`;
+
+        [...modelMap.entries()].forEach(([model, branches]) => {
+          const openB  = branches.filter(r => r.status === "เปิดอยู่").length;
+          const sorted = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
+          out += `<div class="gv-model-block">
+            <div class="gv-model-head">
+              <span class="gv-model-name">🏪 ${esc(model)}</span>
+              <span class="gv-model-pill">${branches.length} สาขา · เปิด ${openB}</span>
+            </div>
+            <table class="gv-table">
+              <colgroup>
+                <col style="width:auto">
+                <col style="width:28px">
+                <col style="width:28px">
+              </colgroup>
+              <tbody>`;
+
+          sorted.forEach(r => {
+            out += `<tr class="gv-row">
+              <td class="gv-name">
+                <span class="badge ${badgeClass(r.status)} gv-badge">${esc(r.status||"-")}</span>
+                <span class="gv-branch-label">${esc(r.name)}</span>
+                ${r.province ? `<span class="gv-prov">${esc(r.province)}</span>` : ""}
+              </td>
+              <td class="gv-icon-cell">
+                ${r.facebook  ? `<a href="${esc(r.facebook)}"  target="_blank" class="gv-icon-link" title="Facebook">f</a>`
+                              : `<span class="gv-icon-empty"></span>`}
+              </td>
+              <td class="gv-icon-cell">
+                ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="gv-icon-link gv-map-link" title="Google Map">📍</a>`
+                              : `<span class="gv-icon-empty"></span>`}
+              </td>
+            </tr>`;
+          });
+
+          out += `</tbody></table></div>`;
+        });
+        out += `</div>`;
+      });
+
+      gv.innerHTML = out;
     }
 
 
