@@ -70,6 +70,33 @@
 
 
 
+
+    /* ── Category collapse ── */
+    .gv-cat-head {
+      cursor:pointer; user-select:none;
+      display:flex; align-items:center; gap:6px;
+      transition:background .15s;
+    }
+    .gv-cat-head:hover { background:rgba(200,164,86,.14); }
+    .gv-cat-toggle { font-size:10px; color:var(--gold); transition:transform .2s; }
+    .gv-cat-toggle.collapsed { transform:rotate(-90deg); }
+    .gv-cat-body { transition:all .2s; overflow:hidden; }
+    .gv-cat-body.collapsed { display:none; }
+
+    /* ── Status filter chips (หน้าแรก) ── */
+    .status-chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+    .sc-chip {
+      padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700;
+      cursor:pointer; border:1px solid; transition:.15s; user-select:none;
+    }
+    .sc-chip.active { opacity:1; }
+    .sc-chip:not(.active) { opacity:.45; }
+    .sc-all   { border-color:rgba(91,141,239,.4);  background:rgba(91,141,239,.12); color:var(--bl); }
+    .sc-open  { border-color:rgba(61,214,140,.4);  background:rgba(61,214,140,.12); color:var(--gr); }
+    .sc-close { border-color:rgba(240,96,96,.4);   background:rgba(240,96,96,.12);  color:var(--rd); }
+    .sc-other { border-color:rgba(200,164,86,.4);  background:rgba(200,164,86,.12); color:var(--gold); }
+    .sc-build { border-color:rgba(91,141,239,.35); background:rgba(91,141,239,.08); color:var(--bl); }
+
     /* ── Main branch table (หน้าแรก) ── */
     .main-table-wrap { overflow-x:auto; margin-top:6px; margin-bottom:4px; }
     .main-table { width:100%; border-collapse:collapse; font-size:13px; table-layout:auto; }
@@ -127,7 +154,7 @@
     .gv-icon-empty  { display:inline-block; width:22px; }
 
     /* ── Admin branch table ── */
-    .admin-table-wrap { overflow:auto; max-height:60vh; margin-top: 12px; }
+    .admin-table-wrap { overflow:visible; margin-top: 12px; }
     .admin-table { width:100%; border-collapse:collapse; font-size:12px; }
     .admin-table th { text-align:left; color:var(--gold); font-size:11px;
       background:rgba(200,164,86,.05); padding:8px 10px;
@@ -416,6 +443,22 @@
     .tv-meta-sm { font-size: 11px; color: var(--td); margin-left: 4px; }
     .tv-open-count { color: var(--gr); }
 
+
+    /* ── Zone bar chart ── */
+    .zone-bar-wrap { background:#0a1628; border-radius:12px; padding:14px 16px;
+      margin-bottom:16px; border:1px solid rgba(200,164,86,.1); }
+    .zone-bar-title { font-size:13px; font-weight:700; color:var(--gold); margin-bottom:10px; }
+    .zone-bar-legend { display:flex; gap:12px; font-size:11px; color:var(--td);
+      margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+    .zl-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+    .zone-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+    .zone-bar-label { font-size:11px; color:var(--tx); width:160px; flex-shrink:0;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .zone-bar-track { flex:1; height:14px; background:rgba(255,255,255,.05);
+      border-radius:999px; display:flex; overflow:hidden; }
+    .zone-seg { height:100%; transition:width .5s ease; min-width:0; }
+    .zone-bar-num { font-size:11px; color:var(--td); width:28px; text-align:right; flex-shrink:0; }
+
     .tv-zone-tag { font-size:10px; color:var(--td); background:rgba(255,255,255,.06);
       border-radius:4px; padding:1px 5px; margin-left:4px; }
 
@@ -571,6 +614,16 @@
           <span id="sClose" class="pill p-close">ปิดแล้ว 0</span>
         </div>
 
+        <!-- Status filter chips -->
+        <div class="status-chips" id="statusChips">
+          <span class="sc-chip sc-all active"  data-sc="">ทั้งหมด</span>
+          <span class="sc-chip sc-open"  data-sc="เปิดอยู่">เปิดอยู่</span>
+          <span class="sc-chip sc-close" data-sc="ปิดแล้ว">ปิดแล้ว</span>
+          <span class="sc-chip sc-other" data-sc="ยกเลิกสัญญา">ยกเลิกสัญญา</span>
+          <span class="sc-chip sc-other" data-sc="ติดตาม">ติดตาม</span>
+          <span class="sc-chip sc-build" data-sc="กำลังก่อสร้าง">กำลังก่อสร้าง</span>
+          <span class="sc-chip sc-other" data-sc="ฟ้องร้อง">ฟ้องร้อง</span>
+        </div>
         <!-- Grouped Branch View -->
         <div id="groupedView"></div>
         <div id="msg" class="msg muted"></div>
@@ -1472,7 +1525,8 @@
       const data = orgFilteredRows();
       const openCount  = data.filter(r => r.status === "เปิดอยู่").length;
       const closeCount = data.filter(r => r.status === "ปิดแล้ว").length;
-      const otherCount = data.length - openCount - closeCount;
+      const buildCount = data.filter(r => r.status === "กำลังก่อสร้าง").length;
+      const otherCount = data.length - openCount - closeCount - buildCount;
       const total = data.length || 1;
 
       const brands = [...new Set(data.map(r => r.model).filter(Boolean))];
@@ -1489,7 +1543,7 @@
         requestAnimationFrame(() => {
           document.getElementById("barOpen").style.width  = (openCount/total*100).toFixed(1)+"%";
           document.getElementById("barClose").style.width = (closeCount/total*100).toFixed(1)+"%";
-          document.getElementById("barOther").style.width = (otherCount/total*100).toFixed(1)+"%";
+          document.getElementById("barOther").style.width = ((otherCount+buildCount)/total*100).toFixed(1)+"%";
         });
       }
 
@@ -1497,6 +1551,48 @@
         el.orgWrap.innerHTML = '<div class="org-empty">ไม่พบข้อมูล</div>';
         return;
       }
+
+      // ── Zone bar chart (สถานะตามภาค) ──
+      const zoneMap = new Map();
+      data.forEach(r => {
+        const z = r.zone || "ไม่ระบุ";
+        if (!zoneMap.has(z)) zoneMap.set(z, {open:0,close:0,build:0,other:0,total:0});
+        const zd = zoneMap.get(z);
+        zd.total++;
+        if (r.status==="เปิดอยู่") zd.open++;
+        else if (r.status==="ปิดแล้ว") zd.close++;
+        else if (r.status==="กำลังก่อสร้าง") zd.build++;
+        else zd.other++;
+      });
+      const sortedZones = [...zoneMap.entries()].sort((a,b) => b[1].total - a[1].total);
+      const maxZone = Math.max(...sortedZones.map(([,v]) => v.total)) || 1;
+
+      let zoneBarHtml = `<div class="zone-bar-wrap">
+        <div class="zone-bar-title">📊 จำนวนสาขาตามภูมิภาค</div>
+        <div class="zone-bar-legend">
+          <span class="zl-dot" style="background:var(--gr)"></span>เปิดอยู่
+          <span class="zl-dot" style="background:var(--rd)"></span>ปิดแล้ว
+          <span class="zl-dot" style="background:var(--bl)"></span>ก่อสร้าง
+          <span class="zl-dot" style="background:var(--gold)"></span>อื่นๆ
+        </div>`;
+      sortedZones.forEach(([zone, zd]) => {
+        const pOpen  = (zd.open /maxZone*100).toFixed(1);
+        const pClose = (zd.close/maxZone*100).toFixed(1);
+        const pBuild = (zd.build/maxZone*100).toFixed(1);
+        const pOther = (zd.other/maxZone*100).toFixed(1);
+        zoneBarHtml += `
+          <div class="zone-bar-row">
+            <div class="zone-bar-label">${esc(zone)}</div>
+            <div class="zone-bar-track">
+              <div class="zone-seg" style="width:${pOpen}%;background:var(--gr)" title="เปิด ${zd.open}"></div>
+              <div class="zone-seg" style="width:${pClose}%;background:var(--rd)" title="ปิด ${zd.close}"></div>
+              <div class="zone-seg" style="width:${pBuild}%;background:var(--bl)" title="ก่อสร้าง ${zd.build}"></div>
+              <div class="zone-seg" style="width:${pOther}%;background:var(--gold)" title="อื่นๆ ${zd.other}"></div>
+            </div>
+            <div class="zone-bar-num">${zd.total}</div>
+          </div>`;
+      });
+      zoneBarHtml += `</div>`;
 
       // Group: category → model → branches
       const catMap = new Map();
@@ -1509,8 +1605,8 @@
       });
       const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
-      // ── build tree HTML (vertical file-explorer style) ──
-      let html = `<div class="tv-root">`;
+      // ── build tree HTML ──
+      let html = zoneBarHtml + `<div class="tv-root">`;
 
       // root node
       html += `
@@ -1581,29 +1677,30 @@
       html += `</div></div>`; // end root-children + tv-root
       el.orgWrap.innerHTML = html;
 
-      // ── toggle handler (event delegation) ──
-      el.orgWrap.addEventListener("click", function handler(e) {
+      // ── toggle handler — single delegation, no duplicate listeners ──
+      el.orgWrap.onclick = (e) => {
+        // root toggle
+        const rootTog = e.target.closest("[data-tv='root-children']");
+        if (rootTog) {
+          e.stopPropagation();
+          const ch = document.getElementById("root-children");
+          if (!ch) return;
+          const hidden = ch.classList.toggle("tv-hidden");
+          rootTog.textContent = hidden ? "▶" : "▼";
+          return;
+        }
+        // cat/model toggle
         const row = e.target.closest("[data-tv-toggle]");
         if (!row) return;
         const targetId = row.dataset.tvToggle;
         const children = document.getElementById(targetId);
         const toggleEl = row.querySelector("[data-tv]");
         if (!children || !toggleEl) return;
-        const isHidden = children.classList.contains("tv-hidden");
-        children.classList.toggle("tv-hidden", !isHidden);
-        toggleEl.textContent  = isHidden ? "▼" : "▶";
-        toggleEl.classList.toggle("tv-open",   isHidden);
-        toggleEl.classList.toggle("tv-closed", !isHidden);
-      });
-
-      // root toggle
-      el.orgWrap.querySelector("[data-tv='root-children']")?.addEventListener("click", function(e) {
-        e.stopPropagation();
-        const children = document.getElementById("root-children");
-        const isHidden = children.classList.contains("tv-hidden");
-        children.classList.toggle("tv-hidden", !isHidden);
-        this.textContent = isHidden ? "▼" : "▶";
-      });
+        const isHidden = children.classList.toggle("tv-hidden");
+        toggleEl.textContent = isHidden ? "▶" : "▼";
+        toggleEl.classList.toggle("tv-open",   !isHidden);
+        toggleEl.classList.toggle("tv-closed",  isHidden);
+      };
 
       // branch click → popup detail
       el.orgWrap.querySelectorAll(".tv-level-branch[data-bid]").forEach(row => {
@@ -1832,10 +1929,10 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
 
     function filteredRows() {
       const q = el.q.value.trim().toLowerCase();
-      const fModel = el.fModel.value;
-      const fStatus = el.fStatus.value;
+      const fModel  = el.fModel.value;
+      const fStatus = el.fStatus.value || _statusFilter;
       return rows.filter(r => {
-        if (fModel && r.model !== fModel) return false;
+        if (fModel  && r.model  !== fModel)  return false;
         if (fStatus && r.status !== fStatus) return false;
         if (!q) return true;
         const text = [r.name, r.model, r.zone, r.province, r.country].join(" ").toLowerCase();
@@ -1869,17 +1966,21 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
       let out = "";
-      sortedCats.forEach(cat => {
+      sortedCats.forEach((cat, ci) => {
         const branches = catMap.get(cat);
         const openC    = branches.filter(r => r.status === "เปิดอยู่").length;
         const sorted   = [...branches].sort((a,b) => (a.model||"").localeCompare(b.model||"","th") || (a.name||"").localeCompare(b.name||"","th"));
+        const bodyId   = `gv-body-${ci}`;
+        const isOpen   = _catOpenState[cat] !== false; // default: open
 
         out += `
           <div class="gv-cat-block">
-            <div class="gv-cat-head">
+            <div class="gv-cat-head" data-cat-toggle="${bodyId}" data-cat-name="${esc(cat)}">
+              <span class="gv-cat-toggle ${isOpen ? "" : "collapsed"}">▼</span>
               📂 ${esc(cat)}
-              <span style="font-weight:400;font-size:11px;color:var(--td);margin-left:8px">${branches.length} สาขา · เปิด ${openC}</span>
+              <span style="font-weight:400;font-size:11px;color:var(--td);margin-left:6px">${branches.length} สาขา · เปิด ${openC}</span>
             </div>
+            <div class="gv-cat-body ${isOpen ? "" : "collapsed"}" id="${bodyId}">
             <div class="main-table-wrap">
             <table class="main-table">
               <thead><tr>
@@ -1913,15 +2014,31 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
           </tr>`;
         });
 
-        out += `</tbody></table></div></div>`;
+        out += `</tbody></table></div></div></div>`;
       });
 
       gv.innerHTML = out;
+
+      // ── wire collapse/expand ──
+      gv.querySelectorAll("[data-cat-toggle]").forEach(head => {
+        head.addEventListener("click", () => {
+          const bodyId  = head.dataset.catToggle;
+          const catName = head.dataset.catName;
+          const body    = document.getElementById(bodyId);
+          const tog     = head.querySelector(".gv-cat-toggle");
+          if (!body) return;
+          const collapsed = body.classList.toggle("collapsed");
+          if (tog) tog.classList.toggle("collapsed", collapsed);
+          _catOpenState[catName] = !collapsed;
+        });
+      });
     }
 
 
     // ── Card View ──
-    let viewMode = "table"; // "table" | "card"
+    let viewMode = "table";
+    const _catOpenState = {}; // เก็บ state collapse ของแต่ละ Category
+    let _statusFilter   = "";  // status chip filter
 
     function renderCards() {
       const data = filteredRows();
@@ -2142,6 +2259,15 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
     });
 
     el.q.addEventListener("input", render);
+
+    // ── Status chips ──
+    document.getElementById("statusChips")?.addEventListener("click", e => {
+      const chip = e.target.closest(".sc-chip");
+      if (!chip) return;
+      _statusFilter = chip.dataset.sc;
+      document.querySelectorAll(".sc-chip").forEach(c => c.classList.toggle("active", c === chip));
+      render();
+    });
     el.fModel.addEventListener("change", render);
     el.fStatus.addEventListener("change", render);
     el.btnAdd.addEventListener("click", () => openModal("create"));
