@@ -147,6 +147,114 @@
     /* branch node clickable */
     .org-node-branch{cursor:pointer;transition:border-color .18s,background .18s}
     .org-node-branch:hover{border-color:rgba(200,164,86,.5);background:rgba(200,164,86,.06)}
+
+
+    /* ─── Category Manager ─── */
+    .cat-manager{display:grid;grid-template-columns:260px 1fr;gap:16px;min-height:420px}
+    @media(max-width:700px){.cat-manager{grid-template-columns:1fr}}
+    .cat-list-panel{background:#0a1628;border-radius:12px;padding:12px;border:1px solid rgba(200,164,86,.1)}
+    .cat-list-title{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;
+      letter-spacing:.06em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(200,164,86,.1)}
+    .cat-item{
+      display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+      cursor:pointer;transition:.15s;margin-bottom:4px;border:1px solid transparent
+    }
+    .cat-item:hover{background:rgba(200,164,86,.06)}
+    .cat-item.active{background:rgba(200,164,86,.1);border-color:rgba(200,164,86,.25)}
+    .cat-item-name{flex:1;font-size:13px;font-weight:600;color:var(--tx)}
+    .cat-item-count{font-size:11px;color:var(--td);background:rgba(255,255,255,.06);
+      padding:1px 7px;border-radius:999px}
+    .cat-item-del{color:var(--td);background:none;border:none;cursor:pointer;font-size:14px;
+      opacity:0;transition:.15s;line-height:1}
+    .cat-item:hover .cat-item-del{opacity:1}
+    .cat-item-del:hover{color:var(--rd)}
+    .add-cat-row{display:flex;gap:6px;margin-top:8px}
+    .add-cat-row .input{min-width:0;flex:1;padding:8px 10px;font-size:12px}
+
+    .cat-detail-panel{background:#0a1628;border-radius:12px;padding:16px;border:1px solid rgba(200,164,86,.1)}
+    .cat-detail-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .cat-name-input{flex:1;background:#0f1b33;border:1px solid rgba(200,164,86,.3);
+      color:var(--gl);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:800;
+      font-family:inherit}
+    .cat-name-input:focus{outline:none;border-color:var(--gold)}
+    .model-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .model-chip{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;
+      background:rgba(91,141,239,.1);border:1px solid rgba(91,141,239,.3);color:var(--bl);
+      cursor:default
+    }
+    .model-chip-del{background:none;border:none;color:rgba(91,141,239,.5);cursor:pointer;
+      font-size:14px;line-height:1;padding:0}
+    .model-chip-del:hover{color:var(--rd)}
+    .unassigned-pool{margin-top:16px}
+    .pool-title{font-size:11px;color:var(--td);font-weight:700;text-transform:uppercase;
+      letter-spacing:.05em;margin-bottom:8px}
+    .pool-chip{
+      display:inline-flex;align-items:center;gap:5px;margin:4px;
+      padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--td);
+      cursor:pointer;transition:.15s
+    }
+    .pool-chip:hover{background:rgba(200,164,86,.12);border-color:rgba(200,164,86,.3);color:var(--gold)}
+    .cat-save-bar{display:flex;gap:8px;margin-top:16px;padding-top:14px;
+      border-top:1px solid rgba(200,164,86,.1);align-items:center}
+    .cat-save-msg{font-size:12px;color:var(--td)}
+    .cat-save-msg.ok{color:var(--gr)}.cat-save-msg.err{color:var(--rd)}
+    .cat-empty{color:var(--td);font-size:13px;text-align:center;padding:40px 0}
+
+    /* ─── Category Level ─── */
+    .org-node-cat{
+      background:linear-gradient(135deg,rgba(200,164,86,.14),rgba(200,164,86,.05));
+      border-color:rgba(200,164,86,.5);min-width:180px;margin-top:28px;cursor:default
+    }
+    .org-node-cat .org-node-label{font-size:14px;font-weight:800;color:var(--gl)}
+    .org-cat-meta{font-size:11px;color:var(--td);margin-top:3px}
+    .org-cat-pill{
+      display:inline-flex;align-items:center;gap:5px;
+      background:rgba(200,164,86,.12);border:1px solid rgba(200,164,86,.25);
+      color:var(--gold);border-radius:999px;padding:2px 10px;
+      font-size:11px;font-weight:700;margin-top:5px;cursor:pointer;transition:.18s
+    }
+    .org-cat-pill:hover{background:var(--gold);color:#0B1426}
+
+    /* model node */
+    .org-node-model{
+      background:rgba(91,141,239,.08);border-color:rgba(91,141,239,.4);
+      min-width:160px;margin-top:28px
+    }
+    .org-node-model .org-node-label{font-size:13px;font-weight:700;color:var(--bl)}
+    .org-model-pill{
+      display:inline-flex;align-items:center;gap:4px;
+      background:rgba(91,141,239,.15);border:1px solid rgba(91,141,239,.3);
+      color:var(--bl);border-radius:999px;padding:2px 9px;
+      font-size:11px;font-weight:700;margin-top:4px;cursor:pointer;transition:.18s
+    }
+    .org-model-pill:hover{background:var(--bl);color:#fff}
+
+    /* collapse/expand */
+    .org-children{transition:opacity .25s;overflow:hidden}
+    .org-children.collapsed{display:none}
+
+    /* category column layout */
+    .org-cat-col{
+      display:flex;flex-direction:column;align-items:center;
+      padding:0 16px;position:relative
+    }
+    .org-cat-col::before{
+      content:'';position:absolute;top:0;left:50%;
+      border-left:1px solid rgba(200,164,86,.4);height:28px;width:0
+    }
+    .org-cat-row{
+      display:flex;flex-wrap:wrap;justify-content:center;
+      gap:0;position:relative;padding:0 16px
+    }
+    .org-cat-row::before{
+      content:'';position:absolute;top:0;
+      left:calc(12.5%);right:calc(12.5%);
+      height:1px;background:rgba(200,164,86,.4)
+    }
+
     /* ─── Org Chart ─── */
     .org-wrap{padding:24px 8px;overflow-x:auto;min-height:320px}
     .org-empty{text-align:center;color:var(--td);padding:60px 0;font-size:14px}
@@ -269,6 +377,7 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="branches">สาขา</button>
       <button class="tab-btn" data-tab="orgchart">Org Chart</button>
+      <button class="tab-btn" data-tab="catmgr">จัดการ Category</button>
     </div>
 
     <!-- Tab: สาขา -->
@@ -362,6 +471,38 @@
         </div>
         <div class="org-wrap" id="orgWrap">
           <div class="org-empty">กรุณา Login และรอข้อมูลโหลด...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: จัดการ Category -->
+    <div id="panel-catmgr" class="tab-panel">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--gl)">จัดการ Category</div>
+            <div style="font-size:12px;color:var(--td);margin-top:2px">แก้ชื่อ Category · ย้าย Model · เพิ่ม/ลบ Category · บันทึกลง Firestore</div>
+          </div>
+          <button class="btn btn-blue" id="btnReloadCat">🔄 โหลดจาก Firestore</button>
+        </div>
+        <div class="cat-manager">
+          <!-- Left: list of categories -->
+          <div class="cat-list-panel">
+            <div class="cat-list-title">Categories</div>
+            <div id="catListEl"></div>
+            <div class="add-cat-row">
+              <input class="input" id="newCatInput" placeholder="ชื่อ Category ใหม่..." />
+              <button class="btn btn-green" id="btnAddCat">+</button>
+            </div>
+          </div>
+          <!-- Right: detail / model assignment -->
+          <div class="cat-detail-panel">
+            <div id="catDetailEl"><div class="cat-empty">เลือก Category ทางซ้ายเพื่อแก้ไข</div></div>
+          </div>
+        </div>
+        <div class="cat-save-bar">
+          <button class="btn btn-gold" id="btnSaveCat">💾 บันทึกลง Firestore</button>
+          <span class="cat-save-msg" id="catSaveMsg"></span>
         </div>
       </div>
     </div>
@@ -466,7 +607,7 @@
     };
     import {
       getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-      onSnapshot, serverTimestamp, writeBatch, getDocs, query, limit
+      onSnapshot, serverTimestamp, writeBatch, getDocs, query, limit, getDoc, setDoc
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import {
       getAuth, onAuthStateChanged, signInWithEmailAndPassword,
@@ -524,6 +665,231 @@
     let editingId = null;
     let unsubscribeRows = null;
     const editorIds = ["q","fModel","fStatus","btnAdd","btnSeed","btnExportCsv","btnImportCsv"];
+
+
+    // ════════════════════════════════════════════
+    // ── Category Manager ──
+    // ════════════════════════════════════════════
+    const CAT_DOC_REF = () => doc(db, "_config", "categoryMap");
+
+    // working copy: { catName: [modelName, ...], ... }
+    let catConfig = {};
+    let catOrder  = [];
+    let activeCat = null;
+    let allKnownModels = [];   // จาก rows ที่โหลดจาก Firestore
+
+    // default mapping (fallback ถ้ายังไม่มีใน Firestore)
+    const DEFAULT_CAT_MAP = {
+      "Durianism Cafe'":                 "Cafe'",
+      "Nigiwai Sushi":                   "A La Carte",
+      "Nigi Express":                    "A La Carte",
+      "Nigiwai X":                       "A La Carte",
+      "Nigiwai Izakaya":                 "A La Carte",
+      "Nigiwai Yakiniku Buffet":         "Buffet",
+      "Nigi Grill":                      "A La Carte",
+      "Nigiwai Cuisine":                 "A La Carte",
+      "Nigiwai Shabu & Sushi Buffet":    "Buffet",
+      "Nigiwai Yakiniku & Sushi Buffet": "Buffet",
+      "Asian Hot Pot By Nigiwai":        "Buffet",
+      "Viengviet":                       "Other (Go/No Go)",
+      "Yuu Pot":                         "Buffet",
+      "Kin Matcha":                      "Cafe'",
+      "Nigiwai Brunch Drink Japanese":   "A La Carte",
+      "Nigiben":                         "Grab & Go",
+    };
+    const DEFAULT_CAT_ORDER = ["A La Carte","Buffet","Cafe'","Grab & Go","Other (Go/No Go)"];
+
+    function buildCatConfigFromDefault() {
+      catConfig = {};
+      catOrder  = [...DEFAULT_CAT_ORDER];
+      Object.entries(DEFAULT_CAT_MAP).forEach(([model, cat]) => {
+        if (!catConfig[cat]) catConfig[cat] = [];
+        if (!catConfig[cat].includes(model)) catConfig[cat].push(model);
+      });
+    }
+
+    async function loadCatFromFirestore() {
+      try {
+        const snap = await getDoc(CAT_DOC_REF());
+        if (snap.exists()) {
+          const d = snap.data();
+          catOrder  = d.order  || DEFAULT_CAT_ORDER;
+          catConfig = d.config || {};
+          setCatSaveMsg("โหลดจาก Firestore สำเร็จ", "ok");
+        } else {
+          buildCatConfigFromDefault();
+          setCatSaveMsg("ใช้ค่า default (ยังไม่มีใน Firestore)", "");
+        }
+      } catch(e) {
+        buildCatConfigFromDefault();
+        setCatSaveMsg("โหลดไม่ได้: " + e.message, "err");
+      }
+      activeCat = catOrder[0] || null;
+      renderCatManager();
+    }
+
+    async function saveCatToFirestore() {
+      try {
+        await setDoc(CAT_DOC_REF(), {
+          order:  catOrder,
+          config: catConfig,
+          updatedAt: serverTimestamp()
+        });
+        setCatSaveMsg("บันทึกสำเร็จ ✓", "ok");
+        // sync CATEGORY_MAP ที่ใช้ใน renderOrgChart
+        syncCategoryMap();
+      } catch(e) {
+        setCatSaveMsg("บันทึกไม่สำเร็จ: " + e.message, "err");
+      }
+    }
+
+    function setCatSaveMsg(txt, cls) {
+      const el = document.getElementById("catSaveMsg");
+      if (!el) return;
+      el.textContent = txt;
+      el.className = "cat-save-msg" + (cls ? " " + cls : "");
+    }
+
+    // sync catConfig → CATEGORY_MAP ที่ renderOrgChart ใช้
+    function syncCategoryMap() {
+      Object.keys(CATEGORY_MAP).forEach(k => delete CATEGORY_MAP[k]);
+      Object.entries(catConfig).forEach(([cat, models]) => {
+        models.forEach(m => { CATEGORY_MAP[m] = cat; });
+      });
+      CAT_ORDER.length = 0;
+      catOrder.forEach(c => CAT_ORDER.push(c));
+    }
+
+    function getUnassignedModels() {
+      const assigned = new Set(Object.values(catConfig).flat());
+      return allKnownModels.filter(m => !assigned.has(m));
+    }
+
+    // ── Render left panel (category list) ──
+    function renderCatList() {
+      const el = document.getElementById("catListEl");
+      if (!el) return;
+      el.innerHTML = catOrder.map(cat => {
+        const count = (catConfig[cat] || []).length;
+        return `
+          <div class="cat-item${activeCat === cat ? " active" : ""}" data-cat="${esc(cat)}">
+            <span class="cat-item-name">${esc(cat)}</span>
+            <span class="cat-item-count">${count}</span>
+            <button class="cat-item-del" data-del-cat="${esc(cat)}" title="ลบ Category นี้">×</button>
+          </div>`;
+      }).join("");
+
+      el.querySelectorAll(".cat-item").forEach(item => {
+        item.addEventListener("click", e => {
+          if (e.target.closest("[data-del-cat]")) return;
+          activeCat = item.dataset.cat;
+          renderCatManager();
+        });
+      });
+      el.querySelectorAll("[data-del-cat]").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const cat = btn.dataset.delCat;
+          if (!confirm(`ลบ Category "${cat}"?\nModel ในกลุ่มนี้จะกลายเป็น unassigned`)) return;
+          delete catConfig[cat];
+          catOrder = catOrder.filter(c => c !== cat);
+          if (activeCat === cat) activeCat = catOrder[0] || null;
+          renderCatManager();
+        });
+      });
+    }
+
+    // ── Render right panel (detail) ──
+    function renderCatDetail() {
+      const el = document.getElementById("catDetailEl");
+      if (!el) return;
+      if (!activeCat) { el.innerHTML = '<div class="cat-empty">เลือก Category ทางซ้ายเพื่อแก้ไข</div>'; return; }
+
+      const models   = catConfig[activeCat] || [];
+      const unassigned = getUnassignedModels();
+
+      el.innerHTML = `
+        <div class="cat-detail-head">
+          <input class="cat-name-input" id="catNameInput" value="${esc(activeCat)}" placeholder="ชื่อ Category" />
+          <button class="btn btn-blue" id="btnRenameCat" style="white-space:nowrap">✏️ เปลี่ยนชื่อ</button>
+        </div>
+        <div class="pool-title">Model ใน "${esc(activeCat)}" — คลิก × เพื่อย้ายออก</div>
+        <div class="model-grid" id="assignedModels">
+          ${models.length ? models.map(m => `
+            <span class="model-chip">
+              ${esc(m)}
+              <button class="model-chip-del" data-remove-model="${esc(m)}" title="ย้ายออกจาก category นี้">×</button>
+            </span>`).join("") : '<span style="color:var(--td);font-size:12px">ยังไม่มี Model</span>'}
+        </div>
+        ${unassigned.length ? `
+          <div class="unassigned-pool">
+            <div class="pool-title">🗂 Model ที่ยังไม่มี Category — คลิกเพื่อเพิ่มเข้า "${esc(activeCat)}"</div>
+            <div>
+              ${unassigned.map(m => `
+                <span class="pool-chip" data-add-model="${esc(m)}">${esc(m)} +</span>`).join("")}
+            </div>
+          </div>` : ""}`;
+
+      // rename
+      document.getElementById("btnRenameCat").addEventListener("click", () => {
+        const newName = document.getElementById("catNameInput").value.trim();
+        if (!newName || newName === activeCat) return;
+        if (catOrder.includes(newName)) { setCatSaveMsg("ชื่อนี้มีอยู่แล้ว", "err"); return; }
+        catConfig[newName] = catConfig[activeCat] || [];
+        delete catConfig[activeCat];
+        catOrder = catOrder.map(c => c === activeCat ? newName : c);
+        activeCat = newName;
+        setCatSaveMsg(`เปลี่ยนชื่อเป็น "${newName}" แล้ว (อย่าลืมบันทึก)`, "");
+        renderCatManager();
+      });
+
+      // remove model from this cat
+      el.querySelectorAll("[data-remove-model]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const m = btn.dataset.removeModel;
+          catConfig[activeCat] = (catConfig[activeCat] || []).filter(x => x !== m);
+          renderCatManager();
+        });
+      });
+
+      // add unassigned model
+      el.querySelectorAll("[data-add-model]").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const m = chip.dataset.addModel;
+          if (!catConfig[activeCat]) catConfig[activeCat] = [];
+          if (!catConfig[activeCat].includes(m)) catConfig[activeCat].push(m);
+          renderCatManager();
+        });
+      });
+    }
+
+    function renderCatManager() {
+      renderCatList();
+      renderCatDetail();
+    }
+
+    // add new category
+    document.getElementById("btnAddCat").addEventListener("click", () => {
+      const input = document.getElementById("newCatInput");
+      const name  = input.value.trim();
+      if (!name) return;
+      if (catOrder.includes(name)) { setCatSaveMsg("ชื่อนี้มีอยู่แล้ว", "err"); return; }
+      catConfig[name] = [];
+      catOrder.push(name);
+      activeCat = name;
+      input.value = "";
+      renderCatManager();
+    });
+    document.getElementById("newCatInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("btnAddCat").click();
+    });
+
+    document.getElementById("btnSaveCat").addEventListener("click", saveCatToFirestore);
+    document.getElementById("btnReloadCat").addEventListener("click", loadCatFromFirestore);
+
+    // ── init cat manager เมื่อ tab ถูกเลือก ──
+    // (loadCatFromFirestore จะถูกเรียกครั้งแรกหลัง login)
+
 
     // ─── Status Check ───
     const ovStatus = document.getElementById("ovStatus");
@@ -622,6 +988,10 @@
         btn.classList.add("active");
         document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
         if (btn.dataset.tab === "orgchart") renderOrgChart();
+        if (btn.dataset.tab === "catmgr") {
+          allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
+          renderCatManager();
+        }
       });
     });
 
@@ -656,20 +1026,43 @@
       });
     }
 
+    // ── Category mapping ──
+    const CATEGORY_MAP = {
+      "Durianism Cafe'":                 "Cafe'",
+      "Nigiwai Sushi":                   "A La Carte",
+      "Nigi Express":                    "A La Carte",
+      "Nigiwai X":                       "A La Carte",
+      "Nigiwai Izakaya":                 "A La Carte",
+      "Nigiwai Yakiniku Buffet":         "Buffet",
+      "Nigi Grill":                      "A La Carte",
+      "Nigiwai Cuisine":                 "A La Carte",
+      "Nigiwai Shabu & Sushi Buffet":    "Buffet",
+      "Nigiwai Yakiniku & Sushi Buffet": "Buffet",
+      "Asian Hot Pot By Nigiwai":        "Buffet",
+      "Viengviet":                       "Other (Go/No Go)",
+      "Yuu Pot":                         "Buffet",
+      "Kin Matcha":                      "Cafe'",
+      "Nigiwai Brunch Drink Japanese":   "A La Carte",
+      "Nigiben":                         "Grab & Go",
+    };
+    const CAT_ORDER = ["A La Carte","Buffet","Cafe'","Grab & Go","Other (Go/No Go)"];
+
+    function getCategory(model) {
+      return CATEGORY_MAP[model] || "Other (Go/No Go)";
+    }
+
     function renderOrgChart() {
       const data = orgFilteredRows();
-      const openCount = data.filter(r => r.status === "เปิดอยู่").length;
-
-      // Stats
-      const brands = [...new Set(data.map(r => r.model).filter(Boolean))];
-      el.orgSAll.textContent = `ทั้งหมด ${data.length}`;
-      el.orgSOpen.textContent = `เปิดอยู่ ${openCount}`;
-      el.orgSBrand.textContent = `${brands.length} แบรนด์`;
-
-      // ─── Summary bar ───
+      const openCount  = data.filter(r => r.status === "เปิดอยู่").length;
       const closeCount = data.filter(r => r.status === "ปิดแล้ว").length;
       const otherCount = data.length - openCount - closeCount;
       const total = data.length || 1;
+
+      const brands = [...new Set(data.map(r => r.model).filter(Boolean))];
+      el.orgSAll.textContent   = `ทั้งหมด ${data.length}`;
+      el.orgSOpen.textContent  = `เปิดอยู่ ${openCount}`;
+      el.orgSBrand.textContent = `${brands.length} แบรนด์`;
+
       const sumEl = document.getElementById("orgSummary");
       if (sumEl) {
         sumEl.style.display = data.length ? "flex" : "none";
@@ -688,76 +1081,114 @@
         return;
       }
 
-      // Group by brand
-      const brandMap = new Map();
+      // Group: category → model → branches
+      const catMap = new Map();
       data.forEach(r => {
-        const brand = r.model || "ไม่ระบุ Brand";
-        if (!brandMap.has(brand)) brandMap.set(brand, []);
-        brandMap.get(brand).push(r);
+        const cat   = getCategory(r.model || "");
+        const model = r.model || "ไม่ระบุ Model";
+        if (!catMap.has(cat))            catMap.set(cat, new Map());
+        if (!catMap.get(cat).has(model)) catMap.get(cat).set(model, []);
+        catMap.get(cat).get(model).push(r);
       });
 
-      const sortedBrands = [...brandMap.keys()].sort((a,b) => a.localeCompare(b,"th"));
+      const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
-      // Build brand columns HTML
-      const brandCols = sortedBrands.map(brand => {
-        const branches = brandMap.get(brand);
-        const openB = branches.filter(r => r.status === "เปิดอยู่").length;
-
-        // Branch nodes
-        const branchNodes = branches
-          .sort((a,b) => (a.name||"").localeCompare(b.name||"","th"))
-          .map(r => `
-            <div class="org-branch-col">
-              <div class="org-node org-node-branch" data-bid="${esc(r.id)}">
-                <div class="org-node-label">${esc(r.name)}</div>
-                <div class="org-node-prov">
-                  <span class="badge ${badgeForStatus(r.status)}">${esc(r.status||"-")}</span>
-                  ${r.province ? `<span style="margin-left:4px">${esc(r.province)}</span>` : ""}
-                </div>
-              </div>
-            </div>
-          `).join("");
-
-        // Horizontal bar for branches (only if >1)
-        const branchBar = branches.length > 1
-          ? `<div class="org-h-bar" style="background:rgba(91,141,239,.3)"></div>`
-          : "";
-
+      function renderBranches(branches, modelId) {
+        const sorted = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
+        const bar = branches.length > 1
+          ? `<div class="org-h-bar" style="background:rgba(91,141,239,.25)"></div>` : "";
         return `
-          <div class="org-brand-col">
-            <div class="org-node org-node-brand">
-              <div class="org-node-label">${esc(brand)}</div>
-              <div><span class="org-node-count">${branches.length} สาขา · เปิด ${openB}</span></div>
+          <div class="org-branch-list org-children collapsed" id="bl-${modelId}" style="position:relative">
+            ${bar}
+            ${sorted.map(r => `
+              <div class="org-branch-col">
+                <div class="org-node org-node-branch" data-bid="${esc(r.id)}">
+                  <div class="org-node-label">${esc(r.name)}</div>
+                  <div class="org-node-prov">
+                    <span class="badge ${badgeForStatus(r.status)}">${esc(r.status||"-")}</span>
+                    ${r.province ? `<span style="margin-left:4px">${esc(r.province)}</span>` : ""}
+                  </div>
+                </div>
+              </div>`).join("")}
+          </div>`;
+      }
+
+      function renderModels(modelMap, catId) {
+        return [...modelMap.entries()].map(([model, branches], mi) => {
+          const openB   = branches.filter(r => r.status === "เปิดอยู่").length;
+          const modelId = `${catId}-m${mi}`;
+          return `
+            <div class="org-brand-col">
+              <div class="org-node org-node-model">
+                <div class="org-node-label">${esc(model)}</div>
+                <span class="org-model-pill" data-toggle="bl-${modelId}">
+                  🏪 ${branches.length} สาขา · เปิด ${openB}
+                </span>
+              </div>
+              ${renderBranches(branches, modelId)}
+            </div>`;
+        }).join("");
+      }
+
+      const catCols = sortedCats.map((cat, ci) => {
+        const modelMap   = catMap.get(cat);
+        const allBranch  = [...modelMap.values()].flat();
+        const openC      = allBranch.filter(r => r.status === "เปิดอยู่").length;
+        const catId      = `cat-${ci}`;
+        const modelCount = modelMap.size;
+        const modelsBar  = modelCount > 1
+          ? `<div class="org-h-bar" style="background:rgba(200,164,86,.3)"></div>` : "";
+        return `
+          <div class="org-cat-col">
+            <div class="org-node org-node-cat">
+              <div class="org-node-label">${esc(cat)}</div>
+              <div class="org-cat-meta">${modelCount} Model</div>
+              <span class="org-cat-pill" data-toggle-cat="${catId}">
+                🏬 ${allBranch.length} สาขา · เปิด ${openC}
+              </span>
             </div>
-            <div class="org-branch-list" style="position:relative">
-              ${branchBar}
-              ${branchNodes}
+            <div class="org-children org-brand-row collapsed" id="${catId}" style="position:relative">
+              ${modelsBar}
+              ${renderModels(modelMap, catId)}
             </div>
-          </div>
-        `;
+          </div>`;
       }).join("");
 
-      // Horizontal bar across brands (only if >1)
-      const brandBar = sortedBrands.length > 1
-        ? `<div class="org-h-bar" style="background:rgba(200,164,86,.35)"></div>`
-        : "";
+      const rootBar = sortedCats.length > 1
+        ? `<div class="org-h-bar" style="background:rgba(200,164,86,.4)"></div>` : "";
 
       el.orgWrap.innerHTML = `
         <div class="org-tree">
           <li style="list-style:none;display:flex;flex-direction:column;align-items:center">
             <div class="org-node org-node-root">
               <div class="org-node-label">Nigiwai Group</div>
-              <div class="org-node-sub">${data.length} สาขา · ${sortedBrands.length} แบรนด์</div>
+              <div class="org-node-sub">${data.length} สาขา · ${sortedCats.length} หมวดหมู่ · ${brands.length} แบรนด์</div>
             </div>
             <div style="width:1px;height:28px;background:rgba(200,164,86,.4)"></div>
-            <div class="org-brand-row" style="position:relative">
-              ${brandBar}
-              ${brandCols}
+            <div class="org-cat-row" style="position:relative">
+              ${rootBar}
+              ${catCols}
             </div>
           </li>
-        </div>
-      `;
+        </div>`;
+
+      el.orgWrap.querySelectorAll("[data-toggle-cat]").forEach(pill => {
+        pill.addEventListener("click", e => {
+          e.stopPropagation();
+          const target = document.getElementById(pill.dataset.toggleCat);
+          if (target) target.classList.toggle("collapsed");
+        });
+      });
+
+      el.orgWrap.querySelectorAll("[data-toggle]").forEach(pill => {
+        pill.addEventListener("click", e => {
+          e.stopPropagation();
+          const target = document.getElementById(pill.dataset.toggle);
+          if (target) target.classList.toggle("collapsed");
+        });
+      });
     }
+
 
     el.orgFilterStatus.addEventListener("change", renderOrgChart);
     el.orgFilterZone.addEventListener("change", renderOrgChart);
@@ -1079,6 +1510,7 @@
         // Re-render org chart if that tab is active
         if (document.getElementById("panel-orgchart").classList.contains("active")) renderOrgChart();
         showMsg(`ซิงก์ข้อมูลล่าสุด: ${rows.length} รายการ`, "ok");
+        allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
       }, err => {
         showMsg("เชื่อม Firestore ไม่สำเร็จ: " + err.message, "err");
       });
@@ -1172,6 +1604,7 @@
         el.btnRegister.classList.add("hidden");
         setDashboardEnabled(true);
         startSnapshot();
+        loadCatFromFirestore();
       } else {
         el.authState.innerHTML = `<span id="connDot" class="conn-dot err"></span>ยังไม่ได้ล็อกอิน`;
         el.btnLogout.classList.add("hidden");
