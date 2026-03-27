@@ -3,338 +3,1187 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firebase Status Check — Nigiwai</title>
+  <title>Nigiwai Dashboard (Firebase CRUD)</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy:#0B1426;--nl:#132040;--gold:#C8A456;--gl:#E8CA7A;
-      --tx:#E8E4DC;--td:#9A9AAA;--gr:#3DD68C;--rd:#F06060;--bl:#5B8DEF;--or:#F5A623;
+    :root{
+      --navy:#0B1426;--nl:#132040;--gold:#C8A456;--gl:#E8CA7A;--tx:#E8E4DC;--td:#9A9AAA;
+      --gr:#3DD68C;--rd:#F06060;--bl:#5B8DEF;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Noto Sans Thai',sans-serif;background:var(--navy);color:var(--tx);
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-    .page{width:min(560px,100%)}
-    .header{text-align:center;margin-bottom:28px}
-    .logo{width:52px;height:52px;border-radius:14px;margin:0 auto 12px;
-      background:linear-gradient(135deg,rgba(200,164,86,.25),rgba(200,164,86,.08));
-      border:1px solid rgba(200,164,86,.4);display:flex;align-items:center;justify-content:center;font-size:26px}
-    .header-title{font-size:22px;font-weight:800;color:var(--gl)}
-    .header-sub{font-size:13px;color:var(--td);margin-top:4px}
-    .card{background:var(--nl);border:1px solid rgba(200,164,86,.14);border-radius:16px;padding:20px;margin-bottom:14px}
-    .card-title{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;
-      letter-spacing:.06em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(200,164,86,.1)}
-    .s-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(200,164,86,.06)}
-    .s-row:last-child{border-bottom:none}
-    .s-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s,box-shadow .3s}
-    .dot-idle{background:var(--td)}
-    .dot-spin{background:var(--td);animation:pulse 1s infinite}
-    .dot-ok{background:var(--gr);box-shadow:0 0 8px rgba(61,214,140,.55)}
-    .dot-warn{background:var(--or);box-shadow:0 0 8px rgba(245,166,35,.5)}
-    .dot-err{background:var(--rd);box-shadow:0 0 8px rgba(240,96,96,.5)}
-    @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
-    .s-label{font-size:13px;font-weight:700;color:var(--tx);flex:1}
-    .s-detail{font-size:12px;color:var(--td);min-width:0;text-align:right}
-    .s-detail.ok{color:var(--gr)}.s-detail.warn{color:var(--or)}.s-detail.err{color:var(--rd)}
-    .ping{font-size:11px;color:var(--td);margin-left:5px}
-    .overall{display:flex;align-items:center;gap:10px;justify-content:center;
-      padding:14px;border-radius:12px;margin-bottom:14px;font-size:14px;font-weight:700;
-      background:rgba(154,154,170,.08);border:1px solid rgba(154,154,170,.18);color:var(--td)}
-    .overall.ok{background:rgba(61,214,140,.08);border-color:rgba(61,214,140,.3);color:var(--gr)}
-    .overall.warn{background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.3);color:var(--or)}
-    .overall.err{background:rgba(240,96,96,.08);border-color:rgba(240,96,96,.3);color:var(--rd)}
-    .overall .big-dot{width:14px;height:14px;border-radius:50%;background:currentColor;flex-shrink:0}
-    .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-    .input{background:#0f1b33;border:1px solid rgba(200,164,86,.2);color:var(--tx);
-      border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%}
-    .input:focus{outline:none;border-color:rgba(200,164,86,.5)}
-    .auth-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn{border-radius:10px;padding:10px 16px;font-family:inherit;font-size:13px;
-      font-weight:700;cursor:pointer;border:1px solid;transition:.18s}
-    .btn-gold{border-color:rgba(200,164,86,.35);background:rgba(200,164,86,.1);color:var(--gold)}
-    .btn-gold:hover{background:var(--gold);color:#0B1426}
-    .btn-green{border-color:rgba(61,214,140,.35);background:rgba(61,214,140,.1);color:var(--gr)}
-    .btn-green:hover{background:var(--gr);color:#0B1426}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans Thai',sans-serif;background:var(--navy);color:var(--tx)}
+    .wrap{max-width:1240px;margin:0 auto;padding:24px}
+    .title{font-size:28px;font-weight:800;color:var(--gl);margin-bottom:8px}
+    .sub{color:var(--td);margin-bottom:20px}
+    .card{background:var(--nl);border:1px solid rgba(200,164,86,.12);border-radius:14px;padding:16px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+    .space{flex:1}
+    .input,.select{
+      background:#0f1b33;border:1px solid rgba(200,164,86,.2);color:var(--tx);
+      border-radius:10px;padding:10px 12px;font-family:inherit
+    }
+    .input{min-width:240px}
+    .btn{
+      border:1px solid rgba(200,164,86,.3);background:rgba(200,164,86,.08);color:var(--gold);
+      border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer
+    }
+    .btn:hover{background:var(--gold);color:#0B1426}
     .btn-blue{border-color:rgba(91,141,239,.35);background:rgba(91,141,239,.1);color:var(--bl)}
     .btn-red{border-color:rgba(240,96,96,.35);background:rgba(240,96,96,.1);color:var(--rd)}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-    .auth-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
-      border-radius:999px;font-size:11px;font-weight:700;
-      background:rgba(154,154,170,.1);color:var(--td)}
-    .auth-chip.ok{background:rgba(61,214,140,.12);color:var(--gr)}
-    .auth-chip.err{background:rgba(240,96,96,.1);color:var(--rd)}
-    .chip-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-    .err-msg{font-size:11px;color:var(--rd);margin-top:6px;word-break:break-all}
-    .meta{font-size:11px;color:var(--td);text-align:center;margin-top:6px}
-    .project-id{font-weight:700;color:rgba(200,164,86,.6)}
+    .btn-green{border-color:rgba(61,214,140,.35);background:rgba(61,214,140,.1);color:var(--gr)}
+    .muted{color:var(--td)}
+    .hidden{display:none}
+    .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .pill{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .p-open{background:rgba(61,214,140,.16);color:var(--gr)}
+    .p-close{background:rgba(240,96,96,.16);color:var(--rd)}
+    .p-all{background:rgba(91,141,239,.16);color:var(--bl)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:10px;border-bottom:1px solid rgba(200,164,86,.08);white-space:nowrap}
+    th{text-align:left;color:var(--gold);font-size:12px;background:rgba(200,164,86,.05)}
+    tr:hover{background:rgba(200,164,86,.04)}
+    .table-wrap{overflow:auto;max-height:65vh}
+    .badge{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .b-open{background:rgba(61,214,140,.15);color:var(--gr)}
+    .b-close{background:rgba(240,96,96,.15);color:var(--rd)}
+    .b-other{background:rgba(200,164,86,.15);color:var(--gold)}
+    .actions{display:flex;gap:8px}
+    .msg{margin-top:8px;font-size:12px}
+    .ok{color:var(--gr)} .err{color:var(--rd)}
+    .overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;
+      align-items:center;justify-content:center;z-index:99;padding:16px
+    }
+    .overlay.open{display:flex}
+    .modal{
+      width:min(860px,96vw);max-height:90vh;overflow:auto;background:var(--nl);
+      border:1px solid rgba(200,164,86,.18);border-radius:14px;padding:16px
+    }
+    .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .modal-title{font-size:20px;font-weight:800;color:var(--gl)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .grid .full{grid-column:1/-1}
+    label{font-size:12px;color:var(--td);display:block;margin-bottom:5px}
+    .field{width:100%}
+    .note{font-size:12px;color:var(--td);margin-top:8px}
+    .auth-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}}
+
+    /* ─── Status Modal ─── */
+    .status-modal{width:min(520px,96vw);background:var(--nl);border:1px solid rgba(200,164,86,.2);border-radius:14px;padding:20px}
+    .status-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(200,164,86,.07)}
+    .status-row:last-child{border-bottom:none}
+    .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:.3s}
+    .dot-ok{background:var(--gr);box-shadow:0 0 6px rgba(61,214,140,.6)}
+    .dot-err{background:var(--rd);box-shadow:0 0 6px rgba(240,96,96,.5)}
+    .dot-warn{background:var(--gold);box-shadow:0 0 6px rgba(200,164,86,.5)}
+    .dot-spin{background:var(--td);animation:dotpulse 1s infinite}
+    @keyframes dotpulse{0%,100%{opacity:.3}50%{opacity:1}}
+    .status-label{font-size:13px;font-weight:700;color:var(--tx);flex:1}
+    .status-val{font-size:12px;color:var(--td);text-align:right}
+    .status-val.ok{color:var(--gr)}
+    .status-val.err{color:var(--rd)}
+    .status-val.warn{color:var(--gold)}
+    .status-ping{font-size:11px;color:var(--td);margin-left:6px}
+    .conn-dot{
+      display:inline-block;width:8px;height:8px;border-radius:50%;
+      background:var(--td);margin-right:6px;vertical-align:middle;transition:.3s
+    }
+    .conn-dot.ok{background:var(--gr);box-shadow:0 0 5px rgba(61,214,140,.5)}
+    .conn-dot.err{background:var(--rd)}
+
+    /* ─── Tabs ─── */
+    .tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid rgba(200,164,86,.18)}
+    .tab-btn{
+      padding:10px 22px;border:none;background:transparent;color:var(--td);
+      font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+      border-bottom:2px solid transparent;margin-bottom:-1px;
+      border-radius:8px 8px 0 0;transition:.18s
+    }
+    .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(200,164,86,.06)}
+    .tab-btn:hover:not(.active){color:var(--tx);background:rgba(200,164,86,.04)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+
+    /* ─── Summary Chart Bar ─── */
+    .org-summary{
+      display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;
+      background:#0a1628;border-radius:12px;padding:14px 16px;
+      border:1px solid rgba(200,164,86,.1)
+    }
+    .org-sum-item{flex:1;min-width:100px}
+    .org-sum-label{font-size:11px;color:var(--td);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+    .org-bar-track{height:8px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+    .org-bar-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+    .org-sum-val{font-size:13px;font-weight:800;margin-top:5px}
+    .fill-open{background:var(--gr)}
+    .fill-close{background:var(--rd)}
+    .fill-other{background:var(--gold)}
+    .val-open{color:var(--gr)}.val-close{color:var(--rd)}.val-other{color:var(--gold)}
+
+    /* ─── Branch Detail Popup ─── */
+    .branch-popup{
+      position:fixed;z-index:200;
+      background:var(--nl);border:1px solid rgba(200,164,86,.25);
+      border-radius:14px;padding:18px;min-width:260px;max-width:320px;
+      box-shadow:0 8px 32px rgba(0,0,0,.5);
+      opacity:0;pointer-events:none;transform:scale(.95) translateY(6px);
+      transition:opacity .18s,transform .18s;
+    }
+    .branch-popup.show{opacity:1;pointer-events:auto;transform:scale(1) translateY(0)}
+    .bp-title{font-size:14px;font-weight:800;color:var(--gl);margin-bottom:10px;line-height:1.4}
+    .bp-row{display:flex;justify-content:space-between;gap:8px;
+      padding:5px 0;border-bottom:1px solid rgba(200,164,86,.06);font-size:12px}
+    .bp-row:last-child{border-bottom:none}
+    .bp-key{color:var(--td);flex-shrink:0}
+    .bp-val{color:var(--tx);font-weight:600;text-align:right;word-break:break-word}
+    .bp-close{
+      position:absolute;top:10px;right:12px;
+      background:none;border:none;color:var(--td);cursor:pointer;font-size:18px;line-height:1
+    }
+    .bp-close:hover{color:var(--rd)}
+
+    /* branch node clickable */
+    .org-node-branch{cursor:pointer;transition:border-color .18s,background .18s}
+    .org-node-branch:hover{border-color:rgba(200,164,86,.5);background:rgba(200,164,86,.06)}
+    /* ─── Org Chart ─── */
+    .org-wrap{padding:24px 8px;overflow-x:auto;min-height:320px}
+    .org-empty{text-align:center;color:var(--td);padding:60px 0;font-size:14px}
+
+    /* Tree layout */
+    .org-tree,
+    .org-tree ul,
+    .org-tree li{list-style:none;margin:0;padding:0}
+    .org-tree{display:flex;justify-content:center}
+
+    /* Root level */
+    .org-tree > li{display:flex;flex-direction:column;align-items:center}
+
+    /* Connector: root → brand row */
+    .org-tree > li > ul{
+      display:flex;flex-wrap:wrap;justify-content:center;
+      gap:0;padding-top:28px;position:relative
+    }
+    .org-tree > li > ul::before{
+      content:'';position:absolute;top:0;left:50%;
+      border-left:1px solid rgba(200,164,86,.4);height:28px;width:0
+    }
+
+    /* Brand row: horizontal bar */
+    .org-brand-row{
+      display:flex;flex-wrap:wrap;justify-content:center;
+      gap:0;position:relative;padding:0 12px
+    }
+    .org-brand-row::before{
+      content:'';position:absolute;top:0;
+      left:calc(50% - 50% + 12px);right:calc(50% - 50% + 12px);
+      height:1px;background:rgba(200,164,86,.35)
+    }
+    .org-brand-col{
+      display:flex;flex-direction:column;align-items:center;
+      padding:0 12px;position:relative
+    }
+    .org-brand-col::before{
+      content:'';position:absolute;top:0;left:50%;
+      border-left:1px solid rgba(200,164,86,.35);height:28px;width:0
+    }
+
+    /* Branch group under each brand */
+    .org-branch-list{
+      display:flex;flex-wrap:wrap;justify-content:center;
+      gap:0;padding-top:28px;position:relative;max-width:600px
+    }
+    .org-branch-list::before{
+      content:'';position:absolute;top:0;left:50%;
+      border-left:1px solid rgba(91,141,239,.35);height:28px;width:0
+    }
+    .org-branch-col{
+      display:flex;flex-direction:column;align-items:center;
+      padding:0 8px;position:relative
+    }
+    .org-branch-col::before{
+      content:'';position:absolute;top:0;left:50%;
+      border-left:1px solid rgba(91,141,239,.3);height:28px;width:0
+    }
+
+    /* Horizontal connectors (multi-child) */
+    .org-h-bar{
+      position:absolute;top:0;left:0;right:0;height:1px;
+      background:rgba(91,141,239,.3)
+    }
+
+    /* Nodes */
+    .org-node{
+      border-radius:12px;padding:12px 16px;text-align:center;
+      border:1px solid rgba(200,164,86,.2);background:var(--nl);
+      min-width:150px;max-width:210px;position:relative
+    }
+    .org-node-root{
+      background:linear-gradient(135deg,rgba(200,164,86,.18),rgba(200,164,86,.07));
+      border-color:var(--gold);min-width:200px
+    }
+    .org-node-root .org-node-label{font-size:17px;font-weight:800;color:var(--gl)}
+    .org-node-root .org-node-sub{font-size:11px;color:var(--td);margin-top:2px}
+
+    .org-node-brand{
+      background:rgba(91,141,239,.08);border-color:rgba(91,141,239,.4);
+      min-width:160px;margin-top:28px
+    }
+    .org-node-brand .org-node-label{font-size:13px;font-weight:700;color:var(--bl)}
+    .org-node-brand .org-node-count{
+      display:inline-block;background:rgba(91,141,239,.18);color:var(--bl);
+      border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;margin-top:4px
+    }
+
+    .org-node-branch{
+      min-width:130px;max-width:180px;padding:8px 10px;margin-top:28px;
+      background:#0f1b33
+    }
+    .org-node-branch .org-node-label{font-size:11px;font-weight:600;color:var(--tx);line-height:1.4}
+    .org-node-branch .org-node-prov{font-size:10px;color:var(--td);margin-top:2px}
+
+    /* Org toolbar */
+    .org-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+    .org-stat{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
   </style>
 </head>
 <body>
-<div class="page">
+  <div class="wrap">
+    <div class="title">Nigiwai Branch Dashboard</div>
+    <div class="sub">Production-ready: Firebase Config แยกไฟล์ + Auth + Firestore CRUD + CSV Import/Export</div>
 
-  <div class="header">
-    <div class="logo">🔥</div>
-    <div class="header-title">Firebase Status Check</div>
-    <div class="header-sub">Nigiwai Group — Firestore Connection Diagnostics</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="auth-row">
+        <input id="authEmail" class="input" placeholder="อีเมล" />
+        <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" />
+        <button id="btnLogin" class="btn btn-green">Login</button>
+        <button id="btnRegister" class="btn btn-blue">Register</button>
+        <button id="btnLogout" class="btn btn-red hidden">Logout</button>
+        <button id="btnCheckStatus" class="btn btn-blue">Check Status</button>
+        <span id="authState" class="muted"><span id="connDot" class="conn-dot"></span>ยังไม่ได้ล็อกอิน</span>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="branches">สาขา</button>
+      <button class="tab-btn" data-tab="orgchart">Org Chart</button>
+    </div>
+
+    <!-- Tab: สาขา -->
+    <div id="panel-branches" class="tab-panel active">
+      <div class="card">
+        <div class="toolbar">
+          <input id="q" class="input" placeholder="ค้นหา ชื่อสาขา / model / จังหวัด..." />
+          <select id="fModel" class="select"><option value="">ทุก Model</option></select>
+          <select id="fStatus" class="select">
+            <option value="">ทุกสถานะ</option>
+            <option value="เปิดอยู่">เปิดอยู่</option>
+            <option value="ปิดแล้ว">ปิดแล้ว</option>
+            <option value="ยกเลิกสัญญา">ยกเลิกสัญญา</option>
+            <option value="ติดตาม">ติดตาม</option>
+            <option value="กำลังก่อสร้าง">กำลังก่อสร้าง</option>
+            <option value="ฟ้องร้อง">ฟ้องร้อง</option>
+          </select>
+          <button id="btnAdd" class="btn">+ เพิ่มสาขา</button>
+          <button id="btnSeed" class="btn btn-blue">Import ตัวอย่างเริ่มต้น</button>
+          <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
+          <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
+          <input id="csvFile" class="hidden" type="file" accept=".csv,text/csv" />
+        </div>
+
+        <div class="stat">
+          <span id="sAll" class="pill p-all">ทั้งหมด 0</span>
+          <span id="sOpen" class="pill p-open">เปิดอยู่ 0</span>
+          <span id="sClose" class="pill p-close">ปิดแล้ว 0</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ชื่อสาขา</th>
+                <th>Model</th>
+                <th>สถานะ</th>
+                <th>วันเปิด</th>
+                <th>ภูมิภาค</th>
+                <th>จังหวัด</th>
+                <th>ประเทศ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="tb"></tbody>
+          </table>
+        </div>
+        <div id="msg" class="msg muted"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Org Chart -->
+    <div id="panel-orgchart" class="tab-panel">
+      <div class="card">
+        <div class="org-summary" id="orgSummary" style="display:none">
+          <div class="org-sum-item">
+            <div class="org-sum-label">เปิดอยู่</div>
+            <div class="org-bar-track"><div class="org-bar-fill fill-open" id="barOpen" style="width:0%"></div></div>
+            <div class="org-sum-val val-open" id="numOpen">0</div>
+          </div>
+          <div class="org-sum-item">
+            <div class="org-sum-label">ปิดแล้ว</div>
+            <div class="org-bar-track"><div class="org-bar-fill fill-close" id="barClose" style="width:0%"></div></div>
+            <div class="org-sum-val val-close" id="numClose">0</div>
+          </div>
+          <div class="org-sum-item">
+            <div class="org-sum-label">ยกเลิก/อื่นๆ</div>
+            <div class="org-bar-track"><div class="org-bar-fill fill-other" id="barOther" style="width:0%"></div></div>
+            <div class="org-sum-val val-other" id="numOther">0</div>
+          </div>
+        </div>
+        <div class="org-toolbar">
+          <select id="orgFilterStatus" class="select">
+            <option value="">ทุกสถานะ</option>
+            <option value="เปิดอยู่">เปิดอยู่</option>
+            <option value="ปิดแล้ว">ปิดแล้ว</option>
+            <option value="ยกเลิกสัญญา">ยกเลิกสัญญา</option>
+            <option value="ติดตาม">ติดตาม</option>
+            <option value="กำลังก่อสร้าง">กำลังก่อสร้าง</option>
+            <option value="ฟ้องร้อง">ฟ้องร้อง</option>
+          </select>
+          <select id="orgFilterZone" class="select"><option value="">ทุกภูมิภาค</option></select>
+          <div class="space"></div>
+          <button id="btnExportOrg" class="btn btn-green">📸 Export PNG</button>
+          <div class="org-stat">
+            <span id="orgSAll" class="pill p-all">ทั้งหมด 0</span>
+            <span id="orgSOpen" class="pill p-open">เปิดอยู่ 0</span>
+            <span id="orgSBrand" class="pill" style="background:rgba(91,141,239,.16);color:var(--bl)">0 แบรนด์</span>
+          </div>
+        </div>
+        <div class="org-wrap" id="orgWrap">
+          <div class="org-empty">กรุณา Login และรอข้อมูลโหลด...</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="overall" id="overall">
-    <span class="big-dot"></span>
-    <span id="overallText">กดปุ่ม Run Check เพื่อเริ่มตรวจสอบ</span>
-  </div>
+  <!-- Status Modal -->
+  <div class="overlay" id="ovStatus">
+    <div class="status-modal">
+      <div class="modal-head">
+        <div class="modal-title">Connection Status</div>
+        <button id="btnStatusClose" class="btn btn-red">ปิด</button>
+      </div>
 
-  <div class="card">
-    <div class="card-title">🔐 Authentication</div>
-    <div class="auth-grid">
-      <input id="email"    class="input" placeholder="อีเมล Firebase" type="email" />
-      <input id="password" class="input" placeholder="รหัสผ่าน" type="password" />
-    </div>
-    <div class="auth-actions">
-      <button class="btn btn-green" id="btnLogin">Login</button>
-      <button class="btn btn-red"   id="btnLogout" disabled>Logout</button>
-      <span id="authChip" class="auth-chip err"><span class="chip-dot"></span>ยังไม่ได้ล็อกอิน</span>
-    </div>
-    <div id="authErr" class="err-msg"></div>
-  </div>
+      <div class="status-row">
+        <span class="status-dot dot-spin" id="sdApp"></span>
+        <span class="status-label">Firebase App</span>
+        <span class="status-val" id="svApp">กำลังตรวจสอบ...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-dot dot-spin" id="sdAuth"></span>
+        <span class="status-label">Authentication</span>
+        <span class="status-val" id="svAuth">กำลังตรวจสอบ...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-dot dot-spin" id="sdRead"></span>
+        <span class="status-label">Firestore Read</span>
+        <span class="status-val" id="svRead">กำลังทดสอบ...<span class="status-ping" id="spRead"></span></span>
+      </div>
+      <div class="status-row">
+        <span class="status-dot dot-spin" id="sdWrite"></span>
+        <span class="status-label">Firestore Write</span>
+        <span class="status-val" id="svWrite">กำลังทดสอบ...<span class="status-ping" id="spWrite"></span></span>
+      </div>
+      <div class="status-row">
+        <span class="status-dot dot-spin" id="sdDocs"></span>
+        <span class="status-label">จำนวน Documents</span>
+        <span class="status-val" id="svDocs">กำลังนับ...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-dot dot-ok" id="sdTime"></span>
+        <span class="status-label">เวลาตรวจสอบ</span>
+        <span class="status-val" id="svTime">-</span>
+      </div>
 
-  <div class="card">
-    <div class="card-title">📡 Connection Status</div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-app"></div>
-      <div class="s-label">Firebase App Init</div>
-      <div class="s-detail" id="val-app">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-auth"></div>
-      <div class="s-label">Auth State</div>
-      <div class="s-detail" id="val-auth">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-read"></div>
-      <div class="s-label">Firestore Read</div>
-      <div class="s-detail" id="val-read">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-write"></div>
-      <div class="s-label">Firestore Write</div>
-      <div class="s-detail" id="val-write">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-docs"></div>
-      <div class="s-label">Document Count (branches)</div>
-      <div class="s-detail" id="val-docs">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-idle" id="dot-rt"></div>
-      <div class="s-label">Realtime Listener (onSnapshot)</div>
-      <div class="s-detail" id="val-rt">รอ...</div>
-    </div>
-    <div class="s-row">
-      <div class="s-dot dot-ok" id="dot-time"></div>
-      <div class="s-label">ตรวจสอบล่าสุด</div>
-      <div class="s-detail" id="val-time">—</div>
+      <div style="margin-top:14px;display:flex;gap:10px">
+        <button id="btnRecheck" class="btn btn-green">ตรวจสอบอีกครั้ง</button>
+      </div>
     </div>
   </div>
 
-  <div style="display:flex;gap:10px;margin-bottom:14px">
-    <button class="btn btn-gold" id="btnRun" style="flex:1">▶ Run Check</button>
-    <button class="btn btn-blue" id="btnReset">Reset</button>
+  <!-- Modal -->
+  <div class="overlay" id="ov">
+    <div class="modal">
+      <div class="modal-head">
+        <div id="modalTitle" class="modal-title">เพิ่มสาขา</div>
+        <button id="btnClose" class="btn btn-red">ปิด</button>
+      </div>
+      <form id="fm">
+        <div class="grid">
+          <div><label>ชื่อสาขา *</label><input class="input field" name="name" required /></div>
+          <div><label>Model *</label><input class="input field" name="model" required /></div>
+          <div>
+            <label>สถานะ *</label>
+            <select class="select field" name="status" required>
+              <option value="เปิดอยู่">เปิดอยู่</option>
+              <option value="ปิดแล้ว">ปิดแล้ว</option>
+              <option value="ยกเลิกสัญญา">ยกเลิกสัญญา</option>
+              <option value="ติดตาม">ติดตาม</option>
+              <option value="กำลังก่อสร้าง">กำลังก่อสร้าง</option>
+              <option value="ฟ้องร้อง">ฟ้องร้อง</option>
+            </select>
+          </div>
+          <div><label>วันเปิด (dd/mm/yyyy)</label><input class="input field" name="openDate" placeholder="25/12/2025" /></div>
+          <div><label>ประเภทผู้ถือสิทธิ์</label><input class="input field" name="branchType" placeholder="นิติบุคคล / บุคคลธรรมดา" /></div>
+          <div><label>เจ้าของ</label><input class="input field" name="owner" /></div>
+          <div><label>ประเภทที่ตั้ง</label><input class="input field" name="locationType" placeholder="ในห้าง / นอกห้าง" /></div>
+          <div><label>ภูมิภาค</label><input class="input field" name="zone" /></div>
+          <div><label>จังหวัด</label><input class="input field" name="province" /></div>
+          <div><label>ประเทศ</label><input class="input field" name="country" value="Thailand" /></div>
+          <div><label>Relation</label><input class="input field" name="relation" value="Normal" /></div>
+          <div class="full"><label>Location</label><input class="input field" name="location" /></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button class="btn" type="submit" id="btnSave">บันทึก</button>
+          <button class="btn btn-red" type="button" id="btnDelete" style="display:none">ลบสาขานี้</button>
+        </div>
+      </form>
+      <div class="note">* ถ้า `วันเปิด` ไม่ทราบ ให้เว้นว่างได้</div>
+    </div>
   </div>
 
-  <div class="meta">
-    Project: <span class="project-id">nigiwai-core-a1c41</span> &nbsp;·&nbsp;
-    Region: asia-southeast1 &nbsp;·&nbsp; SDK: Firebase 10.12.2
-  </div>
+  <script type="module">
+    import { firebaseConfig } from "./firebase-config.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+      onSnapshot, serverTimestamp, writeBatch, getDocs, query, limit
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+      createUserWithEmailAndPassword, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-</div>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const colRef = collection(db, "branches");
 
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged,
-    signInWithEmailAndPassword, signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import {
-    getFirestore, collection, addDoc, deleteDoc,
-    getDocs, query, limit, onSnapshot, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const EXAMPLE_DATA = [
+      {name:"Durianism Cafe' เชียงราย",model:"Durianism Cafe'",status:"เปิดอยู่",openDate:"27/12/2021",branchType:"บุคคลธรรมดา",owner:"วรปภา แก้วจินดา",locationType:"ในห้าง",location:"เชียงราย",country:"Thailand",zone:"เหนือ",province:"เชียงราย",relation:"Normal"},
+      {name:"Durianism Cafe' สยาม",model:"Durianism Cafe'",status:"ปิดแล้ว",openDate:"25/12/2021",branchType:"บุคคลธรรมดา",owner:"",locationType:"นอกห้าง",location:"กรุงเทพ",country:"Thailand",zone:"กรุงเทพและปริมณฑล",province:"กรุงเทพมหานคร",relation:"Normal"},
+      {name:"Nigiwai Sushi สาขาแม่เหียะ",model:"Nigiwai Sushi",status:"เปิดอยู่",openDate:"25/01/2023",branchType:"นิติบุคคล",owner:"บริษัท คะเนะโมะชิ จำกัด",locationType:"นอกห้าง",location:"เชียงใหม่",country:"Thailand",zone:"เหนือ",province:"เชียงใหม่",relation:"Good"},
+      {name:"Nigi Express สาขา PTT บรมราชชนนี",model:"Nigi Express",status:"เปิดอยู่",openDate:"30/04/2024",branchType:"นิติบุคคล",owner:"บริษัท ดับเบิ้ล เค เวลล์เนส จำกัด",locationType:"นอกห้าง",location:"กรุงเทพ",country:"Thailand",zone:"กรุงเทพและปริมณฑล",province:"กรุงเทพมหานคร",relation:"Normal"},
+      {name:"Kin Matcha สาขาขอนแก่น",model:"Kin Matcha",status:"เปิดอยู่",openDate:"28/09/2025",branchType:"นิติบุคคล",owner:"บริษัท คินฉะอัน จำกัด",locationType:"ในห้าง",location:"ขอนแก่น",country:"Thailand",zone:"ตะวันออกเฉียงเหนือ",province:"ขอนแก่น",relation:"Normal"}
+    ];
 
-  const firebaseConfig = {
-    apiKey:            "AIzaSyB75sJAh4myOUkXIEKzrwo0yoPFwZJQ1po",
-    authDomain:        "nigiwai-core-a1c41.firebaseapp.com",
-    projectId:         "nigiwai-core-a1c41",
-    storageBucket:     "nigiwai-core-a1c41.firebasestorage.app",
-    messagingSenderId: "815850074955",
-    appId:             "1:815850074955:web:31c9ba46dbd4d95d4eaece",
-  };
+    const el = {
+      authEmail: document.getElementById("authEmail"),
+      authPassword: document.getElementById("authPassword"),
+      btnLogin: document.getElementById("btnLogin"),
+      btnRegister: document.getElementById("btnRegister"),
+      btnLogout: document.getElementById("btnLogout"),
+      authState: document.getElementById("authState"),
+      q: document.getElementById("q"),
+      fModel: document.getElementById("fModel"),
+      fStatus: document.getElementById("fStatus"),
+      tb: document.getElementById("tb"),
+      sAll: document.getElementById("sAll"),
+      sOpen: document.getElementById("sOpen"),
+      sClose: document.getElementById("sClose"),
+      msg: document.getElementById("msg"),
+      ov: document.getElementById("ov"),
+      fm: document.getElementById("fm"),
+      btnAdd: document.getElementById("btnAdd"),
+      btnClose: document.getElementById("btnClose"),
+      btnSave: document.getElementById("btnSave"),
+      btnDelete: document.getElementById("btnDelete"),
+      btnSeed: document.getElementById("btnSeed"),
+      btnExportCsv: document.getElementById("btnExportCsv"),
+      btnImportCsv: document.getElementById("btnImportCsv"),
+      csvFile: document.getElementById("csvFile"),
+      modalTitle: document.getElementById("modalTitle"),
+      orgWrap: document.getElementById("orgWrap"),
+      orgFilterStatus: document.getElementById("orgFilterStatus"),
+      orgFilterZone: document.getElementById("orgFilterZone"),
+      orgSAll: document.getElementById("orgSAll"),
+      orgSOpen: document.getElementById("orgSOpen"),
+      orgSBrand: document.getElementById("orgSBrand"),
+    };
 
-  const app    = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  const auth   = getAuth(app);
-  const db     = getFirestore(app);
-  const colRef = collection(db, "branches");
+    let rows = [];
+    let editingId = null;
+    let unsubscribeRows = null;
+    const editorIds = ["q","fModel","fStatus","btnAdd","btnSeed","btnExportCsv","btnImportCsv"];
 
-  let rtUnsub = null;
+    // ─── Status Check ───
+    const ovStatus = document.getElementById("ovStatus");
+    document.getElementById("btnCheckStatus").addEventListener("click", () => {
+      ovStatus.classList.add("open");
+      runStatusCheck();
+    });
+    document.getElementById("btnStatusClose").addEventListener("click", () => ovStatus.classList.remove("open"));
+    document.getElementById("btnRecheck").addEventListener("click", runStatusCheck);
+    ovStatus.addEventListener("click", e => { if (e.target === ovStatus) ovStatus.classList.remove("open"); });
 
-  const esc = s => (s ?? "").toString()
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-
-  function setRow(key, dotCls, html, textCls = "") {
-    document.getElementById("dot-" + key).className = "s-dot " + dotCls;
-    const el = document.getElementById("val-" + key);
-    el.className = "s-detail" + (textCls ? " " + textCls : "");
-    el.innerHTML = html;
-  }
-
-  function setOverall(state, text) {
-    document.getElementById("overall").className = "overall " + state;
-    document.getElementById("overallText").textContent = text;
-  }
-
-  function resetAll() {
-    ["app","auth","read","write","docs","rt"].forEach(k => setRow(k, "dot-idle", "รอ..."));
-    setRow("time", "dot-ok", "—");
-    setOverall("", "กดปุ่ม Run Check เพื่อเริ่มตรวจสอบ");
-    if (rtUnsub) { rtUnsub(); rtUnsub = null; }
-  }
-
-  onAuthStateChanged(auth, user => {
-    const chip = document.getElementById("authChip");
-    if (user) {
-      chip.className = "auth-chip ok";
-      chip.innerHTML = `<span class="chip-dot"></span>ล็อกอิน: ${esc(user.email)}`;
-      document.getElementById("btnLogin").disabled  = true;
-      document.getElementById("btnLogout").disabled = false;
-    } else {
-      chip.className = "auth-chip err";
-      chip.innerHTML = `<span class="chip-dot"></span>ยังไม่ได้ล็อกอิน`;
-      document.getElementById("btnLogin").disabled  = false;
-      document.getElementById("btnLogout").disabled = true;
+    function setStat(id, dotCls, valText, valCls = "") {
+      const dot = document.getElementById("sd" + id);
+      const val = document.getElementById("sv" + id);
+      dot.className = "status-dot " + dotCls;
+      val.className = "status-val" + (valCls ? " " + valCls : "");
+      val.innerHTML = valText;
     }
-  });
-
-  document.getElementById("btnLogin").addEventListener("click", async () => {
-    document.getElementById("authErr").textContent = "";
-    try {
-      await signInWithEmailAndPassword(
-        auth,
-        document.getElementById("email").value.trim(),
-        document.getElementById("password").value
-      );
-    } catch(e) {
-      document.getElementById("authErr").textContent = "Login ไม่สำเร็จ: " + e.message;
-    }
-  });
-
-  document.getElementById("btnLogout").addEventListener("click", async () => {
-    try { await signOut(auth); }
-    catch(e) { document.getElementById("authErr").textContent = e.message; }
-  });
-
-  document.getElementById("btnReset").addEventListener("click", resetAll);
-
-  document.getElementById("btnRun").addEventListener("click", async () => {
-    const btnRun = document.getElementById("btnRun");
-    btnRun.disabled = true;
-    btnRun.textContent = "⏳ กำลังตรวจสอบ...";
-
-    ["app","auth","read","write","docs","rt"].forEach(k =>
-      setRow(k, "dot-spin", "กำลังตรวจสอบ...")
-    );
-    setOverall("", "กำลังตรวจสอบ...");
-
-    let errors = 0, warns = 0;
-
-    // 1. App init
-    try {
-      setRow("app", "dot-ok",
-        `OK &nbsp;<span style="color:var(--td);font-size:11px">[${esc(app.name)}]</span>`, "ok");
-    } catch(e) {
-      setRow("app", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
+    function resetStats() {
+      ["App","Auth","Read","Write","Docs"].forEach(id => {
+        setStat(id, "dot-spin", "กำลังตรวจสอบ...");
+        const ping = document.getElementById("sp" + id);
+        if (ping) ping.textContent = "";
+      });
+      document.getElementById("svTime").textContent = new Date().toLocaleString("th-TH");
     }
 
-    // 2. Auth
-    const user = auth.currentUser;
-    if (user) {
-      setRow("auth", "dot-ok", `ล็อกอินแล้ว: ${esc(user.email)}`, "ok");
-    } else {
-      setRow("auth", "dot-warn", "ยังไม่ได้ล็อกอิน (Write จะถูกข้าม)", "warn"); warns++;
-    }
+    async function runStatusCheck() {
+      resetStats();
 
-    // 3. Read
-    try {
-      const t0 = performance.now();
-      await getDocs(query(colRef, limit(1)));
-      const ms = Math.round(performance.now() - t0);
-      setRow("read", "dot-ok", `OK <span class="ping">${ms} ms</span>`, "ok");
-    } catch(e) {
-      setRow("read", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
-    }
-
-    // 4. Write
-    if (!user) {
-      setRow("write", "dot-warn", "ข้าม — ยังไม่ได้ล็อกอิน", "warn"); warns++;
-    } else {
+      // 1. Firebase App
       try {
-        const pingCol = collection(db, "_ping");
-        const t0 = performance.now();
-        const ref = await addDoc(pingCol, { ts: serverTimestamp(), by: user.email });
-        await deleteDoc(ref);
-        const ms = Math.round(performance.now() - t0);
-        setRow("write", "dot-ok",
-          `OK — write+delete <span class="ping">${ms} ms</span>`, "ok");
+        const name = app.name;
+        setStat("App", "dot-ok", `OK &nbsp;<span style="color:var(--td);font-size:11px">${esc(name)}</span>`, "ok");
       } catch(e) {
-        setRow("write", "dot-err", "ไม่สำเร็จ: " + esc(e.message), "err"); errors++;
+        setStat("App", "dot-err", "ไม่สำเร็จ: " + e.message, "err");
+      }
+
+      // 2. Auth state
+      const user = auth.currentUser;
+      if (user) {
+        setStat("Auth", "dot-ok", `ล็อกอินแล้ว: ${esc(user.email)}`, "ok");
+      } else {
+        setStat("Auth", "dot-warn", "ยังไม่ได้ล็อกอิน (Read อาจถูก block)", "warn");
+      }
+
+      // 3. Firestore Read
+      try {
+        const t0 = performance.now();
+        const snap = await getDocs(query(colRef, limit(1)));
+        const ms = Math.round(performance.now() - t0);
+        setStat("Read", "dot-ok",
+          `OK <span class="status-ping">${ms} ms</span>`, "ok");
+        document.getElementById("spRead").textContent = "";
+
+        // 5. Count docs (reuse snapshot full)
+        try {
+          const t1 = performance.now();
+          const all = await getDocs(colRef);
+          const ms2 = Math.round(performance.now() - t1);
+          setStat("Docs", "dot-ok",
+            `${all.size} documents <span class="status-ping">${ms2} ms</span>`, "ok");
+        } catch(e) {
+          setStat("Docs", "dot-warn", "นับไม่ได้: " + e.message, "warn");
+        }
+      } catch(e) {
+        setStat("Read", "dot-err", "ไม่สำเร็จ: " + e.message, "err");
+        setStat("Docs", "dot-err", "ข้ามเพราะ Read ไม่ผ่าน", "err");
+      }
+
+      // 4. Firestore Write (ping doc)
+      if (!user) {
+        setStat("Write", "dot-warn", "ข้าม (ยังไม่ได้ล็อกอิน)", "warn");
+      } else {
+        try {
+          const pingCol = collection(db, "_ping");
+          const t0 = performance.now();
+          const ref = await addDoc(pingCol, { ts: serverTimestamp(), by: user.email });
+          await deleteDoc(ref);
+          const ms = Math.round(performance.now() - t0);
+          setStat("Write", "dot-ok",
+            `OK — write+delete <span class="status-ping">${ms} ms</span>`, "ok");
+        } catch(e) {
+          setStat("Write", "dot-err", "ไม่สำเร็จ: " + e.message, "err");
+        }
+      }
+
+      document.getElementById("svTime").textContent = new Date().toLocaleString("th-TH");
+    }
+
+    // ─── Tab switching ───
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "orgchart") renderOrgChart();
+      });
+    });
+
+    // ─── Org Chart ───
+    function esc(s) {
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    function badgeForStatus(status) {
+      if (status === "เปิดอยู่") return "b-open";
+      if (status === "ปิดแล้ว") return "b-close";
+      return "b-other";
+    }
+
+    function buildZoneOptions(data) {
+      const zones = [...new Set(data.map(r => r.zone).filter(Boolean))].sort((a,b) => a.localeCompare(b,"th"));
+      const cur = el.orgFilterZone.value;
+      el.orgFilterZone.innerHTML = '<option value="">ทุกภูมิภาค</option>' +
+        zones.map(z => `<option value="${esc(z)}">${esc(z)}</option>`).join("");
+      if (zones.includes(cur)) el.orgFilterZone.value = cur;
+    }
+
+    function orgFilteredRows() {
+      const fs = el.orgFilterStatus.value;
+      const fz = el.orgFilterZone.value;
+      return rows.filter(r => {
+        if (fs && r.status !== fs) return false;
+        if (fz && r.zone !== fz) return false;
+        return true;
+      });
+    }
+
+    function renderOrgChart() {
+      const data = orgFilteredRows();
+      const openCount = data.filter(r => r.status === "เปิดอยู่").length;
+
+      // Stats
+      const brands = [...new Set(data.map(r => r.model).filter(Boolean))];
+      el.orgSAll.textContent = `ทั้งหมด ${data.length}`;
+      el.orgSOpen.textContent = `เปิดอยู่ ${openCount}`;
+      el.orgSBrand.textContent = `${brands.length} แบรนด์`;
+
+      // ─── Summary bar ───
+      const closeCount = data.filter(r => r.status === "ปิดแล้ว").length;
+      const otherCount = data.length - openCount - closeCount;
+      const total = data.length || 1;
+      const sumEl = document.getElementById("orgSummary");
+      if (sumEl) {
+        sumEl.style.display = data.length ? "flex" : "none";
+        document.getElementById("numOpen").textContent  = openCount;
+        document.getElementById("numClose").textContent = closeCount;
+        document.getElementById("numOther").textContent = otherCount;
+        requestAnimationFrame(() => {
+          document.getElementById("barOpen").style.width  = (openCount/total*100).toFixed(1)+"%";
+          document.getElementById("barClose").style.width = (closeCount/total*100).toFixed(1)+"%";
+          document.getElementById("barOther").style.width = (otherCount/total*100).toFixed(1)+"%";
+        });
+      }
+
+      if (!data.length) {
+        el.orgWrap.innerHTML = '<div class="org-empty">ไม่พบข้อมูล</div>';
+        return;
+      }
+
+      // Group by brand
+      const brandMap = new Map();
+      data.forEach(r => {
+        const brand = r.model || "ไม่ระบุ Brand";
+        if (!brandMap.has(brand)) brandMap.set(brand, []);
+        brandMap.get(brand).push(r);
+      });
+
+      const sortedBrands = [...brandMap.keys()].sort((a,b) => a.localeCompare(b,"th"));
+
+      // Build brand columns HTML
+      const brandCols = sortedBrands.map(brand => {
+        const branches = brandMap.get(brand);
+        const openB = branches.filter(r => r.status === "เปิดอยู่").length;
+
+        // Branch nodes
+        const branchNodes = branches
+          .sort((a,b) => (a.name||"").localeCompare(b.name||"","th"))
+          .map(r => `
+            <div class="org-branch-col">
+              <div class="org-node org-node-branch" data-bid="${esc(r.id)}">
+                <div class="org-node-label">${esc(r.name)}</div>
+                <div class="org-node-prov">
+                  <span class="badge ${badgeForStatus(r.status)}">${esc(r.status||"-")}</span>
+                  ${r.province ? `<span style="margin-left:4px">${esc(r.province)}</span>` : ""}
+                </div>
+              </div>
+            </div>
+          `).join("");
+
+        // Horizontal bar for branches (only if >1)
+        const branchBar = branches.length > 1
+          ? `<div class="org-h-bar" style="background:rgba(91,141,239,.3)"></div>`
+          : "";
+
+        return `
+          <div class="org-brand-col">
+            <div class="org-node org-node-brand">
+              <div class="org-node-label">${esc(brand)}</div>
+              <div><span class="org-node-count">${branches.length} สาขา · เปิด ${openB}</span></div>
+            </div>
+            <div class="org-branch-list" style="position:relative">
+              ${branchBar}
+              ${branchNodes}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Horizontal bar across brands (only if >1)
+      const brandBar = sortedBrands.length > 1
+        ? `<div class="org-h-bar" style="background:rgba(200,164,86,.35)"></div>`
+        : "";
+
+      el.orgWrap.innerHTML = `
+        <div class="org-tree">
+          <li style="list-style:none;display:flex;flex-direction:column;align-items:center">
+            <div class="org-node org-node-root">
+              <div class="org-node-label">Nigiwai Group</div>
+              <div class="org-node-sub">${data.length} สาขา · ${sortedBrands.length} แบรนด์</div>
+            </div>
+            <div style="width:1px;height:28px;background:rgba(200,164,86,.4)"></div>
+            <div class="org-brand-row" style="position:relative">
+              ${brandBar}
+              ${brandCols}
+            </div>
+          </li>
+        </div>
+      `;
+    }
+
+    el.orgFilterStatus.addEventListener("change", renderOrgChart);
+    el.orgFilterZone.addEventListener("change", renderOrgChart);
+
+    // ─── Export Org Chart as PNG ───
+    document.getElementById("btnExportOrg").addEventListener("click", async () => {
+      const btn = document.getElementById("btnExportOrg");
+      btn.disabled = true;
+      btn.textContent = "⏳ กำลัง export...";
+      // ซ่อน popup ก่อน capture
+      document.getElementById("branchPopup").classList.remove("show");
+      try {
+        const target = document.getElementById("orgWrap");
+        const canvas = await html2canvas(target, {
+          backgroundColor: "#0B1426",
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          scrollX: 0,
+          scrollY: -window.scrollY,
+        });
+        const link = document.createElement("a");
+        const now = new Date().toISOString().slice(0,16).replace("T","_").replaceAll(":","-");
+        link.download = `nigiwai-orgchart-${now}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      } catch(e) {
+        showMsg("Export PNG ไม่สำเร็จ: " + e.message, "err");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "📸 Export PNG";
+      }
+    });
+
+
+    // ─── Branch Detail Popup ───
+    const popup = document.getElementById("branchPopup");
+    document.getElementById("bpClose").addEventListener("click", () => popup.classList.remove("show"));
+    document.addEventListener("click", e => {
+      const node = e.target.closest(".org-node-branch[data-bid]");
+      if (node) {
+        const bid = node.getAttribute("data-bid");
+        const r = rows.find(x => x.id === bid);
+        if (!r) return;
+        document.getElementById("bpTitle").textContent = r.name;
+        const fields = [
+          ["Model",      r.model],
+          ["สถานะ",      r.status],
+          ["วันเปิด",    r.openDate || "ไม่ทราบ"],
+          ["ภูมิภาค",   r.zone],
+          ["จังหวัด",   r.province],
+          ["ประเทศ",    r.country],
+          ["ประเภท",    r.branchType],
+          ["เจ้าของ",   r.owner],
+          ["Location",  r.locationType],
+          ["Relation",  r.relation],
+        ].filter(([,v]) => v);
+        document.getElementById("bpBody").innerHTML = fields
+          .map(([k,v]) => `<div class="bp-row"><span class="bp-key">${esc(k)}</span><span class="bp-val">${esc(v)}</span></div>`)
+          .join("");
+        // position near click
+        const rect = node.getBoundingClientRect();
+        const pw = 320, ph = 300;
+        let left = rect.right + 10;
+        let top  = rect.top;
+        if (left + pw > window.innerWidth)  left = rect.left - pw - 10;
+        if (left < 8) left = 8;
+        if (top + ph > window.innerHeight)  top = window.innerHeight - ph - 8;
+        if (top < 8) top = 8;
+        popup.style.left = left + "px";
+        popup.style.top  = (top + window.scrollY) + "px";
+        popup.classList.add("show");
+        e.stopPropagation();
+        return;
+      }
+      if (!e.target.closest("#branchPopup")) popup.classList.remove("show");
+    });
+
+
+    // ─── Dashboard helpers ───
+    function showMsg(text, type = "muted") {
+      el.msg.className = "msg " + type;
+      el.msg.textContent = text;
+    }
+
+    function setDashboardEnabled(enabled) {
+      editorIds.forEach(id => {
+        const node = document.getElementById(id);
+        if (node) node.disabled = !enabled;
+      });
+      if (!enabled) {
+        rows = [];
+        buildModelOptions([]);
+        render();
+        el.orgWrap.innerHTML = '<div class="org-empty">กรุณา Login ก่อนใช้งานข้อมูล</div>';
       }
     }
 
-    // 5. Count
-    try {
-      const t0 = performance.now();
-      const snap = await getDocs(colRef);
-      const ms = Math.round(performance.now() - t0);
-      setRow("docs", "dot-ok",
-        `${snap.size} documents <span class="ping">${ms} ms</span>`, "ok");
-    } catch(e) {
-      setRow("docs", "dot-warn", "นับไม่ได้: " + esc(e.message), "warn"); warns++;
+    function badgeClass(status) {
+      if (status === "เปิดอยู่") return "b-open";
+      if (status === "ปิดแล้ว") return "b-close";
+      return "b-other";
     }
 
-    // 6. Realtime listener
-    await new Promise(resolve => {
-      const timeout = setTimeout(() => {
-        setRow("rt", "dot-err", "Timeout 5s — Listener ไม่ตอบสนอง", "err");
-        errors++; resolve();
-      }, 5000);
-      if (rtUnsub) rtUnsub();
-      const t0 = performance.now();
-      rtUnsub = onSnapshot(
-        query(colRef, limit(1)),
-        () => {
-          clearTimeout(timeout);
-          const ms = Math.round(performance.now() - t0);
-          setRow("rt", "dot-ok",
-            `Live <span class="ping">${ms} ms first event</span>`, "ok");
-          resolve();
-        },
-        err => {
-          clearTimeout(timeout);
-          setRow("rt", "dot-err", "Listener Error: " + esc(err.message), "err");
-          errors++; resolve();
+    function collectForm() {
+      const fd = new FormData(el.fm);
+      const data = Object.fromEntries(fd.entries());
+      const required = ["name", "model", "status"];
+      for (const k of required) {
+        if (!data[k]?.trim()) throw new Error(`กรุณากรอก ${k}`);
+      }
+      return {
+        name: data.name.trim(),
+        model: data.model.trim(),
+        status: data.status.trim(),
+        openDate: data.openDate?.trim() || null,
+        branchType: data.branchType?.trim() || "",
+        owner: data.owner?.trim() || "",
+        locationType: data.locationType?.trim() || "",
+        location: data.location?.trim() || "",
+        country: data.country?.trim() || "Thailand",
+        zone: data.zone?.trim() || "",
+        province: data.province?.trim() || "",
+        relation: data.relation?.trim() || "Normal"
+      };
+    }
+
+    function resetForm() {
+      el.fm.reset();
+      el.fm.country.value = "Thailand";
+      el.fm.relation.value = "Normal";
+    }
+
+    function openModal(mode, row = null) {
+      editingId = mode === "edit" ? row.id : null;
+      el.modalTitle.textContent = mode === "edit" ? "แก้ไขสาขา" : "เพิ่มสาขา";
+      el.btnDelete.style.display = mode === "edit" ? "inline-flex" : "none";
+      if (mode === "edit" && row) {
+        const keys = ["name","model","status","openDate","branchType","owner","locationType","location","country","zone","province","relation"];
+        keys.forEach(k => {
+          if (el.fm[k]) el.fm[k].value = row[k] ?? "";
+        });
+      } else {
+        resetForm();
+      }
+      el.ov.classList.add("open");
+    }
+
+    function closeModal() {
+      el.ov.classList.remove("open");
+      editingId = null;
+      resetForm();
+    }
+
+    function buildModelOptions(data) {
+      const models = [...new Set(data.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
+      const current = el.fModel.value;
+      el.fModel.innerHTML = '<option value="">ทุก Model</option>' + models.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+      if (models.includes(current)) el.fModel.value = current;
+    }
+
+    function filteredRows() {
+      const q = el.q.value.trim().toLowerCase();
+      const fModel = el.fModel.value;
+      const fStatus = el.fStatus.value;
+      return rows.filter(r => {
+        if (fModel && r.model !== fModel) return false;
+        if (fStatus && r.status !== fStatus) return false;
+        if (!q) return true;
+        const text = [r.name, r.model, r.zone, r.province, r.country].join(" ").toLowerCase();
+        return text.includes(q);
+      });
+    }
+
+    function render() {
+      const data = filteredRows();
+      const openCount = data.filter(r => r.status === "เปิดอยู่").length;
+      const closeCount = data.filter(r => r.status === "ปิดแล้ว").length;
+      el.sAll.textContent = `ทั้งหมด ${data.length}`;
+      el.sOpen.textContent = `เปิดอยู่ ${openCount}`;
+      el.sClose.textContent = `ปิดแล้ว ${closeCount}`;
+
+      el.tb.innerHTML = data.map((r, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td style="font-weight:700">${esc(r.name)}</td>
+          <td>${esc(r.model || "")}</td>
+          <td><span class="badge ${badgeClass(r.status)}">${esc(r.status || "-")}</span></td>
+          <td>${esc(r.openDate || "ไม่ทราบ")}</td>
+          <td>${esc(r.zone || "-")}</td>
+          <td>${esc(r.province || "-")}</td>
+          <td>${esc(r.country || "-")}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-blue" data-act="edit" data-id="${esc(r.id)}">แก้ไข</button>
+              <button class="btn btn-red" data-act="del" data-id="${esc(r.id)}">ลบ</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function exportCsv() {
+      const headers = ["name","model","status","openDate","branchType","owner","locationType","location","country","zone","province","relation"];
+      const escapeCsv = (v) => {
+        const s = (v ?? "").toString();
+        if (s.includes(",") || s.includes('"') || s.includes("\n")) return `"${s.replaceAll('"', '""')}"`;
+        return s;
+      };
+      const lines = [headers.join(",")];
+      filteredRows().forEach(r => {
+        lines.push(headers.map(h => escapeCsv(r[h])).join(","));
+      });
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const now = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
+      a.href = url;
+      a.download = `branches-export-${now}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function parseCsvText(text) {
+      const rowsOut = [];
+      let row = [];
+      let value = "";
+      let i = 0;
+      let inQuotes = false;
+      while (i < text.length) {
+        const c = text[i];
+        const n = text[i + 1];
+        if (inQuotes) {
+          if (c === '"' && n === '"') { value += '"'; i += 2; continue; }
+          if (c === '"') { inQuotes = false; i += 1; continue; }
+          value += c; i += 1; continue;
         }
-      );
+        if (c === '"') { inQuotes = true; i += 1; continue; }
+        if (c === ",") { row.push(value); value = ""; i += 1; continue; }
+        if (c === "\n") { row.push(value); rowsOut.push(row); row = []; value = ""; i += 1; continue; }
+        if (c === "\r") { i += 1; continue; }
+        value += c; i += 1;
+      }
+      if (value.length || row.length) { row.push(value); rowsOut.push(row); }
+      return rowsOut;
+    }
+
+    async function importCsvFile(file) {
+      const text = await file.text();
+      const parsed = parseCsvText(text);
+      if (parsed.length < 2) throw new Error("CSV ว่างหรือไม่มีข้อมูล");
+      const headers = parsed[0].map(h => h.trim());
+      const required = ["name","model","status"];
+      required.forEach(h => {
+        if (!headers.includes(h)) throw new Error(`ไม่พบคอลัมน์ ${h}`);
+      });
+      const idx = Object.fromEntries(headers.map((h, n) => [h, n]));
+      const normalize = (cells, k, def = "") => (cells[idx[k]] ?? def).trim();
+      const items = parsed.slice(1)
+        .filter(cells => cells.some(c => c.trim().length))
+        .map(cells => ({
+          name: normalize(cells, "name"),
+          model: normalize(cells, "model"),
+          status: normalize(cells, "status"),
+          openDate: normalize(cells, "openDate", "") || null,
+          branchType: normalize(cells, "branchType", ""),
+          owner: normalize(cells, "owner", ""),
+          locationType: normalize(cells, "locationType", ""),
+          location: normalize(cells, "location", ""),
+          country: normalize(cells, "country", "Thailand") || "Thailand",
+          zone: normalize(cells, "zone", ""),
+          province: normalize(cells, "province", ""),
+          relation: normalize(cells, "relation", "Normal") || "Normal"
+        }));
+      if (!items.length) throw new Error("ไม่พบแถวข้อมูลที่ใช้ได้");
+      const chunks = [];
+      for (let i = 0; i < items.length; i += 400) chunks.push(items.slice(i, i + 400));
+      for (const chunk of chunks) {
+        const batch = writeBatch(db);
+        chunk.forEach(item => {
+          const ref = doc(colRef);
+          batch.set(ref, { ...item, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+        });
+        await batch.commit();
+      }
+      showMsg(`Import CSV สำเร็จ: ${items.length} รายการ`, "ok");
+    }
+
+    async function createBranch(data) {
+      await addDoc(colRef, { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    }
+    async function updateBranch(id, data) {
+      await updateDoc(doc(db, "branches", id), { ...data, updatedAt: serverTimestamp() });
+    }
+    async function deleteBranch(id) {
+      await deleteDoc(doc(db, "branches", id));
+    }
+
+    async function seedExampleData() {
+      const check = await getDocs(query(colRef, limit(1)));
+      if (!check.empty) { showMsg("มีข้อมูลใน Firestore อยู่แล้ว ข้ามการ import", "ok"); return; }
+      const batch = writeBatch(db);
+      EXAMPLE_DATA.forEach(item => {
+        const ref = doc(colRef);
+        batch.set(ref, { ...item, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+      });
+      await batch.commit();
+      showMsg("Import ตัวอย่างเริ่มต้นเรียบร้อย", "ok");
+    }
+
+    function startSnapshot() {
+      if (unsubscribeRows) unsubscribeRows();
+      unsubscribeRows = onSnapshot(colRef, snap => {
+        rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        rows.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th"));
+        buildModelOptions(rows);
+        buildZoneOptions(rows);
+        render();
+        // Re-render org chart if that tab is active
+        if (document.getElementById("panel-orgchart").classList.contains("active")) renderOrgChart();
+        showMsg(`ซิงก์ข้อมูลล่าสุด: ${rows.length} รายการ`, "ok");
+      }, err => {
+        showMsg("เชื่อม Firestore ไม่สำเร็จ: " + err.message, "err");
+      });
+    }
+
+    // ─── Events ───
+    el.btnLogin.addEventListener("click", async () => {
+      try { await signInWithEmailAndPassword(auth, el.authEmail.value.trim(), el.authPassword.value); }
+      catch (e) { showMsg("Login ไม่สำเร็จ: " + e.message, "err"); }
+    });
+    el.btnRegister.addEventListener("click", async () => {
+      try {
+        await createUserWithEmailAndPassword(auth, el.authEmail.value.trim(), el.authPassword.value);
+        showMsg("สมัครสมาชิกสำเร็จและล็อกอินแล้ว", "ok");
+      } catch (e) { showMsg("Register ไม่สำเร็จ: " + e.message, "err"); }
+    });
+    el.btnLogout.addEventListener("click", async () => {
+      try { await signOut(auth); }
+      catch (e) { showMsg("Logout ไม่สำเร็จ: " + e.message, "err"); }
     });
 
-    setRow("time", "dot-ok", new Date().toLocaleString("th-TH"));
+    el.q.addEventListener("input", render);
+    el.fModel.addEventListener("change", render);
+    el.fStatus.addEventListener("change", render);
+    el.btnAdd.addEventListener("click", () => openModal("create"));
+    el.btnClose.addEventListener("click", closeModal);
+    el.ov.addEventListener("click", e => { if (e.target === el.ov) closeModal(); });
+    el.btnSeed.addEventListener("click", async () => {
+      try { await seedExampleData(); }
+      catch (e) { showMsg("Import ไม่สำเร็จ: " + e.message, "err"); }
+    });
+    el.btnExportCsv.addEventListener("click", exportCsv);
+    el.btnImportCsv.addEventListener("click", () => el.csvFile.click());
+    el.csvFile.addEventListener("change", async () => {
+      const file = el.csvFile.files?.[0];
+      if (!file) return;
+      try { await importCsvFile(file); }
+      catch (e) { showMsg("Import CSV ไม่สำเร็จ: " + e.message, "err"); }
+      finally { el.csvFile.value = ""; }
+    });
 
-    if (errors === 0 && warns === 0) {
-      setOverall("ok", "✅ ทุกอย่างปกติ — Firestore พร้อมใช้งาน");
-    } else if (errors === 0) {
-      setOverall("warn", `⚠ เชื่อมต่อได้ แต่มี ${warns} รายการที่ควรตรวจสอบ`);
-    } else {
-      setOverall("err", `❌ พบ ${errors} ข้อผิดพลาด${warns ? ` และ ${warns} คำเตือน` : ""}`);
-    }
+    el.fm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const data = collectForm();
+        if (editingId) {
+          await updateBranch(editingId, data);
+          showMsg("บันทึกการแก้ไขเรียบร้อย", "ok");
+        } else {
+          await createBranch(data);
+          showMsg("เพิ่มสาขาเรียบร้อย", "ok");
+        }
+        closeModal();
+      } catch (err) { showMsg("บันทึกไม่สำเร็จ: " + err.message, "err"); }
+    });
 
-    btnRun.disabled = false;
-    btnRun.textContent = "▶ Run Check";
-  });
-</script>
+    el.btnDelete.addEventListener("click", async () => {
+      if (!editingId) return;
+      if (!confirm("ยืนยันลบสาขานี้?")) return;
+      try {
+        await deleteBranch(editingId);
+        showMsg("ลบสาขาเรียบร้อย", "ok");
+        closeModal();
+      } catch (err) { showMsg("ลบไม่สำเร็จ: " + err.message, "err"); }
+    });
+
+    el.tb.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const id = btn.getAttribute("data-id");
+      const act = btn.getAttribute("data-act");
+      const row = rows.find(r => r.id === id);
+      if (!row) return;
+      if (act === "edit") { openModal("edit", row); return; }
+      if (act === "del") {
+        if (!confirm(`ยืนยันลบ: ${row.name}?`)) return;
+        try {
+          await deleteBranch(id);
+          showMsg("ลบสาขาเรียบร้อย", "ok");
+        } catch (err) { showMsg("ลบไม่สำเร็จ: " + err.message, "err"); }
+      }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      const connDot = document.getElementById("connDot");
+      if (user) {
+        connDot.className = "conn-dot ok";
+        el.authState.innerHTML = `<span id="connDot" class="conn-dot ok"></span>ล็อกอินแล้ว: ${esc(user.email)}`;
+        el.btnLogout.classList.remove("hidden");
+        el.btnLogin.classList.add("hidden");
+        el.btnRegister.classList.add("hidden");
+        setDashboardEnabled(true);
+        startSnapshot();
+      } else {
+        el.authState.innerHTML = `<span id="connDot" class="conn-dot err"></span>ยังไม่ได้ล็อกอิน`;
+        el.btnLogout.classList.add("hidden");
+        el.btnLogin.classList.remove("hidden");
+        el.btnRegister.classList.remove("hidden");
+        setDashboardEnabled(false);
+        if (unsubscribeRows) unsubscribeRows();
+        unsubscribeRows = null;
+        showMsg("กรุณา Login ก่อนใช้งานข้อมูล", "muted");
+      }
+    });
+  </script>
+  <!-- Branch Detail Popup -->
+  <div class="branch-popup" id="branchPopup">
+    <button class="bp-close" id="bpClose">×</button>
+    <div class="bp-title" id="bpTitle"></div>
+    <div id="bpBody"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
