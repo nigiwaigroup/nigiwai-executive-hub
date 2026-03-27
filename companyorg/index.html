@@ -1990,16 +1990,16 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       }
 
       // stat pills — เปิด + ก่อสร้าง เท่านั้น
-      function statPills(branches) {
-        const o = branches.filter(r => r.status === "เปิดอยู่").length;
-        const b = branches.filter(r => r.status === "กำลังก่อสร้าง").length;
+      function statPills(arr) {
+        const o = arr.filter(r => r.status === "เปิดอยู่").length;
+        const b = arr.filter(r => r.status === "กำลังก่อสร้าง").length;
         let p = "";
-        if (o) p += `<span class="tv-stat-pill tv-sp-open" title="เปิดอยู่">🟢 ${o}</span>`;
-        if (b) p += `<span class="tv-stat-pill tv-sp-build" title="กำลังก่อสร้าง">🏗 ${b}</span>`;
+        if (o) p += `<span class="tv-stat-pill tv-sp-open">🟢 ${o}</span>`;
+        if (b) p += `<span class="tv-stat-pill tv-sp-build">🏗 ${b}</span>`;
         return p;
       }
 
-      // กลุ่ม Category → Model
+      // กลุ่ม Category → Model → Branch
       const catMap = new Map();
       data.forEach(r => {
         const cat   = getCategory(r.model || "");
@@ -2010,34 +2010,49 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       });
       const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
 
-      // sort table
-      const sorted = [...data].sort((a, b) => {
-        const va = a[_sortCol] || "", vb = b[_sortCol] || "";
-        return _sortAsc ? va.localeCompare(vb,"th") : vb.localeCompare(va,"th");
-      });
+      // build table rows สำหรับแต่ละ model
+      function modelTable(branches, modelId) {
+        const sorted = [...branches].sort((a,b) => {
+          const va = a[_sortCol]||"", vb = b[_sortCol]||"";
+          return _sortAsc ? va.localeCompare(vb,"th") : vb.localeCompare(va,"th");
+        });
+        const cols = [
+          {key:"name",     label:"ชื่อสาขา"},
+          {key:"status",   label:"สถานะ",   w:"90px"},
+          {key:"province", label:"จังหวัด",  w:"90px"},
+          {key:"zone",     label:"ภูมิภาค",  w:"130px"},
+          {key:"openDate", label:"วันเปิด",  w:"95px"},
+          {key:"owner",    label:"เจ้าของ",  w:"140px"},
+          {key:"_fb",  label:"FB",  w:"36px", nosort:true},
+          {key:"_map", label:"Map", w:"40px", nosort:true},
+        ];
+        const thHtml = col => {
+          if (col.nosort) return `<th style="width:${col.w||""};text-align:center">${col.label}</th>`;
+          const active = _sortCol === col.key;
+          const arr = active ? (_sortAsc?"▲":"▼") : "⇅";
+          return `<th class="sortable-th${active?" th-active":""}" data-sort="${col.key}" data-mid="${modelId}"
+            style="width:${col.w||""}">${col.label} <span style="opacity:.4;font-size:9px">${arr}</span></th>`;
+        };
+        return `<div style="overflow-x:auto">
+          <table class="main-table" style="margin:0">
+            <thead><tr>${cols.map(thHtml).join("")}</tr></thead>
+            <tbody>${sorted.map(r => `
+              <tr class="main-row" data-bid="${esc(r.id)}">
+                <td style="font-weight:700;min-width:160px">${esc(r.name)}</td>
+                <td><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span></td>
+                <td style="font-size:12px">${esc(r.province||"-")}</td>
+                <td style="font-size:11px;color:var(--td)">${esc(r.zone||"-")}</td>
+                <td style="font-size:11px;color:var(--td)">${esc(r.openDate||"-")}</td>
+                <td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${esc(r.owner||"-")}</td>
+                <td style="text-align:center">${r.facebook?`<a href="${esc(r.facebook)}" target="_blank" class="tbl-icon-link tbl-fb" onclick="event.stopPropagation()">f</a>`:""}</td>
+                <td style="text-align:center">${r.googleMap?`<a href="${esc(r.googleMap)}" target="_blank" class="tbl-icon-link tbl-map" onclick="event.stopPropagation()">📍</a>`:""}</td>
+              </tr>`).join("")}
+            </tbody>
+          </table></div>`;
+      }
 
-      const cols = [
-        {key:"name",     label:"ชื่อสาขา", w:""},
-        {key:"model",    label:"Model",     w:"140px"},
-        {key:"status",   label:"สถานะ",     w:"100px"},
-        {key:"province", label:"จังหวัด",   w:"100px"},
-        {key:"zone",     label:"ภูมิภาค",   w:"140px"},
-        {key:"openDate", label:"วันเปิด",   w:"100px"},
-        {key:"owner",    label:"เจ้าของ",   w:"150px"},
-        {key:"_fb",  label:"FB",   w:"40px", nosort:true},
-        {key:"_map", label:"Map",  w:"44px", nosort:true},
-      ];
-
-      const thHtml = col => {
-        if (col.nosort) return `<th style="width:${col.w};text-align:center">${col.label}</th>`;
-        const active = _sortCol === col.key;
-        const arr = active ? (_sortAsc ? " ▲" : " ▼") : " ⇅";
-        return `<th class="sortable-th${active?" th-active":""}" data-sort="${col.key}"
-          style="width:${col.w}">${col.label}<span style="opacity:.5;font-size:10px">${arr}</span></th>`;
-      };
-
-      // ── Tree (Category + Model) ──
-      let treeOut = `<div class="tv-root" style="margin-bottom:14px">
+      // build HTML
+      let out = `<div class="tv-root">
         <div class="tv-row tv-level-root">
           <span class="tv-toggle tv-open" data-tv="main-root-ch">▼</span>
           <span class="tv-icon">🏢</span>
@@ -2050,9 +2065,10 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       sortedCats.forEach((cat, ci) => {
         const modelMap  = catMap.get(cat);
         const allBranch = [...modelMap.values()].flat();
-        const catId     = "main-cat-" + ci;
+        const catId     = "mc-" + ci;
         const isOpen    = _catOpenState[cat] !== false;
-        treeOut += `
+
+        out += `
           <div class="tv-row tv-level-cat" data-tv-toggle="${catId}">
             <span class="tv-connector"></span>
             <span class="tv-toggle ${isOpen?"tv-open":"tv-closed"}" data-tv="${catId}">${isOpen?"▼":"▶"}</span>
@@ -2062,82 +2078,48 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
             ${statPills(allBranch)}
           </div>
           <div class="tv-children ${isOpen?"":"tv-hidden"}" id="${catId}">`;
-        [...modelMap.entries()].sort((a,b)=>a[0].localeCompare(b[0],"th"))
+
+        [...modelMap.entries()].sort((a,b) => a[0].localeCompare(b[0],"th"))
           .forEach(([model, branches], mi) => {
-            treeOut += `
-              <div class="tv-row tv-level-model">
+            const modelId  = `mm-${ci}-${mi}`;
+            const tableId  = `mt-${ci}-${mi}`;
+
+            out += `
+              <div class="tv-row tv-level-model" data-tv-toggle="${tableId}">
                 <span class="tv-connector"></span>
                 <span class="tv-connector"></span>
-                <span style="width:18px;flex-shrink:0"></span>
+                <span class="tv-toggle tv-closed" data-tv="${tableId}">▶</span>
                 <span class="tv-icon">🏪</span>
                 <span class="tv-label-model">${esc(model)}</span>
                 <span class="tv-badge tv-badge-model">${branches.length} สาขา</span>
                 ${statPills(branches)}
+              </div>
+              <div class="tv-children tv-hidden" id="${tableId}" data-mid="${modelId}">
+                ${modelTable(branches, modelId)}
               </div>`;
           });
-        treeOut += `</div>`;
+
+        out += `</div>`; // end cat
       });
-      treeOut += `</div></div>`;
 
-      // ── Table ──
-      const tableOut = `
-        <div class="main-table-wrap">
-        <table class="main-table">
-          <thead><tr>${cols.map(thHtml).join("")}</tr></thead>
-          <tbody>
-            ${sorted.map(r => `
-              <tr class="main-row" data-bid="${esc(r.id)}">
-                <td style="font-weight:700">${esc(r.name)}</td>
-                <td style="font-size:12px;color:var(--bl)">${esc(r.model||"")}</td>
-                <td><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span></td>
-                <td style="font-size:12px">${esc(r.province||"-")}</td>
-                <td style="font-size:11px;color:var(--td)">${esc(r.zone||"-")}</td>
-                <td style="font-size:11px;color:var(--td)">${esc(r.openDate||"-")}</td>
-                <td style="font-size:11px;overflow:hidden;text-overflow:ellipsis;max-width:150px">${esc(r.owner||"-")}</td>
-                <td style="text-align:center">${r.facebook?`<a href="${esc(r.facebook)}" target="_blank" class="tbl-icon-link tbl-fb" onclick="event.stopPropagation()">f</a>`:""}</td>
-                <td style="text-align:center">${r.googleMap?`<a href="${esc(r.googleMap)}" target="_blank" class="tbl-icon-link tbl-map" onclick="event.stopPropagation()">📍</a>`:""}</td>
-              </tr>`).join("")}
-          </tbody>
-        </table>
-        </div>`;
+      out += `</div></div>`; // root-ch + tv-root
+      gv.innerHTML = out;
 
-      gv.innerHTML = treeOut + tableOut;
+      // ── event delegation ──
+      gv.onclick = function(e) {
+        if (e.target.closest("a")) return;
 
-      // wire tree toggles
-      gv.querySelector(".tv-root")?.addEventListener("click", e => {
+        // root toggle
         const rootTog = e.target.closest("[data-tv='main-root-ch']");
         if (rootTog) {
           const ch = document.getElementById("main-root-ch");
           if (ch) rootTog.textContent = ch.classList.toggle("tv-hidden") ? "▶" : "▼";
           return;
         }
-        const row = e.target.closest("[data-tv-toggle]");
-        if (!row) return;
-        const ch  = document.getElementById(row.dataset.tvToggle);
-        const tog = row.querySelector("[data-tv]");
-        if (!ch || !tog) return;
-        const h = ch.classList.toggle("tv-hidden");
-        tog.textContent = h ? "▶" : "▼";
-        tog.classList.toggle("tv-open", !h);
-        tog.classList.toggle("tv-closed", h);
-        const catName = row.querySelector(".tv-label-cat")?.textContent?.trim();
-        if (catName) _catOpenState[catName] = !h;
-      });
 
-      // wire sort
-      gv.querySelectorAll(".sortable-th").forEach(th => {
-        th.addEventListener("click", () => {
-          const col = th.dataset.sort;
-          _sortAsc = _sortCol === col ? !_sortAsc : true;
-          _sortCol = col;
-          render();
-        });
-      });
-
-      // wire row click → popup
-      gv.querySelectorAll(".main-row[data-bid]").forEach(tr => {
-        tr.addEventListener("click", e => {
-          if (e.target.closest("a")) return;
+        // branch row → popup
+        const tr = e.target.closest(".main-row[data-bid]");
+        if (tr) {
           const r = rows.find(x => x.id === tr.dataset.bid);
           if (!r) return;
           const popup = document.getElementById("branchPopup");
@@ -2154,15 +2136,47 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
             .join("");
           const rect = tr.getBoundingClientRect();
           let left = rect.right+12, top = rect.top+window.scrollY;
-          if (left+320 > window.innerWidth) left = Math.max(8, rect.left-332);
+          if (left+320 > window.innerWidth) left = Math.max(8,rect.left-332);
           popup.style.cssText = `left:${left}px;top:${top}px`;
           popup.classList.add("show");
-        });
-      });
+          return;
+        }
+
+        // sort th
+        const th = e.target.closest(".sortable-th");
+        if (th) {
+          const col = th.dataset.sort;
+          const mid = th.dataset.mid;
+          _sortAsc = _sortCol === col ? !_sortAsc : true;
+          _sortCol = col;
+          // re-render แค่ตารางของ model นั้น
+          const tableWrap = th.closest("[data-mid]");
+          if (tableWrap) {
+            const branches = rows.filter(r => {
+              const node = tableWrap.previousElementSibling;
+              return node?.querySelector(".tv-label-model")?.textContent?.trim() === r.model;
+            });
+            // re-render ทั้ง render() เพื่อ simplicity
+          }
+          render();
+          return;
+        }
+
+        // cat/model toggle
+        const row = e.target.closest("[data-tv-toggle]");
+        if (!row) return;
+        const ch  = document.getElementById(row.dataset.tvToggle);
+        const tog = row.querySelector("[data-tv]");
+        if (!ch || !tog) return;
+        const hidden = ch.classList.toggle("tv-hidden");
+        tog.textContent = hidden ? "▶" : "▼";
+        tog.classList.toggle("tv-open",   !hidden);
+        tog.classList.toggle("tv-closed",  hidden);
+        const catName = row.querySelector(".tv-label-cat")?.textContent?.trim();
+        if (catName) _catOpenState[catName] = !hidden;
+      };
     }
 
-
-        // ── Card View ──
     let viewMode = "table";
 
     function renderCards() {
