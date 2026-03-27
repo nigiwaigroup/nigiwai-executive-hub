@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Nigiwai Dashboard (Firebase CRUD)</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -67,6 +68,27 @@
     .field{width:100%}
     .note{font-size:12px;color:var(--td);margin-top:8px}
 
+
+
+    /* ── Main branch table (หน้าแรก) ── */
+    .main-table-wrap { overflow-x:auto; margin-top:6px; margin-bottom:4px; }
+    .main-table { width:100%; border-collapse:collapse; font-size:13px; table-layout:auto; }
+    .main-table th {
+      text-align:left; color:var(--gold); font-size:11px; font-weight:700;
+      background:rgba(200,164,86,.06); padding:8px 10px;
+      border-bottom:1px solid rgba(200,164,86,.12); white-space:nowrap; position:sticky; top:0;
+    }
+    .main-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.03); white-space:nowrap; }
+    .main-row:hover { background:rgba(200,164,86,.04); }
+    .tbl-icon-link {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px; height:24px; border-radius:6px; font-size:12px; font-weight:900;
+      text-decoration:none; transition:.15s; line-height:1;
+    }
+    .tbl-fb  { background:rgba(66,103,178,.18); color:#4267B2; border:1px solid rgba(66,103,178,.3); }
+    .tbl-fb:hover  { background:#4267B2; color:#fff; }
+    .tbl-map { background:rgba(61,214,140,.12); color:var(--gr); border:1px solid rgba(61,214,140,.3); font-size:13px; }
+    .tbl-map:hover { background:var(--gr); color:#0B1426; }
 
     /* ── Grouped View (หน้าแรก) ── */
     .gv-cat-block { margin-bottom: 18px; }
@@ -557,81 +579,80 @@
 
     <!-- Tab: Admin -->
     <div id="panel-admin" class="tab-panel">
-      <div class="card" style="max-width:480px;margin:0 auto">
+      <div class="card" style="max-width:540px;margin:0 auto">
         <div style="font-size:18px;font-weight:800;color:var(--gl);margin-bottom:4px">⚙️ Admin Panel</div>
-        <div style="font-size:12px;color:var(--td);margin-bottom:18px">จัดการระบบและเชื่อมต่อ Firebase</div>
+        <div style="font-size:12px;color:var(--td);margin-bottom:18px">ใส่รหัสผ่านเพื่อเข้าจัดการระบบ</div>
 
-        <!-- Admin PIN section -->
+        <!-- PIN Login (แสดงก่อนเสมอ) -->
         <div id="adminAuthSection">
-          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 Admin Access</div>
-          <div style="font-size:12px;color:var(--td);margin-bottom:12px">ใส่ PIN เพื่อเข้าใช้งาน Admin — ไม่เกี่ยวกับ Firebase account</div>
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 เข้าสู่ระบบ Admin</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="adminPinInput" class="input" type="password" placeholder="Admin PIN"
-              style="flex:1;letter-spacing:4px;font-size:18px"
+            <input id="adminPinInput" class="input" type="password" placeholder="รหัสผ่าน Admin"
+              style="flex:1;letter-spacing:6px;font-size:20px"
               onkeydown="if(event.key==='Enter')document.getElementById('btnAdminPin').click()" />
-            <button id="btnAdminPin" class="btn btn-green" style="white-space:nowrap">เข้าสู่ระบบ</button>
+            <button id="btnAdminPin" class="btn btn-green" style="white-space:nowrap;padding:10px 20px">เข้าสู่ระบบ</button>
           </div>
           <div id="adminLoginMsg" style="margin-top:10px;font-size:12px;min-height:18px"></div>
         </div>
 
-        <!-- Logged-in section -->
+        <!-- Admin content (ซ่อนจนกว่าจะ login) -->
         <div id="adminLoggedSection" class="hidden">
-          <div class="admin-status-bar">
+          <div class="admin-status-bar" style="margin-bottom:16px">
             <span class="conn-dot ok"></span>
-            <span id="adminUserLabel" style="font-weight:700;color:var(--gr)">Admin Mode</span>
+            <span style="font-weight:700;color:var(--gr)">Admin Mode เปิดใช้งานแล้ว</span>
             <span style="flex:1"></span>
-            <button id="btnAdminLogout" class="btn btn-red" style="padding:5px 10px;font-size:12px">ออกจากระบบ</button>
+            <button id="btnAdminLogout" class="btn btn-red" style="padding:5px 12px;font-size:12px">🔒 ออกจากระบบ</button>
             <button id="btnCheckStatus2" class="btn" style="padding:5px 10px;font-size:12px">🔌 Status</button>
           </div>
-        </div>
 
-        <!-- Admin branch list -->
-        <div id="adminBranchSection" class="hidden" style="margin-top:16px">
-          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px">📋 รายชื่อสาขาทั้งหมด</div>
-          <input id="adminQ" class="input" placeholder="ค้นหาสาขา..." style="width:100%;margin-bottom:8px" />
-          <div class="admin-table-wrap">
-            <table class="admin-table">
-              <thead><tr>
-                <th>#</th><th>ชื่อสาขา</th><th>Model</th>
-                <th>สถานะ</th><th>จังหวัด</th><th>จัดการ</th>
-              </tr></thead>
-              <tbody id="adminTb"></tbody>
-            </table>
+          <!-- Branch list -->
+          <div id="adminBranchSection">
+            <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px">📋 รายชื่อสาขาทั้งหมด</div>
+            <input id="adminQ" class="input" placeholder="ค้นหาสาขา..." style="width:100%;margin-bottom:8px" />
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead><tr>
+                  <th>#</th><th>ชื่อสาขา</th><th>Model</th>
+                  <th>สถานะ</th><th>จังหวัด</th><th>จัดการ</th>
+                </tr></thead>
+                <tbody id="adminTb"></tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        <!-- Tool links -->
-        <div style="margin-top:18px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🛠 เครื่องมือ Admin</div>
-        <a class="admin-link-card" href="https://nigiwaigroup.github.io/nigiwai-executive-hub/companyorg/firebase-status-check.html" target="_blank">
-          <span class="admin-link-icon">🔥</span>
-          <div>
-            <div class="admin-link-label">Firebase Status Check</div>
-            <div class="admin-link-sub">ตรวจสอบการเชื่อมต่อ Firestore, Auth, Rules</div>
-          </div>
-          <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
-        </a>
-        <a class="admin-link-card" href="https://console.firebase.google.com/project/nigiwai-core-a1c41/firestore" target="_blank">
-          <span class="admin-link-icon">🗄️</span>
-          <div>
-            <div class="admin-link-label">Firebase Console — Firestore</div>
-            <div class="admin-link-sub">จัดการ Database, Rules, Indexes</div>
-          </div>
-          <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
-        </a>
+          <!-- Tool links -->
+          <div style="margin-top:18px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🛠 เครื่องมือ Admin</div>
+          <a class="admin-link-card" href="https://nigiwaigroup.github.io/nigiwai-executive-hub/companyorg/firebase-status-check.html" target="_blank">
+            <span class="admin-link-icon">🔥</span>
+            <div>
+              <div class="admin-link-label">Firebase Status Check</div>
+              <div class="admin-link-sub">ตรวจสอบการเชื่อมต่อ Firestore, Auth, Rules</div>
+            </div>
+            <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
+          </a>
+          <a class="admin-link-card" href="https://console.firebase.google.com/project/nigiwai-core-a1c41/firestore" target="_blank">
+            <span class="admin-link-icon">🗄️</span>
+            <div>
+              <div class="admin-link-label">Firebase Console — Firestore</div>
+              <div class="admin-link-sub">จัดการ Database, Rules, Indexes</div>
+            </div>
+            <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
+          </a>
 
-        <!-- Admin tools section -->
-        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(200,164,86,.12)">
-          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">📋 จัดการข้อมูล</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button id="btnAdd" class="btn">+ เพิ่มสาขา</button>
-            <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
-            <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
+          <!-- Data management -->
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(200,164,86,.12)">
+            <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">📋 จัดการข้อมูล</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="btnAdd" class="btn">+ เพิ่มสาขา</button>
+              <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
+              <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
+            </div>
           </div>
-        </div>
-        <!-- Danger zone -->
-        <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(240,96,96,.15)">
-          <div style="font-size:11px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠ Danger Zone</div>
-          <button id="btnSeed" class="btn btn-blue" style="font-size:12px">📦 Import ตัวอย่างเริ่มต้น</button>
+          <!-- Danger zone -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(240,96,96,.15)">
+            <div style="font-size:11px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠ Danger Zone</div>
+            <button id="btnSeed" class="btn btn-blue" style="font-size:12px">📦 Import ตัวอย่างเริ่มต้น</button>
+          </div>
         </div>
       </div>
     </div>
@@ -941,6 +962,10 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    // ── Firebase config ──
+    // Policy: apiKey นี้ถูก restrict ให้ใช้ได้เฉพาะ domain ที่กำหนดใน Google Cloud Console
+    // (APIs & Services → Credentials → API key → Application restrictions → HTTP referrers)
+    // Allowed referrers: nigiwaigroup.github.io/*, localhost/*, 127.0.0.1/*
     const firebaseConfig = {
       apiKey:            "AIzaSyB75sJAh4myOUkXIEKzrwo0yoPFwZJQ1po",
       authDomain:        "nigiwai-core-a1c41.firebaseapp.com",
@@ -1233,17 +1258,15 @@
     // Admin: hardcode check + branch table
     // ════════════════════════════════════════════
     // ── Admin PIN (app-level only — ไม่เกี่ยวกับ Firebase credentials) ──
-    const ADMIN_PIN = "11122334455"; // เปลี่ยนได้ที่นี่จุดเดียว
+    const ADMIN_PIN = "1122334455"; // เปลี่ยนได้ที่นี่จุดเดียว
     let isAdmin = false;
 
     function setAdminMode(on) {
       isAdmin = on;
       const authSec   = document.getElementById("adminAuthSection");
       const loggedSec = document.getElementById("adminLoggedSection");
-      const branchSec = document.getElementById("adminBranchSection");
       if (authSec)   authSec.classList.toggle("hidden", on);
       if (loggedSec) loggedSec.classList.toggle("hidden", !on);
-      if (branchSec) branchSec.classList.toggle("hidden", !on);
       if (on) renderAdminTable();
     }
 
@@ -1828,17 +1851,6 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       el.sOpen.textContent  = `เปิดอยู่ ${openCount}`;
       el.sClose.textContent = `ปิดแล้ว ${closeCount}`;
 
-      // ── Grouped View: Category → Model → Branch ──
-      const catMap = new Map();
-      data.forEach(r => {
-        const cat   = getCategory(r.model || "");
-        const model = r.model || "ไม่ระบุ Model";
-        if (!catMap.has(cat))            catMap.set(cat, new Map());
-        if (!catMap.get(cat).has(model)) catMap.get(cat).set(model, []);
-        catMap.get(cat).get(model).push(r);
-      });
-      const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
-
       const gv = document.getElementById("groupedView");
       if (!gv) return;
 
@@ -1847,49 +1859,61 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
         return;
       }
 
+      // ── จัดกลุ่มตาม Category ──
+      const catMap = new Map();
+      data.forEach(r => {
+        const cat = getCategory(r.model || "");
+        if (!catMap.has(cat)) catMap.set(cat, []);
+        catMap.get(cat).push(r);
+      });
+      const sortedCats = CAT_ORDER.filter(c => catMap.has(c));
+
       let out = "";
       sortedCats.forEach(cat => {
-        const modelMap = catMap.get(cat);
-        out += `<div class="gv-cat-block">
-          <div class="gv-cat-head">📂 ${esc(cat)}</div>`;
+        const branches = catMap.get(cat);
+        const openC    = branches.filter(r => r.status === "เปิดอยู่").length;
+        const sorted   = [...branches].sort((a,b) => (a.model||"").localeCompare(b.model||"","th") || (a.name||"").localeCompare(b.name||"","th"));
 
-        [...modelMap.entries()].forEach(([model, branches]) => {
-          const openB  = branches.filter(r => r.status === "เปิดอยู่").length;
-          const sorted = [...branches].sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
-          out += `<div class="gv-model-block">
-            <div class="gv-model-head">
-              <span class="gv-model-name">🏪 ${esc(model)}</span>
-              <span class="gv-model-pill">${branches.length} สาขา · เปิด ${openB}</span>
+        out += `
+          <div class="gv-cat-block">
+            <div class="gv-cat-head">
+              📂 ${esc(cat)}
+              <span style="font-weight:400;font-size:11px;color:var(--td);margin-left:8px">${branches.length} สาขา · เปิด ${openC}</span>
             </div>
-            <table class="gv-table">
-              <colgroup>
-                <col style="width:auto">
-                <col style="width:28px">
-                <col style="width:28px">
-              </colgroup>
+            <div class="main-table-wrap">
+            <table class="main-table">
+              <thead><tr>
+                <th style="width:32px">#</th>
+                <th>ชื่อสาขา</th>
+                <th style="min-width:140px">Model</th>
+                <th style="width:100px">สถานะ</th>
+                <th style="width:110px">จังหวัด</th>
+                <th style="width:160px">ภูมิภาค</th>
+                <th style="width:100px">วันเปิด</th>
+                <th style="width:40px">FB</th>
+                <th style="width:40px">Map</th>
+              </tr></thead>
               <tbody>`;
 
-          sorted.forEach(r => {
-            out += `<tr class="gv-row">
-              <td class="gv-name">
-                <span class="badge ${badgeClass(r.status)} gv-badge">${esc(r.status||"-")}</span>
-                <span class="gv-branch-label">${esc(r.name)}</span>
-                ${r.province ? `<span class="gv-prov">${esc(r.province)}</span>` : ""}
-              </td>
-              <td class="gv-icon-cell">
-                ${r.facebook  ? `<a href="${esc(r.facebook)}"  target="_blank" class="gv-icon-link" title="Facebook">f</a>`
-                              : `<span class="gv-icon-empty"></span>`}
-              </td>
-              <td class="gv-icon-cell">
-                ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="gv-icon-link gv-map-link" title="Google Map">📍</a>`
-                              : `<span class="gv-icon-empty"></span>`}
-              </td>
-            </tr>`;
-          });
-
-          out += `</tbody></table></div>`;
+        sorted.forEach((r, i) => {
+          out += `<tr class="main-row">
+            <td style="color:var(--td);font-size:11px">${i+1}</td>
+            <td style="font-weight:700">${esc(r.name)}</td>
+            <td style="font-size:12px;color:var(--bl)">${esc(r.model||"")}</td>
+            <td><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span></td>
+            <td style="font-size:12px">${esc(r.province||"-")}</td>
+            <td style="font-size:12px;color:var(--td)">${esc(r.zone||"-")}</td>
+            <td style="font-size:11px;color:var(--td)">${esc(r.openDate||"-")}</td>
+            <td style="text-align:center">
+              ${r.facebook ? `<a href="${esc(r.facebook)}" target="_blank" class="tbl-icon-link tbl-fb" title="Facebook">f</a>` : ""}
+            </td>
+            <td style="text-align:center">
+              ${r.googleMap ? `<a href="${esc(r.googleMap)}" target="_blank" class="tbl-icon-link tbl-map" title="Google Map">📍</a>` : ""}
+            </td>
+          </tr>`;
         });
-        out += `</div>`;
+
+        out += `</tbody></table></div></div>`;
       });
 
       gv.innerHTML = out;
