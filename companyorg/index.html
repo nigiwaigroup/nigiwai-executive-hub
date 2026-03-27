@@ -565,13 +565,14 @@
           <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🔐 เข้าสู่ระบบ</div>
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
             <input id="authEmail" class="input" placeholder="อีเมล Firebase" type="email" />
-            <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" />
+            <input id="authPassword" class="input" type="password" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')document.getElementById('btnLogin').click()" />
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button id="btnLogin" class="btn btn-green">Login</button>
             <button id="btnRegister" class="btn btn-blue">Register</button>
             <button id="btnCheckStatus" class="btn" style="margin-left:auto">🔌 Check Status</button>
           </div>
+          <div id="adminLoginMsg" style="margin-top:10px;font-size:12px;min-height:18px"></div>
         </div>
 
         <!-- Logged-in section -->
@@ -2040,19 +2041,40 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
     }
 
     // ─── Events ───
+    function setAdminMsg(txt, ok) {
+      const el = document.getElementById("adminLoginMsg");
+      if (!el) return;
+      el.textContent = txt;
+      el.style.color = ok ? "var(--gr)" : "var(--rd)";
+    }
+
     document.getElementById("btnLogin")?.addEventListener("click", async () => {
       const email = document.getElementById("authEmail")?.value.trim();
       const pass  = document.getElementById("authPassword")?.value;
-      try { await signInWithEmailAndPassword(auth, email, pass); }
-      catch (e) { showMsg("Login ไม่สำเร็จ: " + e.message, "err"); }
+      if (!email || !pass) { setAdminMsg("กรุณากรอกอีเมลและรหัสผ่าน", false); return; }
+      setAdminMsg("กำลัง Login...", true);
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        setAdminMsg("Login สำเร็จ ✓", true);
+      } catch (e) {
+        const msg = e.code === "auth/invalid-credential" || e.code === "auth/wrong-password"
+          ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+          : e.code === "auth/user-not-found" ? "ไม่พบบัญชีนี้"
+          : e.code === "auth/too-many-requests" ? "ลองเข้าสู่ระบบหลายครั้งเกินไป กรุณารอสักครู่"
+          : e.message;
+        setAdminMsg("Login ไม่สำเร็จ: " + msg, false);
+      }
     });
     document.getElementById("btnRegister")?.addEventListener("click", async () => {
       const email = document.getElementById("authEmail")?.value.trim();
       const pass  = document.getElementById("authPassword")?.value;
+      if (!email || !pass) { setAdminMsg("กรุณากรอกอีเมลและรหัสผ่าน", false); return; }
       try {
         await createUserWithEmailAndPassword(auth, email, pass);
-        showMsg("สมัครสมาชิกสำเร็จและล็อกอินแล้ว", "ok");
-      } catch (e) { showMsg("Register ไม่สำเร็จ: " + e.message, "err"); }
+        setAdminMsg("สมัครสมาชิกสำเร็จและล็อกอินแล้ว ✓", true);
+      } catch (e) {
+        setAdminMsg("Register ไม่สำเร็จ: " + e.message, false);
+      }
     });
     el.btnLogout.addEventListener("click", async () => {
       try { await signOut(auth); }
