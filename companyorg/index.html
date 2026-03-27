@@ -67,6 +67,53 @@
     .field{width:100%}
     .note{font-size:12px;color:var(--td);margin-top:8px}
 
+
+    /* ── Grouped View (หน้าแรก) ── */
+    .gv-cat-block { margin-bottom: 18px; }
+    .gv-cat-head  { font-size: 13px; font-weight: 800; color: var(--gl);
+      padding: 6px 10px; background: rgba(200,164,86,.08);
+      border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0;
+      margin-bottom: 6px; letter-spacing:.02em; }
+    .gv-model-block { margin-bottom: 8px; margin-left: 12px; }
+    .gv-model-head  { display:flex; align-items:center; gap:8px;
+      padding: 4px 8px; margin-bottom: 2px; }
+    .gv-model-name  { font-size: 12px; font-weight: 700; color: var(--bl); }
+    .gv-model-pill  { font-size: 10px; color: var(--td);
+      background: rgba(91,141,239,.1); border-radius: 999px;
+      padding: 1px 7px; border: 1px solid rgba(91,141,239,.2); }
+
+    .gv-table       { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .gv-row         { border-bottom: 1px solid rgba(255,255,255,.03); }
+    .gv-row:hover   { background: rgba(255,255,255,.03); }
+    .gv-name        { padding: 5px 8px 5px 20px; font-size: 12px;
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .gv-badge       { font-size: 10px; padding: 1px 6px; margin-right: 6px;
+      vertical-align: middle; flex-shrink: 0; }
+    .gv-branch-label { font-weight: 600; color: var(--tx); vertical-align: middle; }
+    .gv-prov        { font-size: 10px; color: var(--td); margin-left: 6px;
+      vertical-align: middle; }
+    .gv-icon-cell   { width: 28px; text-align: center; padding: 4px 2px; }
+    .gv-icon-link   { display:inline-flex; align-items:center; justify-content:center;
+      width: 22px; height: 22px; border-radius: 6px; font-size: 12px; font-weight: 900;
+      text-decoration: none; background: rgba(66,103,178,.15);
+      color: #4267B2; border: 1px solid rgba(66,103,178,.3);
+      transition: .15s; line-height:1; }
+    .gv-icon-link:hover { background: #4267B2; color: #fff; }
+    .gv-map-link    { background: rgba(61,214,140,.1); color: var(--gr);
+      border-color: rgba(61,214,140,.3); font-size: 11px; }
+    .gv-map-link:hover { background: var(--gr); color: #0B1426; }
+    .gv-icon-empty  { display:inline-block; width:22px; }
+
+    /* ── Admin branch table ── */
+    .admin-table-wrap { overflow:auto; max-height:60vh; margin-top: 12px; }
+    .admin-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .admin-table th { text-align:left; color:var(--gold); font-size:11px;
+      background:rgba(200,164,86,.05); padding:8px 10px;
+      border-bottom:1px solid rgba(200,164,86,.1); white-space:nowrap; }
+    .admin-table td { padding:8px 10px;
+      border-bottom:1px solid rgba(200,164,86,.05); vertical-align:middle; }
+    .admin-table tr:hover { background:rgba(200,164,86,.03); }
+
     /* ── Admin tab / login modal ── */
     .admin-login-card{background:var(--nl);border:1px solid rgba(200,164,86,.2);border-radius:14px;padding:24px;width:min(380px,96vw)}
     .admin-link-card{background:#0a1628;border:1px solid rgba(91,141,239,.2);border-radius:12px;padding:16px;margin-top:14px;display:flex;align-items:center;gap:12px;text-decoration:none;transition:.18s}
@@ -347,6 +394,10 @@
     .tv-meta-sm { font-size: 11px; color: var(--td); margin-left: 4px; }
     .tv-open-count { color: var(--gr); }
 
+    .tv-zone-tag { font-size:10px; color:var(--td); background:rgba(255,255,255,.06);
+      border-radius:4px; padding:1px 5px; margin-left:4px; }
+
+
     /* children container */
     .tv-children { border-left: 1px solid rgba(255,255,255,.05); margin-left: 26px; }
     .tv-hidden   { display: none; }
@@ -488,15 +539,7 @@
             <option value="กำลังก่อสร้าง">กำลังก่อสร้าง</option>
             <option value="ฟ้องร้อง">ฟ้องร้อง</option>
           </select>
-          <button id="btnAdd" class="btn">+ เพิ่มสาขา</button>
-          <button id="btnSeed" class="btn btn-blue">Import ตัวอย่างเริ่มต้น</button>
-          <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
-          <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
           <input id="csvFile" class="hidden" type="file" accept=".csv,text/csv" />
-          <div class="view-toggle">
-            <button class="vt-btn active" id="btnViewTable" title="ตาราง">☰</button>
-            <button class="vt-btn" id="btnViewCard" title="การ์ด">⊞</button>
-          </div>
         </div>
 
         <div class="stat">
@@ -505,26 +548,8 @@
           <span id="sClose" class="pill p-close">ปิดแล้ว 0</span>
         </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>ชื่อสาขา</th>
-                <th>Model</th>
-                <th>สถานะ</th>
-                <th>วันเปิด</th>
-                <th>วันปิด</th>
-                <th>จังหวัด</th>
-                <th>ลิงก์</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="tb"></tbody>
-          </table>
-        </div>
-        <!-- Card View -->
-        <div id="cardView" class="branch-cards" style="display:none"></div>
+        <!-- Grouped Branch View -->
+        <div id="groupedView"></div>
         <div id="msg" class="msg muted"></div>
       </div>
     </div>
@@ -559,6 +584,21 @@
           </div>
         </div>
 
+        <!-- Admin branch list -->
+        <div id="adminBranchSection" class="hidden" style="margin-top:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px">📋 รายชื่อสาขาทั้งหมด</div>
+          <input id="adminQ" class="input" placeholder="ค้นหาสาขา..." style="width:100%;margin-bottom:8px" />
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr>
+                <th>#</th><th>ชื่อสาขา</th><th>Model</th>
+                <th>สถานะ</th><th>จังหวัด</th><th>จัดการ</th>
+              </tr></thead>
+              <tbody id="adminTb"></tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Tool links -->
         <div style="margin-top:18px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">🛠 เครื่องมือ Admin</div>
         <a class="admin-link-card" href="https://nigiwaigroup.github.io/nigiwai-executive-hub/companyorg/firebase-status-check.html" target="_blank">
@@ -578,8 +618,17 @@
           <span style="margin-left:auto;color:var(--td);font-size:18px">↗</span>
         </a>
 
+        <!-- Admin tools section -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(200,164,86,.12)">
+          <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">📋 จัดการข้อมูล</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="btnAdd" class="btn">+ เพิ่มสาขา</button>
+            <button id="btnExportCsv" class="btn btn-green">Export CSV</button>
+            <button id="btnImportCsv" class="btn btn-blue">Import CSV</button>
+          </div>
+        </div>
         <!-- Danger zone -->
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(240,96,96,.15)">
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(240,96,96,.15)">
           <div style="font-size:11px;font-weight:700;color:var(--rd);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">⚠ Danger Zone</div>
           <button id="btnSeed" class="btn btn-blue" style="font-size:12px">📦 Import ตัวอย่างเริ่มต้น</button>
         </div>
@@ -956,7 +1005,7 @@
     let rows = [];
     let editingId = null;
     let unsubscribeRows = null;
-    const editorIds = ["q","fModel","fStatus","btnAdd","btnSeed","btnExportCsv","btnImportCsv"];
+    const editorIds = ["q","fModel","fStatus","btnAdd","btnSeed","btnExportCsv","btnImportCsv","adminQ"];
 
 
     // ════════════════════════════════════════════
@@ -1183,6 +1232,55 @@
     // (loadCatFromFirestore จะถูกเรียกครั้งแรกหลัง login)
 
 
+
+    // ════════════════════════════════════════════
+    // Admin: hardcode check + branch table
+    // ════════════════════════════════════════════
+    const ADMIN_EMAIL = "admin@nigiwai.com";
+    const ADMIN_PASS  = "11122334455";
+    let isAdmin = false;
+
+    function checkAdminAccess(user) {
+      isAdmin = !!(user && user.email === ADMIN_EMAIL);
+      // หน้าแรก: ซ่อนปุ่ม edit ถ้าไม่ใช่ admin (no-op เพราะ groupedView ไม่มีปุ่ม edit)
+      // Admin tab: แสดง branch section ถ้าเป็น admin
+      const adminBranchSec = document.getElementById("adminBranchSection");
+      if (adminBranchSec) adminBranchSec.classList.toggle("hidden", !isAdmin);
+      if (isAdmin) renderAdminTable();
+    }
+
+    function renderAdminTable(filter) {
+      const tb = document.getElementById("adminTb");
+      if (!tb) return;
+      const q = (filter || document.getElementById("adminQ")?.value || "").toLowerCase();
+      const data = rows.filter(r => {
+        if (!q) return true;
+        return [r.name, r.model, r.province, r.status].join(" ").toLowerCase().includes(q);
+      }).sort((a,b) => (a.name||"").localeCompare(b.name||"","th"));
+
+      tb.innerHTML = data.map((r,i) => `
+        <tr>
+          <td style="color:var(--td)">${i+1}</td>
+          <td style="font-weight:700">${esc(r.name)}</td>
+          <td style="font-size:11px;color:var(--bl)">${esc(r.model||"")}</td>
+          <td><span class="badge ${badgeClass(r.status)}">${esc(r.status||"-")}</span></td>
+          <td style="font-size:11px">${esc(r.province||"-")}</td>
+          <td><button class="btn btn-blue" style="padding:4px 10px;font-size:11px"
+            data-act="edit" data-id="${esc(r.id)}">✏️ แก้ไข</button></td>
+        </tr>`).join("");
+
+      // click edit
+      tb.querySelectorAll("[data-act='edit']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const row = rows.find(r => r.id === btn.dataset.id);
+          if (row) openModal("edit", row);
+        });
+      });
+    }
+
+    document.getElementById("adminQ")?.addEventListener("input", e => renderAdminTable(e.target.value));
+
+
     // ─── Status Check ───
     const ovStatus = document.getElementById("ovStatus");
     document.getElementById("btnCheckStatus").addEventListener("click", () => {
@@ -1287,6 +1385,7 @@
         if (btn.dataset.tab === "admin") { /* admin panel loaded statically */ }
         if (btn.dataset.tab === "catmgr") {
           allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
+        if (isAdmin) renderAdminTable();
           renderCatManager();
         }
       });
@@ -1433,6 +1532,7 @@
               <span class="tv-label-model">${esc(model)}</span>
               <span class="tv-badge tv-badge-model">${branches.length} สาขา</span>
               <span class="tv-meta-sm tv-open-count">เปิด ${openB}</span>
+              <span class="tv-meta-sm" style="color:var(--rd)">· ปิด ${branches.length - openB}</span>
             </div>
             <div class="tv-children tv-hidden" id="${modelId}">`;
 
@@ -1447,6 +1547,7 @@
                 <span class="tv-branch-name">${esc(r.name)}</span>
                 <span class="badge ${badgeForStatus(r.status)} tv-status-badge">${esc(r.status||"-")}</span>
                 ${r.province ? `<span class="tv-prov">${esc(r.province)}</span>` : ""}
+                ${r.zone ? `<span class="tv-zone-tag">${esc(r.zone)}</span>` : ""}
               </div>`;
           });
 
@@ -1932,6 +2033,7 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
         if (document.getElementById("panel-orgchart").classList.contains("active")) renderOrgChart();
         showMsg(`ซิงก์ข้อมูลล่าสุด: ${rows.length} รายการ`, "ok");
         allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
+        if (isAdmin) renderAdminTable();
       }, err => {
         showMsg("เชื่อม Firestore ไม่สำเร็จ: " + err.message, "err");
       });
@@ -2035,6 +2137,7 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
         setDashboardEnabled(true);
         startSnapshot();
         loadCatFromFirestore();
+        checkAdminAccess(user);
       } else {
         el.authState.innerHTML = `<span id="connDot" class="conn-dot err"></span>ยังไม่ได้ล็อกอิน`;
         el.btnLogout.classList.add("hidden");
@@ -2044,6 +2147,7 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
         if (adminAuth2) adminAuth2.classList.remove("hidden");
         if (adminLogged2) adminLogged2.classList.add("hidden");
         setDashboardEnabled(false);
+        checkAdminAccess(null);
         if (unsubscribeRows) unsubscribeRows();
         unsubscribeRows = null;
         showMsg("กรุณา Login ก่อนใช้งานข้อมูล", "muted");
