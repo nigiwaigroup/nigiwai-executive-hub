@@ -1970,6 +1970,10 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       });
     }
 
+    const _catOpenState = {};
+    let _statusFilter = "";
+    let _sortCol = "name", _sortAsc = true;
+
     function render() {
       const data = filteredRows();
       const openCount  = data.filter(r => r.status === "เปิดอยู่").length;
@@ -2160,8 +2164,6 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
 
         // ── Card View ──
     let viewMode = "table";
-    const _catOpenState = {}; // เก็บ state collapse ของแต่ละ Category
-    let _statusFilter   = "";  // status chip filter
 
     function renderCards() {
       const data = filteredRows();
