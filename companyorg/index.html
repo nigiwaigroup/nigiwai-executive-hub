@@ -2021,21 +2021,32 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       showMsg("Import ตัวอย่างเริ่มต้นเรียบร้อย", "ok");
     }
 
-    function startSnapshot() {
+    async function startSnapshot() {
       if (unsubscribeRows) unsubscribeRows();
+      console.log("[Firestore] เริ่ม snapshot, user:", auth.currentUser?.uid ?? "none");
+      // ทดสอบ read ก่อน 1 ครั้ง เพื่อดู error ชัดๆ
+      try {
+        const test = await getDocs(query(colRef, limit(1)));
+        console.log("[Firestore] read test OK:", test.size, "doc(s)");
+      } catch(e) {
+        console.error("[Firestore] read test FAILED:", e.code, e.message);
+        showMsg("อ่าน Firestore ไม่ได้: " + e.code, "err");
+        return;
+      }
       unsubscribeRows = onSnapshot(colRef, snap => {
+        console.log("[Firestore] รับข้อมูลแล้ว:", snap.docs.length, "docs");
         rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         rows.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th"));
         buildModelOptions(rows);
         buildZoneOptions(rows);
         render();
-        // Re-render org chart if that tab is active
         if (document.getElementById("panel-orgchart").classList.contains("active")) renderOrgChart();
         showMsg(`ซิงก์ข้อมูลล่าสุด: ${rows.length} รายการ`, "ok");
         allKnownModels = [...new Set(rows.map(r => r.model).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"th"));
         if (isAdmin) renderAdminTable();
       }, err => {
-        showMsg("เชื่อม Firestore ไม่สำเร็จ: " + err.message, "err");
+        console.error("[Firestore] onSnapshot error:", err.code, err.message);
+        showMsg("เชื่อม Firestore ไม่สำเร็จ: " + err.code + " — " + err.message, "err");
       });
     }
 
@@ -2138,6 +2149,7 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       onAuthStateChanged(auth, (user) => {
         if (user) {
           // มี session แล้ว (anonymous หรือ existing)
+          console.log("[Auth] signed in:", user.uid, "anonymous:", user.isAnonymous);
           if (connDot)   connDot.className = "conn-dot ok";
           if (authState) authState.innerHTML =
             `<span id="connDot" class="conn-dot ok"></span>เชื่อมต่อแล้ว`;
@@ -2150,7 +2162,9 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
           if (authState) authState.innerHTML =
             `<span id="connDot" class="conn-dot"></span>กำลังเชื่อมต่อ...`;
 
+          console.log("[Auth] ไม่มี session, กำลัง signInAnonymously...");
           signInAnonymously(auth).catch(e => {
+            console.error("[Auth] signInAnonymously failed:", e.code, e.message);
             // Anonymous Auth ยังไม่ได้ Enable — fallback: โหลดข้อมูลโดยไม่ต้อง auth
             if (e.code === "auth/operation-not-allowed") {
               console.warn("Anonymous Auth ไม่ได้ enable — ใช้ read-only mode");
