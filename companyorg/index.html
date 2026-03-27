@@ -624,13 +624,10 @@
           <input id="q" class="input" placeholder="ค้นหา ชื่อสาขา / model / จังหวัด..." />
           <select id="fModel" class="select"><option value="">ทุก Model</option></select>
           <select id="fStatus" class="select">
-            <option value="">ทุกสถานะ</option>
+            <option value="">ทุกสถานะ (active)</option>
             <option value="เปิดอยู่">เปิดอยู่</option>
-            <option value="ปิดแล้ว">ปิดแล้ว</option>
-            <option value="ยกเลิกสัญญา">ยกเลิกสัญญา</option>
             <option value="ติดตาม">ติดตาม</option>
             <option value="กำลังก่อสร้าง">กำลังก่อสร้าง</option>
-            <option value="ฟ้องร้อง">ฟ้องร้อง</option>
           </select>
           <input id="csvFile" class="hidden" type="file" accept=".csv,text/csv" />
         </div>
@@ -643,13 +640,10 @@
 
         <!-- Status filter chips -->
         <div class="status-chips" id="statusChips">
-          <span class="sc-chip sc-all active"  data-sc="">ทั้งหมด</span>
+          <span class="sc-chip sc-all active" data-sc="">ทั้งหมด (ที่ active)</span>
           <span class="sc-chip sc-open"  data-sc="เปิดอยู่">เปิดอยู่</span>
-          <span class="sc-chip sc-close" data-sc="ปิดแล้ว">ปิดแล้ว</span>
-          <span class="sc-chip sc-other" data-sc="ยกเลิกสัญญา">ยกเลิกสัญญา</span>
           <span class="sc-chip sc-other" data-sc="ติดตาม">ติดตาม</span>
           <span class="sc-chip sc-build" data-sc="กำลังก่อสร้าง">กำลังก่อสร้าง</span>
-          <span class="sc-chip sc-other" data-sc="ฟ้องร้อง">ฟ้องร้อง</span>
         </div>
         <!-- Grouped Branch View -->
         <div id="groupedView"></div>
@@ -1954,11 +1948,15 @@ const keys = ["name","model","status","branchType","owner","investorName","phone
       }
     }
 
+    // สถานะที่ซ่อนในหน้าแรก
+    const HIDDEN_STATUS = new Set(["ปิดแล้ว","ยกเลิกสัญญา","ฟ้องร้อง"]);
+
     function filteredRows() {
       const q = el.q.value.trim().toLowerCase();
       const fModel  = el.fModel.value;
       const fStatus = el.fStatus.value || _statusFilter;
       return rows.filter(r => {
+        if (HIDDEN_STATUS.has(r.status)) return false;   // ซ่อนเสมอ
         if (fModel  && r.model  !== fModel)  return false;
         if (fStatus && r.status !== fStatus) return false;
         if (!q) return true;
