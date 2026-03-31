@@ -1189,7 +1189,7 @@ function renderCharts(){
   var p=processedState;
   var mKeys=Object.keys(p.months).filter(function(k){return k!=='Unknown';}).sort();
   var mVals=mKeys.map(function(k){return p.months[k].c;});
-  mkLine('cMonth',mKeys.map(function(k){var parts=k.split('-');return TH_M[+parts[1]-1]+"'"+(+parts[0]-2500);}),mVals);
+  mkLine('cMonth',mKeys.map(function(k){var parts=k.split('-');return TH_M[+parts[1]-1]+"'"+(String(+parts[0]+543).slice(-2));}),mVals);
 
   var tArr=Object.entries(p.types).sort(function(a,b){return b[1].c-a[1].c;});
   mkBar('cType',tArr.map(function(d){return d[0];}),tArr.map(function(d){return d[1].c;}),tArr.map(function(_,i){return PAL[i%PAL.length];}),false);
@@ -1237,7 +1237,7 @@ function renderNewWidgets(){
     var delta=prev!==null?cur-prev:null;
     var barW=Math.round((cur/maxMom)*100);
     var deltaHtml=delta===null?'':(delta>0?'<span class="mcmp-delta" style="color:var(--sem-red)">▲'+delta+'</span>':(delta<0?'<span class="mcmp-delta" style="color:var(--sem-green)">▼'+Math.abs(delta)+'</span>':'<span class="mcmp-delta" style="color:var(--on-light-x)">—</span>'));
-    momHtml+='<div class="mcmp-row"><div class="mcmp-month">'+TH_M[+parts[1]-1]+"'"+(+parts[0]-2500)+'</div><div class="mcmp-bar-wrap"><div class="mcmp-bar" style="width:'+barW+'%;background:'+(cur===maxMom?C.red:'#2E90FA')+'"></div></div><div class="mcmp-val">'+cur+'</div>'+deltaHtml+'</div>';
+    momHtml+='<div class="mcmp-row"><div class="mcmp-month">'+TH_M[+parts[1]-1]+"'"+(String(+parts[0]+543).slice(-2))+'</div><div class="mcmp-bar-wrap"><div class="mcmp-bar" style="width:'+barW+'%;background:'+(cur===maxMom?C.red:'#2E90FA')+'"></div></div><div class="mcmp-val">'+cur+'</div>'+deltaHtml+'</div>';
   });
   document.getElementById('momWrap').innerHTML=momHtml||'<p style="color:var(--on-light-m);font-size:13px;padding:12px">ไม่มีข้อมูล</p>';
 
