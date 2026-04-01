@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -21,9 +21,9 @@
     --red:      #f87171;
     --text:     #e2e8f0;
     --muted:    #64748b;
-    --mono:     'DM Mono', monospace;
-    --head:     'Syne', 'Noto Sans Thai', sans-serif;
-    --body:     'Noto Sans Thai', sans-serif;
+    --mono:     'Prompt', sans-serif;
+    --head:     'Prompt', sans-serif;
+    --body:     'Prompt', sans-serif;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,7 +104,7 @@
 
   .logo-text h1 {
     font-family: var(--head);
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.3px;
     color: #fff;
@@ -113,9 +113,9 @@
 
   .logo-text p {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     color: var(--muted);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-top: 3px;
   }
@@ -123,12 +123,13 @@
   /* ── Status Pill ── */
   .status-pill {
     display: flex; align-items: center; gap: 8px;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 100px;
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--muted);
     transition: all 0.3s;
   }
@@ -182,8 +183,9 @@
 
   .kpi-label {
     font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 14px;
@@ -191,7 +193,7 @@
 
   .kpi-value {
     font-family: var(--head);
-    font-size: 36px;
+    font-size: 42px;
     font-weight: 700;
     line-height: 1;
     background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.7));
@@ -210,7 +212,8 @@
 
   .kpi-sub {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 400;
     color: var(--muted);
     margin-top: 10px;
   }
@@ -240,7 +243,7 @@
 
   .chart-title {
     font-family: var(--head);
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
     color: #fff;
     letter-spacing: -0.3px;
@@ -248,10 +251,11 @@
 
   .chart-subtitle {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 400;
     color: var(--muted);
     margin-top: 5px;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
   }
 
   .refresh-btn {
@@ -262,7 +266,7 @@
     background: rgba(79,142,247,0.08);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
@@ -493,41 +497,44 @@ function setStatus(state, text) {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   FETCH
+   FETCH  (native fetch → PapaParse string parse, avoids XHR/CORS issues)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function fetchData() {
+async function fetchData() {
   setStatus('syncing', 'Syncing...');
 
-  Papa.parse(SHEET_URL(), {
-    download: true,
-    header: false,
-    skipEmptyLines: true,
-    complete: (results) => {
-      // Sanity check — if we got fewer than HEADER_ROWS rows, likely a proxy error page
-      if (!results.data || results.data.length <= HEADER_ROWS) {
-        tryNextProxy();
-        return;
+  for (let i = 0; i < PROXIES.length; i++) {
+    const url = PROXIES[i](SHEET_CSV);
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+
+      // Guard: if response looks like HTML (proxy error page), skip
+      if (text.trim().startsWith('<')) throw new Error('Got HTML, not CSV');
+
+      const result = Papa.parse(text, { header: false, skipEmptyLines: true });
+
+      if (!result.data || result.data.length <= HEADER_ROWS) {
+        throw new Error('Too few rows');
       }
-      console.groupCollapsed('[Dashboard] Raw data sample');
-      console.table(results.data.slice(0, 12));
+
+      console.groupCollapsed(`[Dashboard] Data via proxy #${i}`);
+      console.table(result.data.slice(0, 12));
       console.groupEnd();
-      proxyIdx = proxyIdx; // keep working proxy
-      processData(results.data);
-    },
-    error: () => tryNextProxy()
-  });
+
+      processData(result.data);
+      return; // success — stop trying proxies
+
+    } catch (err) {
+      console.warn(`[Dashboard] Proxy #${i} failed:`, err.message);
+    }
+  }
+
+  // All proxies failed
+  setStatus('error', 'Connection Error');
 }
 
-function tryNextProxy() {
-  if (proxyIdx < PROXIES.length - 1) {
-    proxyIdx++;
-    console.warn(`[Dashboard] Trying proxy #${proxyIdx}…`);
-    fetchData();
-  } else {
-    proxyIdx = 0; // reset for next manual refresh
-    setStatus('error', 'Connection Error');
-  }
-}
+function tryNextProxy() {} // kept for compatibility
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    PROCESS
@@ -637,8 +644,8 @@ function renderChart(labels, data) {
           borderWidth: 1,
           padding: 14,
           cornerRadius: 12,
-          titleFont: { family: "'DM Mono', monospace", size: 11 },
-          bodyFont: { family: "'Syne', sans-serif", size: 16, weight: '700' },
+          titleFont: { family: "'Prompt', sans-serif", size: 12 },
+          bodyFont: { family: "'Prompt', sans-serif", size: 17, weight: '700' },
           callbacks: {
             title: (items) => items[0].label,
             label: (ctx) => ' ฿' + ctx.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2 })
@@ -651,7 +658,7 @@ function renderChart(labels, data) {
           border: { display: false },
           ticks: {
             color: tickClr,
-            font: { family: "'DM Mono', monospace", size: 10 },
+            font: { family: "'Prompt', sans-serif", size: 11 },
             maxTicksLimit: 12,
             maxRotation: 30,
           }
@@ -662,7 +669,7 @@ function renderChart(labels, data) {
           border: { display: false },
           ticks: {
             color: tickClr,
-            font: { family: "'DM Mono', monospace", size: 10 },
+            font: { family: "'Prompt', sans-serif", size: 11 },
             callback: (v) => '฿' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v.toLocaleString())
           }
         }
