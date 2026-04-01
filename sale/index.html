@@ -3,155 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revenue Dashboard Pro</title>
+    <title>Revenue Dashboard Pro v2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Prompt', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .gradient-header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
 
-    <nav class="gradient-bg p-4 shadow-xl text-white">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold flex items-center gap-2">
-                <span>📊</span> Revenue Analytics
-            </h1>
-            <div id="statusBadge" class="text-xs bg-white/20 px-3 py-1 rounded-full border border-white/30">
-                Checking connection...
+    <nav class="gradient-header p-4 shadow-2xl text-white">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">📈</span>
+                <div>
+                    <h1 class="text-xl font-bold leading-none">Dashboard Pro</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Real-time Revenue Tracker</p>
+                </div>
+            </div>
+            <div id="statusBadge" class="flex items-center gap-2 bg-slate-700/50 px-4 py-2 rounded-full border border-slate-600">
+                <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                <span class="text-xs font-medium">Initializing...</span>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-indigo-600">
-                <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider">รายได้สุทธิ</p>
-                <h2 id="totalRevenue" class="text-3xl font-bold text-gray-800">฿0.00</h2>
+            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-semibold mb-1">ยอดขายรวมสุทธิ</p>
+                <h2 id="totalRevenue" class="text-4xl font-bold text-indigo-600">฿0.00</h2>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-purple-500">
-                <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider">จำนวนออร์เดอร์</p>
-                <h2 id="orderCount" class="text-3xl font-bold text-gray-800">0</h2>
+            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-semibold mb-1">จำนวนรายการทั้งหมด</p>
+                <h2 id="orderCount" class="text-4xl font-bold text-slate-800">0</h2>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-pink-500">
-                <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider">ข้อมูล ณ เวลา</p>
-                <h2 id="updateTime" class="text-xl font-bold text-gray-600 mt-2">-</h2>
+            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
+                <p class="text-slate-500 text-sm font-semibold mb-1">อัปเดตข้อมูลล่าสุด</p>
+                <h2 id="updateTime" class="text-xl font-bold text-slate-600 mt-2">-</h2>
             </div>
         </div>
 
-        <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-800">Income Visualization</h3>
-                <button onclick="loadData()" class="text-indigo-600 hover:text-indigo-800 font-semibold text-sm">Refresh Now ↻</button>
-            </div>
-            <div class="relative h-[450px]">
-                <canvas id="mainChart"></canvas>
+        <div class="grid grid-cols-1 gap-8">
+            <div class="glass-card p-8 rounded-3xl shadow-lg border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">แนวโน้มรายรับ (Revenue Trend)</h3>
+                        <p class="text-sm text-slate-500">ข้อมูลจาก Column J (รายรับ) ใน Google Sheet</p>
+                    </div>
+                    <button onclick="fetchData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl transition shadow-md active:scale-95">
+                        Refresh Data
+                    </button>
+                </div>
+                <div class="relative h-[450px]">
+                    <canvas id="revenueChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        // URL ที่คุณให้มา (ตรวจสอบแล้วว่าถูกต้อง)
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0EgLY6BXgMakGncUtRNx3XjecAc0mKqDb7rLGrPBknG1W1CjNTC8is9ibUjJIThVCfal-1mOJNeKq/pub?gid=303701821&single=true&output=csv';
+        // 1. ตรวจสอบ URL ของคุณ (ใช้ตัวล่าสุดที่คุณส่งมา)
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0EgLY6BXgMakGncUtRNx3XjecAc0mKqDb7rLGrPBknG1W1CjNTC8is9ibUjJIThVCfal-1mOJNeKq/pub?gid=303701821&single=true&output=csv';
 
-        let chartInstance = null;
+        let chart;
 
-        function loadData() {
+        function fetchData() {
             const badge = document.getElementById('statusBadge');
-            badge.innerText = "Syncing Data...";
-            badge.className = "text-xs bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full animate-pulse";
+            badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-blue-400 animate-spin"></div><span class="text-xs">Syncing...</span>`;
 
-            // ใช้ PapaParse โหลดข้อมูลโดยตรงจาก URL
-            Papa.parse(CSV_URL, {
+            Papa.parse(SHEET_URL, {
                 download: true,
-                header: false, // เราจะจัดการ Row เองเพราะไฟล์มีหลายหัวข้อ
+                header: false,
+                skipEmptyLines: true,
                 complete: function(results) {
-                    processSheetData(results.data);
-                    badge.innerText = "● Live Data Connected";
-                    badge.className = "text-xs bg-green-500 text-white px-3 py-1 rounded-full";
+                    console.log("Data Received Successfully");
+                    // พ่นข้อมูลออกมาดูที่ Console (F12) เพื่อเช็กพิกัด
+                    console.table(results.data.slice(0, 20)); 
+                    processData(results.data);
                 },
                 error: function(err) {
-                    console.error("PapaParse Error:", err);
-                    badge.innerText = "✕ Connection Error";
-                    badge.className = "text-xs bg-red-500 text-white px-3 py-1 rounded-full";
+                    console.error("Error:", err);
+                    badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-red-500"></div><span class="text-xs text-red-500">Error!</span>`;
                 }
             });
         }
 
-        function processSheetData(data) {
+        function processData(rawData) {
             let labels = [];
             let values = [];
             let total = 0;
 
-            // เริ่มอ่านตั้งแต่ Row ที่ 8 (Index 7) เป็นต้นไป
-            // Column B (Index 1) = วันที่
-            // Column J (Index 9) = รายรับ
-            data.slice(7).forEach((row) => {
-                if (row[9]) {
-                    // กำจัดเครื่องหมาย ฿ และ , ออกจากตัวเลขเพื่อให้คำนวณได้
-                    const amount = parseFloat(row[9].replace(/[฿,]/g, ''));
-                    const dateLabel = row[1] || 'No Date';
+            // วนลูปข้อมูล (ข้าม 7 แถวแรกที่เป็นหัวตาราง)
+            rawData.forEach((row, index) => {
+                if (index >= 7) { 
+                    // ดึงข้อมูล Column B (วันที่ - Index 1) และ Column J (รายรับ - Index 9)
+                    const rawDate = row[1] || `รายการที่ ${index - 6}`;
+                    const rawIncome = row[9]; // Column J คือตำแหน่งที่ 10 (Index 9)
 
-                    if (!isNaN(amount) && amount > 0) {
-                        total += amount;
-                        labels.push(dateLabel);
-                        values.push(amount);
+                    if (rawIncome) {
+                        // ทำความสะอาดตัวเลข: ลบ ฿, ลบ Comma, ลบช่องว่าง
+                        const cleanValue = rawIncome.toString().replace(/[฿,\s]/g, '');
+                        const income = parseFloat(cleanValue);
+
+                        if (!isNaN(income) && income > 0) {
+                            total += income;
+                            labels.push(rawDate);
+                            values.push(income);
+                        }
                     }
                 }
             });
 
-            // Update UI
+            // อัปเดต UI
             document.getElementById('totalRevenue').innerText = '฿' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('orderCount').innerText = values.length.toLocaleString();
+            document.getElementById('orderCount').innerText = values.length.toLocaleString() + ' รายการ';
             document.getElementById('updateTime').innerText = new Date().toLocaleTimeString('th-TH');
+            
+            const badge = document.getElementById('statusBadge');
+            badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-xs">Live Connected</span>`;
 
-            updateChart(labels, values);
+            renderChart(labels, values);
         }
 
-        function updateChart(labels, data) {
-            const ctx = document.getElementById('mainChart').getContext('2d');
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
             
-            if (chartInstance) chartInstance.destroy();
+            if (chart) chart.destroy();
 
-            chartInstance = new Chart(ctx, {
+            chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'รายรับต่อรายการ',
+                        label: 'รายรับ (บาท)',
                         data: data,
                         borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 4,
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        borderWidth: 3,
                         pointRadius: 4,
-                        pointBackgroundColor: '#fff'
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6366f1',
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            titleFont: { size: 14 },
+                            callbacks: {
+                                label: (ctx) => ` รายรับ: ฿${ctx.parsed.y.toLocaleString()}`
+                            }
+                        }
+                    },
                     scales: {
                         y: { 
                             beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
                             ticks: { callback: v => '฿' + v.toLocaleString() }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
+                        },
+                        x: { grid: { display: false } }
                     }
                 }
             });
         }
 
-        // เริ่มโหลดข้อมูลครั้งแรก
-        loadData();
-        // รีเฟรชทุก 1 นาที
-        setInterval(loadData, 60000);
+        // เริ่มต้นการทำงาน
+        fetchData();
+        // รีเฟรชอัตโนมัติทุก 5 นาที
+        setInterval(fetchData, 300000);
     </script>
 </body>
 </html>
