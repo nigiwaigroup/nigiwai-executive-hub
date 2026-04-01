@@ -1,189 +1,681 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revenue Dashboard Pro v2.5</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .gradient-header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Intelligence · Live Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:       #080c12;
+    --surface:  #0e1420;
+    --border:   rgba(255,255,255,0.07);
+    --accent:   #4f8ef7;
+    --accent2:  #7c5cfa;
+    --gold:     #e8b84b;
+    --green:    #34d399;
+    --red:      #f87171;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --mono:     'DM Mono', monospace;
+    --head:     'Syne', 'Noto Sans Thai', sans-serif;
+    --body:     'Noto Sans Thai', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Ambient background mesh ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 10%, rgba(79,142,247,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 90% 90%, rgba(124,92,250,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 0%,  rgba(232,184,75,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Noise grain overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── Layout ── */
+  .page { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 24px 60px; }
+
+  /* ── Glass card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.13); }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 24px rgba(79,142,247,0.35);
+  }
+
+  .logo-text h1 {
+    font-family: var(--head);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .logo-text p {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ── Status Pill ── */
+  .status-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+  .status-pill.syncing { border-color: rgba(79,142,247,0.4); color: var(--accent); }
+  .status-pill.live    { border-color: rgba(52,211,153,0.4); color: var(--green); }
+  .status-pill.error   { border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+  .pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .pulse.anim { animation: pulse-anim 1.4s ease-in-out infinite; }
+  @keyframes pulse-anim {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ── KPI Cards ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .chart-header { flex-direction: column !important; gap: 12px; }
+    header { padding: 20px 16px; }
+    .page { padding: 0 16px 40px; }
+  }
+
+  .kpi-card {
+    padding: 28px 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 20px 20px 0 0;
+  }
+  .kpi-card.primary::before   { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .kpi-card.secondary::before { background: linear-gradient(90deg, var(--gold), #f59e0b); }
+  .kpi-card.tertiary::before  { background: linear-gradient(90deg, var(--green), #059669); }
+
+  .kpi-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .kpi-value {
+    font-family: var(--head);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+  }
+
+  .kpi-card.primary .kpi-value {
+    background: linear-gradient(135deg, var(--accent) 20%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .kpi-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .kpi-glow {
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    opacity: 0.08;
+    filter: blur(30px);
+  }
+  .kpi-card.primary .kpi-glow   { background: var(--accent); }
+  .kpi-card.secondary .kpi-glow { background: var(--gold); }
+  .kpi-card.tertiary .kpi-glow  { background: var(--green); }
+
+  /* ── Chart Card ── */
+  .chart-card { padding: 32px; }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+
+  .chart-title {
+    font-family: var(--head);
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  .chart-subtitle {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    letter-spacing: 0.05em;
+  }
+
+  .refresh-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(79,142,247,0.3);
+    background: rgba(79,142,247,0.08);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .refresh-btn:hover {
+    background: rgba(79,142,247,0.15);
+    border-color: rgba(79,142,247,0.5);
+    box-shadow: 0 0 20px rgba(79,142,247,0.15);
+    transform: translateY(-1px);
+  }
+  .refresh-btn:active { transform: translateY(0); }
+
+  /* ── Divider ── */
+  .section-divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 28px 0 20px;
+  }
+  .section-divider span {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Chart wrapper ── */
+  .chart-wrap { position: relative; height: 420px; }
+
+  /* ── Footer info bar ── */
+  .info-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .info-item {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .info-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* ── Skeleton animation ── */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  /* ── Entry animation ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-card  { animation: fadeUp 0.5s ease both; }
+  .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+  .chart-card { animation: fadeUp 0.5s 0.35s ease both; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <nav class="gradient-header p-4 shadow-2xl text-white">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">📈</span>
-                <div>
-                    <h1 class="text-xl font-bold leading-none">Dashboard Pro</h1>
-                    <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Real-time Revenue Tracker</p>
-                </div>
-            </div>
-            <div id="statusBadge" class="flex items-center gap-2 bg-slate-700/50 px-4 py-2 rounded-full border border-slate-600">
-                <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                <span class="text-xs font-medium">Initializing...</span>
-            </div>
-        </div>
-    </nav>
+<!-- ════════════════ HEADER ════════════════ -->
+<header>
+  <div class="logo-mark">
+    <div class="logo-icon">📈</div>
+    <div class="logo-text">
+      <h1>Revenue Intelligence</h1>
+      <p>Live Dashboard · Google Sheets</p>
+    </div>
+  </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
-                <p class="text-slate-500 text-sm font-semibold mb-1">ยอดขายรวมสุทธิ</p>
-                <h2 id="totalRevenue" class="text-4xl font-bold text-indigo-600">฿0.00</h2>
-            </div>
-            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
-                <p class="text-slate-500 text-sm font-semibold mb-1">จำนวนรายการทั้งหมด</p>
-                <h2 id="orderCount" class="text-4xl font-bold text-slate-800">0</h2>
-            </div>
-            <div class="glass-card p-8 rounded-3xl shadow-sm border border-slate-200">
-                <p class="text-slate-500 text-sm font-semibold mb-1">อัปเดตข้อมูลล่าสุด</p>
-                <h2 id="updateTime" class="text-xl font-bold text-slate-600 mt-2">-</h2>
-            </div>
-        </div>
+  <div id="statusPill" class="status-pill">
+    <span class="pulse anim"></span>
+    <span id="statusText">Initializing...</span>
+  </div>
+</header>
 
-        <div class="grid grid-cols-1 gap-8">
-            <div class="glass-card p-8 rounded-3xl shadow-lg border border-slate-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800">แนวโน้มรายรับ (Revenue Trend)</h3>
-                        <p class="text-sm text-slate-500">ข้อมูลจาก Column J (รายรับ) ใน Google Sheet</p>
-                    </div>
-                    <button onclick="fetchData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl transition shadow-md active:scale-95">
-                        Refresh Data
-                    </button>
-                </div>
-                <div class="relative h-[450px]">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </main>
+<!-- ════════════════ PAGE ════════════════ -->
+<div class="page">
 
-    <script>
-        // 1. ตรวจสอบ URL ของคุณ (ใช้ตัวล่าสุดที่คุณส่งมา)
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0EgLY6BXgMakGncUtRNx3XjecAc0mKqDb7rLGrPBknG1W1CjNTC8is9ibUjJIThVCfal-1mOJNeKq/pub?gid=303701821&single=true&output=csv';
+  <div class="section-divider" style="margin-top:36px;">
+    <span>Key Performance Indicators</span>
+  </div>
 
-        let chart;
+  <!-- KPI GRID -->
+  <div class="kpi-grid">
+    <div class="card kpi-card primary">
+      <div class="kpi-glow"></div>
+      <div class="kpi-label">ยอดขายรวมสุทธิ · Net Revenue</div>
+      <div class="kpi-value" id="totalRevenue">—</div>
+      <div class="kpi-sub" id="revSub">Loading data...</div>
+    </div>
 
-        function fetchData() {
-            const badge = document.getElementById('statusBadge');
-            badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-blue-400 animate-spin"></div><span class="text-xs">Syncing...</span>`;
+    <div class="card kpi-card secondary">
+      <div class="kpi-glow"></div>
+      <div class="kpi-label">จำนวนรายการ · Order Count</div>
+      <div class="kpi-value" id="orderCount" style="background:linear-gradient(135deg,var(--gold),#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">—</div>
+      <div class="kpi-sub" id="ordSub">Loading data...</div>
+    </div>
 
-            Papa.parse(SHEET_URL, {
-                download: true,
-                header: false,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    console.log("Data Received Successfully");
-                    // พ่นข้อมูลออกมาดูที่ Console (F12) เพื่อเช็กพิกัด
-                    console.table(results.data.slice(0, 20)); 
-                    processData(results.data);
-                },
-                error: function(err) {
-                    console.error("Error:", err);
-                    badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-red-500"></div><span class="text-xs text-red-500">Error!</span>`;
-                }
-            });
+    <div class="card kpi-card tertiary">
+      <div class="kpi-glow"></div>
+      <div class="kpi-label">ค่าเฉลี่ยต่อรายการ · Avg per Order</div>
+      <div class="kpi-value" id="avgOrder" style="background:linear-gradient(135deg,var(--green),#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">—</div>
+      <div class="kpi-sub" id="avgSub">Loading data...</div>
+    </div>
+  </div>
+
+  <!-- CHART CARD -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Revenue Trend</div>
+        <div class="chart-subtitle">แนวโน้มรายรับ — จาก Column J (Index 9) · Auto-refresh ทุก 5 นาที</div>
+      </div>
+      <button class="refresh-btn" onclick="fetchData()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="revenueChart"></canvas>
+    </div>
+
+    <div class="info-bar">
+      <div class="info-item">
+        <div class="info-dot"></div>
+        <span>Source: Google Sheets CSV</span>
+      </div>
+      <div class="info-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>Last updated: <span id="lastUpdated">—</span></span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0EgLY6BXgMakGncUtRNx3XjecAc0mKqDb7rLGrPBknG1W1CjNTC8is9ibUjJIThVCfal-1mOJNeKq/pub?gid=303701821&single=true&output=csv';
+
+// CORS proxies — tried in order until one works
+const PROXIES = [
+  (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  (u) => u, // direct last (works if sheet is truly public)
+];
+let proxyIdx = 0;
+
+function SHEET_URL() {
+  return PROXIES[proxyIdx](SHEET_CSV);
+}
+const HEADER_ROWS = 7;    // Skip top rows (headers / blank rows)
+const DATE_COL   = 1;     // Column B (index 1)
+const REV_COL    = 9;     // Column J (index 9)
+const REFRESH_MS = 300000; // 5 minutes
+
+let chartInstance = null;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   UTILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/**
+ * Clean a currency string: strip ฿, commas, spaces → parseFloat
+ */
+function parseCurrency(raw) {
+  if (!raw) return NaN;
+  const clean = raw.toString().replace(/[฿,\s]/g, '').trim();
+  return parseFloat(clean);
+}
+
+function fmtCurrency(n) {
+  return '฿' + n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtNumber(n) {
+  return n.toLocaleString('th-TH');
+}
+
+function now() {
+  return new Date().toLocaleTimeString('th-TH', { hour12: false });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATUS PILL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function setStatus(state, text) {
+  const pill = document.getElementById('statusPill');
+  const span = document.getElementById('statusText');
+  pill.className = 'status-pill ' + state;
+  span.textContent = text;
+  const dot = pill.querySelector('.pulse');
+  dot.className = 'pulse' + (state === 'syncing' ? ' anim' : '');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FETCH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function fetchData() {
+  setStatus('syncing', 'Syncing...');
+
+  Papa.parse(SHEET_URL(), {
+    download: true,
+    header: false,
+    skipEmptyLines: true,
+    complete: (results) => {
+      // Sanity check — if we got fewer than HEADER_ROWS rows, likely a proxy error page
+      if (!results.data || results.data.length <= HEADER_ROWS) {
+        tryNextProxy();
+        return;
+      }
+      console.groupCollapsed('[Dashboard] Raw data sample');
+      console.table(results.data.slice(0, 12));
+      console.groupEnd();
+      proxyIdx = proxyIdx; // keep working proxy
+      processData(results.data);
+    },
+    error: () => tryNextProxy()
+  });
+}
+
+function tryNextProxy() {
+  if (proxyIdx < PROXIES.length - 1) {
+    proxyIdx++;
+    console.warn(`[Dashboard] Trying proxy #${proxyIdx}…`);
+    fetchData();
+  } else {
+    proxyIdx = 0; // reset for next manual refresh
+    setStatus('error', 'Connection Error');
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PROCESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function processData(rawData) {
+  const labels = [];
+  const values = [];
+
+  rawData.forEach((row, idx) => {
+    if (idx < HEADER_ROWS) return;
+
+    const rawDate = row[DATE_COL] || `#${idx - HEADER_ROWS + 1}`;
+    const income  = parseCurrency(row[REV_COL]);
+
+    if (!isNaN(income) && income > 0) {
+      labels.push(rawDate);
+      values.push(income);
+    }
+  });
+
+  if (values.length === 0) {
+    setStatus('error', 'No data found');
+    return;
+  }
+
+  const total = values.reduce((s, v) => s + v, 0);
+  const avg   = total / values.length;
+
+  /* Update KPIs */
+  animate(document.getElementById('totalRevenue'), fmtCurrency(total));
+  animate(document.getElementById('orderCount'),   fmtNumber(values.length) + ' รายการ');
+  animate(document.getElementById('avgOrder'),     fmtCurrency(avg));
+
+  document.getElementById('revSub').textContent  = `${values.length} รายการที่มียอดขาย`;
+  document.getElementById('ordSub').textContent  = `จาก ${rawData.length - HEADER_ROWS} แถวทั้งหมด`;
+  document.getElementById('avgSub').textContent  = `ค่าเฉลี่ยต่อ 1 รายการ`;
+  document.getElementById('lastUpdated').textContent = now();
+
+  setStatus('live', 'Live Connected');
+  renderChart(labels, values);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIMPLE NUMBER FLIP ANIMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function animate(el, newVal) {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(8px)';
+  el.style.transition = 'opacity 0.3s, transform 0.3s';
+  setTimeout(() => {
+    el.textContent = newVal;
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  }, 180);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CHART
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderChart(labels, data) {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+
+  /* Gradient fill */
+  const grad = ctx.createLinearGradient(0, 0, 0, 380);
+  grad.addColorStop(0,   'rgba(79,142,247,0.18)');
+  grad.addColorStop(0.6, 'rgba(79,142,247,0.04)');
+  grad.addColorStop(1,   'rgba(79,142,247,0)');
+
+  const accent  = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()  || '#4f8ef7';
+  const muted   = '#1e2a3a';
+  const gridClr = 'rgba(255,255,255,0.05)';
+  const tickClr = '#475569';
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'รายรับ (฿)',
+        data,
+        borderColor: '#4f8ef7',
+        backgroundColor: grad,
+        borderWidth: 2.5,
+        pointRadius: data.length > 60 ? 0 : 4,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#4f8ef7',
+        pointBorderColor: '#080c12',
+        pointBorderWidth: 2,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 800, easing: 'easeInOutCubic' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0e1420',
+          titleColor: '#94a3b8',
+          bodyColor: '#e2e8f0',
+          borderColor: 'rgba(79,142,247,0.3)',
+          borderWidth: 1,
+          padding: 14,
+          cornerRadius: 12,
+          titleFont: { family: "'DM Mono', monospace", size: 11 },
+          bodyFont: { family: "'Syne', sans-serif", size: 16, weight: '700' },
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (ctx) => ' ฿' + ctx.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2 })
+          }
         }
-
-        function processData(rawData) {
-            let labels = [];
-            let values = [];
-            let total = 0;
-
-            // วนลูปข้อมูล (ข้าม 7 แถวแรกที่เป็นหัวตาราง)
-            rawData.forEach((row, index) => {
-                if (index >= 7) { 
-                    // ดึงข้อมูล Column B (วันที่ - Index 1) และ Column J (รายรับ - Index 9)
-                    const rawDate = row[1] || `รายการที่ ${index - 6}`;
-                    const rawIncome = row[9]; // Column J คือตำแหน่งที่ 10 (Index 9)
-
-                    if (rawIncome) {
-                        // ทำความสะอาดตัวเลข: ลบ ฿, ลบ Comma, ลบช่องว่าง
-                        const cleanValue = rawIncome.toString().replace(/[฿,\s]/g, '');
-                        const income = parseFloat(cleanValue);
-
-                        if (!isNaN(income) && income > 0) {
-                            total += income;
-                            labels.push(rawDate);
-                            values.push(income);
-                        }
-                    }
-                }
-            });
-
-            // อัปเดต UI
-            document.getElementById('totalRevenue').innerText = '฿' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
-            document.getElementById('orderCount').innerText = values.length.toLocaleString() + ' รายการ';
-            document.getElementById('updateTime').innerText = new Date().toLocaleTimeString('th-TH');
-            
-            const badge = document.getElementById('statusBadge');
-            badge.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-xs">Live Connected</span>`;
-
-            renderChart(labels, values);
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: tickClr,
+            font: { family: "'DM Mono', monospace", size: 10 },
+            maxTicksLimit: 12,
+            maxRotation: 30,
+          }
+        },
+        y: {
+          beginAtZero: false,
+          grid: { color: gridClr, drawBorder: false },
+          border: { display: false },
+          ticks: {
+            color: tickClr,
+            font: { family: "'DM Mono', monospace", size: 10 },
+            callback: (v) => '฿' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v.toLocaleString())
+          }
         }
+      }
+    }
+  });
+}
 
-        function renderChart(labels, data) {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            
-            if (chart) chart.destroy();
-
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'รายรับ (บาท)',
-                        data: data,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#6366f1',
-                        pointHoverRadius: 8,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            titleFont: { size: 14 },
-                            callbacks: {
-                                label: (ctx) => ` รายรับ: ฿${ctx.parsed.y.toLocaleString()}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9' },
-                            ticks: { callback: v => '฿' + v.toLocaleString() }
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // เริ่มต้นการทำงาน
-        fetchData();
-        // รีเฟรชอัตโนมัติทุก 5 นาที
-        setInterval(fetchData, 300000);
-    </script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
 </body>
 </html>
