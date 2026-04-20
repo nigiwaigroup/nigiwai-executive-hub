@@ -117,6 +117,9 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 .lb-chf{background:#ffebeb;color:var(--red);}
 .lb-snr{background:#eafaf1;color:#27ae60;}
 .lb-con{background:#fef9e6;color:#b45309;}
+.lb-res{background:#f5f5f5;color:#7f8c8d;}
+.resigned-row td{color:#aaa!important;}
+.res-tag{display:inline-flex;align-items:center;gap:3px;background:#f0f0f0;color:#95a5a6;font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;margin-left:4px;}
 
 /* MOBILITY CARD */
 .mob-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);}
@@ -217,9 +220,48 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
     </div>
     <div id="dynTabs" style="display:flex;align-items:center;"></div>
     <div class="spacer"></div>
+    <button onclick="openPicker()" id="pickerBtn" style="background:#2c3e50;color:#fff;border:none;padding:6px 13px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;margin-right:6px;white-space:nowrap;flex-shrink:0;font-family:'Prompt',sans-serif;">👁 แสดง/ซ่อน</button>
     <a href="admin.html" class="admin-btn">⚙ Admin</a>
   </div>
 </nav>
+<!-- ══ EMPLOYEE PICKER MODAL ══ -->
+<div id="pickerOverlay" onclick="closePicker()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;"></div>
+<div id="pickerModal" style="display:none;position:fixed;top:54px;right:16px;width:420px;max-width:95vw;max-height:82vh;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.22);z-index:501;flex-direction:column;overflow:hidden;">
+  <!-- Header -->
+  <div style="padding:14px 18px 10px;border-bottom:1px solid #f0f0f0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:14px;font-weight:700;">👁 เลือกพนักงานที่แสดงข้อมูล</div>
+      <button onclick="closePicker()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    </div>
+    <!-- Search -->
+    <input type="text" id="pickerSearch" placeholder="🔍 ค้นหาชื่อ / รหัส / ตำแหน่ง..." oninput="renderPickerList()"
+      style="width:100%;border:1px solid #e0e0e0;border-radius:8px;padding:8px 12px;font-family:'Prompt',sans-serif;font-size:12.5px;outline:none;">
+    <!-- Sub-filter row -->
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+      <select id="pickerCC" onchange="renderPickerList()" style="flex:1;min-width:0;border:1px solid #e0e0e0;border-radius:7px;padding:5px 8px;font-family:'Prompt',sans-serif;font-size:11.5px;outline:none;">
+        <option value="">— ทุก Cost Center —</option>
+      </select>
+      <select id="pickerDept" onchange="renderPickerList()" style="flex:1;min-width:0;border:1px solid #e0e0e0;border-radius:7px;padding:5px 8px;font-family:'Prompt',sans-serif;font-size:11.5px;outline:none;">
+        <option value="">— ทุกแผนก —</option>
+      </select>
+    </div>
+    <!-- Action row -->
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+      <button onclick="pickerSelectAll(true)"  style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid #27ae60;color:#27ae60;background:#eafaf1;cursor:pointer;font-family:'Prompt',sans-serif;">✓ ทั้งหมด</button>
+      <button onclick="pickerSelectAll(false)" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid #e74c3c;color:#e74c3c;background:#ffebeb;cursor:pointer;font-family:'Prompt',sans-serif;">✕ ล้าง</button>
+      <button onclick="pickerSelectActive()"  style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid #2980b9;color:#2980b9;background:#eaf0ff;cursor:pointer;font-family:'Prompt',sans-serif;">👤 เฉพาะปัจจุบัน</button>
+      <span style="margin-left:auto;font-size:11px;color:#888;" id="pickerCount">—</span>
+    </div>
+  </div>
+  <!-- List -->
+  <div id="pickerList" style="overflow-y:auto;flex:1;padding:8px 0;"></div>
+  <!-- Footer -->
+  <div style="padding:10px 18px;border-top:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:11px;color:#888;" id="pickerFooterInfo"></span>
+    <button onclick="applyPicker()" style="margin-left:auto;background:var(--red);color:#fff;border:none;border-radius:8px;padding:8px 22px;font-family:'Prompt',sans-serif;font-weight:700;font-size:13px;cursor:pointer;">✓ ใช้งาน</button>
+  </div>
+</div>
+
 <div class="sync-bar">
   <div class="sync-bar-inner">
     <span class="sync-dot"></span>
@@ -493,6 +535,7 @@ const DEFAULT_CC=[
   {key:'Phuket Ocean',         full:'บริษัท ภูเก็ตโอเชี่ยนกรุ๊ป จำกัด (The Oceanic Sportel)', color:'#1abc9c'},
   {key:'Viang Viet',           full:'บริษัท เวียงเวียต ฟู้ด จำกัด (สำนักงานใหญ่)',            color:'#e91e63'},
   {key:'Andamanda',            full:'บริษัท สุดสาครกรุ๊ป จำกัด (Andamanda)',                   color:'#f39c12'},
+  {key:'__RESIGNED__',         full:'พนักงานที่ลาออก',                                          color:'#95a5a6', resigned:true},
 ];
 
 // สี palette สำหรับแผนก (รองรับ 12 แผนก)
@@ -501,7 +544,7 @@ const DEPT_COLORS = [
   '#f39c12','#2c3e50','#e91e63','#00bcd4','#795548','#607d8b'
 ];
 
-function getEMP(){ return JSON.parse(localStorage.getItem('hr_db')||'null') || SEED_EMP; }
+// getEMP() defined below in picker section — do not duplicate
 function getCC(){  return JSON.parse(localStorage.getItem('hr_cc')||'null') || DEFAULT_CC; }
 function ccFull(k){ const c=getCC().find(c=>c.key===k); return c?c.full:k; }
 function ccColor(k){ const c=getCC().find(c=>c.key===k); return c?c.color:'#888'; }
@@ -580,7 +623,7 @@ function buildOverview(){
 // ══════════════════════════════════════════════════════════
 let hcReady=false, hcF=[];
 function buildHeadcount(){
-  const EMP=getEMP();
+  const EMP=_getEMPRaw();
   if(!hcReady){
     hcReady=true;
     const bf=document.getElementById('hcBrand'),df=document.getElementById('hcDept');
@@ -592,32 +635,41 @@ function buildHeadcount(){
   hcF=[...EMP]; renderHC();
 }
 function filterHC(){
-  const EMP=getEMP();
+  const EMP=_getEMPRaw();
   const q=document.getElementById('hcQ').value.toLowerCase();
   const b=document.getElementById('hcBrand').value;
   const d=document.getElementById('hcDept').value;
   hcF=EMP.filter(e=>(!q||e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.position.toLowerCase().includes(q))&&(!b||e.brand===b)&&(!d||e.dept===d));
   renderHC();
 }
-function clearHC(){document.getElementById('hcQ').value='';document.getElementById('hcBrand').value='';document.getElementById('hcDept').value='';hcF=[...getEMP()];renderHC();}
+function clearHC(){document.getElementById('hcQ').value='';document.getElementById('hcBrand').value='';document.getElementById('hcDept').value='';hcF=[..._getEMPRaw()];renderHC();}
 function renderHC(){
-  document.getElementById('hc-count').textContent=hcF.length;
-  document.getElementById('hc-info').textContent=`แสดงทั้งหมด ${hcF.length} รายการ`;
-  document.getElementById('hcBody').innerHTML=hcF.map((e,i)=>{
+  const state = getPickerState();
+  const LVL_STYLE={'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed','Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b','Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'};
+  const active   = hcF.filter(e=>e.brand!==RESIGNED_CC);
+  const resigned = hcF.filter(e=>e.brand===RESIGNED_CC);
+  document.getElementById('hc-count').textContent=active.length;
+  document.getElementById('hc-info').textContent=`แสดง ${active.length} คน (ซ่อน ${active.filter(e=>state[e.id]===false).length} คน)${resigned.length?' · ลาออก '+resigned.length+' คน':''}`;
+  let rowNum=0;
+  const mkRow=(e,isResigned)=>{
+    rowNum++;
     const d=e.totalIncome69-e.totalIncome68;
-    return`<tr>
-      <td style="color:#bbb">${i+1}</td>
+    const hidden=state[e.id]===false&&!isResigned;
+    return`<tr${isResigned?' class="resigned-row"':hidden?' style="opacity:.45;background:#fafafa"':''}>
+      <td style="color:#bbb">${rowNum}</td>
       <td style="color:#bbb;font-size:10.5px">${e.id}</td>
-      <td><div style="font-weight:600">${e.name}</div><div style="font-size:10.5px;color:#aaa">${e.nickname}</div></td>
-      <td style="font-size:10.5px;color:${ccColor(e.brand)};font-weight:600" title="${ccFull(e.brand)}">${ccFull(e.brand)}</td>
+      <td><div style="font-weight:600">${e.name}${hidden?'<span style="font-size:10px;color:#bbb;font-weight:400"> (ซ่อน)</span>':''}</div><div style="font-size:10.5px;color:#aaa">${e.nickname}</div></td>
+      <td style="font-size:10.5px;color:${isResigned?'#95a5a6':ccColor(e.brand)};font-weight:600" title="${ccFull(e.brand)}">${ccFull(e.brand)}${isResigned?'<span class="res-tag">ลาออก</span>':''}</td>
       <td style="font-size:11.5px">${e.dept}</td>
       <td style="font-size:11.5px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
-      <td>${lvlB(e.level)}</td>
+      <td><span style="display:inline-block;padding:2px 7px;border-radius:9px;font-size:10.5px;font-weight:700;${isResigned?'background:#f5f5f5;color:#7f8c8d':LVL_STYLE[e.level]||'background:#eee;color:#666'}">${e.level}</span></td>
       <td style="text-align:right">฿${fmt(e.baseSalary69)}</td>
       <td style="text-align:right;font-weight:700">฿${fmt(e.totalIncome69)}</td>
       <td style="text-align:right;font-size:11.5px;color:${d>0?'#27ae60':d<0?'var(--red)':'#bbb'}">${d>0?'+฿'+fmt(d):d<0?'-฿'+fmt(Math.abs(d)):'—'}</td>
     </tr>`;
-  }).join('');
+  };
+  const divider=resigned.length?`<tr><td colspan="10" style="background:#f5f5f5;padding:7px 11px;border-top:2px solid #ddd;"><span style="font-size:11px;font-weight:700;color:#95a5a6;">⚠ พนักงานที่ลาออก (${resigned.length} คน) — ไม่นับในงบประมาณ</span></td></tr>`:'';
+  document.getElementById('hcBody').innerHTML=active.map(e=>mkRow(e,false)).join('')+divider+resigned.map(e=>mkRow(e,true)).join('');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1247,9 +1299,197 @@ function buildTabs(){
   renderTab(toShow);
 }
 
+// ══════════════════════════════════════════════════════════
+// EMPLOYEE PICKER — เลือกพนักงานที่แสดงข้อมูล
+// ══════════════════════════════════════════════════════════
+const RESIGNED_CC = '__RESIGNED__';
+
+// pickerState: { [empId]: true(แสดง) / false(ซ่อน) }
+// default = true ทุกคน (lazy-init จาก localStorage)
+function getPickerState(){
+  return JSON.parse(localStorage.getItem('hr_picker_state')||'null') || {};
+}
+function savePickerState(s){
+  localStorage.setItem('hr_picker_state', JSON.stringify(s));
+}
+
+/* ─── Raw loader (ไม่กรอง) ───────────────────────────────── */
+function _getEMPRaw(){
+  return JSON.parse(localStorage.getItem('hr_db')||'null') || SEED_EMP;
+}
+
+/* ─── getEMP() = กรองตาม pickerState + ไม่แสดงลาออก ─────── */
+function getEMP(){
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  return all.filter(e => {
+    if(e.brand === RESIGNED_CC) return false;   // ลาออก ไม่นับงบ
+    if(state[e.id] === false)   return false;   // ถูก hide โดย picker
+    return true;
+  });
+}
+
+/* ─── Open / Close ─────────────────────────────────────── */
+function openPicker(){
+  const modal = document.getElementById('pickerModal');
+  const overlay = document.getElementById('pickerOverlay');
+  modal.style.display = 'flex';
+  overlay.style.display = 'block';
+  buildPickerDropdowns();
+  renderPickerList();
+  document.getElementById('pickerSearch').focus();
+}
+function closePicker(){
+  document.getElementById('pickerModal').style.display = 'none';
+  document.getElementById('pickerOverlay').style.display = 'none';
+}
+function applyPicker(){
+  closePicker();
+  updatePickerBadge();
+  renderTab(currentTab);
+}
+
+/* ─── Dropdowns ────────────────────────────────────────── */
+function buildPickerDropdowns(){
+  const all = _getEMPRaw();
+  const ccSel = document.getElementById('pickerCC');
+  const dSel  = document.getElementById('pickerDept');
+  const prevCC = ccSel.value, prevD = dSel.value;
+
+  ccSel.innerHTML = '<option value="">— ทุก Cost Center —</option>';
+  dSel.innerHTML  = '<option value="">— ทุกแผนก —</option>';
+
+  const ccs = [...new Set(all.map(e=>e.brand))].sort();
+  ccs.forEach(b => {
+    const isResigned = b === RESIGNED_CC;
+    const opt = document.createElement('option');
+    opt.value = b;
+    opt.textContent = (isResigned ? '⚠ ' : '') + ccFull(b);
+    if(prevCC===b) opt.selected = true;
+    ccSel.appendChild(opt);
+  });
+  [...new Set(all.map(e=>e.dept))].sort().forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    if(prevD===d) opt.selected = true;
+    dSel.appendChild(opt);
+  });
+}
+
+/* ─── List Renderer ────────────────────────────────────── */
+function renderPickerList(){
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  const q     = document.getElementById('pickerSearch').value.toLowerCase();
+  const cc    = document.getElementById('pickerCC').value;
+  const dept  = document.getElementById('pickerDept').value;
+
+  let shown = all.filter(e =>
+    (!q    || e.name.toLowerCase().includes(q) || e.id.toLowerCase().includes(q) || (e.nickname||'').toLowerCase().includes(q) || e.position.toLowerCase().includes(q)) &&
+    (!cc   || e.brand === cc) &&
+    (!dept || e.dept  === dept)
+  );
+
+  const total   = all.length;
+  const visible = all.filter(e => state[e.id] !== false && e.brand !== RESIGNED_CC).length;
+  document.getElementById('pickerCount').textContent = `แสดง ${visible} / ${total} คน`;
+  document.getElementById('pickerFooterInfo').textContent = `พบ ${shown.length} คน`;
+
+  // Group by brand — resigned last
+  const grouped = {};
+  shown.forEach(e => { if(!grouped[e.brand]) grouped[e.brand]=[]; grouped[e.brand].push(e); });
+  const brandOrder = Object.keys(grouped).sort((a,b) => {
+    if(a===RESIGNED_CC) return 1; if(b===RESIGNED_CC) return -1;
+    return grouped[b].length - grouped[a].length;
+  });
+
+  const LVL_STYLE = {'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed','Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b','Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'};
+
+  let html = '';
+  brandOrder.forEach(brand => {
+    const isResigned = brand === RESIGNED_CC;
+    const bcolor = isResigned ? '#95a5a6' : ccColor(brand);
+    const emps = grouped[brand];
+    // Brand separator
+    html += `<div style="padding:5px 14px 3px;display:flex;align-items:center;gap:6px;position:sticky;top:0;background:#fff;border-bottom:1px solid #f5f5f5;z-index:2;">
+      <span style="width:8px;height:8px;border-radius:50%;background:${bcolor};flex-shrink:0;"></span>
+      <span style="font-size:11px;font-weight:700;color:${bcolor};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${isResigned?'⚠ ':''} ${ccFull(brand)}</span>
+      <span style="font-size:10px;color:#aaa">${emps.length} คน</span>
+      <button onclick="pickerToggleCC('${brand}',true)" style="font-size:9.5px;padding:1px 6px;border-radius:4px;border:1px solid #27ae60;color:#27ae60;background:#eafaf1;cursor:pointer;font-family:'Prompt',sans-serif;">✓</button>
+      <button onclick="pickerToggleCC('${brand}',false)" style="font-size:9.5px;padding:1px 6px;border-radius:4px;border:1px solid #e74c3c;color:#e74c3c;background:#ffebeb;cursor:pointer;font-family:'Prompt',sans-serif;">✕</button>
+    </div>`;
+
+    emps.forEach(e => {
+      const checked = state[e.id] !== false;
+      const isHidden = !checked;
+      html += `<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;transition:background .1s;${isHidden?'opacity:.5':''}background:${checked?'#fff':'#fafafa'};" onmouseover="this.style.background='#f8f8f8'" onmouseout="this.style.background='${checked?'#fff':'#fafafa'}'">
+        <input type="checkbox" data-id="${e.id}" ${checked?'checked':''} onchange="pickerCheck(this)"
+          style="width:15px;height:15px;accent-color:${bcolor};cursor:pointer;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.name} <span style="font-weight:400;color:#aaa;font-size:11px">(${e.nickname})</span></div>
+          <div style="font-size:10.5px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.id} · ${e.dept}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;flex-shrink:0;${LVL_STYLE[e.level]||'background:#eee;color:#666'}">${e.level.replace('Leader and Supervisor','Ldr').replace('Chief and Director','Chief').replace('Senior Officer','Senior')}</span>
+        ${isResigned?'<span style="font-size:9.5px;background:#f5f5f5;color:#95a5a6;padding:1px 6px;border-radius:8px;flex-shrink:0;font-weight:700;">ลาออก</span>':''}
+      </label>`;
+    });
+  });
+
+  if(!html) html = '<div style="text-align:center;padding:32px;color:#aaa;font-size:12px;">ไม่พบพนักงาน</div>';
+  document.getElementById('pickerList').innerHTML = html;
+}
+
+/* ─── Checkbox handlers ─────────────────────────────────── */
+function pickerCheck(el){
+  const state = getPickerState();
+  state[el.dataset.id] = el.checked;
+  savePickerState(state);
+  renderPickerList();
+}
+function pickerToggleCC(brand, val){
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  all.filter(e=>e.brand===brand).forEach(e=>state[e.id]=val);
+  savePickerState(state);
+  renderPickerList();
+}
+function pickerSelectAll(val){
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  all.forEach(e=>state[e.id]=val);
+  savePickerState(state);
+  renderPickerList();
+}
+function pickerSelectActive(){
+  // เลือกเฉพาะคนที่ไม่ได้อยู่ใน CC ลาออก
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  all.forEach(e=>{ state[e.id] = (e.brand !== RESIGNED_CC); });
+  savePickerState(state);
+  renderPickerList();
+}
+
+/* ─── Badge บน topbar ───────────────────────────────────── */
+function updatePickerBadge(){
+  const all   = _getEMPRaw();
+  const state = getPickerState();
+  const hidden = all.filter(e => state[e.id]===false).length;
+  const btn = document.getElementById('pickerBtn');
+  if(hidden > 0){
+    btn.style.background = '#e67e22';
+    btn.textContent = `👁 ซ่อน ${hidden} คน`;
+  } else {
+    btn.style.background = '#2c3e50';
+    btn.textContent = '👁 แสดง/ซ่อน';
+  }
+}
+
+// ══════════════════════════════════════════════════════════
 // INIT
+// ══════════════════════════════════════════════════════════
 buildTabs();
 updateSyncLabel();
+updatePickerBadge();
 </script>
 </body>
 </html>
