@@ -321,27 +321,41 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 <!-- ══ สรุปเงินเดือนตามแผนก ══ -->
 <div id="tab-deptsalary" class="tab-content">
 <div class="page fi">
-  <div class="page-title"><div class="icon-box" style="background:linear-gradient(135deg,#8e44ad,#2980b9);">🏦</div><h1>สรุปเงินเดือนตามแผนก</h1></div>
+  <div class="page-title">
+    <div class="icon-box" style="background:linear-gradient(135deg,#8e44ad,#2980b9);">🏦</div>
+    <h1 id="ds-page-title">สรุปเงินเดือนตามแผนก</h1>
+  </div>
+
+  <!-- VIEW MODE TOGGLE -->
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:5px;box-shadow:var(--shadow);width:fit-content;">
+    <button id="dsModeDept" onclick="setDsMode('dept')"
+      style="padding:7px 18px;border-radius:7px;border:none;font-family:'Prompt',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:var(--red);color:#fff;">
+      🗂 แยกตามแผนก
+    </button>
+    <button id="dsModeCC" onclick="setDsMode('cc')"
+      style="padding:7px 18px;border-radius:7px;border:none;font-family:'Prompt',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--muted);">
+      🏢 แยกตาม Cost Center
+    </button>
+  </div>
 
   <!-- KPI Row -->
   <div class="kpi-grid" id="ds-kpis" style="margin-bottom:14px;"></div>
 
-  <!-- Chart + Sort bar -->
+  <!-- Charts -->
   <div class="card" style="margin-bottom:14px;">
-    <div class="card-title blue">📊 เปรียบเทียบรายได้รวม ปี 68 vs ปี 69 แยกแผนก</div>
+    <div class="card-title blue" id="ds-chart1-title">📊 เปรียบเทียบรายได้รวม ปี 68 vs ปี 69 แยกแผนก</div>
     <canvas id="deptYoYChart" style="max-height:340px;"></canvas>
   </div>
 
-  <!-- Donut + Top-spender -->
   <div class="g2" style="margin-bottom:14px;">
     <div class="card">
-      <div class="card-title purple">🍩 สัดส่วนค่าใช้จ่ายบุคลากร ปี 69</div>
+      <div class="card-title purple" id="ds-donut-title">🍩 สัดส่วนค่าใช้จ่ายบุคลากร ปี 69</div>
       <div style="display:flex;justify-content:center">
         <canvas id="deptDonutChart" style="max-width:260px;max-height:260px;"></canvas>
       </div>
     </div>
     <div class="card">
-      <div class="card-title gold">📈 ค่าเฉลี่ยรายได้/คน แยกแผนก</div>
+      <div class="card-title gold" id="ds-avg-title">📈 ค่าเฉลี่ยรายได้/คน แยกแผนก</div>
       <canvas id="deptAvgChart" style="max-height:260px;"></canvas>
     </div>
   </div>
@@ -349,21 +363,21 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
   <!-- Filter bar -->
   <div class="dept-filter-bar">
     <span style="font-size:12px;font-weight:700;color:var(--muted);">เรียงตาม:</span>
-    <select class="ctrl" id="dsSortBy" onchange="buildDeptSalary()" style="width:auto;">
+    <select class="ctrl" id="dsSortBy" onchange="renderDsSummary()" style="width:auto;">
       <option value="income69">รายได้รวม ปี 69 (สูง→ต่ำ)</option>
       <option value="income68">รายได้รวม ปี 68 (สูง→ต่ำ)</option>
       <option value="headcount">Headcount (มาก→น้อย)</option>
       <option value="diff">เปลี่ยนแปลง (สูง→ต่ำ)</option>
       <option value="avg">เฉลี่ย/คน (สูง→ต่ำ)</option>
-      <option value="name">ชื่อแผนก (A→Z)</option>
+      <option value="name">ชื่อ (A→Z)</option>
     </select>
     <span style="font-size:12px;font-weight:700;color:var(--muted);">ปี 69 ต่ำกว่า:</span>
-    <input type="number" class="ctrl" id="dsMaxFilter" placeholder="สูงสุด (บาท)" style="width:140px;" oninput="buildDeptSalary()">
-    <button onclick="document.getElementById('dsMaxFilter').value='';buildDeptSalary();" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:11px;color:var(--muted);">✕ ล้าง</button>
+    <input type="number" class="ctrl" id="dsMaxFilter" placeholder="สูงสุด (บาท)" style="width:140px;" oninput="renderDsSummary()">
+    <button onclick="document.getElementById('dsMaxFilter').value='';renderDsSummary();" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:11px;color:var(--muted);">✕ ล้าง</button>
     <span style="margin-left:auto;font-size:11px;color:var(--muted);" id="ds-info"></span>
   </div>
 
-  <!-- Dept blocks -->
+  <!-- Blocks container -->
   <div id="ds-dept-blocks"></div>
 </div>
 </div>
@@ -626,29 +640,81 @@ function buildMobility(){
 // ══════════════════════════════════════════════════════════
 // DEPT SALARY SUMMARY ← NEW
 // ══════════════════════════════════════════════════════════
-function buildDeptSalary(){
+// ══════════════════════════════════════════════════════════
+// DEPT SALARY — VIEW MODE (dept / cc)
+// ══════════════════════════════════════════════════════════
+let dsMode = 'dept'; // 'dept' | 'cc'
+
+function setDsMode(mode){
+  dsMode = mode;
+  // Toggle button styles
+  const btnDept = document.getElementById('dsModeDept');
+  const btnCC   = document.getElementById('dsModeCC');
+  if(mode === 'dept'){
+    btnDept.style.background = 'var(--red)'; btnDept.style.color = '#fff';
+    btnCC.style.background = 'transparent'; btnCC.style.color = 'var(--muted)';
+    document.getElementById('ds-page-title').textContent = 'สรุปเงินเดือนตามแผนก';
+    document.getElementById('ds-chart1-title').textContent = '📊 เปรียบเทียบรายได้รวม ปี 68 vs ปี 69 แยกแผนก';
+    document.getElementById('ds-donut-title').textContent  = '🍩 สัดส่วนค่าใช้จ่ายบุคลากร ปี 69 (แผนก)';
+    document.getElementById('ds-avg-title').textContent    = '📈 ค่าเฉลี่ยรายได้/คน แยกแผนก';
+    document.getElementById('dsSortBy').options[5].text   = 'ชื่อแผนก (A→Z)';
+  } else {
+    btnCC.style.background = 'var(--red)'; btnCC.style.color = '#fff';
+    btnDept.style.background = 'transparent'; btnDept.style.color = 'var(--muted)';
+    document.getElementById('ds-page-title').textContent = 'สรุปเงินเดือนตาม Cost Center';
+    document.getElementById('ds-chart1-title').textContent = '📊 เปรียบเทียบรายได้รวม ปี 68 vs ปี 69 แยก Cost Center';
+    document.getElementById('ds-donut-title').textContent  = '🍩 สัดส่วนค่าใช้จ่ายบุคลากร ปี 69 (Cost Center)';
+    document.getElementById('ds-avg-title').textContent    = '📈 ค่าเฉลี่ยรายได้/คน แยก Cost Center';
+    document.getElementById('dsSortBy').options[5].text   = 'ชื่อ CC (A→Z)';
+  }
+  renderDsSummary();
+}
+
+function buildDeptSalary(){ renderDsSummary(); }  // backward compat
+
+function renderDsSummary(){
+  if(dsMode === 'cc') buildCCSalary(); else buildDeptSalaryCore();
+}
+
+/* ─── DEPT MODE ────────────────────────────────────────── */
+function buildDeptSalaryCore(){
   const EMP = getEMP();
   const deptGrp = grp(EMP, 'dept');
   const depts = Object.keys(deptGrp);
-
-  // Assign consistent colors per dept
   const deptColorMap = {};
   depts.sort().forEach((d,i) => deptColorMap[d] = DEPT_COLORS[i % DEPT_COLORS.length]);
 
-  // Aggregate stats per dept
   const stats = depts.map(d => {
     const emps = deptGrp[d];
-    const i68  = sum(emps,'totalIncome68');
-    const i69  = sum(emps,'totalIncome69');
-    const diff = i69 - i68;
-    const avg69 = emps.length > 0 ? i69/emps.length : 0;
+    const i68  = sum(emps,'totalIncome68'), i69 = sum(emps,'totalIncome69');
+    const diff = i69-i68, avg69 = emps.length>0?i69/emps.length:0;
     const adjCount = emps.filter(e=>e.totalIncome69>e.totalIncome68).length;
-    return { dept:d, emps, headcount:emps.length, i68, i69, diff, avg69, adjCount, color:deptColorMap[d] };
+    return { key:d, label:d, emps, headcount:emps.length, i68, i69, diff, avg69, adjCount, color:deptColorMap[d] };
   });
+  renderDsBlocks(stats, EMP, 'แผนก', depts.length, false);
+}
 
-  // Sort
-  const sortBy = document.getElementById('dsSortBy').value;
+/* ─── COST CENTER MODE ─────────────────────────────────── */
+function buildCCSalary(){
+  const EMP = getEMP();
+  const brandGrp = grp(EMP, 'brand');
+  const brands = Object.keys(brandGrp);
+
+  const stats = brands.map(b => {
+    const emps = brandGrp[b];
+    const i68  = sum(emps,'totalIncome68'), i69 = sum(emps,'totalIncome69');
+    const diff = i69-i68, avg69 = emps.length>0?i69/emps.length:0;
+    const adjCount = emps.filter(e=>e.totalIncome69>e.totalIncome68).length;
+    return { key:b, label:ccFull(b), emps, headcount:emps.length, i68, i69, diff, avg69, adjCount, color:ccColor(b) };
+  });
+  renderDsBlocks(stats, EMP, 'Cost Center', brands.length, true);
+}
+
+/* ─── SHARED RENDERER ──────────────────────────────────── */
+function renderDsBlocks(stats, EMP, unitLabel, totalGroups, isCCMode){
+  const sortBy    = document.getElementById('dsSortBy').value;
   const maxFilter = parseFloat(document.getElementById('dsMaxFilter').value) || null;
+  const totI68    = sum(EMP,'totalIncome68'), totI69 = sum(EMP,'totalIncome69');
 
   let filtered = [...stats];
   if(maxFilter) filtered = filtered.filter(s => s.i69 <= maxFilter);
@@ -659,124 +725,79 @@ function buildDeptSalary(){
     headcount: (a,b)=>b.headcount-a.headcount,
     diff:      (a,b)=>b.diff-a.diff,
     avg:       (a,b)=>b.avg69-a.avg69,
-    name:      (a,b)=>a.dept.localeCompare(b.dept,'th')
+    name:      (a,b)=>a.label.localeCompare(b.label,'th')
   };
   filtered.sort(sorters[sortBy]||sorters.income69);
 
-  // Global totals
-  const totI68  = sum(EMP,'totalIncome68');
-  const totI69  = sum(EMP,'totalIncome69');
-  const totDiff = totI69 - totI69;
-
   // KPI
-  const topDept = [...stats].sort((a,b)=>b.i69-a.i69)[0];
-  const mostAdj = [...stats].sort((a,b)=>b.adjCount-a.adjCount)[0];
-  const highAvg  = [...stats].sort((a,b)=>b.avg69-a.avg69)[0];
+  const top  = [...stats].sort((a,b)=>b.i69-a.i69)[0];
+  const topAdj = [...stats].sort((a,b)=>b.adjCount-a.adjCount)[0];
+  const topAvg = [...stats].sort((a,b)=>b.avg69-a.avg69)[0];
   document.getElementById('ds-kpis').innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">แผนกทั้งหมด</div><div class="kpi-val red">${depts.length}</div><div class="kpi-sub">แผนก</div></div>
-    <div class="kpi-card gold"><div class="kpi-label">รายได้สูงสุด (แผนก)</div><div class="kpi-val gold" style="font-size:16px">${topDept?topDept.dept:'—'}</div><div class="kpi-sub">฿${topDept?fmt(topDept.i69):'—'}/เดือน</div></div>
-    <div class="kpi-card purple"><div class="kpi-label">เฉลี่ยสูงสุด/คน</div><div class="kpi-val purple" style="font-size:16px">${highAvg?highAvg.dept:'—'}</div><div class="kpi-sub">฿${highAvg?fmt(highAvg.avg69):'—'}/คน</div></div>
-    <div class="kpi-card green"><div class="kpi-label">แผนกที่ปรับมากสุด</div><div class="kpi-val green" style="font-size:16px">${mostAdj?mostAdj.dept:'—'}</div><div class="kpi-sub">${mostAdj?mostAdj.adjCount:0} คน</div></div>
-    <div class="kpi-card blue"><div class="kpi-label">รายได้รวม ปี 69</div><div class="kpi-val blue" style="font-size:18px">฿${fmt(totI69)}</div><div class="kpi-sub">ทุกแผนก/เดือน</div></div>
+    <div class="kpi-card"><div class="kpi-label">${unitLabel}ทั้งหมด</div><div class="kpi-val red">${totalGroups}</div><div class="kpi-sub">${unitLabel}</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">รายได้สูงสุด</div><div class="kpi-val gold" style="font-size:14px;line-height:1.2">${top?top.label:'—'}</div><div class="kpi-sub">฿${top?fmt(top.i69):'—'}/เดือน</div></div>
+    <div class="kpi-card purple"><div class="kpi-label">เฉลี่ย/คน สูงสุด</div><div class="kpi-val purple" style="font-size:14px;line-height:1.2">${topAvg?topAvg.label:'—'}</div><div class="kpi-sub">฿${topAvg?fmt(topAvg.avg69):'—'}/คน</div></div>
+    <div class="kpi-card green"><div class="kpi-label">ปรับมากสุด</div><div class="kpi-val green" style="font-size:14px;line-height:1.2">${topAdj?topAdj.label:'—'}</div><div class="kpi-sub">${topAdj?topAdj.adjCount:0} คน</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">รายได้รวม ปี 69</div><div class="kpi-val blue" style="font-size:18px">฿${fmt(totI69)}</div><div class="kpi-sub">ทุก${unitLabel}/เดือน</div></div>
   `;
 
-  // Chart 1: YoY Bar
-  const chartDepts = filtered.map(s=>s.dept);
+  // Chart labels — CC mode ย่อให้สั้น
+  const chartLabels = filtered.map(s => isCCMode
+    ? s.label.replace('บริษัท ','').replace(' จำกัด','').replace(/ \(.*\)/,'').trim().substring(0,22)
+    : s.label
+  );
+
+  // Chart 1: YoY
   makeChart('deptYoYChart',{
     type:'bar',
-    data:{
-      labels: chartDepts,
-      datasets:[
-        { label:'ปี 68', data:filtered.map(s=>s.i68), backgroundColor:'rgba(180,180,180,0.55)', borderRadius:4, barThickness:18 },
-        { label:'ปี 69', data:filtered.map(s=>s.i69), backgroundColor:filtered.map(s=>s.color+'cc'), borderRadius:4, barThickness:18 }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{display:true,position:'top',labels:{font:{size:12,family:'Prompt'},usePointStyle:true,boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.y.toLocaleString('th-TH')}}
-      },
-      scales:{
-        x:{ticks:{font:{size:11,family:'Prompt'}}},
-        y:{ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v, font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}}
-      }
-    }
+    data:{labels:chartLabels,datasets:[
+      {label:'ปี 68',data:filtered.map(s=>s.i68),backgroundColor:'rgba(180,180,180,0.55)',borderRadius:4,barThickness:18},
+      {label:'ปี 69',data:filtered.map(s=>s.i69),backgroundColor:filtered.map(s=>s.color+'cc'),borderRadius:4,barThickness:18}
+    ]},
+    options:{responsive:true,plugins:{legend:{display:true,position:'top',labels:{font:{size:12,family:'Prompt'},usePointStyle:true,boxWidth:10}},tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.y.toLocaleString('th-TH')}}},
+      scales:{x:{ticks:{font:{size:10,family:'Prompt'},maxRotation:30}},y:{ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v,font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}}}}
   });
 
-  // Chart 2: Donut proportion
+  // Chart 2: Donut
   makeChart('deptDonutChart',{
     type:'doughnut',
-    data:{
-      labels:filtered.map(s=>s.dept),
-      datasets:[{
-        data:filtered.map(s=>s.i69),
-        backgroundColor:filtered.map(s=>s.color),
-        borderWidth:2,borderColor:'#fff'
-      }]
-    },
-    options:{
-      cutout:'52%',
-      plugins:{
-        legend:{position:'right',labels:{font:{size:11,family:'Prompt'},boxWidth:12,padding:10}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ฿${ctx.parsed.toLocaleString('th-TH')}`}}
-      }
-    }
+    data:{labels:chartLabels,datasets:[{data:filtered.map(s=>s.i69),backgroundColor:filtered.map(s=>s.color),borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'52%',plugins:{legend:{position:'right',labels:{font:{size:11,family:'Prompt'},boxWidth:12,padding:10}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ฿${ctx.parsed.toLocaleString('th-TH')}`}}}}
   });
 
-  // Chart 3: Avg per person
+  // Chart 3: Avg
   makeChart('deptAvgChart',{
-    type:'bar',
-    indexAxis:'y',
-    data:{
-      labels:filtered.map(s=>s.dept),
-      datasets:[{
-        label:'เฉลี่ย/คน ปี 69',
-        data:filtered.map(s=>Math.round(s.avg69)),
-        backgroundColor:filtered.map(s=>s.color+'bb'),
-        borderRadius:4,
-        barThickness:16
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.x.toLocaleString('th-TH')}}
-      },
-      scales:{
-        x:{ticks:{callback:v=>v>=1e3?(v/1e3).toFixed(0)+'K':v, font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-        y:{ticks:{font:{size:10,family:'Prompt'}}}
-      }
-    }
+    type:'bar',indexAxis:'y',
+    data:{labels:chartLabels,datasets:[{label:'เฉลี่ย/คน ปี 69',data:filtered.map(s=>Math.round(s.avg69)),backgroundColor:filtered.map(s=>s.color+'bb'),borderRadius:4,barThickness:16}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' ฿'+ctx.parsed.x.toLocaleString('th-TH')}}},
+      scales:{x:{ticks:{callback:v=>v>=1e3?(v/1e3).toFixed(0)+'K':v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},y:{ticks:{font:{size:10,family:'Prompt'}}}}}
   });
 
-  // Info label
-  document.getElementById('ds-info').textContent = `แสดง ${filtered.length} จาก ${depts.length} แผนก`;
+  document.getElementById('ds-info').textContent = `แสดง ${filtered.length} จาก ${totalGroups} ${unitLabel}`;
 
-  // Dept blocks (accordion)
+  // Accordion blocks
+  const LVL_STYLE = {'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed','Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b','Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'};
   const maxInc = Math.max(...filtered.map(s=>s.i69), 1);
-  const blocks = filtered.map((s,idx) => {
-    const diffUp  = s.diff >= 0;
-    const pctDiff = s.i68>0 ? (s.diff/s.i68*100).toFixed(2) : '0.00';
-    const pctOfTotal = totI69>0 ? (s.i69/totI69*100).toFixed(1) : 0;
-    const barW = (s.i69/maxInc*100).toFixed(1);
-    const expanded = (idx === 0); // ขยายแผนกแรกเป็น default
 
-    // Employee rows in this dept — เรียงตาม totalIncome69 สูงสุด
+  // ใน CC mode: column ย่อย = แผนก | ใน Dept mode: column ย่อย = CC
+  const subCol = isCCMode ? 'แผนก' : 'Cost Center';
+
+  document.getElementById('ds-dept-blocks').innerHTML = filtered.map((s,idx)=>{
+    const diffUp  = s.diff >= 0;
+    const pctDiff = s.i68>0?(s.diff/s.i68*100).toFixed(2):'0.00';
+    const pctOfTotal = totI69>0?(s.i69/totI69*100).toFixed(1):0;
+    const expanded = (idx===0);
+
     const empRows = [...s.emps].sort((a,b)=>b.totalIncome69-a.totalIncome69).map((e,i)=>{
       const d = e.totalIncome69-e.totalIncome68;
-      const LVL_STYLE = {
-        'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed',
-        'Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b',
-        'Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'
-      };
+      const subVal = isCCMode ? e.dept : ccFull(e.brand);
+      const subColor = isCCMode ? '#555' : ccColor(e.brand);
       return `<tr>
         <td style="color:#bbb;font-size:10px">${i+1}</td>
         <td style="font-size:10px;color:#bbb;white-space:nowrap">${e.id}</td>
         <td><div style="font-weight:600;font-size:12px">${e.name}</div><div style="font-size:10px;color:#aaa">${e.nickname}</div></td>
-        <td style="font-size:10.5px;color:${ccColor(e.brand)};font-weight:600;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis" title="${ccFull(e.brand)}">${ccFull(e.brand)}</td>
-        <td style="font-size:10.5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
+        <td style="font-size:10.5px;color:${subColor};font-weight:600;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${subVal}">${subVal}</td>
+        <td style="font-size:10.5px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.position}">${e.position}</td>
         <td><span style="display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;${LVL_STYLE[e.level]||'background:#eee;color:#666'}">${e.level}</span></td>
         <td style="text-align:right;font-size:11px">฿${fmt(e.totalIncome68)}</td>
         <td style="text-align:right;font-size:11.5px;font-weight:700">฿${fmt(e.totalIncome69)}</td>
@@ -784,26 +805,32 @@ function buildDeptSalary(){
       </tr>`;
     }).join('');
 
+    // Mini bar width
+    const barW = (s.i69/maxInc*100).toFixed(1);
+
     return `
     <div class="dept-summary-block">
       <div class="dept-summary-header" onclick="toggleDeptBlock(this)">
         <div class="dept-summary-header-left">
           <div class="dept-color-bar" style="background:${s.color}"></div>
-          <div>
-            <div class="dept-name">${s.dept}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:1px;">${s.headcount} คน · ปรับแล้ว ${s.adjCount} คน · ${pctOfTotal}% ของรายได้รวม</div>
+          <div style="flex:1;min-width:0;">
+            <div class="dept-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:480px;" title="${s.label}">${s.label}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span>${s.headcount} คน</span>
+              <span>·</span>
+              <span>ปรับแล้ว <strong>${s.adjCount}</strong> คน</span>
+              <span>·</span>
+              <span>${pctOfTotal}% ของรายได้รวม</span>
+              <!-- mini progress -->
+              <div style="flex:1;max-width:120px;min-width:60px;background:#f0f0f0;border-radius:3px;height:5px;overflow:hidden;">
+                <div style="width:${barW}%;height:100%;border-radius:3px;background:${s.color};"></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <!-- Progress bar mini -->
-          <div style="width:100px;background:#f0f0f0;border-radius:3px;height:6px;display:none;" class="dept-mini-bar-wrap">
-            <div style="width:${barW}%;height:100%;border-radius:3px;background:${s.color};transition:width .5s;"></div>
-          </div>
-          <span class="chevron ${expanded?'open':''}">▼</span>
-        </div>
+        <span class="chevron ${expanded?'open':''}">▼</span>
       </div>
 
-      <!-- KPI summary row -->
       <div class="dept-summary-kpis">
         <div class="dept-kpi-item">
           <div class="dept-kpi-label">รายได้รวม ปี 68</div>
@@ -826,14 +853,13 @@ function buildDeptSalary(){
         </div>
       </div>
 
-      <!-- Employee table (collapsible) -->
       <div class="dept-body-wrap ${expanded?'open':''}">
         <div class="dept-body">
           <div class="tbl-wrap" style="margin-top:4px;">
             <table class="dept-emp-tbl">
               <thead><tr>
                 <th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th>
-                <th>Cost Center</th><th>ตำแหน่ง</th><th>ระดับ</th>
+                <th>${subCol}</th><th>ตำแหน่ง</th><th>ระดับ</th>
                 <th style="text-align:right">ปี 68</th>
                 <th style="text-align:right">ปี 69</th>
                 <th style="text-align:right">Δ</th>
@@ -845,8 +871,6 @@ function buildDeptSalary(){
       </div>
     </div>`;
   }).join('');
-
-  document.getElementById('ds-dept-blocks').innerHTML = blocks;
 }
 
 function toggleDeptBlock(header){
@@ -1055,7 +1079,7 @@ function renderTab(name){
   if(name==='mobility')    buildMobility();
   if(name==='distribution')buildDist();
   if(name==='costcenter')  buildCostCenter();
-  if(name==='deptsalary')  buildDeptSalary();
+  if(name==='deptsalary')  renderDsSummary();
   updateSyncLabel();
 }
 function updateSyncLabel(){
