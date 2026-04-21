@@ -108,6 +108,9 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 .tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
 .tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .tbl th{background:#f8f8f8;color:var(--muted);padding:9px 11px;text-align:left;font-weight:700;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl th.sortable{cursor:pointer;user-select:none;}
+.tbl th.sortable:hover{background:#efefef;color:#333;}
+.tbl th.sorted{color:#1a1a1a;background:#e8eef7;}
 .tbl td{padding:8px 11px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
 .tbl tr:hover td{background:#fafafa;}
 .tbl tr:last-child td{border-bottom:none;}
@@ -378,7 +381,18 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
       </div>
     </div>
     <div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">Δ</th></tr></thead>
+      <thead><tr>
+        <th>#</th>
+        <th class="sortable" onclick="sortHCBy('id')" id="th-hc-id">รหัส</th>
+        <th class="sortable" onclick="sortHCBy('name')" id="th-hc-name">ชื่อ-นามสกุล</th>
+        <th class="sortable" onclick="sortHCBy('brand')" id="th-hc-brand">Cost Center</th>
+        <th class="sortable" onclick="sortHCBy('dept')" id="th-hc-dept">แผนก</th>
+        <th class="sortable" onclick="sortHCBy('position')" id="th-hc-pos">ตำแหน่ง</th>
+        <th class="sortable" onclick="sortHCBy('level')" id="th-hc-lvl">ระดับ</th>
+        <th class="sortable" onclick="sortHCBy('baseSalary69')" id="th-hc-b69" style="text-align:right">เงินเดือน 69</th>
+        <th class="sortable" onclick="sortHCBy('totalIncome69')" id="th-hc-i69" style="text-align:right">รายได้รวม 69</th>
+        <th class="sortable" onclick="sortHCBy('delta')" id="th-hc-delta" style="text-align:right">Δ</th>
+      </tr></thead>
       <tbody id="hcBody"></tbody>
     </table></div>
     <div style="margin-top:6px;font-size:11px;color:var(--muted)" id="hc-info"></div>
@@ -420,7 +434,16 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
     </div>
     <div class="tbl-wrap">
       <table class="tbl" id="ccEmpTable">
-        <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th><th>หมายเหตุ</th></tr></thead>
+        <thead><tr>
+          <th>#</th>
+          <th class="sortable" onclick="sortCCEmpBy('id')" id="th-cc-id">รหัส</th>
+          <th class="sortable" onclick="sortCCEmpBy('name')" id="th-cc-name">ชื่อ-นามสกุล</th>
+          <th class="sortable" onclick="sortCCEmpBy('brand')" id="th-cc-brand">Cost Center</th>
+          <th class="sortable" onclick="sortCCEmpBy('dept')" id="th-cc-dept">แผนก</th>
+          <th class="sortable" onclick="sortCCEmpBy('position')" id="th-cc-pos">ตำแหน่ง</th>
+          <th class="sortable" onclick="sortCCEmpBy('level')" id="th-cc-lvl">ระดับ</th>
+          <th>หมายเหตุ</th>
+        </tr></thead>
         <tbody id="ccEmpBody"></tbody>
       </table>
     </div>
@@ -737,7 +760,16 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
     </div>
     <div class="tbl-wrap">
       <table class="tbl">
-        <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">อายุงาน</th></tr></thead>
+        <thead><tr>
+          <th>#</th>
+          <th class="sortable" onclick="sortAlrBy('id')" id="th-alr-id">รหัส</th>
+          <th class="sortable" onclick="sortAlrBy('name')" id="th-alr-name">ชื่อ-นามสกุล</th>
+          <th class="sortable" onclick="sortAlrBy('brand')" id="th-alr-brand">Cost Center</th>
+          <th class="sortable" onclick="sortAlrBy('dept')" id="th-alr-dept">แผนก</th>
+          <th class="sortable" onclick="sortAlrBy('level')" id="th-alr-lvl">ระดับ</th>
+          <th class="sortable" onclick="sortAlrBy('baseSalary69')" id="th-alr-sal" style="text-align:right">เงินเดือน 69</th>
+          <th class="sortable" onclick="sortAlrBy('tenure')" id="th-alr-ten" style="text-align:right">อายุงาน</th>
+        </tr></thead>
         <tbody id="alrPendingBody"></tbody>
       </table>
     </div>
@@ -775,7 +807,17 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
     <div class="card">
       <div class="card-title gold">รายชื่อพนักงานที่ได้รับการปรับ</div>
       <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>ตำแหน่ง</th><th style="text-align:right">ปี 68</th><th style="text-align:right">ปี 69</th><th style="text-align:right">เพิ่มขึ้น</th><th style="text-align:right">%</th><th>หมายเหตุ</th></tr></thead>
+        <thead><tr>
+          <th class="sortable" onclick="sortAdjBy('id')" id="th-adj-id">รหัส</th>
+          <th class="sortable" onclick="sortAdjBy('name')" id="th-adj-name">ชื่อ-นามสกุล</th>
+          <th class="sortable" onclick="sortAdjBy('brand')" id="th-adj-brand">Cost Center</th>
+          <th class="sortable" onclick="sortAdjBy('position')" id="th-adj-pos">ตำแหน่ง</th>
+          <th class="sortable" onclick="sortAdjBy('totalIncome68')" id="th-adj-68" style="text-align:right">ปี 68</th>
+          <th class="sortable" onclick="sortAdjBy('totalIncome69')" id="th-adj-69" style="text-align:right">ปี 69</th>
+          <th class="sortable" onclick="sortAdjBy('delta')" id="th-adj-delta" style="text-align:right">เพิ่มขึ้น</th>
+          <th class="sortable" onclick="sortAdjBy('pct')" id="th-adj-pct" style="text-align:right">%</th>
+          <th>หมายเหตุ</th>
+        </tr></thead>
         <tbody id="adjBody"></tbody>
       </table></div>
     </div>
@@ -888,6 +930,7 @@ function buildOverview(){
 // HEADCOUNT
 // ══════════════════════════════════════════════════════════
 let hcReady=false, hcF=[];
+let hcSortCol=null, hcSortDir='asc';
 function buildHeadcount(){
   const EMP=_getEMPRaw();
   if(!hcReady){
@@ -909,11 +952,35 @@ function filterHC(){
   renderHC();
 }
 function clearHC(){document.getElementById('hcQ').value='';document.getElementById('hcBrand').value='';document.getElementById('hcDept').value='';hcF=[..._getEMPRaw()];renderHC();}
+function sortHCBy(col){
+  if(hcSortCol===col){hcSortDir=hcSortDir==='asc'?'desc':'asc';}
+  else{hcSortCol=col;hcSortDir='asc';}
+  renderHC();
+}
 function renderHC(){
   const state = getPickerState();
   const LVL_STYLE={'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed','Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b','Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'};
-  const active   = hcF.filter(e=>e.brand!==RESIGNED_CC);
-  const resigned = hcF.filter(e=>e.brand===RESIGNED_CC);
+  // Update sort header indicators
+  const hcCols=['id','name','brand','dept','position','level','baseSalary69','totalIncome69','delta'];
+  const hcIds=['th-hc-id','th-hc-name','th-hc-brand','th-hc-dept','th-hc-pos','th-hc-lvl','th-hc-b69','th-hc-i69','th-hc-delta'];
+  const hcLabels=['รหัส','ชื่อ-นามสกุล','Cost Center','แผนก','ตำแหน่ง','ระดับ','เงินเดือน 69','รายได้รวม 69','Δ'];
+  hcCols.forEach((c,idx)=>{
+    const el=document.getElementById(hcIds[idx]); if(!el) return;
+    el.classList.toggle('sorted',hcSortCol===c);
+    el.textContent=hcLabels[idx]+(hcSortCol===c?(hcSortDir==='asc'?' ▲':' ▼'):'');
+  });
+  // Sort
+  let sorted=[...hcF];
+  if(hcSortCol){
+    sorted.sort((a,b)=>{
+      let av=hcSortCol==='delta'?(a.totalIncome69-a.totalIncome68):hcSortCol==='brand'?ccFull(a.brand||''):(a[hcSortCol]||'');
+      let bv=hcSortCol==='delta'?(b.totalIncome69-b.totalIncome68):hcSortCol==='brand'?ccFull(b.brand||''):(b[hcSortCol]||'');
+      const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return hcSortDir==='asc'?cmp:-cmp;
+    });
+  }
+  const active   = sorted.filter(e=>e.brand!==RESIGNED_CC);
+  const resigned = sorted.filter(e=>e.brand===RESIGNED_CC);
   document.getElementById('hc-count').textContent=active.length;
   document.getElementById('hc-info').textContent=`แสดง ${active.length} คน (ซ่อน ${active.filter(e=>state[e.id]===false).length} คน)${resigned.length?' · ลาออก '+resigned.length+' คน':''}`;
   let rowNum=0;
@@ -1347,7 +1414,30 @@ function buildPayroll(){
     <div class="kpi-card blue"><div class="kpi-label">เพิ่มเฉลี่ย/คน</div><div class="kpi-val blue" style="font-size:20px">฿${fmt(avgD)}</div><div class="kpi-sub">บาท/เดือน</div></div>
     <div class="kpi-card purple"><div class="kpi-label">% เปลี่ยนแปลง</div><div class="kpi-val purple" style="font-size:20px">${avgPct.toFixed(1)}%</div><div class="kpi-sub">เฉลี่ยของผู้ถูกปรับ</div></div>
   `;
-  document.getElementById('adjBody').innerHTML=adj.sort((a,b)=>(b.totalIncome69-b.totalIncome68)-(a.totalIncome69-a.totalIncome68)).map(e=>{
+  window._adjData = adj;
+  renderAdjTable();
+}
+function renderAdjTable(){
+  const adj = (window._adjData||[]).slice();
+  // Update headers
+  const adjCols=['id','name','brand','position','totalIncome68','totalIncome69','delta','pct'];
+  const adjIds=['th-adj-id','th-adj-name','th-adj-brand','th-adj-pos','th-adj-68','th-adj-69','th-adj-delta','th-adj-pct'];
+  const adjLbls=['รหัส','ชื่อ-นามสกุล','Cost Center','ตำแหน่ง','ปี 68','ปี 69','เพิ่มขึ้น','%'];
+  adjCols.forEach((c,i)=>{const el=document.getElementById(adjIds[i]);if(!el)return;el.classList.toggle('sorted',adjSortCol===c);el.textContent=adjLbls[i]+(adjSortCol===c?(adjSortDir==='asc'?' ▲':' ▼'):'');});
+  if(adjSortCol){
+    adj.sort((a,b)=>{
+      let av,bv;
+      if(adjSortCol==='delta'){av=a.totalIncome69-a.totalIncome68;bv=b.totalIncome69-b.totalIncome68;}
+      else if(adjSortCol==='pct'){av=a.totalIncome68>0?(a.totalIncome69-a.totalIncome68)/a.totalIncome68:0;bv=b.totalIncome68>0?(b.totalIncome69-b.totalIncome68)/b.totalIncome68:0;}
+      else if(adjSortCol==='brand'){av=ccFull(a.brand||'');bv=ccFull(b.brand||'');}
+      else{av=a[adjSortCol]||'';bv=b[adjSortCol]||'';}
+      const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return adjSortDir==='asc'?cmp:-cmp;
+    });
+  } else {
+    adj.sort((a,b)=>(b.totalIncome69-b.totalIncome68)-(a.totalIncome69-a.totalIncome68));
+  }
+  document.getElementById('adjBody').innerHTML=adj.map(e=>{
     const d=e.totalIncome69-e.totalIncome68;
     const pct=e.totalIncome68>0?(d/e.totalIncome68*100).toFixed(1):'—';
     return`<tr>
@@ -1433,21 +1523,44 @@ function clearCCEmpFilter(){
   document.getElementById('ccEmpDept').value='';document.getElementById('ccEmpLevel').value='';
   ccEmpFilter={q:'',cc:'',dept:'',level:''};renderCCEmpTable();
 }
+let ccEmpSortCol=null,ccEmpSortDir='asc';
+function sortCCEmpBy(col){
+  if(ccEmpSortCol===col){ccEmpSortDir=ccEmpSortDir==='asc'?'desc':'asc';}
+  else{ccEmpSortCol=col;ccEmpSortDir='asc';}
+  renderCCEmpTable();
+}
 function renderCCEmpTable(){
   const EMP=getEMP();
+  // Update sort header indicators
+  const ccCols=['id','name','brand','dept','position','level'];
+  const ccIds=['th-cc-id','th-cc-name','th-cc-brand','th-cc-dept','th-cc-pos','th-cc-lvl'];
+  const ccLabels=['รหัส','ชื่อ-นามสกุล','Cost Center','แผนก','ตำแหน่ง','ระดับ'];
+  ccCols.forEach((c,idx)=>{
+    const el=document.getElementById(ccIds[idx]); if(!el) return;
+    el.classList.toggle('sorted',ccEmpSortCol===c);
+    el.textContent=ccLabels[idx]+(ccEmpSortCol===c?(ccEmpSortDir==='asc'?' ▲':' ▼'):'');
+  });
   const LVL_STYLE={'Officer':'background:#eaf0ff;color:#2563eb','Leader and Supervisor':'background:#f3ebff;color:#7c3aed','Manager':'background:#fff8e6;color:#d97706','Chief and Director':'background:#ffebeb;color:#c0392b','Senior Officer':'background:#eafaf1;color:#27ae60','Consultant':'background:#fef9e6;color:#b45309'};
-  const rows=EMP.filter(e=>{
+  let rows=EMP.filter(e=>{
     const q=ccEmpFilter.q;
     return(!q||e.name.toLowerCase().includes(q)||e.nickname.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)||e.position.toLowerCase().includes(q))&&
       (!ccEmpFilter.cc||e.brand===ccEmpFilter.cc)&&(!ccEmpFilter.dept||e.dept===ccEmpFilter.dept)&&(!ccEmpFilter.level||e.level===ccEmpFilter.level);
   });
+  if(ccEmpSortCol){
+    rows.sort((a,b)=>{
+      const av=ccEmpSortCol==='brand'?ccFull(a.brand||''):(a[ccEmpSortCol]||'');
+      const bv=ccEmpSortCol==='brand'?ccFull(b.brand||''):(b[ccEmpSortCol]||'');
+      const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return ccEmpSortDir==='asc'?cmp:-cmp;
+    });
+  }
   const brandGrp=grp(rows,'brand');
   const brands=Object.keys(brandGrp).sort((a,b)=>brandGrp[b].length-brandGrp[a].length);
   document.getElementById('ccEmpInfo').textContent='แสดง '+rows.length+' คน จาก '+EMP.length+' คน';
   let html='',rowNum=0;
   if(rows.length===0){html='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">ไม่พบข้อมูล</td></tr>';}
   else{brands.forEach(b=>{
-    const emps=brandGrp[b], bcolor=ccColor(b);
+    const emps=ccEmpSortCol?rows.filter(e=>e.brand===b):brandGrp[b], bcolor=ccColor(b);
     html+=`<tr><td colspan="8" style="background:${bcolor}12;border-top:2px solid ${bcolor}33;border-bottom:1px solid ${bcolor}22;padding:9px 12px;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="width:10px;height:10px;border-radius:50%;background:${bcolor};display:inline-block;flex-shrink:0;"></span>
@@ -1595,19 +1708,48 @@ function savePickerState(s){
 }
 
 /* ─── Raw loader (ไม่กรอง) ───────────────────────────────── */
-function _getEMPRaw(){
-  return JSON.parse(localStorage.getItem('hr_db')||'null') || SEED_EMP;
+// ── Resigned store (hr_resigned localStorage) ────────────
+function _getResignedDB(){
+  return JSON.parse(localStorage.getItem('hr_resigned')||'[]');
+}
+function _saveResignedDB(arr){
+  localStorage.setItem('hr_resigned', JSON.stringify(arr));
+  localStorage.setItem('hr_last_save', Date.now().toString());
 }
 
-/* ─── getEMP() = กรองตาม pickerState + ไม่แสดงลาออก ─────── */
+// ── Active-only store (hr_db) — with one-time migration ──
+function _getActiveDB(){
+  const raw = JSON.parse(localStorage.getItem('hr_db')||'null') || JSON.parse(JSON.stringify(SEED_EMP));
+  const toMigrate = raw.filter(e => e.brand === RESIGNED_CC);
+  if(toMigrate.length){
+    const existing = _getResignedDB();
+    const migrated = toMigrate.map(e => Object.assign({}, e, {
+      resignDate: e.moveDate || '',
+      resignReason: 'ไม่ระบุ (migrated)',
+      lastBrand: e.brandOld || e.brand,
+      lastDept: e.dept
+    }));
+    const existingIds = existing.map(r=>r.id);
+    const newOnes = migrated.filter(m=>!existingIds.includes(m.id));
+    if(newOnes.length) _saveResignedDB([...existing, ...newOnes]);
+    const active = raw.filter(e => e.brand !== RESIGNED_CC);
+    localStorage.setItem('hr_db', JSON.stringify(active));
+    localStorage.setItem('hr_last_save', Date.now().toString());
+    return active;
+  }
+  return raw;
+}
+
+// ── Raw combined (active + resigned) — for Turnover tab ──
+function _getEMPRaw(){
+  const resigned = _getResignedDB().map(e => Object.assign({}, e, {brand: RESIGNED_CC}));
+  return [..._getActiveDB(), ...resigned];
+}
+
+// ── Dashboard employees: active only, respects picker state ──
 function getEMP(){
-  const all   = _getEMPRaw();
   const state = getPickerState();
-  return all.filter(e => {
-    if(e.brand === RESIGNED_CC) return false;   // ลาออก ไม่นับงบ
-    if(state[e.id] === false)   return false;   // ถูก hide โดย picker
-    return true;
-  });
+  return _getActiveDB().filter(e => state[e.id] !== false);
 }
 
 /* ─── Open / Close ─────────────────────────────────────── */
@@ -2055,6 +2197,10 @@ function buildTurnover(){
 // ALERTS & COMPLIANCE
 // ══════════════════════════════════════════════════════════
 var _alrAllPending = [];
+let alrSortCol=null,alrSortDir='asc';
+let adjSortCol=null,adjSortDir='asc';
+function sortAlrBy(col){if(alrSortCol===col){alrSortDir=alrSortDir==='asc'?'desc':'asc';}else{alrSortCol=col;alrSortDir='asc';}filterAlrList();}
+function sortAdjBy(col){if(adjSortCol===col){adjSortDir=adjSortDir==='asc'?'desc':'asc';}else{adjSortCol=col;adjSortDir='asc';}renderAdjTable();}
 
 function buildAlerts(){
   const ALL    = _getEMPRaw();
@@ -2184,10 +2330,23 @@ function buildAlerts(){
 function filterAlrList(){
   const q     = (document.getElementById('alrQ')||{value:''}).value.toLowerCase();
   const brand = (document.getElementById('alrBrand')||{value:''}).value;
-  const shown = _alrAllPending.filter(e =>
+  let shown = _alrAllPending.filter(e =>
     (!q || e.name.toLowerCase().includes(q) || e.id.toLowerCase().includes(q)) &&
     (!brand || e.brand === brand)
   );
+  // Update headers
+  const alrCols=['id','name','brand','dept','level','baseSalary69','tenure'];
+  const alrIds=['th-alr-id','th-alr-name','th-alr-brand','th-alr-dept','th-alr-lvl','th-alr-sal','th-alr-ten'];
+  const alrLbls=['รหัส','ชื่อ-นามสกุล','Cost Center','แผนก','ระดับ','เงินเดือน 69','อายุงาน'];
+  alrCols.forEach((c,i)=>{const el=document.getElementById(alrIds[i]);if(!el)return;el.classList.toggle('sorted',alrSortCol===c);el.textContent=alrLbls[i]+(alrSortCol===c?(alrSortDir==='asc'?' ▲':' ▼'):'');});
+  if(alrSortCol){
+    shown.sort((a,b)=>{
+      const av=alrSortCol==='brand'?ccFull(a.brand||''):alrSortCol==='tenure'?parseFloat(getTenure(a.id)||0):(a[alrSortCol]||'');
+      const bv=alrSortCol==='brand'?ccFull(b.brand||''):alrSortCol==='tenure'?parseFloat(getTenure(b.id)||0):(b[alrSortCol]||'');
+      const cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return alrSortDir==='asc'?cmp:-cmp;
+    });
+  }
   document.getElementById('alr-list-count').textContent = `พบ ${shown.length} คน`;
   document.getElementById('alrPendingBody').innerHTML = shown.length
     ? shown.map((e,i) => `<tr>
