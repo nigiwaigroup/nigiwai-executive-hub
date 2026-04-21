@@ -20,7 +20,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .login-logo{width:54px;height:54px;background:linear-gradient(135deg,var(--red),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;margin:0 auto 12px;}
 
 .topbar{background:var(--black);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.topbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 16px;overflow-x:auto;gap:0;}
+.topbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 16px;gap:0;flex-wrap:nowrap;}
+.topbar-tabs{background:#111;border-top:1px solid rgba(255,255,255,.06);overflow-x:auto;scrollbar-width:none;}
+.topbar-tabs::-webkit-scrollbar{display:none;}
+.topbar-tabs-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 16px;gap:0;flex-wrap:nowrap;}
 .t-logo{display:flex;align-items:center;gap:8px;padding:10px 14px 10px 0;border-right:1px solid rgba(255,255,255,.12);margin-right:8px;flex-shrink:0;}
 .t-logo-c{width:30px;height:30px;background:linear-gradient(135deg,var(--red),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
 .t-logo-t{font-family:'Prompt',sans-serif;font-weight:700;font-size:12px;color:#fff;}
@@ -199,24 +202,30 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 <div id="adminApp" style="display:none">
 
   <nav class="topbar">
-    <div class="topbar-inner">
+    <!-- ROW 1: Brand + Controls -->
+    <div class="topbar-inner" style="padding:0 16px;min-height:46px;">
       <div class="t-logo">
         <div class="t-logo-c">NG</div>
         <div><div class="t-logo-t">Nigiwai Group</div><div class="t-logo-s">Admin Panel</div></div>
       </div>
-      <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
-      <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
-      <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
-      <a class="nav-tab" href="#" onclick="switchTab('pointview',this);return false">📊 Point View</a>
-      <a class="nav-tab" href="#" onclick="switchTab('sheets',this);return false">🟢 Google Sheets</a>
-      <a class="nav-tab" href="#" onclick="switchTab('menus',this);return false">⚙ จัดการเมนู</a>
       <div class="spacer"></div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:8px 0">
-        <span id="syncStatus" style="font-size:10.5px;color:rgba(255,255,255,.45);max-width:220px">—</span>
+      <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;padding:6px 0;">
+        <span id="syncStatus" style="font-size:10.5px;color:rgba(255,255,255,.45);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</span>
         <button onclick="checkGAS()" class="hdr-btn">🔍 Test GAS</button>
-        <button onclick="syncSheet()" class="hdr-btn" style="border-color:rgba(201,162,39,.4);color:#f0c040">☁ Full Sync</button>
+        <button onclick="syncSheet()" class="hdr-btn" style="border-color:rgba(201,162,39,.4);color:#f0c040;">☁ Sync</button>
         <a href="index.html" class="back-btn">← Dashboard</a>
         <button onclick="doLogout()" class="logout-btn">🚪 ออก</button>
+      </div>
+    </div>
+    <!-- ROW 2: Tabs (scrollable, never wraps) -->
+    <div class="topbar-tabs">
+      <div class="topbar-tabs-inner">
+        <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
+        <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
+        <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
+        <a class="nav-tab" href="#" onclick="switchTab('pointview',this);return false">📊 Point View</a>
+        <a class="nav-tab" href="#" onclick="switchTab('sheets',this);return false">🟢 Google Sheets</a>
+        <a class="nav-tab" href="#" onclick="switchTab('menus',this);return false">⚙ เมนู</a>
       </div>
     </div>
   </nav>
@@ -813,6 +822,10 @@ function init() {
 
   CC.forEach(function(c) { ts.innerHTML += '<option value="' + c.full + '">' + c.full + '</option>'; });
 
+  // Load GAS URL from saved config if present
+  var _gasCfg = JSON.parse(localStorage.getItem('hr_gas_config')||'{}');
+  if(_gasCfg.url) { GAS_URL = _gasCfg.url; }
+
   renderStats();
   empF = DB.slice();
   renderEmp();
@@ -1199,24 +1212,28 @@ function delCC(i) {
 function switchTab(name, el) {
   document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-  document.getElementById('tab-' + name).classList.add('active');
-  el.classList.add('active');
-  if (name === 'menus') {
-    renderMenuList();
-    loadDashboardConfig();
-  }
+  var pane = document.getElementById('tab-' + name);
+  if(pane) pane.classList.add('active');
+  if(el) el.classList.add('active');
+  if(name === 'menus')     { renderMenuList(); loadDashboardConfig(); }
+  if(name === 'pointview') { setTimeout(buildMatrix, 50); }
+  if(name === 'sheets')    { loadGASConfig(); loadSyncLog(); }
 }
 
 // ═══════════════════════════════════════════════════════════════
 // MENU MANAGER
 // ═══════════════════════════════════════════════════════════════
 var DEFAULT_MENUS = [
-  { id:'overview',     icon:'🏢', label:'ภาพรวม',               visible:true  },
-  { id:'headcount',    icon:'👥', label:'Headcount',             visible:true  },
-  { id:'costcenter',   icon:'📋', label:'งบฯ ตาม Cost Center',  visible:true  },
-  { id:'mobility',     icon:'🔄', label:'Internal Mobility',     visible:true  },
-  { id:'distribution', icon:'📊', label:'Payroll Distribution',  visible:true  },
-  { id:'payroll',      icon:'💰', label:'ปรับเงินเดือน #01/26', visible:true  }
+  { id:'overview',      icon:'🏢', label:'ภาพรวม',                 visible:true  },
+  { id:'headcount',     icon:'👥', label:'Headcount',               visible:true  },
+  { id:'demographics',  icon:'👤', label:'Demographics',            visible:true  },
+  { id:'turnover',      icon:'📉', label:'Turnover & Retention',    visible:true  },
+  { id:'costcenter',    icon:'📋', label:'งบฯ ตาม Cost Center',    visible:true  },
+  { id:'deptsalary',    icon:'🏦', label:'สรุปตามแผนก',            visible:true  },
+  { id:'mobility',      icon:'🔄', label:'Internal Mobility',       visible:true  },
+  { id:'alerts',        icon:'🔔', label:'Alerts & Compliance',     visible:true  },
+  { id:'distribution',  icon:'📊', label:'Payroll Distribution',    visible:false },
+  { id:'payroll',       icon:'💰', label:'ปรับเงินเดือน #01/26',   visible:true  }
 ];
 
 function getMenuConfig() {
@@ -1321,6 +1338,12 @@ function saveMenuConfig() {
     var inp = document.getElementById('mlabel-' + m.id);
     if (inp) m.label = inp.value.trim() || m.label;
   });
+  // Ensure new tabs that are in DEFAULT_MENUS but not in saved config get merged in
+  DEFAULT_MENUS.forEach(function(def) {
+    if(!menus.find(function(m){ return m.id === def.id; })) {
+      menus.push(JSON.parse(JSON.stringify(def)));
+    }
+  });
   saveMenuLS(menus);
   toast('✅ บันทึกการตั้งค่าเมนูแล้ว — Reload index.html เพื่อดูผล', 'ok');
 }
@@ -1328,16 +1351,7 @@ function saveMenuConfig() {
 // ═══════════════════════════════════════════════════════════════
 // TAB SWITCHING — extended for new tabs
 // ═══════════════════════════════════════════════════════════════
-var _tabSwitchOrig = window.switchTab;
-window.switchTab = function(name, el) {
-  document.querySelectorAll('.tab-pane').forEach(function(t){ t.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
-  var pane = document.getElementById('tab-' + name);
-  if(pane) pane.classList.add('active');
-  if(el) el.classList.add('active');
-  if(name === 'pointview') { setTimeout(buildMatrix, 50); }
-  if(name === 'sheets')    { loadGASConfig(); loadSyncLog(); }
-};
+
 
 // ═══════════════════════════════════════════════════════════════
 // POINT VIEW — MODE TOGGLE
@@ -1677,59 +1691,47 @@ function checkGASSheet(){
 }
 
 function fetchSheetPreview(){
+  // Preview: ping GAS to verify connection and show local DB snapshot
   document.getElementById('sheetPreviewArea').innerHTML =
-    '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ กำลังโหลดข้อมูลจาก Google Sheet...</div>';
-  gasCall({ action:'fetch', limit:10 },
+    '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ กำลังตรวจสอบ Sheet...</div>';
+  gasCall({ action:'ping' },
     function(res){
-      var data = res.data || [];
+      var hc = res.headcount || 0;
+      // Show local DB as preview (GAS read-back requires extra GAS code)
+      var data = DB.slice(0, 10);
       if(!data.length){
         document.getElementById('sheetPreviewArea').innerHTML =
-          '<div style="text-align:center;padding:20px;color:var(--muted);">Sheet ว่างเปล่า — กด "Full Sync" เพื่ออัปโหลดข้อมูลก่อน</div>';
+          '<div style="text-align:center;padding:20px;color:var(--muted);">ไม่มีข้อมูลใน Local DB — เพิ่มพนักงานก่อน แล้วกด Full Sync</div>';
         return;
       }
-      var cols  = Object.keys(data[0]);
-      var html  = '<div style="overflow-x:auto;"><table class="tbl"><thead><tr>'+
-                  cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead><tbody>';
-      data.slice(0,10).forEach(function(row){
-        html += '<tr>'+cols.map(function(c){ return '<td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">'+
-                (row[c]||'—')+'</td>'; }).join('')+'</tr>';
+      var cols = ['id','name','nickname','brand','dept','position','level','baseSalary69','totalIncome69','remark'];
+      var html = '<div style="overflow-x:auto;"><table class="tbl"><thead><tr>'+
+                 cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead><tbody>';
+      data.forEach(function(row){
+        html += '<tr>'+cols.map(function(c){
+          return '<td style="white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;font-size:11px;">'+(row[c]||'—')+'</td>';
+        }).join('')+'</tr>';
       });
       html += '</tbody></table></div>';
-      html += '<div style="padding:8px 12px;font-size:11px;color:var(--muted);">แสดง '+Math.min(data.length,10)+' รายการแรก (ทั้งหมด '+res.total+' รายการ)</div>';
+      html += '<div style="padding:8px 12px;background:#eafaf1;border-radius:7px;margin-top:8px;font-size:11px;color:#1e8449;">'+
+              '🟢 GAS เชื่อมต่อได้ — Sheet มี <strong>'+hc+'</strong> รายการ | Local DB มี <strong>'+DB.length+'</strong> รายการ'+
+              '</div>';
       document.getElementById('sheetPreviewArea').innerHTML = html;
-      addSyncLog('📄 Preview โหลดสำเร็จ — '+res.total+' รายการ');
+      addSyncLog('📄 Preview OK — Sheet: '+hc+' rows | Local: '+DB.length+' rows');
     },
     function(e){
       document.getElementById('sheetPreviewArea').innerHTML =
-        '<div style="text-align:center;padding:20px;color:#c0392b;">❌ โหลดไม่สำเร็จ: '+e+' — ตรวจสอบ GAS URL และ Deploy Settings</div>';
+        '<div style="padding:12px;background:#fff5f5;border-radius:7px;color:#c0392b;font-size:12px;">'+
+        '❌ เชื่อมต่อ GAS ไม่ได้: '+e+'<br><small>ตรวจสอบ URL และ Deploy Settings: Who has access = Anyone</small></div>';
     }
   );
 }
 
 function importFromSheet(){
-  if(!confirm('นำเข้าข้อมูลจาก Google Sheet มาแทนที่ข้อมูลปัจจุบันใน Dashboard?\nข้อมูลเดิมจะถูก Overwrite')) return;
-  toast('⏳ กำลังนำเข้าข้อมูล...', 'ok');
-  gasCall({ action:'fetchAll' },
-    function(res){
-      if(!res.data || !res.data.length){ toast('⚠ ไม่พบข้อมูลใน Sheet', 'err'); return; }
-      var colMap = JSON.parse(localStorage.getItem('hr_col_map')||'null') || DEFAULT_COL_MAP;
-      var imported = res.data.map(function(row){
-        var emp = {};
-        Object.keys(colMap).forEach(function(field){ emp[field] = row[colMap[field]] || ''; });
-        ['baseSalary68','baseSalary69','totalIncome68','totalIncome69'].forEach(function(f){
-          emp[f] = parseFloat(emp[f])||0;
-        });
-        if(!emp.moveHistory) emp.moveHistory = [];
-        return emp;
-      });
-      DB = imported;
-      saveDB();
-      renderStats(); filterEmp(); renderEmp(); renderMobility();
-      toast('✅ นำเข้า '+imported.length+' รายการสำเร็จ', 'ok');
-      addSyncLog('⬇ Import จาก Sheet สำเร็จ — '+imported.length+' รายการ');
-    },
-    function(e){ toast('❌ Import ล้มเหลว: '+e, 'err'); }
-  );
+  // Import = push local DB → Sheet (GAS upsert-all via sync+append protocol)
+  if(!confirm('อัปโหลดข้อมูลทั้งหมด ('+DB.length+' รายการ) ไปยัง Google Sheet?\nข้อมูลเดิมใน Sheet จะถูก Overwrite')) return;
+  syncSheet(); // uses existing sync+append chunked protocol
+  addSyncLog('⬇ Triggered Full Sync → Sheet ('+DB.length+' records)');
 }
 
 // ── Sync Log ──
@@ -1761,10 +1763,12 @@ function renderSyncLog(){
 
 
 function resetMenuConfig() {
-  if (!confirm('รีเซ็ตเมนูกลับค่าเริ่มต้น?')) return;
+  if (!confirm('รีเซ็ตเมนูกลับค่าเริ่มต้น? (รวมถึงแท็บใหม่ทั้งหมด)')) return;
   localStorage.removeItem('hr_menu_config');
+  // Write fresh DEFAULT_MENUS immediately so index.html gets it right away
+  localStorage.setItem('hr_menu_config', JSON.stringify(JSON.parse(JSON.stringify(DEFAULT_MENUS))));
   renderMenuList();
-  toast('↺ รีเซ็ตเมนูแล้ว', 'ok');
+  toast('↺ รีเซ็ตเมนูแล้ว — ทุกแท็บถูกเพิ่มกลับมาครบ', 'ok');
 }
 
 function saveDashboardConfig() {

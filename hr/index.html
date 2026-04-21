@@ -20,12 +20,15 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 
 /* TOPBAR */
 .topbar{background:var(--black);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.topbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;overflow-x:auto;padding:0 16px;}
-.logo{display:flex;align-items:center;gap:8px;padding:11px 14px 11px 0;border-right:1px solid rgba(255,255,255,.12);margin-right:8px;flex-shrink:0;}
+.topbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;padding:0 16px;flex-wrap:nowrap;}
+.topbar-tabs{background:#111;border-top:1px solid rgba(255,255,255,.06);overflow-x:auto;scrollbar-width:none;}
+.topbar-tabs::-webkit-scrollbar{display:none;}
+.topbar-tabs-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;padding:0 10px;gap:0;flex-wrap:nowrap;}
+.logo{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 0;border-right:1px solid rgba(255,255,255,.12);margin-right:8px;flex-shrink:0;}
 .logo-c{width:30px;height:30px;background:linear-gradient(135deg,var(--red),var(--gold));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;}
 .logo-t{font-family:'Prompt',sans-serif;font-weight:700;font-size:12.5px;color:#fff;}
 .logo-s{font-size:10px;color:rgba(255,255,255,.4);margin-top:-2px;}
-.nav-tab{display:flex;align-items:center;gap:5px;padding:0 13px;height:46px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;text-decoration:none;flex-shrink:0;}
+.nav-tab{display:flex;align-items:center;gap:5px;padding:0 12px;height:40px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;text-decoration:none;flex-shrink:0;}
 .nav-tab:hover{color:#fff;background:rgba(255,255,255,.06);}
 .nav-tab.active{color:#fff;border-bottom-color:var(--red);}
 .spacer{flex:1;min-width:8px;}
@@ -33,7 +36,7 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 .admin-btn:hover{background:var(--red-dark);}
 
 /* SYNC INDICATOR */
-.sync-bar{background:var(--black);border-top:1px solid rgba(255,255,255,.06);text-align:right;padding:3px 16px;}
+.sync-bar{background:#0d0d0d;border-top:1px solid rgba(255,255,255,.04);text-align:right;padding:2px 16px;}
 .sync-bar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#27ae60;display:inline-block;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -183,7 +186,7 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 @media(max-width:480px){
   .g2,.g3{grid-template-columns:1fr;}
   .kpi-grid{grid-template-columns:1fr 1fr;}
-  .nav-tab{padding:0 9px;font-size:11px;}
+  .nav-tab{padding:0 9px;font-size:10.5px;height:36px;}
 }
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi .3s ease forwards;}
@@ -274,15 +277,19 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 
 <!-- TOPBAR -->
 <nav class="topbar">
-  <div class="topbar-inner">
+  <!-- Row 1: Logo + Controls -->
+  <div class="topbar-inner" style="min-height:44px;">
     <div class="logo">
       <div class="logo-c">NG</div>
       <div><div class="logo-t">Nigiwai Group</div><div class="logo-s">HR Dashboard 2026</div></div>
     </div>
-    <div id="dynTabs" style="display:flex;align-items:center;"></div>
     <div class="spacer"></div>
-    <button onclick="openPicker()" id="pickerBtn" style="background:#2c3e50;color:#fff;border:none;padding:6px 13px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;margin-right:6px;white-space:nowrap;flex-shrink:0;font-family:'Prompt',sans-serif;">👁 แสดง/ซ่อน</button>
+    <button onclick="openPicker()" id="pickerBtn" style="background:#2c3e50;color:#fff;border:none;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;white-space:nowrap;flex-shrink:0;font-family:'Prompt',sans-serif;">👁 แสดง/ซ่อน</button>
     <a href="admin.html" class="admin-btn">⚙ Admin</a>
+  </div>
+  <!-- Row 2: Tabs (scrollable, hidden scrollbar) -->
+  <div class="topbar-tabs">
+    <div class="topbar-tabs-inner" id="dynTabs"></div>
   </div>
 </nav>
 <!-- ══ EMPLOYEE PICKER MODAL ══ -->
@@ -1515,8 +1522,17 @@ var ALL_TABS = [
 
 function getMenuCfg(){
   var saved = JSON.parse(localStorage.getItem('hr_menu_config')||'null');
-  if(saved) return saved;
-  return ALL_TABS.map(function(t){ return {id:t.id,icon:t.icon,label:t.label,visible:true}; });
+  if(!saved) return ALL_TABS.map(function(t){ return {id:t.id,icon:t.icon,label:t.label,visible:true}; });
+  // Migration: merge any ALL_TABS entries missing from saved config
+  var changed = false;
+  ALL_TABS.forEach(function(def){
+    if(!saved.find(function(s){ return s.id===def.id; })){
+      saved.push({id:def.id,icon:def.icon,label:def.label,visible:true});
+      changed = true;
+    }
+  });
+  if(changed){ localStorage.setItem('hr_menu_config', JSON.stringify(saved)); }
+  return saved;
 }
 
 function buildTabs(){
@@ -1538,18 +1554,18 @@ function buildTabs(){
     a.onclick    = (function(id,el){ return function(){ gotoTab(id,el); return false; }; })(m.id, a);
     wrap.appendChild(a);
   });
-  // ตรวจว่า tab deptsalary มีอยู่ใน cfg หรือยัง ถ้าไม่มีให้เพิ่ม
-  if(!cfg.find(function(c){return c.id==='deptsalary';})){
-    var newTab=ALL_TABS.find(function(t){return t.id==='deptsalary';});
-    if(newTab){
-      var a=document.createElement('a');
-      a.className='nav-tab';a.href='#';
-      a.innerHTML=newTab.icon+' '+newTab.label;
-      a.setAttribute('data-tab','deptsalary');
-      a.onclick=(function(id,el){return function(){gotoTab(id,el);return false;};})(newTab.id,a);
-      wrap.appendChild(a);
-    }
-  }
+  // Migration guard: add any ALL_TABS entries absent from cfg (prevents blank nav after admin save)
+  ALL_TABS.forEach(function(def){
+    if(cfg.find(function(c){ return c.id===def.id && c.visible; })) return; // already in nav
+    if(cfg.find(function(c){ return c.id===def.id; })) return; // present but hidden — respect that
+    // Truly missing → add as visible
+    var a = document.createElement('a');
+    a.className = 'nav-tab'; a.href = '#';
+    a.innerHTML = def.icon + ' ' + def.label;
+    a.setAttribute('data-tab', def.id);
+    a.onclick = (function(id,el){ return function(){ gotoTab(id,el); return false; }; })(def.id, a);
+    wrap.appendChild(a);
+  });
   var toShow = currentTab;
   var tabEl  = document.getElementById('tab-'+toShow);
   if(!tabEl || !cfg.find(function(m){ return m.id===toShow && m.visible; })){
