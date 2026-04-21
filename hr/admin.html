@@ -59,6 +59,11 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
 .tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .tbl th{background:#f8f8f8;color:var(--muted);padding:9px 11px;text-align:left;font-weight:700;font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl th.sortable{cursor:pointer;user-select:none;}
+.tbl th.sortable:hover{background:#efefef;color:var(--black);}
+.tbl th.sorted{color:var(--black);background:#e8eef7;}
+.new-emp-form{background:#fffbeb;border:1px solid var(--gold);border-radius:8px;padding:16px;margin-bottom:12px;display:none;}
+.new-emp-form.open{display:block;}
 .tbl td{padding:8px 11px;border-bottom:1px solid #f5f5f5;color:var(--text);vertical-align:middle;}
 .tbl tr:hover td{background:#fafafa;}
 .tbl tr:last-child td{border-bottom:none;}
@@ -222,6 +227,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       <div class="topbar-tabs-inner">
         <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
         <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
+        <a class="nav-tab" href="#" onclick="switchTab('resigned',this);return false" style="color:rgba(240,120,100,.8);">👋 ลาออก</a>
         <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
         <a class="nav-tab" href="#" onclick="switchTab('pointview',this);return false">📊 Point View</a>
         <a class="nav-tab" href="#" onclick="switchTab('sheets',this);return false">🟢 Google Sheets</a>
@@ -248,11 +254,85 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
           <select class="sel" id="empBrand" style="padding:7px 11px" onchange="filterEmp()"><option value="">— Cost Center —</option></select>
           <select class="sel" id="empDept" style="padding:7px 11px" onchange="filterEmp()"><option value="">— แผนก —</option></select>
           <button onclick="clearEmp()" class="btn btn-outline btn-sm">✕</button>
+          <button onclick="toggleNewEmpForm()" class="btn btn-green btn-sm" id="btnAddEmp">➕ เพิ่มพนักงาน</button>
         </div>
       </div>
+
+      <!-- Add New Employee Form -->
+      <div class="new-emp-form" id="newEmpForm">
+        <div style="font-size:12.5px;font-weight:700;color:var(--black);margin-bottom:12px">➕ เพิ่มพนักงานใหม่</div>
+        <div style="display:grid;grid-template-columns:120px 1fr 100px;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">รหัสพนักงาน *</label>
+            <input type="text" class="inp" id="ne-id" placeholder="เช่น 660101" style="width:100%;padding:6px 9px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ชื่อ-นามสกุล *</label>
+            <input type="text" class="inp" id="ne-name" placeholder="นาย/นางสาว..." style="width:100%;padding:6px 9px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ชื่อเล่น</label>
+            <input type="text" class="inp" id="ne-nick" placeholder="ชื่อเล่น" style="width:100%;padding:6px 9px">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">Cost Center *</label>
+            <select class="sel" id="ne-brand" style="width:100%"><option value="">— เลือก —</option></select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">แผนก *</label>
+            <select class="sel" id="ne-dept" style="width:100%"><option value="">— เลือก —</option></select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ระดับ *</label>
+            <select class="sel" id="ne-level" style="width:100%"><option value="">— เลือก —</option></select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 100px 100px 100px;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">ตำแหน่ง</label>
+            <input type="text" class="inp" id="ne-pos" placeholder="ชื่อตำแหน่ง" style="width:100%;padding:6px 9px">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">เงินเดือน 69</label>
+            <input type="number" class="inp" id="ne-b69" placeholder="0" style="width:100%;padding:6px 9px;text-align:right">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">รายได้รวม 69</label>
+            <input type="number" class="inp" id="ne-i69" placeholder="0" style="width:100%;padding:6px 9px;text-align:right">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">รายได้รวม 68</label>
+            <input type="number" class="inp" id="ne-i68" placeholder="0" style="width:100%;padding:6px 9px;text-align:right">
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;display:block;margin-bottom:3px">หมายเหตุ</label>
+          <input type="text" class="inp" id="ne-remark" placeholder="หมายเหตุ (ถ้ามี)" style="width:100%;padding:6px 9px">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="saveNewEmp()" class="btn btn-green">✓ บันทึกพนักงานใหม่</button>
+          <button onclick="toggleNewEmpForm()" class="btn btn-outline">✕ ยกเลิก</button>
+        </div>
+      </div>
+
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ตำแหน่ง</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">รายได้รวม 69</th><th style="text-align:right">Δ</th><th>หมายเหตุ</th><th style="text-align:center">จัดการ</th></tr></thead>
+          <thead id="empThead"><tr>
+            <th>#</th>
+            <th class="sortable" onclick="sortEmpBy('id')" id="th-emp-id">รหัส</th>
+            <th class="sortable" onclick="sortEmpBy('name')" id="th-emp-name">ชื่อ-นามสกุล</th>
+            <th class="sortable" onclick="sortEmpBy('brand')" id="th-emp-brand">Cost Center</th>
+            <th class="sortable" onclick="sortEmpBy('dept')" id="th-emp-dept">แผนก</th>
+            <th class="sortable" onclick="sortEmpBy('position')" id="th-emp-pos">ตำแหน่ง</th>
+            <th class="sortable" onclick="sortEmpBy('level')" id="th-emp-lvl">ระดับ</th>
+            <th class="sortable" onclick="sortEmpBy('baseSalary69')" id="th-emp-b69" style="text-align:right">เงินเดือน 69</th>
+            <th class="sortable" onclick="sortEmpBy('totalIncome69')" id="th-emp-i69" style="text-align:right">รายได้รวม 69</th>
+            <th class="sortable" onclick="sortEmpBy('delta')" id="th-emp-delta" style="text-align:right">Δ</th>
+            <th id="th-emp-remark">หมายเหตุ</th>
+            <th style="text-align:center">จัดการ</th>
+          </tr></thead>
           <tbody id="empBody"></tbody>
         </table>
       </div>
@@ -314,11 +394,105 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก / ตำแหน่ง</th><th>จาก</th><th></th><th>ไปยัง</th><th>ประวัติ</th><th>วันที่</th><th style="text-align:center">ลบ</th></tr></thead>
+          <thead><tr>
+            <th class="sortable" onclick="sortMobBy('id')" id="th-mob-id">รหัส</th>
+            <th class="sortable" onclick="sortMobBy('name')" id="th-mob-name">ชื่อ-นามสกุล</th>
+            <th>แผนก / ตำแหน่ง</th>
+            <th class="sortable" onclick="sortMobBy('brandOld')" id="th-mob-from">จาก</th>
+            <th></th>
+            <th class="sortable" onclick="sortMobBy('brandNew')" id="th-mob-to">ไปยัง</th>
+            <th>ประวัติ</th>
+            <th class="sortable" onclick="sortMobBy('moveDate')" id="th-mob-date">วันที่</th>
+            <th style="text-align:center">ลบ</th>
+          </tr></thead>
           <tbody id="mobBody"></tbody>
         </table>
       </div>
     </div>
+  </div>
+  </div>
+
+  <!-- TAB: RESIGNED EMPLOYEES -->
+  <div id="tab-resigned" class="tab-pane">
+  <div class="page" style="padding-top:0">
+
+    <!-- Stats row -->
+    <div class="stat-grid" id="res-stats" style="margin-bottom:14px;"></div>
+
+    <!-- Resign form (record new resignation) -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title" style="color:var(--red)">👋 บันทึกพนักงานลาออก</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">เลือกพนักงาน</label>
+          <input type="text" class="inp" id="resEmpSearch" placeholder="🔍 พิมพ์ชื่อ / รหัส..." style="width:100%;margin-bottom:6px;" oninput="searchResignEmp(this.value)">
+          <select class="sel" id="resEmpSel" style="width:100%;" onchange="onSelectResignEmp()">
+            <option value="">— เลือกพนักงาน —</option>
+          </select>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:4px;" id="resEmpInfo"></div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">วันที่ลาออก (effective date)</label>
+          <input type="text" class="inp" id="resDate" placeholder="DD/MM/YYYY" style="width:100%;margin-bottom:10px;">
+          <label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">เหตุผล / ประเภทการลาออก</label>
+          <select class="sel" id="resReason" style="width:100%;">
+            <option value="ลาออกด้วยตนเอง">ลาออกด้วยตนเอง (Voluntary)</option>
+            <option value="สิ้นสุดสัญญา">สิ้นสุดสัญญา (Contract end)</option>
+            <option value="เกษียณอายุ">เกษียณอายุ (Retirement)</option>
+            <option value="ถูกเลิกจ้าง">ถูกเลิกจ้าง (Involuntary)</option>
+            <option value="โอนย้ายออกนอกกลุ่ม">โอนย้ายออกนอกกลุ่ม (Transfer out)</option>
+            <option value="ไม่ระบุ">ไม่ระบุ</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="recordResignation()" class="btn btn-red">✓ บันทึกการลาออก</button>
+        <button onclick="clearResignForm()" class="btn btn-outline">✕ ล้าง</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;padding:8px 12px;background:#fff9f9;border-radius:7px;border-left:3px solid var(--red);">
+        ⚠ พนักงานที่บันทึกลาออกแล้วจะถูกย้ายออกจาก <strong>hr_db</strong> ไปยัง <strong>hr_resigned</strong> และไม่ถูกนับในงบประมาณ KPI ทุกตัว
+      </div>
+    </div>
+
+    <!-- Resigned list -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-title" style="margin-bottom:0;color:var(--red)">รายชื่อพนักงานที่ลาออก</div>
+          <span style="background:#ffebeb;color:var(--red);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;" id="resCnt">—</span>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+          <input type="text" class="inp" id="resQ" placeholder="🔍 ค้นหา..." style="width:140px;padding:6px 10px;" oninput="filterResList()">
+          <select class="sel" id="resReasonFilter" style="padding:6px 10px;" onchange="filterResList()">
+            <option value="">— ทุกเหตุผล —</option>
+            <option>ลาออกด้วยตนเอง</option><option>สิ้นสุดสัญญา</option>
+            <option>เกษียณอายุ</option><option>ถูกเลิกจ้าง</option>
+            <option>โอนย้ายออกนอกกลุ่ม</option><option>ไม่ระบุ</option>
+          </select>
+          <button onclick="clearResFilter()" style="border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px;">✕</button>
+          <span style="font-size:11px;color:var(--muted);" id="resFilterInfo"></span>
+          <button onclick="exportResignedCSV()" class="btn btn-outline btn-sm">📥 Export CSV</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th>#</th>
+            <th class="sortable" onclick="sortResBy('id')" id="th-res-id">รหัส</th>
+            <th class="sortable" onclick="sortResBy('name')" id="th-res-name">ชื่อ-นามสกุล</th>
+            <th class="sortable" onclick="sortResBy('brand')" id="th-res-brand">Cost Center สุดท้าย</th>
+            <th class="sortable" onclick="sortResBy('dept')" id="th-res-dept">แผนก</th>
+            <th class="sortable" onclick="sortResBy('position')" id="th-res-pos">ตำแหน่ง</th>
+            <th class="sortable" onclick="sortResBy('resignDate')" id="th-res-date">วันที่ลาออก</th>
+            <th class="sortable" onclick="sortResBy('resignReason')" id="th-res-reason">เหตุผล</th>
+            <th class="sortable" onclick="sortResBy('totalIncome69')" id="th-res-income" style="text-align:right">รายได้ ปี 69</th>
+            <th style="text-align:center">คืนสถานะ</th>
+          </tr></thead>
+          <tbody id="resBody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
   </div>
 
@@ -800,6 +974,9 @@ if (sessionStorage.getItem('auth') === '1') {
 // INIT
 // ═══════════════════════════════════════════════════════════════
 var empF = [], editId = null;
+var empSortCol = null, empSortDir = 'asc';
+var mobSortCol = null, mobSortDir = 'asc';
+var resSortCol = null, resSortDir = 'asc';
 function init() {
   var bf = document.getElementById('empBrand');
   var df = document.getElementById('empDept');
@@ -825,6 +1002,9 @@ function init() {
   // Load GAS URL from saved config if present
   var _gasCfg = JSON.parse(localStorage.getItem('hr_gas_config')||'{}');
   if(_gasCfg.url) { GAS_URL = _gasCfg.url; }
+
+  // One-time migration: move __RESIGNED__ entries from hr_db → hr_resigned
+  migrateResigned();
 
   renderStats();
   empF = DB.slice();
@@ -880,12 +1060,83 @@ function clearEmp() {
   empF = DB.slice(); editId = null; renderEmp();
 }
 
+function sortEmpBy(col) {
+  if (empSortCol === col) { empSortDir = empSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { empSortCol = col; empSortDir = 'asc'; }
+  renderEmp();
+}
+function _empVal(e, col) {
+  if (col === 'delta') return (e.totalIncome69||0) - (e.totalIncome68||0);
+  if (col === 'brand') return ccFull(e.brand||'');
+  return e[col] || '';
+}
+function toggleNewEmpForm() {
+  var f = document.getElementById('newEmpForm');
+  var open = f.classList.toggle('open');
+  document.getElementById('btnAddEmp').textContent = open ? '✕ ปิดฟอร์ม' : '➕ เพิ่มพนักงาน';
+  if (open) {
+    var bs = document.getElementById('ne-brand');
+    var ds = document.getElementById('ne-dept');
+    var ls = document.getElementById('ne-level');
+    bs.innerHTML = '<option value="">— เลือก —</option>' + CC.map(function(c){ return '<option value="'+c.key+'">'+c.full+'</option>'; }).join('');
+    ds.innerHTML = '<option value="">— เลือก —</option>' + DEPTS.map(function(d){ return '<option value="'+d+'">'+d+'</option>'; }).join('');
+    ls.innerHTML = '<option value="">— เลือก —</option>' + LEVELS.map(function(l){ return '<option value="'+l+'">'+l+'</option>'; }).join('');
+  }
+}
+function saveNewEmp() {
+  var id    = document.getElementById('ne-id').value.trim();
+  var name  = document.getElementById('ne-name').value.trim();
+  var nick  = document.getElementById('ne-nick').value.trim();
+  var brand = document.getElementById('ne-brand').value;
+  var dept  = document.getElementById('ne-dept').value;
+  var level = document.getElementById('ne-level').value;
+  var pos   = document.getElementById('ne-pos').value.trim();
+  var b69   = parseFloat(document.getElementById('ne-b69').value) || 0;
+  var i69   = parseFloat(document.getElementById('ne-i69').value) || 0;
+  var i68   = parseFloat(document.getElementById('ne-i68').value) || 0;
+  var rem   = document.getElementById('ne-remark').value.trim();
+  if (!id || !name || !brand || !dept || !level) { toast('⚠ กรอกข้อมูลที่จำเป็นให้ครบ (รหัส, ชื่อ, CC, แผนก, ระดับ)', 'err'); return; }
+  if (DB.find(function(e){ return e.id === id; })) { toast('⚠ รหัส "'+id+'" มีอยู่แล้ว', 'err'); return; }
+  var emp = { id:id, name:name, nickname:nick, brand:brand, dept:dept, position:pos, level:level,
+    baseSalary68:i68, baseSalary69:b69, totalIncome68:i68, totalIncome69:i69, remark:rem,
+    brandOld:'', brandNew:'', moveDate:'', moveHistory:[] };
+  DB.push(emp);
+  saveDB();
+  pushEmp(emp);
+  empF = DB.slice();
+  renderStats();
+  filterEmp();
+  toggleNewEmpForm();
+  ['ne-id','ne-name','ne-nick','ne-pos','ne-b69','ne-i69','ne-i68','ne-remark'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('ne-brand').value='';
+  document.getElementById('ne-dept').value='';
+  document.getElementById('ne-level').value='';
+  toast('✅ เพิ่มพนักงาน '+name+' แล้ว', 'ok');
+}
 function renderEmp() {
   document.getElementById('empCnt').textContent = empF.length;
   document.getElementById('empInfo').textContent = 'แสดงทั้งหมด ' + empF.length + ' รายการ';
+  // Update sort header indicators
+  var cols = ['id','name','brand','dept','position','level','baseSalary69','totalIncome69','delta'];
+  var ids  = ['th-emp-id','th-emp-name','th-emp-brand','th-emp-dept','th-emp-pos','th-emp-lvl','th-emp-b69','th-emp-i69','th-emp-delta'];
+  cols.forEach(function(c, idx) {
+    var el = document.getElementById(ids[idx]);
+    if (!el) return;
+    el.classList.toggle('sorted', empSortCol === c);
+    var base = ['รหัส','ชื่อ-นามสกุล','Cost Center','แผนก','ตำแหน่ง','ระดับ','เงินเดือน 69','รายได้รวม 69','Δ'][idx];
+    el.textContent = base + (empSortCol === c ? (empSortDir === 'asc' ? ' ▲' : ' ▼') : '');
+  });
+  var sorted = empF.slice();
+  if (empSortCol) {
+    sorted.sort(function(a, b) {
+      var av = _empVal(a, empSortCol), bv = _empVal(b, empSortCol);
+      var cmp = typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv), 'th');
+      return empSortDir === 'asc' ? cmp : -cmp;
+    });
+  }
   var rows = '';
-  for (var i = 0; i < empF.length; i++) {
-    var e = empF[i];
+  for (var i = 0; i < sorted.length; i++) {
+    var e = sorted[i];
     if (editId === e.id) { rows += buildEditRow(e, i); continue; }
     var diff = e.totalIncome69 - e.totalIncome68;
     var dc   = diff > 0 ? '#27ae60' : diff < 0 ? 'var(--red)' : '#bbb';
@@ -902,7 +1153,11 @@ function renderEmp() {
       '<td style="text-align:right;font-weight:700">฿' + fmt(e.totalIncome69) + '</td>' +
       '<td style="text-align:right;font-size:11.5px;color:' + dc + '">' + ds + '</td>' +
       '<td style="font-size:11px;color:' + (e.remark ? '#d97706' : '#bbb') + ';max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + e.remark + '">' + (e.remark||'—') + '</td>' +
-      '<td style="text-align:center;white-space:nowrap"><button class="btn-edit" onclick="startEdit(\'' + e.id + '\')">✏</button> <button class="btn-del" onclick="delEmp(\'' + e.id + '\')">🗑</button></td>' +
+      '<td style="text-align:center;white-space:nowrap">' +
+        '<button class="btn-edit" onclick="startEdit(\'' + e.id + '\')">✏</button> ' +
+        '<button class="btn-del" onclick="delEmp(\'' + e.id + '\')">🗑</button> ' +
+        '<button style="background:#fff5f0;border:none;color:var(--red);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:10.5px;font-weight:700;" onclick="quickResign(\'' + e.id + '\')">👋</button>' +
+      '</td>' +
       '</tr>';
   }
   document.getElementById('empBody').innerHTML = rows;
@@ -1076,6 +1331,16 @@ function delMobility(id) {
   toast('🗑 ยกเลิกการโยกย้ายแล้ว', 'ok');
 }
 
+function sortMobBy(col) {
+  if (mobSortCol === col) { mobSortDir = mobSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { mobSortCol = col; mobSortDir = 'asc'; }
+  renderMobility();
+}
+function sortResBy(col) {
+  if (resSortCol === col) { resSortDir = resSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { resSortCol = col; resSortDir = 'asc'; }
+  filterResList();
+}
 function renderMobility() {
   var moved = DB.filter(function(e) { return e.brandNew && e.brandNew !== ''; });
   document.getElementById('mobListCnt').textContent = moved.length;
@@ -1109,6 +1374,21 @@ function filterMobList(movedInput) {
   });
   var info = document.getElementById("mobFilterInfo");
   if (info) info.textContent = (q||ccF) ? filtered.length + " / " + moved.length + " รายการ" : "";
+  // Apply sort
+  var mobThMap = {id:'th-mob-id',name:'th-mob-name',brandOld:'th-mob-from',brandNew:'th-mob-to',moveDate:'th-mob-date'};
+  Object.keys(mobThMap).forEach(function(c){
+    var el=document.getElementById(mobThMap[c]); if(!el) return;
+    el.classList.toggle('sorted', mobSortCol===c);
+    var labels={id:'รหัส',name:'ชื่อ-นามสกุล',brandOld:'จาก',brandNew:'ไปยัง',moveDate:'วันที่'};
+    el.textContent=labels[c]+(mobSortCol===c?(mobSortDir==='asc'?' ▲':' ▼'):'');
+  });
+  if (mobSortCol) {
+    filtered.sort(function(a,b){
+      var av=a[mobSortCol]||'', bv=b[mobSortCol]||'';
+      var cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return mobSortDir==='asc'?cmp:-cmp;
+    });
+  }
   var tbody = document.getElementById("mobBody");
   if (filtered.length === 0) {
     tbody.innerHTML = "<tr><td colspan=\"9\" style=\"text-align:center;color:#aaa;padding:20px\">" + (q||ccF ? "ไม่พบข้อมูลตามเงื่อนไข" : "ยังไม่มีข้อมูลการโยกย้าย") + "</td></tr>";
@@ -1215,9 +1495,10 @@ function switchTab(name, el) {
   var pane = document.getElementById('tab-' + name);
   if(pane) pane.classList.add('active');
   if(el) el.classList.add('active');
-  if(name === 'menus')     { renderMenuList(); loadDashboardConfig(); }
-  if(name === 'pointview') { setTimeout(buildMatrix, 50); }
-  if(name === 'sheets')    { loadGASConfig(); loadSyncLog(); }
+  if(name === 'menus')    { renderMenuList(); loadDashboardConfig(); }
+  if(name === 'pointview'){ setTimeout(buildMatrix, 50); }
+  if(name === 'sheets')   { loadGASConfig(); loadSyncLog(); }
+  if(name === 'resigned') { renderResignedStats(); renderResList(); populateResignEmpSel(''); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1352,6 +1633,225 @@ function saveMenuConfig() {
 // TAB SWITCHING — extended for new tabs
 // ═══════════════════════════════════════════════════════════════
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// RESIGNED EMPLOYEES — hr_resigned store
+// ═══════════════════════════════════════════════════════════════
+function getResignedDB(){
+  return JSON.parse(localStorage.getItem('hr_resigned') || '[]');
+}
+function saveResignedDB(arr){
+  localStorage.setItem('hr_resigned', JSON.stringify(arr));
+  localStorage.setItem('hr_last_save', Date.now().toString());
+}
+
+// Auto-migrate old __RESIGNED__ entries from hr_db on admin load
+function migrateResigned(){
+  var active   = DB.filter(function(e){ return e.brand !== '__RESIGNED__'; });
+  var toMigrate= DB.filter(function(e){ return e.brand === '__RESIGNED__'; });
+  if(!toMigrate.length) return;
+  var existing    = getResignedDB();
+  var existingIds = existing.map(function(r){ return r.id; });
+  var newOnes = toMigrate.filter(function(m){ return !existingIds.includes(m.id); })
+    .map(function(e){
+      return Object.assign({}, e, {
+        resignDate: e.moveDate || '',
+        resignReason: 'ไม่ระบุ (migrated)',
+        lastBrand: e.brandOld || e.brand,
+        lastDept:  e.dept
+      });
+    });
+  if(newOnes.length){ saveResignedDB([...existing, ...newOnes]); }
+  DB = active;
+  saveDB();
+  toast('↺ ย้าย ' + newOnes.length + ' รายการ → hr_resigned (migration)', 'ok');
+}
+
+function renderResignedStats(){
+  var res = getResignedDB();
+  var reasons = {};
+  res.forEach(function(r){ reasons[r.resignReason||'ไม่ระบุ'] = (reasons[r.resignReason||'ไม่ระบุ']||0)+1; });
+  var topReason = Object.entries(reasons).sort(function(a,b){return b[1]-a[1];})[0];
+  var totalIncome = res.reduce(function(s,r){ return s+(parseFloat(r.totalIncome69)||0); },0);
+  document.getElementById('res-stats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">พนักงานที่ลาออก</div><div class="stat-val" style="color:var(--red)">'+res.length+'</div></div>'+
+    '<div class="stat-card gold"><div class="stat-label">เหตุผลหลัก</div><div class="stat-val" style="font-size:14px;color:var(--gold)">'+(topReason?topReason[0].substring(0,12):'—')+'</div></div>'+
+    '<div class="stat-card blue"><div class="stat-label">รายได้รวม (ปี 69)</div><div class="stat-val" style="font-size:16px;color:#2980b9">฿'+(totalIncome>=1e6?(totalIncome/1e6).toFixed(1)+'M':Math.round(totalIncome/1000)+'K')+'</div></div>'+
+    '<div class="stat-card green"><div class="stat-label">Active พนักงาน</div><div class="stat-val" style="color:#27ae60">'+DB.filter(function(e){return e.brand!=='__RESIGNED__';}).length+'</div></div>';
+}
+
+var _resF = [];
+function renderResList(){
+  _resF = getResignedDB().slice();
+  filterResList();
+}
+function filterResList(){
+  var q      = (document.getElementById('resQ')||{value:''}).value.toLowerCase();
+  var reason = (document.getElementById('resReasonFilter')||{value:''}).value;
+  var shown  = _resF.filter(function(r){
+    return (!q || (r.name||'').toLowerCase().includes(q) || (r.id||'').toLowerCase().includes(q)) &&
+           (!reason || (r.resignReason||'') === reason);
+  });
+  document.getElementById('resCnt').textContent = _resF.length + ' คน';
+  document.getElementById('resFilterInfo').textContent = 'พบ ' + shown.length + ' คน';
+  // Apply sort + update headers
+  var resThMap = {id:'th-res-id',name:'th-res-name',brand:'th-res-brand',dept:'th-res-dept',position:'th-res-pos',resignDate:'th-res-date',resignReason:'th-res-reason',totalIncome69:'th-res-income'};
+  var resLabels = {id:'รหัส',name:'ชื่อ-นามสกุล',brand:'Cost Center สุดท้าย',dept:'แผนก',position:'ตำแหน่ง',resignDate:'วันที่ลาออก',resignReason:'เหตุผล',totalIncome69:'รายได้ ปี 69'};
+  Object.keys(resThMap).forEach(function(c){
+    var el=document.getElementById(resThMap[c]); if(!el) return;
+    el.classList.toggle('sorted', resSortCol===c);
+    el.textContent=resLabels[c]+(resSortCol===c?(resSortDir==='asc'?' ▲':' ▼'):'');
+  });
+  if (resSortCol) {
+    shown.sort(function(a,b){
+      var av = resSortCol==='brand' ? ccFull(a.lastBrand||a.brand||'') : (a[resSortCol]||'');
+      var bv = resSortCol==='brand' ? ccFull(b.lastBrand||b.brand||'') : (b[resSortCol]||'');
+      var cmp=typeof av==='number'?av-bv:String(av).localeCompare(String(bv),'th');
+      return resSortDir==='asc'?cmp:-cmp;
+    });
+  }
+  var LVL_C={'Officer':'#2563eb','Leader and Supervisor':'#7c3aed','Manager':'#d97706','Chief and Director':'#c0392b','Senior Officer':'#27ae60','Consultant':'#b45309'};
+  document.getElementById('resBody').innerHTML = shown.length ? shown.map(function(r,i){
+    var lc = LVL_C[r.level]||'#666';
+    return '<tr style="opacity:.85;">'+
+      '<td>'+(i+1)+'</td>'+
+      '<td><code style="font-size:10.5px;">'+r.id+'</code></td>'+
+      '<td><strong>'+r.name+'</strong><br><span style="font-size:10px;color:#aaa;">'+r.nickname+'</span></td>'+
+      '<td style="font-size:11px;">'+ccFull(r.lastBrand||r.brand)+'</td>'+
+      '<td style="font-size:11px;">'+r.lastDept+'</td>'+
+      '<td style="font-size:11px;">'+r.position+'</td>'+
+      '<td style="font-size:11.5px;font-weight:700;color:var(--red);">'+(r.resignDate||'—')+'</td>'+
+      '<td><span style="background:#ffebeb;color:var(--red);padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;">'+(r.resignReason||'ไม่ระบุ')+'</span></td>'+
+      '<td style="text-align:right;font-weight:700;">฿'+Math.round(r.totalIncome69||0).toLocaleString('th-TH')+'</td>'+
+      '<td style="text-align:center;"><button onclick="restoreEmployee(\''+r.id+'\')" class="btn-save" style="font-size:10.5px;">↩ คืนสถานะ</button></td>'+
+    '</tr>';
+  }).join('') : '<tr><td colspan="10" style="text-align:center;padding:20px;color:#aaa;">ยังไม่มีพนักงานที่ลาออก</td></tr>';
+}
+function clearResFilter(){
+  document.getElementById('resQ').value = '';
+  document.getElementById('resReasonFilter').value = '';
+  filterResList();
+}
+
+// ── Resign form ────────────────────────────────────────────
+function populateResignEmpSel(q){
+  var sel = document.getElementById('resEmpSel');
+  if(!sel) return;
+  var filtered = DB.filter(function(e){ return e.brand !== '__RESIGNED__' && (!q || e.name.toLowerCase().includes(q.toLowerCase()) || e.id.toLowerCase().includes(q.toLowerCase()) || (e.nickname||'').toLowerCase().includes(q.toLowerCase())); });
+  sel.innerHTML = '<option value="">— เลือกพนักงาน (' + filtered.length + ' คน) —</option>';
+  filtered.slice(0,100).forEach(function(e){
+    sel.innerHTML += '<option value="'+e.id+'">'+e.id+' · '+e.name+' ('+e.nickname+')</option>';
+  });
+}
+function searchResignEmp(q){ populateResignEmpSel(q); }
+function onSelectResignEmp(){
+  var id  = document.getElementById('resEmpSel').value;
+  var emp = DB.find(function(e){ return e.id === id; });
+  var info = document.getElementById('resEmpInfo');
+  if(!emp){ info.textContent = ''; return; }
+  info.innerHTML = '<strong>'+emp.name+'</strong> · '+ccFull(emp.brand)+' · '+emp.dept+' · '+emp.position+'<br>รายได้รวม ปี 69: <strong>฿'+Math.round(emp.totalIncome69||0).toLocaleString('th-TH')+'</strong>';
+}
+function clearResignForm(){
+  document.getElementById('resEmpSel').value = '';
+  document.getElementById('resDate').value   = '';
+  document.getElementById('resReason').value = 'ลาออกด้วยตนเอง';
+  document.getElementById('resEmpSearch').value = '';
+  document.getElementById('resEmpInfo').textContent = '';
+  populateResignEmpSel('');
+}
+function recordResignation(){
+  var id     = document.getElementById('resEmpSel').value;
+  var date   = document.getElementById('resDate').value.trim();
+  var reason = document.getElementById('resReason').value;
+  if(!id)  { toast('⚠ กรุณาเลือกพนักงาน', 'err'); return; }
+  if(!date){ toast('⚠ กรุณาระบุวันที่ลาออก', 'err'); return; }
+  if(!confirm('ยืนยันบันทึกลาออก: ' + (DB.find(function(e){return e.id===id;})||{}).name + '\nวันที่: ' + date + ' | เหตุผล: ' + reason)) return;
+
+  var empIdx = DB.findIndex(function(e){ return e.id === id; });
+  if(empIdx === -1){ toast('⚠ ไม่พบพนักงาน', 'err'); return; }
+  var emp = DB[empIdx];
+
+  // Move to resigned store
+  var resignedRecord = Object.assign({}, emp, {
+    resignDate:   date,
+    resignReason: reason,
+    lastBrand:    emp.brand,
+    lastDept:     emp.dept,
+    brand:        '__RESIGNED__'
+  });
+  var resDB = getResignedDB();
+  resDB.push(resignedRecord);
+  saveResignedDB(resDB);
+
+  // Remove from active DB
+  DB.splice(empIdx, 1);
+  saveDB();
+  pushEmp(Object.assign({}, emp, { brand: '__RESIGNED__', resignDate: date, resignReason: reason }));
+
+  renderStats();
+  empF = DB.slice(); filterEmp(); renderEmp();
+  renderResignedStats(); renderResList();
+  clearResignForm();
+  toast('✅ บันทึกลาออก ' + emp.name + ' แล้ว — ย้ายไป hr_resigned', 'ok');
+  addSyncLog('👋 ' + emp.name + ' (' + id + ') ลาออก ' + date + ' เหตุผล: ' + reason);
+}
+
+function quickResign(id){
+  var emp = DB.find(function(e){ return e.id === id; });
+  if(!emp){ toast('⚠ ไม่พบพนักงาน', 'err'); return; }
+  var date = prompt('วันที่ลาออก (DD/MM/YYYY):', new Date().toLocaleDateString('en-GB').replace(/\//g,'/'));
+  if(!date) return;
+  var reasons = ['ลาออกด้วยตนเอง','สิ้นสุดสัญญา','เกษียณอายุ','ถูกเลิกจ้าง','โอนย้ายออกนอกกลุ่ม','ไม่ระบุ'];
+  var reason = prompt('เหตุผล (พิมพ์หมายเลข):\n1.ลาออกด้วยตนเอง\n2.สิ้นสุดสัญญา\n3.เกษียณอายุ\n4.ถูกเลิกจ้าง\n5.โอนย้ายออกนอกกลุ่ม\n6.ไม่ระบุ', '1');
+  if(!reason) return;
+  var idx2 = parseInt(reason)-1;
+  var reasonText = reasons[idx2] || reasons[0];
+  if(!confirm('ยืนยันบันทึกลาออก: '+emp.name+'\nวันที่: '+date+' | เหตุผล: '+reasonText)) return;
+  var resignedRecord = Object.assign({}, emp, { resignDate:date, resignReason:reasonText, lastBrand:emp.brand, lastDept:emp.dept, brand:'__RESIGNED__' });
+  var resDB = getResignedDB(); resDB.push(resignedRecord); saveResignedDB(resDB);
+  DB = DB.filter(function(e){ return e.id !== id; });
+  saveDB(); pushEmp(Object.assign({}, emp, {brand:'__RESIGNED__', resignDate:date, resignReason:reasonText}));
+  renderStats(); empF = DB.slice(); filterEmp(); renderEmp();
+  toast('✅ บันทึกลาออก '+emp.name+' แล้ว', 'ok');
+  addSyncLog('👋 Quick resign: '+emp.name+' ('+id+') '+date);
+}
+
+function restoreEmployee(id){
+  var resDB  = getResignedDB();
+  var idx    = resDB.findIndex(function(r){ return r.id === id; });
+  if(idx === -1){ toast('⚠ ไม่พบในรายการลาออก', 'err'); return; }
+  var emp    = resDB[idx];
+  if(!confirm('คืนสถานะ ' + emp.name + ' กลับเป็นพนักงานประจำ?')) return;
+
+  // Restore to active DB with last known brand
+  var restored = Object.assign({}, emp, { brand: emp.lastBrand || 'Nigiwai Group', resignDate: undefined, resignReason: undefined, lastBrand: undefined, lastDept: undefined });
+  delete restored.resignDate; delete restored.resignReason; delete restored.lastBrand; delete restored.lastDept;
+  DB.push(restored);
+  saveDB();
+  pushEmp(restored);
+
+  // Remove from resigned
+  resDB.splice(idx, 1);
+  saveResignedDB(resDB);
+
+  renderStats(); empF = DB.slice(); filterEmp(); renderEmp();
+  renderResignedStats(); renderResList();
+  toast('✅ คืนสถานะ ' + emp.name + ' แล้ว', 'ok');
+  addSyncLog('↩ ' + emp.name + ' (' + id + ') คืนสถานะเป็นพนักงานประจำ');
+}
+
+function exportResignedCSV(){
+  var res = getResignedDB();
+  if(!res.length){ toast('⚠ ไม่มีข้อมูลลาออก', 'err'); return; }
+  var cols = ['id','name','nickname','lastBrand','lastDept','position','level','resignDate','resignReason','totalIncome69'];
+  var rows = [cols].concat(res.map(function(r){ return cols.map(function(c){ return (r[c]||'').toString().replace(/,/g,' '); }); }));
+  var csv  = rows.map(function(r){ return r.join(','); }).join('\n');
+  var blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  var a    = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'HR_Resigned_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  toast('📥 Export สำเร็จ — ' + res.length + ' รายการ', 'ok');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // POINT VIEW — MODE TOGGLE
