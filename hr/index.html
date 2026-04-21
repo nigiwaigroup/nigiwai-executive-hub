@@ -207,6 +207,67 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 .cc-diff-dn{background:#ffebeb;color:#922b21;border:1px solid #f5c6c6;}
 .cc-toggle{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--muted);transition:all .15s;}
 .cc-toggle:hover{border-color:var(--red);color:var(--red);}
+
+/* ═══════ NEW: DEMOGRAPHICS, TURNOVER, ALERTS ═══════ */
+.gender-wrap{display:flex;align-items:center;gap:24px;padding:8px 0 14px;}
+.gender-stat{text-align:center;}
+.gender-val{font-size:30px;font-weight:800;line-height:1;}
+.gender-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.gender-bar-wrap{flex:1;background:#f0f0f0;border-radius:20px;height:12px;overflow:hidden;position:relative;}
+.gender-bar-m{height:100%;border-radius:20px 0 0 20px;background:#2980b9;position:absolute;left:0;top:0;transition:width .6s ease;}
+.gender-bar-f{height:100%;border-radius:0 20px 20px 0;background:#e91e63;position:absolute;right:0;top:0;transition:width .6s ease;}
+
+.tenure-row{display:grid;grid-template-columns:100px 1fr 48px;align-items:center;gap:8px;margin-bottom:7px;}
+.tenure-lbl{font-size:11.5px;color:#555;font-weight:600;}
+.tenure-track{background:#f0f0f0;border-radius:4px;height:20px;overflow:hidden;}
+.tenure-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.tenure-cnt{font-size:11.5px;font-weight:800;text-align:right;}
+
+.pyramid-row{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:5px;}
+.pyramid-bar{border-radius:4px;height:30px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff;padding:0 10px;white-space:nowrap;transition:width .6s ease;}
+.pyramid-label{font-size:10.5px;color:#666;width:110px;text-align:right;font-weight:600;}
+.pyramid-count{font-size:10.5px;color:#666;width:40px;text-align:left;font-weight:700;}
+
+.turnover-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+.turnover-kpi{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;box-shadow:var(--shadow);border-top:3px solid var(--red);text-align:center;}
+.turnover-kpi.safe{border-top-color:#27ae60;}
+.turnover-kpi.warn{border-top-color:#f39c12;}
+.turnover-kpi.blue{border-top-color:#2980b9;}
+.turnover-rate{font-family:'Prompt',sans-serif;font-size:26px;font-weight:800;line-height:1.1;}
+.turnover-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.turnover-sub{font-size:10.5px;color:var(--muted);margin-top:3px;}
+
+.bench-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:#fafafa;border:1px solid #f0f0f0;margin-bottom:6px;}
+.bench-label{font-size:12px;font-weight:700;flex:1;}
+.bench-val{font-size:14px;font-weight:800;}
+.bench-ref{font-size:10.5px;color:var(--muted);margin-top:1px;}
+
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:9px;margin-bottom:8px;border:1px solid transparent;}
+.alert-item.high{background:#fff5f5;border-color:#fca5a5;}
+.alert-item.med{background:#fffbf0;border-color:#fde68a;}
+.alert-item.low{background:#f0fdf4;border-color:#bbf7d0;}
+.alert-item.info{background:#eff6ff;border-color:#bfdbfe;}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:12.5px;font-weight:700;margin-bottom:2px;}
+.alert-desc{font-size:11.5px;line-height:1.4;opacity:.85;}
+.alert-count{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;background:rgba(0,0,0,.12);margin-left:6px;flex-shrink:0;}
+
+.insight-box{background:linear-gradient(135deg,#1c1c2e,#2d2d44);color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:12px;}
+.insight-title{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.insight-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+.insight-item:last-child{border-bottom:none;}
+.insight-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.insight-text{font-size:12px;line-height:1.45;color:rgba(255,255,255,.85);}
+
+.equity-row{display:grid;grid-template-columns:90px 1fr 60px 70px;align-items:center;gap:8px;margin-bottom:7px;}
+.equity-label{font-size:11.5px;font-weight:600;color:#444;}
+.equity-track{background:#f0f0f0;border-radius:3px;height:18px;overflow:hidden;position:relative;}
+.equity-bar-m{height:100%;background:#2980b9;border-radius:3px;transition:width .6s ease;}
+.equity-bar-f{height:100%;background:#e91e63;border-radius:3px;transition:width .6s ease;}
+.equity-val{font-size:11px;font-weight:700;text-align:right;}
+.equity-diff{font-size:10.5px;font-weight:700;text-align:right;}
+.eq-pos{color:#27ae60;}
+.eq-neg{color:var(--red);}
 </style>
 </head>
 <body>
@@ -486,6 +547,203 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);font
 </div>
 </div>
 
+<!-- ══ Demographics ══ -->
+<div id="tab-demographics" class="tab-content">
+<div class="page fi">
+  <div class="page-title"><div class="icon-box" style="background:linear-gradient(135deg,#e91e63,#9c27b0);">👤</div><h1>Demographics & Workforce Analytics</h1></div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid" id="dem-kpis" style="margin-bottom:14px;"></div>
+
+  <div class="g2" style="margin-bottom:12px;">
+    <!-- Gender -->
+    <div class="card">
+      <div class="card-title" style="--c:#e91e63">สัดส่วนเพศ (Gender Ratio)</div>
+      <div class="gender-wrap">
+        <div class="gender-stat">
+          <div class="gender-val" style="color:#2980b9" id="dem-male-n">—</div>
+          <div class="gender-lbl">👨 ชาย</div>
+        </div>
+        <div style="flex:1;">
+          <div class="gender-bar-wrap" id="dem-gender-bar">
+            <div class="gender-bar-m" id="dem-bar-m" style="width:50%"></div>
+            <div class="gender-bar-f" id="dem-bar-f" style="width:50%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:10.5px;font-weight:700;color:#2980b9;" id="dem-male-pct">—%</span>
+            <span style="font-size:10.5px;font-weight:700;color:#e91e63;" id="dem-female-pct">—%</span>
+          </div>
+        </div>
+        <div class="gender-stat">
+          <div class="gender-val" style="color:#e91e63" id="dem-female-n">—</div>
+          <div class="gender-lbl">👩 หญิง</div>
+        </div>
+      </div>
+      <canvas id="demGenderChart" style="max-height:180px;"></canvas>
+    </div>
+
+    <!-- Tenure Distribution -->
+    <div class="card">
+      <div class="card-title green">การกระจายอายุงาน (Tenure Distribution)</div>
+      <div id="dem-tenure-bars" style="padding:4px 0;"></div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;display:flex;justify-content:space-between;">
+        <div style="text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:var(--red);" id="dem-avg-tenure">—</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">เฉลี่ย (ปี)</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#2980b9;" id="dem-max-tenure">—</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">สูงสุด (ปี)</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#27ae60;" id="dem-new-count">—</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">New (&lt;1 ปี)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level Pyramid -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title gold">⛰ Organizational Pyramid — โครงสร้างระดับตำแหน่ง</div>
+    <div id="dem-pyramid" style="padding:12px 0;"></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f5f5f5;">
+      <div style="font-size:11px;color:var(--muted);text-align:center;">Span of Control (Ratio ผู้บังคับบัญชา : ผู้ใต้บังคับบัญชา)</div>
+      <div style="text-align:center;margin-top:6px;font-size:20px;font-weight:800;color:#2980b9;" id="dem-span">—</div>
+    </div>
+  </div>
+
+  <!-- Gender x Level Cross-tab -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title blue">⚖ Salary Equity — เงินเดือนเฉลี่ยเทียบระหว่างเพศ (ตามระดับ)</div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;gap:16px;">
+      <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#2980b9;"></div><span style="font-size:11px;">ชาย</span></div>
+      <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#e91e63;"></div><span style="font-size:11px;">หญิง</span></div>
+      <span style="font-size:10.5px;color:var(--muted);margin-left:auto;">* เฉลี่ย Total Income ปี 69</span>
+    </div>
+    <div id="dem-equity-bars"></div>
+  </div>
+
+  <!-- Dept composition chart -->
+  <div class="card">
+    <div class="card-title purple">📊 Headcount ตามแผนก — เปรียบเทียบเพศ</div>
+    <canvas id="demDeptGenderChart" style="max-height:280px;"></canvas>
+  </div>
+</div>
+</div>
+
+<!-- ══ Turnover & Retention ══ -->
+<div id="tab-turnover" class="tab-content">
+<div class="page fi">
+  <div class="page-title"><div class="icon-box" style="background:linear-gradient(135deg,#e74c3c,#c0392b);">📉</div><h1>Turnover & Retention Analysis</h1></div>
+
+  <!-- Turnover KPIs -->
+  <div class="turnover-grid" id="trn-kpis"></div>
+
+  <!-- Insight Box -->
+  <div class="insight-box" id="trn-insight"></div>
+
+  <div class="g2" style="margin-bottom:12px;">
+    <!-- Turnover by CC -->
+    <div class="card">
+      <div class="card-title red-txt">📤 Turnover ตาม Cost Center</div>
+      <div id="trn-cc-bars"></div>
+    </div>
+
+    <!-- Turnover by Dept -->
+    <div class="card">
+      <div class="card-title gold">📤 Turnover ตามแผนก</div>
+      <div id="trn-dept-bars"></div>
+    </div>
+  </div>
+
+  <!-- Tenure at exit -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title blue">⏱ อายุงาน ณ วันที่ลาออก (Tenure at Exit)</div>
+    <canvas id="trnTenureChart" style="max-height:220px;"></canvas>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;padding-top:10px;border-top:1px solid #f5f5f5;">
+      <div><div style="font-size:18px;font-weight:800;color:var(--red);" id="trn-avg-tenure">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">เฉลี่ยอายุงาน (ปี)</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:#f39c12;" id="trn-early-exit">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">ลาออกใน 2 ปีแรก</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:#27ae60;" id="trn-long-tenure">—</div><div style="font-size:10px;color:var(--muted);font-weight:700;">อยู่ 5+ ปีก่อนลาออก</div></div>
+    </div>
+  </div>
+
+  <!-- Industry Benchmark -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title green">🏆 เปรียบเทียบกับ Benchmark อุตสาหกรรม F&B (Thailand 2025)</div>
+    <div id="trn-benchmark"></div>
+    <div style="margin-top:8px;padding:8px 12px;background:#f9f9f9;border-radius:7px;font-size:10.5px;color:var(--muted);">
+      📌 แหล่งอ้างอิง: Department of Employment Thailand, F&B Industry Report 2024 | Turnover benchmark F&B: 25-45% ต่อปี
+    </div>
+  </div>
+
+  <!-- Resigned Employees List -->
+  <div class="card">
+    <div class="card-title red-txt">📋 รายชื่อพนักงานที่ลาออก</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center เดิม</th><th>แผนก</th><th>ตำแหน่ง</th><th style="text-align:right">รายได้ ปี 68</th><th style="text-align:right">อายุงาน (ปี)</th>
+        </tr></thead>
+        <tbody id="trnResignedBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ HR Alerts & Compliance ══ -->
+<div id="tab-alerts" class="tab-content">
+<div class="page fi">
+  <div class="page-title"><div class="icon-box" style="background:linear-gradient(135deg,#f39c12,#e67e22);">🔔</div><h1>HR Alerts & Compliance</h1></div>
+
+  <!-- Alert Summary KPIs -->
+  <div class="kpi-grid" id="alr-kpis" style="margin-bottom:14px;"></div>
+
+  <div class="g2" style="margin-bottom:12px;">
+    <!-- Critical Alerts -->
+    <div class="card">
+      <div class="card-title red-txt">🚨 Critical Alerts</div>
+      <div id="alr-critical"></div>
+    </div>
+
+    <!-- Warning Alerts -->
+    <div class="card">
+      <div class="card-title gold">⚠️ Warnings</div>
+      <div id="alr-warnings"></div>
+    </div>
+  </div>
+
+  <!-- Salary Review Status -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">💰 สถานะการปรับเงินเดือน #01/26 — รายละเอียดตาม Cost Center</div>
+    <canvas id="alrAdjChart" style="max-height:260px;"></canvas>
+  </div>
+
+  <!-- Employees pending review -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title gold">📋 พนักงานที่ยังไม่ได้รับการปรับเงินเดือน</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <input type="text" class="ctrl" id="alrQ" placeholder="🔍 ค้นหาชื่อ..." style="width:160px;" oninput="filterAlrList()">
+      <select class="ctrl" id="alrBrand" onchange="filterAlrList()"><option value="">— ทุก Cost Center —</option></select>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto;" id="alr-list-count"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>Cost Center</th><th>แผนก</th><th>ระดับ</th><th style="text-align:right">เงินเดือน 69</th><th style="text-align:right">อายุงาน</th></tr></thead>
+        <tbody id="alrPendingBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Data Quality -->
+  <div class="card">
+    <div class="card-title info"><span style="color:#2980b9;">ℹ Data Quality Checks</span></div>
+    <div id="alr-quality"></div>
+  </div>
+</div>
+</div>
+
 <!-- ══ ปรับเงินเดือน (Protected) ══ -->
 <div id="tab-payroll" class="tab-content">
   <div id="payroll-gate" style="display:flex;align-items:center;justify-content:center;min-height:65vh;">
@@ -591,6 +849,7 @@ function buildOverview(){
     <div class="kpi-card purple"><div class="kpi-label">Internal Mobility</div><div class="kpi-val purple">${moved.length}</div><div class="kpi-sub">รายการโยกย้าย</div></div>
     <div class="kpi-card green"><div class="kpi-label">Cost Centers</div><div class="kpi-val green">${[...new Set(EMP.map(e=>e.brand))].length}</div><div class="kpi-sub">กลุ่มบริษัท</div></div>
     <div class="kpi-card blue"><div class="kpi-label">รายได้เฉลี่ย/คน</div><div class="kpi-val blue">${EMP.length>0?(inc69/EMP.length/1000).toFixed(1):0}K</div><div class="kpi-sub">บาท/เดือน</div></div>
+    <div class="kpi-card" style="border-left-color:#e74c3c;"><div class="kpi-label">ยังไม่ปรับเงินเดือน</div><div class="kpi-val" style="color:#e74c3c;">${EMP.filter(e=>!e.remark||e.remark.trim()==='').length}</div><div class="kpi-sub">คน — ตรวจสอบด่วน</div></div>
   `;
   document.getElementById('ov-inc68').textContent=fmt(inc68);
   document.getElementById('ov-inc69').textContent=fmt(inc69);
@@ -1215,12 +1474,15 @@ function gotoTab(name,el){
   renderTab(name);
 }
 function renderTab(name){
-  if(name==='overview')    buildOverview();
-  if(name==='headcount')   { hcReady=false; buildHeadcount(); }
-  if(name==='mobility')    buildMobility();
-  if(name==='distribution')buildDist();
-  if(name==='costcenter')  buildCostCenter();
-  if(name==='deptsalary')  renderDsSummary();
+  if(name==='overview')     buildOverview();
+  if(name==='headcount')    { hcReady=false; buildHeadcount(); }
+  if(name==='mobility')     buildMobility();
+  if(name==='distribution') buildDist();
+  if(name==='costcenter')   buildCostCenter();
+  if(name==='deptsalary')   renderDsSummary();
+  if(name==='demographics') buildDemographics();
+  if(name==='turnover')     buildTurnover();
+  if(name==='alerts')       buildAlerts();
   updateSyncLabel();
 }
 function updateSyncLabel(){
@@ -1239,13 +1501,16 @@ window.addEventListener('storage', e=>{
 // MENU CONFIG
 // ══════════════════════════════════════════════════════════
 var ALL_TABS = [
-  {id:'overview',     icon:'🏢', label:'ภาพรวม'},
-  {id:'headcount',    icon:'👥', label:'Headcount'},
-  {id:'costcenter',   icon:'📋', label:'งบฯ ตาม Cost Center'},
-  {id:'deptsalary',   icon:'🏦', label:'สรุปตามแผนก'},
-  {id:'mobility',     icon:'🔄', label:'Internal Mobility'},
-  {id:'distribution', icon:'📊', label:'Payroll Distribution'},
-  {id:'payroll',      icon:'💰', label:'ปรับเงินเดือน #01/26'}
+  {id:'overview',      icon:'🏢', label:'ภาพรวม'},
+  {id:'headcount',     icon:'👥', label:'Headcount'},
+  {id:'demographics',  icon:'👤', label:'Demographics'},
+  {id:'turnover',      icon:'📉', label:'Turnover & Retention'},
+  {id:'costcenter',    icon:'📋', label:'งบฯ ตาม Cost Center'},
+  {id:'deptsalary',    icon:'🏦', label:'สรุปตามแผนก'},
+  {id:'mobility',      icon:'🔄', label:'Internal Mobility'},
+  {id:'alerts',        icon:'🔔', label:'Alerts & Compliance'},
+  {id:'distribution',  icon:'📊', label:'Payroll Distribution'},
+  {id:'payroll',       icon:'💰', label:'ปรับเงินเดือน #01/26'}
 ];
 
 function getMenuCfg(){
@@ -1482,6 +1747,444 @@ function updatePickerBadge(){
     btn.style.background = '#2c3e50';
     btn.textContent = '👁 แสดง/ซ่อน';
   }
+}
+
+// ══════════════════════════════════════════════════════════
+// HELPER: derive gender from Thai name prefix
+// ══════════════════════════════════════════════════════════
+function getGender(name){
+  if(!name) return 'U';
+  if(name.startsWith('นาย')) return 'M';
+  if(name.startsWith('นางสาว') || name.startsWith('นาง')) return 'F';
+  return 'U';
+}
+
+// HELPER: derive start year from employee ID (Thai BE format: first 2 digits = BE year)
+function getTenure(id){
+  const digits = id.replace(/[^0-9]/g,'');
+  if(digits.length < 2) return 0;
+  const yr = parseInt(digits.substring(0,2));
+  // BE year: 61=2018, 69=2026 (BE 2500+yr = CE)
+  const ceYear = 2500 + yr - 543; // convert to CE
+  // Current year is 2026
+  const tenure = 2026 - (2500 + yr - 543);
+  return Math.max(0, tenure);
+}
+
+// ══════════════════════════════════════════════════════════
+// DEMOGRAPHICS
+// ══════════════════════════════════════════════════════════
+function buildDemographics(){
+  const EMP = getEMP();
+  const active = EMP.filter(e => e.brand !== '__RESIGNED__');
+
+  // Gender
+  const males   = active.filter(e => getGender(e.name) === 'M');
+  const females = active.filter(e => getGender(e.name) === 'F');
+  const mPct = active.length ? (males.length / active.length * 100).toFixed(1) : 0;
+  const fPct = active.length ? (females.length / active.length * 100).toFixed(1) : 0;
+
+  document.getElementById('dem-male-n').textContent   = males.length;
+  document.getElementById('dem-female-n').textContent = females.length;
+  document.getElementById('dem-male-pct').textContent   = mPct + '%';
+  document.getElementById('dem-female-pct').textContent = fPct + '%';
+  document.getElementById('dem-bar-m').style.width = mPct + '%';
+  document.getElementById('dem-bar-f').style.width = fPct + '%';
+
+  // KPIs
+  const tenures = active.map(e => getTenure(e.id));
+  const avgTenure = tenures.length ? (tenures.reduce((a,b)=>a+b,0)/tenures.length).toFixed(1) : 0;
+  const maxTenure = tenures.length ? Math.max(...tenures) : 0;
+  const newCount  = tenures.filter(t => t < 1).length;
+  const managers  = active.filter(e => ['Manager','Chief and Director','Senior Officer'].includes(e.level));
+  const staff     = active.filter(e => e.level === 'Officer');
+  const spanCtrl  = managers.length ? (staff.length / managers.length).toFixed(1) : '—';
+
+  document.getElementById('dem-avg-tenure').textContent = avgTenure;
+  document.getElementById('dem-max-tenure').textContent = maxTenure;
+  document.getElementById('dem-new-count').textContent  = newCount;
+  document.getElementById('dem-span').textContent = spanCtrl + ':1';
+
+  document.getElementById('dem-kpis').innerHTML = `
+    <div class="kpi-card blue"><div class="kpi-label">พนักงานชาย</div><div class="kpi-val blue">${males.length}</div><div class="kpi-sub">${mPct}% ของทีม</div></div>
+    <div class="kpi-card" style="border-left-color:#e91e63"><div class="kpi-label">พนักงานหญิง</div><div class="kpi-val" style="color:#e91e63">${females.length}</div><div class="kpi-sub">${fPct}% ของทีม</div></div>
+    <div class="kpi-card green"><div class="kpi-label">อายุงานเฉลี่ย</div><div class="kpi-val green">${avgTenure}</div><div class="kpi-sub">ปี / คน</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Span of Control</div><div class="kpi-val gold">${spanCtrl}</div><div class="kpi-sub">Staff : Manager</div></div>
+    <div class="kpi-card purple"><div class="kpi-label">New Joiners &lt;1 yr</div><div class="kpi-val purple">${newCount}</div><div class="kpi-sub">พนักงานใหม่</div></div>
+  `;
+
+  // Tenure bands
+  const bands = [
+    {label:'< 1 ปี',  min:0,  max:1,  color:'#e74c3c'},
+    {label:'1 – 3 ปี', min:1,  max:3,  color:'#e67e22'},
+    {label:'3 – 5 ปี', min:3,  max:5,  color:'#f1c40f'},
+    {label:'5 – 7 ปี', min:5,  max:7,  color:'#27ae60'},
+    {label:'7+ ปี',    min:7,  max:99, color:'#2980b9'},
+  ];
+  const maxBand = Math.max(...bands.map(b => tenures.filter(t => t >= b.min && t < b.max).length), 1);
+  document.getElementById('dem-tenure-bars').innerHTML = bands.map(b => {
+    const cnt = tenures.filter(t => t >= b.min && t < b.max).length;
+    const pct = (cnt / maxBand * 100).toFixed(1);
+    return `<div class="tenure-row">
+      <div class="tenure-lbl">${b.label}</div>
+      <div class="tenure-track"><div class="tenure-fill" style="width:${pct}%;background:${b.color}"></div></div>
+      <div class="tenure-cnt" style="color:${b.color}">${cnt} คน</div>
+    </div>`;
+  }).join('');
+
+  // Gender Donut chart
+  makeChart('demGenderChart', {
+    type: 'doughnut',
+    data: {
+      labels: ['ชาย', 'หญิง'],
+      datasets: [{ data: [males.length, females.length], backgroundColor: ['#2980b9','#e91e63'], borderWidth: 2 }]
+    },
+    options: { plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'Prompt', size:11 }, boxWidth:10 } } }, cutout:'70%' }
+  });
+
+  // Level Pyramid
+  const lvlOrder = ['Chief and Director','Manager','Senior Officer','Leader and Supervisor','Officer','Consultant'];
+  const lvlColors = {'Chief and Director':'#c0392b','Manager':'#d35400','Senior Officer':'#27ae60','Leader and Supervisor':'#8e44ad','Officer':'#2980b9','Consultant':'#f39c12'};
+  const lvlCounts = lvlOrder.map(l => ({ label:l, count: active.filter(e=>e.level===l).length, color: lvlColors[l] }));
+  const maxCount = Math.max(...lvlCounts.map(l=>l.count), 1);
+  const pyramidEl = document.getElementById('dem-pyramid');
+  const shortName = {'Chief and Director':'Chief & Director','Manager':'Manager','Senior Officer':'Senior Officer','Leader and Supervisor':'Leader & Supervisor','Officer':'Officer','Consultant':'Consultant'};
+  pyramidEl.innerHTML = lvlCounts.map(l => {
+    const w = Math.max(15, (l.count / maxCount * 70)).toFixed(0);
+    return `<div class="pyramid-row">
+      <div class="pyramid-label">${shortName[l.label]||l.label}</div>
+      <div class="pyramid-bar" style="width:${w}%;background:${l.color};">${l.count} คน</div>
+      <div class="pyramid-count">${((l.count/active.length)*100).toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+
+  // Salary Equity by Level
+  const equityLvls = ['Chief and Director','Manager','Senior Officer','Leader and Supervisor','Officer'];
+  const equityEl = document.getElementById('dem-equity-bars');
+  equityEl.innerHTML = '';
+  equityLvls.forEach(lvl => {
+    const empLvl = active.filter(e=>e.level===lvl);
+    const mEmp = empLvl.filter(e=>getGender(e.name)==='M');
+    const fEmp = empLvl.filter(e=>getGender(e.name)==='F');
+    if(empLvl.length === 0) return;
+    const mAvg = mEmp.length ? mEmp.reduce((a,e)=>a+(e.totalIncome69||0),0)/mEmp.length : 0;
+    const fAvg = fEmp.length ? fEmp.reduce((a,e)=>a+(e.totalIncome69||0),0)/fEmp.length : 0;
+    const maxVal = Math.max(mAvg, fAvg, 1);
+    const diff = mAvg > 0 && fAvg > 0 ? ((fAvg - mAvg)/mAvg*100).toFixed(1) : null;
+    const diffCls = diff === null ? '' : (parseFloat(diff) >= 0 ? 'eq-pos' : 'eq-neg');
+    const diffTxt = diff === null ? '—' : (parseFloat(diff) >= 0 ? '+' : '') + diff + '%';
+    equityEl.innerHTML += `<div class="equity-row" style="margin-bottom:8px;">
+      <div class="equity-label" title="${lvl}">${lvl.replace('Leader and Supervisor','Ldr/Sup').replace('Chief and Director','Chief')}</div>
+      <div style="position:relative;height:20px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+        ${mEmp.length ? `<div style="position:absolute;left:0;top:0;height:100%;width:${(mAvg/maxVal*100).toFixed(1)}%;background:#2980b9;border-radius:4px;"></div>` : ''}
+        ${fEmp.length ? `<div style="position:absolute;left:0;top:0;height:100%;width:${(fAvg/maxVal*100).toFixed(1)}%;background:rgba(233,30,99,.5);border-radius:4px;"></div>` : ''}
+      </div>
+      <div class="equity-val">${mEmp.length?'฿'+Math.round(mAvg/1000)+'K':'—'}</div>
+      <div class="equity-val" style="color:#e91e63">${fEmp.length?'฿'+Math.round(fAvg/1000)+'K':'—'}</div>
+      <div class="equity-diff ${diffCls}" style="width:52px;text-align:right;">${diffTxt}</div>
+    </div>`;
+  });
+
+  // Dept x Gender stacked bar
+  const depts = [...new Set(active.map(e=>e.dept))].sort();
+  makeChart('demDeptGenderChart', {
+    type: 'bar',
+    data: {
+      labels: depts,
+      datasets: [
+        { label:'ชาย', data: depts.map(d=>active.filter(e=>e.dept===d&&getGender(e.name)==='M').length), backgroundColor:'#2980b9' },
+        { label:'หญิง', data: depts.map(d=>active.filter(e=>e.dept===d&&getGender(e.name)==='F').length), backgroundColor:'#e91e63' }
+      ]
+    },
+    options: {
+      indexAxis:'y', plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Prompt',size:11}, boxWidth:10 } } },
+      scales:{ x:{ stacked:true, grid:{color:'#f5f5f5'} }, y:{ stacked:true, ticks:{font:{family:'Prompt',size:10}} } }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// TURNOVER & RETENTION
+// ══════════════════════════════════════════════════════════
+function buildTurnover(){
+  const ALL  = _getEMPRaw();
+  const resigned = ALL.filter(e => e.brand === '__RESIGNED__');
+  const active   = ALL.filter(e => e.brand !== '__RESIGNED__');
+  const total    = ALL.length;
+  const attrRate = total > 0 ? (resigned.length / total * 100).toFixed(1) : 0;
+  const retRate  = (100 - parseFloat(attrRate)).toFixed(1);
+
+  // Tenure of resigned employees
+  const resTenures = resigned.map(e => getTenure(e.id));
+  const avgResTenure = resTenures.length ? (resTenures.reduce((a,b)=>a+b,0)/resTenures.length).toFixed(1) : 0;
+  const earlyExit = resTenures.filter(t=>t<=2).length;
+  const longTenure = resTenures.filter(t=>t>=5).length;
+
+  document.getElementById('trn-avg-tenure').textContent = avgResTenure;
+  document.getElementById('trn-early-exit').textContent = earlyExit;
+  document.getElementById('trn-long-tenure').textContent = longTenure;
+
+  // KPIs
+  const attrClass = parseFloat(attrRate) > 30 ? '' : parseFloat(attrRate) > 15 ? 'warn' : 'safe';
+  document.getElementById('trn-kpis').innerHTML = `
+    <div class="turnover-kpi ${attrClass}">
+      <div class="turnover-label">Attrition Rate</div>
+      <div class="turnover-rate" style="color:${parseFloat(attrRate)>30?'#c0392b':parseFloat(attrRate)>15?'#f39c12':'#27ae60'}">${attrRate}%</div>
+      <div class="turnover-sub">${resigned.length} คน จาก ${total} คน</div>
+    </div>
+    <div class="turnover-kpi safe">
+      <div class="turnover-label">Retention Rate</div>
+      <div class="turnover-rate" style="color:#27ae60">${retRate}%</div>
+      <div class="turnover-sub">${active.length} คน ยังคงทำงาน</div>
+    </div>
+    <div class="turnover-kpi blue">
+      <div class="turnover-label">อายุงานเฉลี่ย (ลาออก)</div>
+      <div class="turnover-rate" style="color:#2980b9">${avgResTenure}</div>
+      <div class="turnover-sub">ปีก่อนลาออก</div>
+    </div>
+    <div class="turnover-kpi warn">
+      <div class="turnover-label">Early Exit ≤2 ปี</div>
+      <div class="turnover-rate" style="color:#f39c12">${earlyExit}</div>
+      <div class="turnover-sub">คน (${resigned.length>0?(earlyExit/resigned.length*100).toFixed(0):0}%)</div>
+    </div>
+  `;
+
+  // Insight box
+  const insight_color = parseFloat(attrRate) > 30 ? '#e74c3c' : parseFloat(attrRate) > 15 ? '#f39c12' : '#27ae60';
+  const insight_status = parseFloat(attrRate) > 30 ? '🚨 สูงกว่า Benchmark — ต้องดำเนินการเร่งด่วน' : parseFloat(attrRate) > 15 ? '⚠️ อยู่ในเกณฑ์ที่ต้องติดตาม' : '✅ อยู่ในเกณฑ์ดี';
+  document.getElementById('trn-insight').innerHTML = `
+    <div class="insight-title">💡 Key Insights — Turnover Analysis</div>
+    <div class="insight-item"><div class="insight-dot" style="background:${insight_color}"></div><div class="insight-text"><strong>Attrition Rate ${attrRate}%</strong> — ${insight_status}</div></div>
+    <div class="insight-item"><div class="insight-dot" style="background:#f39c12"></div><div class="insight-text">${earlyExit > 0 ? earlyExit + ' คนลาออกภายใน 2 ปีแรก (' + (resigned.length>0?(earlyExit/resigned.length*100).toFixed(0):0) + '%) — อาจบ่งชี้ปัญหา Onboarding หรือ Culture Fit' : 'ไม่มีพนักงานลาออกใน 2 ปีแรก — Onboarding มีประสิทธิภาพดี'}</div></div>
+    <div class="insight-item"><div class="insight-dot" style="background:#2980b9"></div><div class="insight-text">อายุงานเฉลี่ยก่อนลาออก ${avgResTenure} ปี — ${parseFloat(avgResTenure) < 3 ? 'ต่ำกว่าเกณฑ์ ควรทบทวน Employee Value Proposition' : 'อยู่ในเกณฑ์ปกติสำหรับอุตสาหกรรม F&B'}</div></div>
+    <div class="insight-item"><div class="insight-dot" style="background:#27ae60"></div><div class="insight-text">Retention Rate ${retRate}% — ${active.length} คน ยังคงทำงานในองค์กร</div></div>
+  `;
+
+  // Turnover by CC — count resigned whose brandOld maps to CC
+  const ccTurnover = {};
+  resigned.forEach(e => {
+    const cc = e.brandOld || e.brand || 'Unknown';
+    ccTurnover[cc] = (ccTurnover[cc]||0) + 1;
+  });
+  const ccData = Object.entries(ccTurnover).sort((a,b)=>b[1]-a[1]);
+  const maxCC = ccData.length ? ccData[0][1] : 1;
+  document.getElementById('trn-cc-bars').innerHTML = ccData.length
+    ? ccData.map(([cc,cnt]) => {
+        const shortCC = cc.length > 30 ? cc.substring(0,30)+'…' : cc;
+        return `<div class="hbar-row"><div class="hbar-label" title="${cc}">${shortCC}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width:${(cnt/maxCC*100).toFixed(1)}%;background:#c0392b"></div></div>
+          <div class="hbar-count">${cnt} คน</div></div>`;
+      }).join('')
+    : '<div style="text-align:center;padding:20px;color:#aaa;font-size:12px;">ไม่มีข้อมูลการลาออก</div>';
+
+  // Turnover by Dept
+  const deptTurnover = {};
+  resigned.forEach(e => { deptTurnover[e.dept] = (deptTurnover[e.dept]||0) + 1; });
+  const deptData = Object.entries(deptTurnover).sort((a,b)=>b[1]-a[1]);
+  const maxDept = deptData.length ? deptData[0][1] : 1;
+  const deptPalette = ['#c0392b','#e67e22','#f1c40f','#27ae60','#2980b9','#8e44ad','#e91e63'];
+  document.getElementById('trn-dept-bars').innerHTML = deptData.length
+    ? deptData.map(([dept,cnt],i) => `<div class="hbar-row">
+        <div class="hbar-label" title="${dept}">${dept}</div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${(cnt/maxDept*100).toFixed(1)}%;background:${deptPalette[i%deptPalette.length]}"></div></div>
+        <div class="hbar-count">${cnt} คน</div></div>`).join('')
+    : '<div style="text-align:center;padding:20px;color:#aaa;font-size:12px;">ไม่มีข้อมูลการลาออก</div>';
+
+  // Tenure at exit chart
+  const bands = ['< 1', '1–2', '3–4', '5–6', '7+'];
+  const bandCounts = [
+    resTenures.filter(t=>t<1).length,
+    resTenures.filter(t=>t>=1&&t<3).length,
+    resTenures.filter(t=>t>=3&&t<5).length,
+    resTenures.filter(t=>t>=5&&t<7).length,
+    resTenures.filter(t=>t>=7).length,
+  ];
+  makeChart('trnTenureChart', {
+    type: 'bar',
+    data: { labels: bands.map(b=>b+' ปี'), datasets: [{ label:'จำนวนพนักงาน', data: bandCounts, backgroundColor:['#e74c3c','#e67e22','#f1c40f','#27ae60','#2980b9'], borderRadius:5 }] },
+    options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, font:{family:'Prompt'} } }, x:{ ticks:{ font:{family:'Prompt'} } } } }
+  });
+
+  // Benchmark comparison
+  const benchmarks = [
+    {label:'Attrition Rate บริษัท', val:attrRate+'%', ref:'F&B Benchmark: 25–45%', cls:parseFloat(attrRate)<25?'safe':parseFloat(attrRate)<45?'warn':''},
+    {label:'Retention Rate', val:retRate+'%', ref:'Best Practice: ≥75%', cls:parseFloat(retRate)>=75?'safe':'warn'},
+    {label:'Early Exit Rate (≤2 ปี)', val:resigned.length>0?(earlyExit/resigned.length*100).toFixed(0)+'%':'—', ref:'Benchmark: <30%', cls:resigned.length>0&&earlyExit/resigned.length<0.3?'safe':'warn'},
+    {label:'อายุงานก่อนลาออก', val:avgResTenure+' ปี', ref:'Best Practice: >3 ปี', cls:parseFloat(avgResTenure)>=3?'safe':'warn'},
+  ];
+  document.getElementById('trn-benchmark').innerHTML = benchmarks.map(b => `
+    <div class="bench-row">
+      <div style="flex:1;"><div class="bench-label">${b.label}</div><div class="bench-ref">${b.ref}</div></div>
+      <div class="bench-val" style="color:${b.cls==='safe'?'#27ae60':b.cls==='warn'?'#f39c12':'#c0392b'}">${b.val}</div>
+      <div style="font-size:16px;">${b.cls==='safe'?'✅':b.cls==='warn'?'⚠️':'🚨'}</div>
+    </div>
+  `).join('');
+
+  // Resigned table
+  document.getElementById('trnResignedBody').innerHTML = resigned.length
+    ? resigned.map((e,i) => `<tr class="resigned-row">
+        <td>${i+1}</td>
+        <td><code style="font-size:10.5px;">${e.id}</code></td>
+        <td><strong style="font-size:11.5px;">${e.name}</strong><br><span style="font-size:10px;color:#bbb;">${e.nickname}</span></td>
+        <td style="font-size:11px;">${e.brandOld||'—'}</td>
+        <td style="font-size:11px;">${e.dept}</td>
+        <td style="font-size:11px;">${e.position}</td>
+        <td style="text-align:right;font-weight:700;">฿${fmt(e.totalIncome68||0)}</td>
+        <td style="text-align:right;font-weight:700;color:var(--red);">${getTenure(e.id)} ปี</td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" style="text-align:center;padding:20px;color:#aaa;">ไม่มีข้อมูลพนักงานที่ลาออก</td></tr>';
+}
+
+// ══════════════════════════════════════════════════════════
+// ALERTS & COMPLIANCE
+// ══════════════════════════════════════════════════════════
+var _alrAllPending = [];
+
+function buildAlerts(){
+  const ALL    = _getEMPRaw();
+  const active = ALL.filter(e => e.brand !== '__RESIGNED__');
+
+  // 1. Employees with NO salary adjustment (remark is empty)
+  const noAdj = active.filter(e => !e.remark || e.remark.trim() === '');
+  // 2. Employees salary DECREASED
+  const salaryDown = active.filter(e => e.totalIncome69 < e.totalIncome68);
+  // 3. Employees in __RESIGNED__ but still showing in active views
+  const dataIssues = [];
+  if(ALL.some(e => !e.id || !e.name)) dataIssues.push('พบพนักงานที่ไม่มีรหัสหรือชื่อ');
+  if(ALL.some(e => !e.dept)) dataIssues.push('พบพนักงานที่ไม่มีข้อมูลแผนก');
+  if(ALL.some(e => !e.level)) dataIssues.push('พบพนักงานที่ไม่มีข้อมูลระดับ');
+  if(ALL.some(e => (e.totalIncome69||0) < (e.baseSalary69||0))) dataIssues.push('พบข้อมูลรายได้รวมต่ำกว่าเงินเดือนพื้นฐาน');
+
+  // 4. High-tenure employees who haven't had adjustment
+  const highTenureNoAdj = noAdj.filter(e => getTenure(e.id) >= 5);
+
+  // 5. Missing mobility completion (has brandNew but no moveDate)
+  const incompleteMob = active.filter(e => e.brandNew && e.brandNew !== '' && (!e.moveDate || e.moveDate === ''));
+
+  // KPIs
+  document.getElementById('alr-kpis').innerHTML = `
+    <div class="kpi-card" style="border-left-color:#e74c3c">
+      <div class="kpi-label">ยังไม่ปรับเงินเดือน</div>
+      <div class="kpi-val" style="color:#e74c3c">${noAdj.length}</div>
+      <div class="kpi-sub">${active.length>0?(noAdj.length/active.length*100).toFixed(0):0}% ของพนักงาน</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">เงินเดือนลดลง</div>
+      <div class="kpi-val gold">${salaryDown.length}</div>
+      <div class="kpi-sub">ตรวจสอบด่วน!</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">ปรับเงินเดือนแล้ว</div>
+      <div class="kpi-val green">${active.length - noAdj.length}</div>
+      <div class="kpi-sub">${active.length>0?((active.length-noAdj.length)/active.length*100).toFixed(0):0}% เสร็จสิ้น</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Data Quality Issues</div>
+      <div class="kpi-val blue">${dataIssues.length}</div>
+      <div class="kpi-sub">รายการที่ต้องแก้ไข</div>
+    </div>
+  `;
+
+  // Critical Alerts
+  const criticals = [];
+  if(salaryDown.length > 0) criticals.push({
+    icon:'⬇️', title:`พนักงาน ${salaryDown.length} คน มีรายได้ลดลง`, cls:'high',
+    desc: salaryDown.map(e=>`${e.name} (${e.id}): ฿${fmt(e.totalIncome68)} → ฿${fmt(e.totalIncome69)}`).join(' | ')
+  });
+  if(incompleteMob.length > 0) criticals.push({
+    icon:'🔄', title:`Internal Mobility ไม่สมบูรณ์ ${incompleteMob.length} รายการ`, cls:'high',
+    desc:'มีการบันทึก brandNew แต่ยังไม่มีวันที่โอนย้าย (' + incompleteMob.map(e=>e.name).join(', ') + ')'
+  });
+  if(highTenureNoAdj.length > 0) criticals.push({
+    icon:'⏰', title:`พนักงานอาวุโส 5+ ปี ยังไม่ปรับเงินเดือน ${highTenureNoAdj.length} คน`, cls:'high',
+    desc: highTenureNoAdj.slice(0,5).map(e=>`${e.name} (${getTenure(e.id)} ปี)`).join(', ') + (highTenureNoAdj.length>5?` ...และอีก ${highTenureNoAdj.length-5} คน`:'')
+  });
+  document.getElementById('alr-critical').innerHTML = criticals.length
+    ? criticals.map(a=>`<div class="alert-item ${a.cls}"><div class="alert-icon">${a.icon}</div><div><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div></div></div>`).join('')
+    : '<div class="alert-item low"><div class="alert-icon">✅</div><div><div class="alert-title">ไม่พบ Critical Alerts</div><div class="alert-desc">ข้อมูลทุกด้านอยู่ในเกณฑ์ปกติ</div></div></div>';
+
+  // Warnings
+  const warnings = [];
+  warnings.push({ icon:'💰', cls:'med', title:`พนักงาน ${noAdj.length} คน ยังไม่ได้รับการพิจารณาปรับเงินเดือน`, desc:`คิดเป็น ${active.length>0?(noAdj.length/active.length*100).toFixed(0):0}% ของพนักงานทั้งหมด — แนะนำให้ตรวจสอบตาม Cost Center` });
+  dataIssues.forEach(d => warnings.push({ icon:'📊', cls:'med', title:'Data Quality Warning', desc:d }));
+  // CC with all-no-adjustment
+  const brands = [...new Set(active.map(e=>e.brand))];
+  brands.forEach(b => {
+    const bEmp = active.filter(e=>e.brand===b);
+    const bNoAdj = bEmp.filter(e=>!e.remark||e.remark.trim()==='');
+    if(bNoAdj.length === bEmp.length && bEmp.length > 0) {
+      warnings.push({ icon:'🏢', cls:'med', title:`${ccFull(b)}: ยังไม่มีพนักงานได้รับการปรับเงินเดือนเลย`, desc:`มีพนักงาน ${bEmp.length} คน ใน Cost Center นี้` });
+    }
+  });
+  document.getElementById('alr-warnings').innerHTML = warnings.length
+    ? warnings.map(a=>`<div class="alert-item ${a.cls}"><div class="alert-icon">${a.icon}</div><div><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div></div></div>`).join('')
+    : '<div class="alert-item low"><div class="alert-icon">✅</div><div><div class="alert-title">ไม่พบ Warnings</div></div></div>';
+
+  // Adjustment chart by CC
+  const ccIds = [...new Set(active.map(e=>e.brand))];
+  const adjCounts = ccIds.map(b => active.filter(e=>e.brand===b&&e.remark&&e.remark.trim()!=='').length);
+  const nadjCounts = ccIds.map(b => active.filter(e=>e.brand===b&&(!e.remark||e.remark.trim()==='')).length);
+  const shortCC = ccIds.map(b => { const f=ccFull(b); return f.length>20?f.substring(0,20)+'…':f; });
+  makeChart('alrAdjChart', {
+    type:'bar',
+    data:{ labels:shortCC, datasets:[
+      { label:'ปรับแล้ว ✓', data:adjCounts, backgroundColor:'#27ae60', borderRadius:4 },
+      { label:'ยังไม่ปรับ ✗', data:nadjCounts, backgroundColor:'#e74c3c', borderRadius:4 }
+    ]},
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Prompt',size:11}, boxWidth:10 } } },
+      scales:{ x:{ stacked:true, ticks:{font:{family:'Prompt',size:10}} }, y:{ stacked:true, beginAtZero:true, ticks:{stepSize:1, font:{family:'Prompt'}} } } }
+  });
+
+  // Pending list
+  _alrAllPending = noAdj;
+  const brands2 = [...new Set(noAdj.map(e=>e.brand))];
+  const brandSel = document.getElementById('alrBrand');
+  const prevBrand = brandSel.value;
+  brandSel.innerHTML = '<option value="">— ทุก Cost Center —</option>';
+  brands2.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b; opt.textContent = ccFull(b);
+    if(prevBrand===b) opt.selected=true;
+    brandSel.appendChild(opt);
+  });
+  filterAlrList();
+
+  // Data quality
+  const qualityChecks = [
+    { ok: ALL.every(e=>e.id&&e.name), icon:'🆔', label:'รหัสและชื่อพนักงาน', detail: ALL.filter(e=>!e.id||!e.name).length + ' รายการที่มีปัญหา' },
+    { ok: active.every(e=>e.dept),    icon:'🏢', label:'ข้อมูลแผนก', detail: active.filter(e=>!e.dept).length + ' รายการที่ขาดหายไป' },
+    { ok: active.every(e=>e.level),   icon:'📊', label:'ระดับตำแหน่ง', detail: active.filter(e=>!e.level).length + ' รายการที่ขาดหายไป' },
+    { ok: active.every(e=>(e.totalIncome69||0)>=(e.baseSalary69||0)), icon:'💰', label:'ความสอดคล้องของรายได้', detail: active.filter(e=>(e.totalIncome69||0)<(e.baseSalary69||0)).length + ' รายการผิดปกติ' },
+    { ok: active.every(e=>e.baseSalary69>0), icon:'📝', label:'เงินเดือนพื้นฐาน ปี 69', detail: active.filter(e=>!e.baseSalary69||e.baseSalary69<=0).length + ' รายการที่เป็น 0' },
+  ];
+  document.getElementById('alr-quality').innerHTML = qualityChecks.map(q=>`
+    <div class="alert-item ${q.ok?'low':'med'}">
+      <div class="alert-icon">${q.ok?'✅':'⚠️'}</div>
+      <div><div class="alert-title">${q.icon} ${q.label}</div>
+      <div class="alert-desc">${q.ok?'ผ่านการตรวจสอบ — ข้อมูลสมบูรณ์':q.detail}</div></div>
+    </div>`).join('');
+}
+
+function filterAlrList(){
+  const q     = (document.getElementById('alrQ')||{value:''}).value.toLowerCase();
+  const brand = (document.getElementById('alrBrand')||{value:''}).value;
+  const shown = _alrAllPending.filter(e =>
+    (!q || e.name.toLowerCase().includes(q) || e.id.toLowerCase().includes(q)) &&
+    (!brand || e.brand === brand)
+  );
+  document.getElementById('alr-list-count').textContent = `พบ ${shown.length} คน`;
+  document.getElementById('alrPendingBody').innerHTML = shown.length
+    ? shown.map((e,i) => `<tr>
+        <td>${i+1}</td>
+        <td><code style="font-size:10.5px;">${e.id}</code></td>
+        <td><strong>${e.name}</strong><br><span style="font-size:10px;color:#aaa;">${e.nickname}</span></td>
+        <td style="font-size:11px;">${ccFull(e.brand)}</td>
+        <td style="font-size:11px;">${e.dept}</td>
+        <td>${lvlB(e.level)}</td>
+        <td style="text-align:right;font-weight:700;">฿${fmt(e.baseSalary69||0)}</td>
+        <td style="text-align:right;font-weight:700;color:#2980b9;">${getTenure(e.id)} ปี</td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" style="text-align:center;padding:20px;color:#aaa;">ไม่พบพนักงานที่ค้นหา</td></tr>';
 }
 
 // ══════════════════════════════════════════════════════════

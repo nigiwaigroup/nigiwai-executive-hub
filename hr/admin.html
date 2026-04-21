@@ -117,6 +117,62 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 .toggle-sw input:checked + .toggle-sw-track{background:#27ae60;}
 .toggle-sw-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
 .toggle-sw input:checked ~ .toggle-sw-thumb{transform:translateX(16px);}
+
+/* ═══ POINT VIEW ═══ */
+.pv-mode-bar{display:flex;align-items:center;gap:6px;margin-bottom:16px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:5px;box-shadow:var(--shadow);width:fit-content;}
+.pv-mode-btn{padding:8px 20px;border-radius:7px;border:none;font-family:'Sarabun',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:var(--muted);}
+.pv-mode-btn.active{background:var(--red);color:#fff;}
+
+/* Matrix Table */
+.matrix-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+.matrix-tbl{border-collapse:collapse;font-size:11.5px;white-space:nowrap;}
+.matrix-tbl th{background:#1a1a1a;color:#fff;padding:9px 12px;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.3px;border:1px solid #333;white-space:nowrap;}
+.matrix-tbl th.dept-header{background:#2c3e50;text-align:left;min-width:140px;}
+.matrix-tbl th.total-col{background:#8e44ad;}
+.matrix-tbl td{padding:8px 12px;border:1px solid #f0f0f0;text-align:center;vertical-align:middle;}
+.matrix-tbl td.dept-name-cell{background:#f8f9fa;font-weight:700;font-size:11.5px;color:#333;text-align:left;border-right:2px solid #e0e0e0;}
+.matrix-tbl td.total-cell{background:#fef9e6;font-weight:800;color:var(--gold);font-size:13px;}
+.matrix-tbl td.row-total{background:#f0f7ff;font-weight:800;color:#2980b9;}
+.matrix-tbl tr:hover td{background:#fafffe;}
+.matrix-tbl tr:hover td.dept-name-cell{background:#f0f7ff;}
+.matrix-tbl tr:hover td.total-cell{background:#fef4c0;}
+.matrix-tbl tr:hover td.row-total{background:#ddeeff;}
+.matrix-tbl .grand-total-row td{background:#1a1a1a!important;color:#fff!important;font-weight:800;border:1px solid #333;}
+.matrix-tbl .grand-total-row td.dept-name-cell{background:#1a1a1a!important;color:#fff!important;}
+
+.matrix-cell{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.cell-count{font-size:13px;font-weight:800;line-height:1;}
+.cell-salary{font-size:9.5px;color:var(--muted);font-weight:600;}
+
+/* CC Point View Cards */
+.pv-cc-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;position:relative;}
+.pv-cc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:12px 0 0 12px;}
+.pv-cc-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.pv-cc-badge{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0;}
+.pv-cc-title{font-size:13.5px;font-weight:700;line-height:1.3;}
+.pv-cc-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.pv-cc-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.pv-cc-kpi{text-align:center;padding:8px;background:#f8f9fa;border-radius:8px;}
+.pv-cc-kpi-val{font-family:'Prompt',sans-serif;font-size:16px;font-weight:800;line-height:1;}
+.pv-cc-kpi-lbl{font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+.pv-dept-row{display:grid;grid-template-columns:120px 1fr 48px 90px;align-items:center;gap:8px;margin-bottom:6px;}
+.pv-dept-lbl{font-size:11px;font-weight:600;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pv-dept-track{background:#f0f0f0;border-radius:3px;height:16px;overflow:hidden;}
+.pv-dept-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+.pv-dept-cnt{font-size:11px;font-weight:800;text-align:right;}
+.pv-dept-sal{font-size:10.5px;font-weight:600;color:var(--muted);text-align:right;}
+
+/* GAS Sheet Tab */
+.gas-status-box{border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.gas-status-box.ok{background:#eafaf1;border:1px solid #a9dfbf;}
+.gas-status-box.err{background:#fff5f5;border:1px solid #fca5a5;}
+.gas-status-box.idle{background:#f8f9fa;border:1px solid var(--border);}
+.sheet-field-row{display:grid;grid-template-columns:140px 1fr;align-items:center;gap:10px;margin-bottom:10px;}
+.sheet-field-label{font-size:11.5px;font-weight:700;color:var(--muted);}
+.sheet-col-map{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.col-map-item{background:#f8f9fa;border-radius:7px;padding:8px 10px;border:1px solid var(--border);}
+.col-map-field{font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:4px;}
+.col-map-val{font-size:12px;font-weight:700;color:var(--text);}
 </style>
 </head>
 <body>
@@ -151,6 +207,8 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
       <a class="nav-tab active" href="#" onclick="switchTab('emp',this);return false">👤 พนักงาน</a>
       <a class="nav-tab" href="#" onclick="switchTab('mobility',this);return false">🔄 Mobility</a>
       <a class="nav-tab" href="#" onclick="switchTab('cc',this);return false">🏢 Cost Center</a>
+      <a class="nav-tab" href="#" onclick="switchTab('pointview',this);return false">📊 Point View</a>
+      <a class="nav-tab" href="#" onclick="switchTab('sheets',this);return false">🟢 Google Sheets</a>
       <a class="nav-tab" href="#" onclick="switchTab('menus',this);return false">⚙ จัดการเมนู</a>
       <div class="spacer"></div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;padding:8px 0">
@@ -282,6 +340,172 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
   </div>
   </div>
 
+
+  <!-- TAB: POINT VIEW -->
+  <div id="tab-pointview" class="tab-pane">
+  <div class="page" style="padding-top:0">
+
+    <div class="pv-mode-bar">
+      <button class="pv-mode-btn active" id="pvBtn1" onclick="setPVMode('matrix')">🔢 Department × Cost Center</button>
+      <button class="pv-mode-btn" id="pvBtn2" onclick="setPVMode('cc')">🏢 Cost Center View</button>
+    </div>
+
+    <!-- MODE 1: MATRIX -->
+    <div id="pv-matrix-view">
+      <div class="card" style="padding:14px 16px 0">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+          <div class="card-title" style="margin-bottom:0">📐 Matrix: Department (แถว) × Cost Center (คอลัมน์)</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="font-size:11.5px;font-weight:700;color:var(--muted);">แสดง:</label>
+            <select class="sel" id="pvMetric" onchange="buildMatrix()" style="padding:5px 10px;font-size:12px;">
+              <option value="headcount">Headcount (คน)</option>
+              <option value="salary69">รายได้รวม ปี 69 (฿)</option>
+              <option value="salary68">รายได้รวม ปี 68 (฿)</option>
+              <option value="base69">เงินเดือนพื้นฐาน ปี 69 (฿)</option>
+              <option value="avg69">เฉลี่ยรายได้/คน ปี 69 (฿)</option>
+            </select>
+            <button onclick="exportMatrixCSV()" class="btn btn-outline btn-sm">📥 Export CSV</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:8px 12px;background:#f8f9fa;border-radius:7px;">
+          💡 แสดงข้อมูลตาม <strong>แผนก (Dept)</strong> × <strong>Cost Center (CC)</strong> — คลิก Cell เพื่อดูรายชื่อพนักงาน
+        </div>
+        <div class="matrix-wrap" id="pvMatrixWrap"></div>
+        <div style="padding:12px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid #f5f5f5;margin-top:12px;">
+          <span style="font-size:11px;color:var(--muted);" id="pvMatrixInfo">—</span>
+          <span style="font-size:10.5px;padding:2px 8px;background:#fef9e6;color:var(--gold);border-radius:6px;font-weight:700;">■ Grand Total</span>
+          <span style="font-size:10.5px;padding:2px 8px;background:#f0f7ff;color:#2980b9;border-radius:6px;font-weight:700;">■ Row Total</span>
+          <span style="font-size:10.5px;padding:2px 8px;background:#e8fff4;color:#27ae60;border-radius:6px;font-weight:700;">■ มีพนักงาน</span>
+        </div>
+      </div>
+
+      <!-- Drill-down modal -->
+      <div id="pvDrillWrap" style="display:none;">
+        <div class="card" style="margin-top:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div class="card-title" style="margin-bottom:0;" id="pvDrillTitle">รายชื่อพนักงาน</div>
+            <button onclick="document.getElementById('pvDrillWrap').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:#aaa;">✕</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>ตำแหน่ง</th><th>ระดับ</th><th style="text-align:right">รายได้รวม 69</th></tr></thead>
+              <tbody id="pvDrillBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 2: CC VIEW -->
+    <div id="pv-cc-view" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <input type="text" class="inp" id="pvCCSearch" placeholder="🔍 ค้นหา Cost Center..." style="width:100%;padding:7px 11px;" oninput="renderCCView()">
+        </div>
+        <select class="sel" id="pvCCSort" onchange="renderCCView()" style="padding:7px 11px;">
+          <option value="headcount">เรียงตาม Headcount ↓</option>
+          <option value="salary">เรียงตาม รายได้รวม ↓</option>
+          <option value="name">เรียงตาม ชื่อ A→Z</option>
+          <option value="dept">เรียงตาม แผนก หลายสุด ↓</option>
+        </select>
+        <span style="font-size:11.5px;color:var(--muted);" id="pvCCCount">—</span>
+      </div>
+      <div id="pvCCCards"></div>
+    </div>
+
+  </div>
+  </div>
+
+  <!-- TAB: GOOGLE SHEETS -->
+  <div id="tab-sheets" class="tab-pane">
+  <div class="page" style="padding-top:0">
+
+    <!-- Connection Status -->
+    <div class="gas-status-box idle" id="gasStatusBox">
+      <div style="font-size:24px;">🔗</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;" id="gasStatusTitle">ยังไม่ได้ตรวจสอบการเชื่อมต่อ</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:2px;" id="gasStatusDetail">กด "ทดสอบการเชื่อมต่อ" เพื่อตรวจสอบ</div>
+      </div>
+      <div style="margin-left:auto;">
+        <button onclick="checkGASSheet()" class="btn btn-green btn-sm">🔍 ทดสอบการเชื่อมต่อ</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+      <!-- GAS Config Card -->
+      <div class="card">
+        <div class="card-title blue">⚙ ตั้งค่า Google Apps Script (GAS)</div>
+
+        <div class="sheet-field-row">
+          <div class="sheet-field-label">🔗 GAS Endpoint URL</div>
+          <div>
+            <input type="text" class="inp" id="gasURLInput" style="width:100%;padding:7px 11px;font-size:11px;" placeholder="https://script.google.com/macros/s/…/exec">
+            <div style="font-size:10.5px;color:var(--muted);margin-top:3px;">Web App URL จาก Google Apps Script → Deploy → Manage deployments</div>
+          </div>
+        </div>
+
+        <div class="sheet-field-row">
+          <div class="sheet-field-label">📋 Sheet Name</div>
+          <input type="text" class="inp" id="gasSheetName" style="padding:7px 11px;" value="HR_Database" placeholder="HR_Database">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="saveGASConfig()" class="btn btn-red">💾 บันทึก</button>
+          <button onclick="checkGASSheet()" class="btn btn-outline">🔍 ทดสอบ</button>
+          <button onclick="syncSheet()" class="btn btn-gold">☁ Full Sync → Sheet</button>
+        </div>
+
+        <div style="margin-top:12px;padding:10px 12px;background:#f8f9fa;border-radius:8px;border:1px solid var(--border);">
+          <div style="font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px;">📌 GAS Script ต้องตั้งค่าดังนี้:</div>
+          <div style="font-size:11px;color:#555;line-height:1.7;">
+            1. Deploy as <strong>Web App</strong><br>
+            2. Execute as: <strong>Me</strong><br>
+            3. Who has access: <strong>Anyone</strong><br>
+            4. Copy URL ที่ลงท้ายด้วย <code style="background:#eee;padding:1px 4px;border-radius:3px;">/exec</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column Mapping Card -->
+      <div class="card">
+        <div class="card-title gold">🗂 Column Mapping — ชื่อคอลัมน์ใน Google Sheet</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:12px;">ระบุชื่อ Header ในแต่ละคอลัมน์ของ Google Sheet ให้ตรงกับระบบ</div>
+        <div class="sheet-col-map" id="colMapGrid"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button onclick="saveColMap()" class="btn btn-green btn-sm">💾 บันทึก Mapping</button>
+          <button onclick="resetColMap()" class="btn btn-outline btn-sm">↺ ค่าเริ่มต้น</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sheet Preview -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-title green" style="margin-bottom:0">📄 ข้อมูลใน Google Sheet (Preview)</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="fetchSheetPreview()" class="btn btn-green btn-sm">↻ โหลดข้อมูล</button>
+          <button onclick="importFromSheet()" class="btn btn-red btn-sm">⬇ Import → Dashboard</button>
+        </div>
+      </div>
+      <div id="sheetPreviewArea">
+        <div style="text-align:center;padding:30px;color:var(--muted);font-size:12.5px;">
+          กด <strong>"โหลดข้อมูล"</strong> เพื่อดูตัวอย่างข้อมูลจาก Google Sheet
+        </div>
+      </div>
+    </div>
+
+    <!-- Sync Log -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">📋 Sync History</div>
+      <div id="syncLogArea">
+        <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">ยังไม่มีประวัติ Sync</div>
+      </div>
+    </div>
+
+  </div>
+  </div>
 
   <!-- TAB: MENU MANAGER -->
   <div id="tab-menus" class="tab-pane">
@@ -1100,6 +1324,441 @@ function saveMenuConfig() {
   saveMenuLS(menus);
   toast('✅ บันทึกการตั้งค่าเมนูแล้ว — Reload index.html เพื่อดูผล', 'ok');
 }
+
+// ═══════════════════════════════════════════════════════════════
+// TAB SWITCHING — extended for new tabs
+// ═══════════════════════════════════════════════════════════════
+var _tabSwitchOrig = window.switchTab;
+window.switchTab = function(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var pane = document.getElementById('tab-' + name);
+  if(pane) pane.classList.add('active');
+  if(el) el.classList.add('active');
+  if(name === 'pointview') { setTimeout(buildMatrix, 50); }
+  if(name === 'sheets')    { loadGASConfig(); loadSyncLog(); }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// POINT VIEW — MODE TOGGLE
+// ═══════════════════════════════════════════════════════════════
+var _pvMode = 'matrix';
+function setPVMode(mode){
+  _pvMode = mode;
+  document.getElementById('pvBtn1').className = 'pv-mode-btn' + (mode==='matrix'?' active':'');
+  document.getElementById('pvBtn2').className = 'pv-mode-btn' + (mode==='cc'?' active':'');
+  document.getElementById('pv-matrix-view').style.display = mode==='matrix' ? 'block' : 'none';
+  document.getElementById('pv-cc-view').style.display     = mode==='cc'     ? 'block' : 'none';
+  if(mode === 'matrix') buildMatrix();
+  if(mode === 'cc')     renderCCView();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POINT VIEW — MATRIX (Dept × Cost Center)
+// ═══════════════════════════════════════════════════════════════
+function getMetricVal(emp, metric){
+  if(metric==='headcount') return 1;
+  if(metric==='salary69')  return emp.totalIncome69||0;
+  if(metric==='salary68')  return emp.totalIncome68||0;
+  if(metric==='base69')    return emp.baseSalary69||0;
+  if(metric==='avg69')     return emp.totalIncome69||0;
+  return 1;
+}
+function fmtCell(val, metric, count){
+  if(metric==='headcount') return val;
+  if(metric==='avg69')     return count > 0 ? '฿'+Math.round(val/count/1000)+'K' : '—';
+  return val >= 1000000 ? '฿'+(val/1000000).toFixed(1)+'M' : '฿'+Math.round(val/1000)+'K';
+}
+
+function buildMatrix(){
+  var metric = (document.getElementById('pvMetric')||{value:'headcount'}).value || 'headcount';
+  var depts  = [...new Set(DB.map(function(e){ return e.dept; }))].sort();
+  var ccKeys = [...new Set(DB.map(function(e){ return e.brand; }))].filter(function(b){ return b !== '__RESIGNED__'; }).sort();
+
+  // Build data grid
+  var grid = {};
+  var rowTotals = {}, colTotals = {}, grandTotal = 0, grandCount = 0;
+  depts.forEach(function(d){ grid[d]={}; rowTotals[d]=0; });
+  ccKeys.forEach(function(c){ colTotals[c]=0; });
+
+  DB.filter(function(e){ return e.brand !== '__RESIGNED__'; }).forEach(function(e){
+    if(!grid[e.dept]) grid[e.dept] = {};
+    if(!grid[e.dept][e.brand]) grid[e.dept][e.brand] = {val:0, count:0};
+    grid[e.dept][e.brand].val   += getMetricVal(e, metric);
+    grid[e.dept][e.brand].count += 1;
+    rowTotals[e.dept] = (rowTotals[e.dept]||0) + getMetricVal(e, metric);
+    colTotals[e.brand] = (colTotals[e.brand]||0) + getMetricVal(e, metric);
+    grandTotal += getMetricVal(e, metric);
+    grandCount++;
+  });
+
+  // Short CC names
+  function shortCC(k){
+    var f = ccFull(k);
+    if(f.length <= 18) return f;
+    // strip บริษัท/จำกัด
+    return f.replace('บริษัท ','').replace(' จำกัด (สำนักงานใหญ่)','').replace(' จำกัด','').substring(0,18);
+  }
+
+  // Render
+  var html = '<table class="matrix-tbl"><thead><tr>';
+  html += '<th class="dept-header">🗂 Department / Cost Center</th>';
+  ccKeys.forEach(function(cc){
+    var dot = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+ccColor(cc)+';margin-right:4px;vertical-align:middle;"></span>';
+    html += '<th style="background:'+ccColor(cc)+'20;color:'+ccColor(cc)+';border-bottom:3px solid '+ccColor(cc)+';">' + dot + shortCC(cc) + '</th>';
+  });
+  html += '<th class="total-col">Σ Total</th></tr></thead><tbody>';
+
+  depts.forEach(function(dept){
+    html += '<tr><td class="dept-name-cell">'+dept+'</td>';
+    ccKeys.forEach(function(cc){
+      var cell = grid[dept][cc];
+      if(!cell || cell.count === 0){
+        html += '<td style="color:#ddd;">—</td>';
+      } else {
+        var display = fmtCell(cell.val, metric, cell.count);
+        var pct = grandCount > 0 ? (cell.count/grandCount*100) : 0;
+        var intensity = Math.min(0.85, pct/8);
+        html += '<td style="background:'+hexToRgba(ccColor(cc), intensity)+';cursor:pointer;" '+
+                'onclick="drillDown(\''+dept.replace(/'/g,"\\'")+"','"+cc.replace(/'/g,"\\'")+'\')" '+
+                'title="'+dept+' × '+ccFull(cc)+': '+cell.count+' คน">'+
+                '<div class="matrix-cell">'+
+                  '<span class="cell-count" style="color:'+(pct>3?ccColor(cc):'#333')+'">'+display+'</span>'+
+                  (metric==='headcount' ? '' : '<span class="cell-salary">'+cell.count+' คน</span>')+
+                '</div></td>';
+      }
+    });
+    var rowTotal = fmtCell(rowTotals[dept], metric, DB.filter(function(e){return e.dept===dept&&e.brand!=='__RESIGNED__';}).length);
+    html += '<td class="row-total">'+rowTotal+'</td></tr>';
+  });
+
+  // Column totals row
+  html += '<tr class="grand-total-row"><td class="dept-name-cell">Σ Grand Total</td>';
+  ccKeys.forEach(function(cc){
+    var ccTotal = fmtCell(colTotals[cc], metric, DB.filter(function(e){return e.brand===cc;}).length);
+    html += '<td>'+ccTotal+'</td>';
+  });
+  var grandDisplay = fmtCell(grandTotal, metric, grandCount);
+  html += '<td>'+grandDisplay+'</td></tr>';
+  html += '</tbody></table>';
+
+  document.getElementById('pvMatrixWrap').innerHTML = html;
+  document.getElementById('pvMatrixInfo').textContent =
+    depts.length + ' แผนก × ' + ccKeys.length + ' Cost Center | พนักงานทั้งหมด ' + DB.filter(function(e){return e.brand!=='__RESIGNED__';}).length + ' คน';
+}
+
+function hexToRgba(hex, alpha){
+  var r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
+function drillDown(dept, cc){
+  var emps = DB.filter(function(e){ return e.dept===dept && e.brand===cc; });
+  if(!emps.length) return;
+  document.getElementById('pvDrillTitle').textContent = '👥 '+dept+' × '+ccFull(cc)+' — '+emps.length+' คน';
+  var LVL_C={'Officer':'#2563eb','Leader and Supervisor':'#7c3aed','Manager':'#d97706','Chief and Director':'#c0392b','Senior Officer':'#27ae60','Consultant':'#b45309'};
+  document.getElementById('pvDrillBody').innerHTML = emps.map(function(e,i){
+    var lvlColor = LVL_C[e.level]||'#666';
+    return '<tr><td>'+(i+1)+'</td><td><code style="font-size:10.5px;">'+e.id+'</code></td>'+
+           '<td><strong>'+e.name+'</strong><br><span style="font-size:10px;color:#aaa;">'+e.nickname+'</span></td>'+
+           '<td style="font-size:11px;">'+e.position+'</td>'+
+           '<td><span style="background:'+lvlColor+'20;color:'+lvlColor+';padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;">'+e.level+'</span></td>'+
+           '<td style="text-align:right;font-weight:700;">฿'+Math.round((e.totalIncome69||0)).toLocaleString('th-TH')+'</td></tr>';
+  }).join('');
+  document.getElementById('pvDrillWrap').style.display = 'block';
+  document.getElementById('pvDrillWrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function exportMatrixCSV(){
+  var metric = (document.getElementById('pvMetric')||{value:'headcount'}).value || 'headcount';
+  var depts  = [...new Set(DB.map(function(e){ return e.dept; }))].sort();
+  var ccKeys = [...new Set(DB.map(function(e){ return e.brand; }))].filter(function(b){ return b !== '__RESIGNED__'; }).sort();
+  var rows   = [['Department'].concat(ccKeys.map(ccFull)).concat(['Total'])];
+  depts.forEach(function(dept){
+    var row = [dept];
+    ccKeys.forEach(function(cc){
+      var emps = DB.filter(function(e){ return e.dept===dept && e.brand===cc; });
+      if(metric==='headcount') row.push(emps.length);
+      else row.push(emps.reduce(function(s,e){ return s+(e.totalIncome69||0); }, 0));
+    });
+    row.push(DB.filter(function(e){ return e.dept===dept&&e.brand!=='__RESIGNED__'; }).length);
+    rows.push(row);
+  });
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download = 'HR_Matrix_'+metric+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  toast('📥 Export CSV สำเร็จ', 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POINT VIEW — CC VIEW (Cost Center Cards)
+// ═══════════════════════════════════════════════════════════════
+var DEPT_COLORS_PV = ['#c0392b','#2980b9','#27ae60','#8e44ad','#d35400','#16a085','#f39c12','#e91e63','#00bcd4','#795548','#607d8b','#2c3e50'];
+
+function renderCCView(){
+  var q    = (document.getElementById('pvCCSearch')||{value:''}).value.toLowerCase();
+  var sort = (document.getElementById('pvCCSort')||{value:'headcount'}).value;
+  var active = DB.filter(function(e){ return e.brand !== '__RESIGNED__'; });
+  var ccList = [...new Set(active.map(function(e){ return e.brand; }))];
+
+  if(q) ccList = ccList.filter(function(cc){ return ccFull(cc).toLowerCase().includes(q) || cc.toLowerCase().includes(q); });
+
+  // Sort
+  ccList.sort(function(a,b){
+    var aEmp = active.filter(function(e){return e.brand===a;}),
+        bEmp = active.filter(function(e){return e.brand===b;});
+    if(sort==='headcount') return bEmp.length - aEmp.length;
+    if(sort==='salary')    return bEmp.reduce(function(s,e){return s+(e.totalIncome69||0);},0) - aEmp.reduce(function(s,e){return s+(e.totalIncome69||0);},0);
+    if(sort==='name')      return ccFull(a).localeCompare(ccFull(b));
+    if(sort==='dept')      return [...new Set(bEmp.map(function(e){return e.dept;}))].length - [...new Set(aEmp.map(function(e){return e.dept;}))].length;
+    return 0;
+  });
+
+  document.getElementById('pvCCCount').textContent = ccList.length + ' Cost Center';
+
+  var html = '';
+  ccList.forEach(function(cc){
+    var emps    = active.filter(function(e){ return e.brand===cc; });
+    var depts   = [...new Set(emps.map(function(e){return e.dept;}))].sort();
+    var inc69   = emps.reduce(function(s,e){return s+(e.totalIncome69||0);},0);
+    var inc68   = emps.reduce(function(s,e){return s+(e.totalIncome68||0);},0);
+    var avgInc  = emps.length ? Math.round(inc69/emps.length) : 0;
+    var adjCnt  = emps.filter(function(e){return e.remark&&e.remark.trim()!=='';}).length;
+    var color   = ccColor(cc);
+    var maxDeptCount = Math.max.apply(null, depts.map(function(d){return emps.filter(function(e){return e.dept===d;}).length;})||[1]);
+
+    html += '<div class="pv-cc-card" style="border-left:5px solid '+color+';">';
+    html += '<div class="pv-cc-header">';
+    html += '  <div class="pv-cc-badge" style="background:'+color+';font-size:18px;">🏢</div>';
+    html += '  <div style="flex:1;min-width:0;">';
+    html += '    <div class="pv-cc-title">'+ccFull(cc)+'</div>';
+    html += '    <div class="pv-cc-sub">'+depts.length+' แผนก | รหัส: '+cc+'</div>';
+    html += '  </div>';
+    html += '  <div style="text-align:right;flex-shrink:0;">';
+    html += '    <div style="font-family:Prompt,sans-serif;font-size:22px;font-weight:800;color:'+color+';">'+emps.length+'</div>';
+    html += '    <div style="font-size:10px;color:var(--muted);font-weight:700;">คน</div>';
+    html += '  </div>';
+    html += '</div>';
+
+    // KPIs
+    html += '<div class="pv-cc-kpis">';
+    html += '  <div class="pv-cc-kpi"><div class="pv-cc-kpi-val" style="color:'+color+'">'+emps.length+'</div><div class="pv-cc-kpi-lbl">Headcount</div></div>';
+    html += '  <div class="pv-cc-kpi"><div class="pv-cc-kpi-val" style="color:#2980b9;">฿'+(inc69>=1000000?(inc69/1000000).toFixed(1)+'M':Math.round(inc69/1000)+'K')+'</div><div class="pv-cc-kpi-lbl">รายได้รวม/เดือน</div></div>';
+    html += '  <div class="pv-cc-kpi"><div class="pv-cc-kpi-val" style="color:#27ae60;">฿'+Math.round(avgInc/1000)+'K</div><div class="pv-cc-kpi-lbl">เฉลี่ย/คน</div></div>';
+    html += '  <div class="pv-cc-kpi"><div class="pv-cc-kpi-val" style="color:'+(adjCnt===emps.length?'#27ae60':adjCnt>0?'#f39c12':'#e74c3c')+';">'+adjCnt+'/'+emps.length+'</div><div class="pv-cc-kpi-lbl">ปรับเงินเดือน</div></div>';
+    html += '</div>';
+
+    // Department breakdown
+    html += '<div style="border-top:1px solid #f5f5f5;padding-top:10px;">';
+    html += '<div style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">📦 แผนก Breakdown</div>';
+    depts.forEach(function(dept, di){
+      var dEmp  = emps.filter(function(e){return e.dept===dept;});
+      var dInc  = dEmp.reduce(function(s,e){return s+(e.totalIncome69||0);},0);
+      var pct   = (dEmp.length/maxDeptCount*100).toFixed(0);
+      var dcolor = DEPT_COLORS_PV[di % DEPT_COLORS_PV.length];
+      html += '<div class="pv-dept-row">';
+      html += '  <div class="pv-dept-lbl" title="'+dept+'">'+dept+'</div>';
+      html += '  <div class="pv-dept-track"><div class="pv-dept-fill" style="width:'+pct+'%;background:'+dcolor+'"></div></div>';
+      html += '  <div class="pv-dept-cnt" style="color:'+dcolor+'">'+dEmp.length+' คน</div>';
+      html += '  <div class="pv-dept-sal">฿'+Math.round(dInc/1000)+'K</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+
+    // Level mini-summary
+    var levels = {'Officer':0,'Leader and Supervisor':0,'Manager':0,'Chief and Director':0,'Senior Officer':0,'Consultant':0};
+    emps.forEach(function(e){ if(levels[e.level]!==undefined) levels[e.level]++; });
+    var lvlParts = Object.entries(levels).filter(function(x){return x[1]>0;}).map(function(x){
+      var colors = {'Officer':'#2563eb','Leader and Supervisor':'#7c3aed','Manager':'#d97706','Chief and Director':'#c0392b','Senior Officer':'#27ae60','Consultant':'#b45309'};
+      var short  = x[0].replace('Leader and Supervisor','Ldr').replace('Chief and Director','Chief').replace('Senior Officer','Senior');
+      return '<span style="background:'+colors[x[0]]+'20;color:'+colors[x[0]]+';font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;white-space:nowrap;">'+short+' '+x[1]+'</span>';
+    });
+    html += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;padding-top:8px;border-top:1px solid #f5f5f5;">'+lvlParts.join('')+'</div>';
+    html += '</div>';
+  });
+
+  if(!html) html = '<div style="text-align:center;padding:30px;color:var(--muted);">ไม่พบ Cost Center ที่ค้นหา</div>';
+  document.getElementById('pvCCCards').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GOOGLE SHEETS — Config & Integration
+// ═══════════════════════════════════════════════════════════════
+var DEFAULT_COL_MAP = {
+  id: 'id', name: 'name', nickname: 'nickname', brand: 'brand',
+  dept: 'dept', position: 'position', level: 'level',
+  baseSalary68: 'baseSalary68', baseSalary69: 'baseSalary69',
+  totalIncome68: 'totalIncome68', totalIncome69: 'totalIncome69',
+  remark: 'remark', brandOld: 'brandOld', brandNew: 'brandNew', moveDate: 'moveDate'
+};
+
+var FIELD_LABELS = {
+  id:'รหัสพนักงาน', name:'ชื่อ-นามสกุล', nickname:'ชื่อเล่น', brand:'Cost Center (Key)',
+  dept:'แผนก', position:'ตำแหน่ง', level:'ระดับ',
+  baseSalary68:'เงินเดือน ปี 68', baseSalary69:'เงินเดือน ปี 69',
+  totalIncome68:'รายได้รวม ปี 68', totalIncome69:'รายได้รวม ปี 69',
+  remark:'หมายเหตุ', brandOld:'CC เดิม', brandNew:'CC ใหม่', moveDate:'วันโยกย้าย'
+};
+
+function loadGASConfig(){
+  var cfg = JSON.parse(localStorage.getItem('hr_gas_config')||'{}');
+  var urlEl = document.getElementById('gasURLInput');
+  var snEl  = document.getElementById('gasSheetName');
+  if(urlEl && cfg.url)  urlEl.value = cfg.url;
+  if(!urlEl.value)      urlEl.value = GAS_URL || '';
+  if(snEl  && cfg.sheet) snEl.value = cfg.sheet;
+  renderColMap();
+  updateGASStatusUI('idle','ยังไม่ได้ตรวจสอบ — กด ทดสอบ เพื่อเริ่ม','');
+}
+
+function saveGASConfig(){
+  var url   = document.getElementById('gasURLInput').value.trim();
+  var sheet = document.getElementById('gasSheetName').value.trim();
+  if(!url){ toast('⚠ กรุณากรอก GAS URL', 'err'); return; }
+  localStorage.setItem('hr_gas_config', JSON.stringify({url:url, sheet:sheet}));
+  GAS_URL = url;
+  toast('✅ บันทึก GAS Config แล้ว', 'ok');
+  addSyncLog('💾 บันทึก GAS Config: ' + url.substring(0,60) + '…');
+}
+
+function renderColMap(){
+  var saved = JSON.parse(localStorage.getItem('hr_col_map')||'null') || DEFAULT_COL_MAP;
+  var html = '';
+  Object.keys(DEFAULT_COL_MAP).forEach(function(field){
+    html += '<div class="col-map-item"><div class="col-map-field">'+FIELD_LABELS[field]+'</div>'+
+            '<input type="text" class="inp" id="cm_'+field+'" value="'+(saved[field]||field)+'" '+
+            'style="padding:4px 7px;font-size:11.5px;margin-top:3px;" placeholder="'+field+'">'+
+            '</div>';
+  });
+  document.getElementById('colMapGrid').innerHTML = html;
+}
+
+function saveColMap(){
+  var map = {};
+  Object.keys(DEFAULT_COL_MAP).forEach(function(f){
+    var el = document.getElementById('cm_'+f);
+    if(el) map[f] = el.value.trim() || f;
+  });
+  localStorage.setItem('hr_col_map', JSON.stringify(map));
+  toast('✅ บันทึก Column Mapping แล้ว', 'ok');
+}
+
+function resetColMap(){
+  localStorage.removeItem('hr_col_map');
+  renderColMap();
+  toast('↺ รีเซ็ต Column Mapping แล้ว', 'ok');
+}
+
+function updateGASStatusUI(state, title, detail){
+  var box = document.getElementById('gasStatusBox');
+  if(!box) return;
+  box.className = 'gas-status-box ' + state;
+  document.getElementById('gasStatusTitle').textContent  = title;
+  document.getElementById('gasStatusDetail').textContent = detail;
+}
+
+function checkGASSheet(){
+  updateGASStatusUI('idle','⏳ กำลังตรวจสอบ...','รอผลตอบกลับจาก GAS');
+  gasCall({ action:'ping' },
+    function(res){
+      var hc = res.headcount || 0;
+      updateGASStatusUI('ok','🟢 เชื่อมต่อ Google Sheets สำเร็จ!',
+        'GAS พร้อมใช้งาน' + (hc ? ' | มีข้อมูล '+hc+' รายการใน Sheet' : ' | Sheet ยังว่างอยู่ (กด Full Sync)'));
+      addSyncLog('🟢 Test Connection สำเร็จ — Sheet มี '+hc+' รายการ');
+    },
+    function(e){
+      updateGASStatusUI('err','🔴 เชื่อมต่อไม่ได้: '+e,
+        'ตรวจสอบ GAS URL และ Deploy Settings: Who has access = Anyone');
+      addSyncLog('🔴 Test Connection ล้มเหลว: '+e);
+    }
+  );
+}
+
+function fetchSheetPreview(){
+  document.getElementById('sheetPreviewArea').innerHTML =
+    '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ กำลังโหลดข้อมูลจาก Google Sheet...</div>';
+  gasCall({ action:'fetch', limit:10 },
+    function(res){
+      var data = res.data || [];
+      if(!data.length){
+        document.getElementById('sheetPreviewArea').innerHTML =
+          '<div style="text-align:center;padding:20px;color:var(--muted);">Sheet ว่างเปล่า — กด "Full Sync" เพื่ออัปโหลดข้อมูลก่อน</div>';
+        return;
+      }
+      var cols  = Object.keys(data[0]);
+      var html  = '<div style="overflow-x:auto;"><table class="tbl"><thead><tr>'+
+                  cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead><tbody>';
+      data.slice(0,10).forEach(function(row){
+        html += '<tr>'+cols.map(function(c){ return '<td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;">'+
+                (row[c]||'—')+'</td>'; }).join('')+'</tr>';
+      });
+      html += '</tbody></table></div>';
+      html += '<div style="padding:8px 12px;font-size:11px;color:var(--muted);">แสดง '+Math.min(data.length,10)+' รายการแรก (ทั้งหมด '+res.total+' รายการ)</div>';
+      document.getElementById('sheetPreviewArea').innerHTML = html;
+      addSyncLog('📄 Preview โหลดสำเร็จ — '+res.total+' รายการ');
+    },
+    function(e){
+      document.getElementById('sheetPreviewArea').innerHTML =
+        '<div style="text-align:center;padding:20px;color:#c0392b;">❌ โหลดไม่สำเร็จ: '+e+' — ตรวจสอบ GAS URL และ Deploy Settings</div>';
+    }
+  );
+}
+
+function importFromSheet(){
+  if(!confirm('นำเข้าข้อมูลจาก Google Sheet มาแทนที่ข้อมูลปัจจุบันใน Dashboard?\nข้อมูลเดิมจะถูก Overwrite')) return;
+  toast('⏳ กำลังนำเข้าข้อมูล...', 'ok');
+  gasCall({ action:'fetchAll' },
+    function(res){
+      if(!res.data || !res.data.length){ toast('⚠ ไม่พบข้อมูลใน Sheet', 'err'); return; }
+      var colMap = JSON.parse(localStorage.getItem('hr_col_map')||'null') || DEFAULT_COL_MAP;
+      var imported = res.data.map(function(row){
+        var emp = {};
+        Object.keys(colMap).forEach(function(field){ emp[field] = row[colMap[field]] || ''; });
+        ['baseSalary68','baseSalary69','totalIncome68','totalIncome69'].forEach(function(f){
+          emp[f] = parseFloat(emp[f])||0;
+        });
+        if(!emp.moveHistory) emp.moveHistory = [];
+        return emp;
+      });
+      DB = imported;
+      saveDB();
+      renderStats(); filterEmp(); renderEmp(); renderMobility();
+      toast('✅ นำเข้า '+imported.length+' รายการสำเร็จ', 'ok');
+      addSyncLog('⬇ Import จาก Sheet สำเร็จ — '+imported.length+' รายการ');
+    },
+    function(e){ toast('❌ Import ล้มเหลว: '+e, 'err'); }
+  );
+}
+
+// ── Sync Log ──
+var _syncLog = [];
+function addSyncLog(msg){
+  _syncLog.unshift({ time: new Date().toLocaleString('th-TH'), msg: msg });
+  if(_syncLog.length > 20) _syncLog.pop();
+  localStorage.setItem('hr_sync_log', JSON.stringify(_syncLog));
+  renderSyncLog();
+}
+function loadSyncLog(){
+  _syncLog = JSON.parse(localStorage.getItem('hr_sync_log')||'[]');
+  renderSyncLog();
+}
+function renderSyncLog(){
+  var el = document.getElementById('syncLogArea');
+  if(!el) return;
+  if(!_syncLog.length){ el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px;">ยังไม่มีประวัติ Sync</div>'; return; }
+  el.innerHTML = _syncLog.map(function(l){
+    var icon = l.msg.startsWith('🟢')?'🟢':l.msg.startsWith('🔴')?'🔴':l.msg.startsWith('❌')?'❌':'📌';
+    var bg   = icon==='🟢'?'#eafaf1':icon==='🔴'||icon==='❌'?'#fff5f5':'#f8f9fa';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:7px;background:'+bg+';margin-bottom:5px;">'+
+           '<span style="font-size:14px;">'+icon+'</span>'+
+           '<span style="font-size:11.5px;flex:1;">'+l.msg+'</span>'+
+           '<span style="font-size:10.5px;color:var(--muted);white-space:nowrap;">'+l.time+'</span></div>';
+  }).join('');
+}
+
+
 
 function resetMenuConfig() {
   if (!confirm('รีเซ็ตเมนูกลับค่าเริ่มต้น?')) return;
